@@ -15,7 +15,7 @@ import { ApplyBatchesSection } from '@/components/sections/landing/ApplyBatchesS
 import { CourseRoadmapSection } from '@/components/sections/landing/CourseRoadmapSection';
 import { StudentReviewsSection } from '@/components/sections/landing/StudentReviewsSection';
 
-export const revalidate = 60; // ISR caching for 60 seconds
+export const dynamic = 'force-dynamic';
 
 export default async function PublicHomePage({
   searchParams,

@@ -24,7 +24,7 @@ import {
   Lock,
 } from 'lucide-react';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
 

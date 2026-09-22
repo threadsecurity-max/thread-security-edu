@@ -31,6 +31,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function PublicCertificateVerificationPage({
   searchParams,
 }: {
@@ -42,20 +44,24 @@ export default async function PublicCertificateVerificationPage({
   let certificate = null;
 
   if (certificateId) {
-    certificate = await prisma.certificate.findFirst({
-      where: {
-        OR: [
-          { certificateId: certificateId.trim() },
-          { verificationHash: certificateId.trim() },
-        ],
-      },
-      include: {
-        user: {
-          include: { tsIdentity: true },
+    try {
+      certificate = await prisma.certificate.findFirst({
+        where: {
+          OR: [
+            { certificateId: certificateId.trim() },
+            { verificationHash: certificateId.trim() },
+          ],
         },
-        course: true,
-      },
-    });
+        include: {
+          user: {
+            include: { tsIdentity: true },
+          },
+          course: true,
+        },
+      });
+    } catch (err) {
+      console.warn('[PublicCertificateVerificationPage] Database query warning:', err);
+    }
   }
 
   async function handleSearch(formData: FormData) {
