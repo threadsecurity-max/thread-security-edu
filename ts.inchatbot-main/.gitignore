@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment — NEVER commit real keys
+.env
+.env.local
+.env.production
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend build output
+frontend/node_modules/
+frontend/dist/
+
+# Test cache
+.pytest_cache/
+tests/__pycache__/
+
+# Compiled Python bytecode inside app
+app/__pycache__/
+app/**/__pycache__/
+data/__pycache__/

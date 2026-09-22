@@ -1,0 +1,81 @@
+/* ==========================================================
+   TSE FLUID TYPOGRAPHY HIERARCHY
+   Scaled gracefully using clamp() from 320px to 2560px+
+   Primary Font: Saira (Loaded via Next.js next/font/google)
+   ========================================================== */
+
+.tse-display {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+  font-size: clamp(2.25rem, 1.5rem + 3.75vw, 4.5rem); /* 36px -> 72px */
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.tse-h1 {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+  font-size: clamp(2rem, 1.4rem + 2.8vw, 3.75rem); /* 32px -> 60px */
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.tse-h2 {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.5rem, 1.15rem + 1.75vw, 2.625rem); /* 24px -> 42px */
+  font-weight: 400;
+  line-height: 1.22;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.tse-h3 {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.875rem); /* 20px -> 30px */
+  font-weight: 300;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
+}
+
+.tse-h4 {
+  font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
+  font-size: clamp(1.0625rem, 0.95rem + 0.5vw, 1.375rem); /* 17px -> 22px */
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.tse-body {
+  font-family: var(--font-saira), system-ui, -apple-system, sans-serif;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); /* 16px -> 18px */
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.015em;
+  text-wrap: pretty;
+}
+
+.tse-body-sm {
+  font-family: var(--font-saira), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.875rem, 0.825rem + 0.2vw, 0.9375rem); /* 14px -> 15px */
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.015em;
+}
+
+.tse-caption {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.8125rem); /* 12px -> 13px */
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Fluid Code / Monospace */
+.tse-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: clamp(0.8125rem, 0.775rem + 0.2vw, 0.875rem);
+  line-height: 1.5;
+}

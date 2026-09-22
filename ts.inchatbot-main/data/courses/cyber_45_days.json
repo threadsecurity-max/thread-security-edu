@@ -1,0 +1,124 @@
+{
+  "domain": "Cybersecurity",
+  "program_type": "Short-term Course",
+  "title": "45 Days Cybersecurity Programs",
+  "duration": "45 Days",
+  "courses": [
+    {
+      "course_name": "Cyber Fundamentals",
+      "description": "Foundational course covering essential cybersecurity concepts, operating systems, and basic security tools.",
+      "modules": [
+        "Introduction to Cybersecurity",
+        "Operating Systems & System Security",
+        "Cryptography & Authentication",
+        "Security Threats & Attacks",
+        "Security Tools & Practical Security",
+        "Industry Readiness"
+      ],
+      "mapped_skills": [
+        "Cybersecurity Basics",
+        "System Security",
+        "Cryptography",
+        "Threat Awareness",
+        "Security Tools"
+      ]
+    },
+    {
+      "course_name": "Computer Networking & Network Security",
+      "description": "Comprehensive networking course covering protocols, infrastructure, and securing networks.",
+      "modules": [
+        "Networking Fundamentals",
+        "Network Services & Protocols",
+        "Routing & Network Infrastructure",
+        "Network Security",
+        "Network Monitoring & Analysis",
+        "Industry Project"
+      ],
+      "mapped_skills": [
+        "Networking",
+        "Network Protocols",
+        "Routing",
+        "Network Security",
+        "Network Monitoring"
+      ]
+    },
+    {
+      "course_name": "Ethical Hacking & Offensive Security",
+      "description": "In-depth training on ethical hacking methodologies, reconnaissance, and exploitation.",
+      "modules": [
+        "Ethical Hacking Fundamentals",
+        "Reconnaissance & Enumeration",
+        "Web Application Security",
+        "System & Network Exploitation",
+        "Active Directory & Enterprise Security",
+        "Red Team Methodology"
+      ],
+      "mapped_skills": [
+        "Ethical Hacking",
+        "Reconnaissance",
+        "Web App Security",
+        "Exploitation",
+        "Active Directory Security",
+        "Red Teaming"
+      ]
+    },
+    {
+      "course_name": "Vulnerability Assessment & Penetration Testing (VAPT)",
+      "description": "Practical VAPT course focusing on vulnerability scanning and penetration testing across web, mobile, and networks.",
+      "modules": [
+        "VAPT Fundamentals",
+        "Vulnerability Assessment",
+        "Web & API Penetration Testing",
+        "Mobile, Network & Infrastructure Testing",
+        "Reporting & Remediation",
+        "Industry VAPT Project"
+      ],
+      "mapped_skills": [
+        "Vulnerability Assessment",
+        "Penetration Testing",
+        "Web & API Testing",
+        "Infrastructure Testing",
+        "Security Reporting"
+      ]
+    },
+    {
+      "course_name": "Security Operations Center (SOC) & Blue Team",
+      "description": "Defensive security course focusing on SOC operations, SIEM, threat detection, and incident response.",
+      "modules": [
+        "SOC Fundamentals",
+        "Log Management & SIEM",
+        "Threat Detection & Analysis",
+        "Incident Response",
+        "Digital Forensics & Threat Hunting",
+        "Industry Project"
+      ],
+      "mapped_skills": [
+        "SOC Operations",
+        "SIEM",
+        "Threat Detection",
+        "Incident Response",
+        "Digital Forensics",
+        "Threat Hunting"
+      ]
+    },
+    {
+      "course_name": "Advanced Cybersecurity & Red Team Operations",
+      "description": "Advanced offensive security course covering advanced recon, exploit development, and full red team operations.",
+      "modules": [
+        "Advanced Reconnaissance",
+        "Advanced Web & API Security",
+        "Exploit Development Fundamentals",
+        "Active Directory Security",
+        "Red Team Operations",
+        "Industry Project"
+      ],
+      "mapped_skills": [
+        "Advanced Reconnaissance",
+        "Advanced Web Security",
+        "Exploit Development",
+        "Active Directory Security",
+        "Red Team Operations"
+      ]
+    }
+  ]
+}

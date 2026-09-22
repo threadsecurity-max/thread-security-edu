@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: threads-edu-lms
+    runtime: node
+    plan: standard
+    buildCommand: npm install --legacy-peer-deps && npx prisma generate && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health/liveness
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        sync: false
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: "Thread Security Education <onboarding@resend.dev>"
+      - key: FACULTY_NOTIFY_EMAIL
+        value: "threadsecurity@gmail.com"

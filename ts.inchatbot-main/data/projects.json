@@ -1,0 +1,31 @@
+{
+  "projects": [
+    {
+      "title": "AI-Powered Threat Hunting & Attack Path Intelligence Platform",
+      "domain": "AI + Cybersecurity",
+      "tech_stack": ["Python", "FastAPI", "React", "PostgreSQL", "LLMs", "Machine Learning", "RAG", "LangGraph", "Docker", "MITRE ATT&CK", "REST APIs"],
+      "learning_outcome": "Develop an AI-driven threat-hunting platform that analyzes security telemetry, network activity, system events, and threat intelligence to uncover suspicious behaviors and potential attack paths. The platform uses AI to correlate security events, identify behavioral patterns, map activities to MITRE ATT&CK techniques, prioritize threats, and provide contextual investigation guidance. Learners gain practical experience in AI-driven threat hunting, behavioral analysis, threat intelligence, attack-path analysis, LLM integration, and security automation."
+    },
+    {
+      "title": "AI-Powered Phishing Detection & Threat Intelligence Engine",
+      "domain": "Artificial Intelligence",
+      "tech_stack": ["Python", "Machine Learning", "NLP", "LLMs", "FastAPI", "React", "PostgreSQL", "Docker", "Threat Intelligence APIs"],
+      "learning_outcome": "Develop an intelligent platform capable of analyzing suspicious emails, URLs, domains, and messages to identify potential phishing and social-engineering threats. The system combines machine learning, NLP, threat intelligence, and LLM-based reasoning to generate explainable risk assessments and security recommendations. Learners understand AI-based threat detection, classification, NLP, threat intelligence, model evaluation, and secure AI application development.",
+      "showcase_url": "Thread Security AI Threat Intelligence Lab"
+    },
+    {
+      "title": "Enterprise Attack Surface Discovery & Continuous VAPT Platform",
+      "domain": "Cybersecurity",
+      "tech_stack": ["Python", "Nmap", "Subfinder", "Amass", "httpx", "Nuclei", "Katana", "FFUF", "PostgreSQL", "Docker", "FastAPI"],
+      "learning_outcome": "Build a real-world attack-surface management platform that discovers assets, identifies live services, maps web applications, performs automated vulnerability scanning, tracks security findings, and generates structured VAPT reports. Learners gain practical experience in reconnaissance, asset discovery, vulnerability assessment, automation, security reporting, and enterprise attack-surface management.",
+      "showcase_url": "Thread Security VAPT Lab"
+    },
+    {
+      "title": "Web Application Red Team & Vulnerability Research Lab",
+      "domain": "Cybersecurity",
+      "tech_stack": ["Burp Suite", "Python", "Nmap", "OWASP methodologies", "Docker", "JavaScript", "REST APIs", "PostgreSQL", "Linux"],
+      "learning_outcome": "Create a controlled enterprise-style web application environment where learners perform complete security assessments, including reconnaissance, authentication testing, authorization testing, IDOR/BOLA, XSS, SQL Injection, SSRF, API security, business-logic testing, exploitation validation, and professional report writing. The project develops practical penetration-testing and vulnerability-research skills through realistic, authorized security scenarios.",
+      "showcase_url": "Thread Security Web Security Lab"
+    }
+  ]
+}

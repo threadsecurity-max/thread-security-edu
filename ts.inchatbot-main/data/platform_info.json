@@ -1,0 +1,63 @@
+{
+  "company": "ThreadSecurity",
+  "website": "threadsecurity.in",
+  "domains": ["Artificial Intelligence", "Cybersecurity"],
+  "labs": {
+    "overview": "Thread Security Labs is a hands-on cybersecurity learning and practice platform for students to apply theoretical knowledge in realistic, controlled environments.",
+    "features": [
+      "Practical labs",
+      "Vulnerable applications",
+      "Security challenges",
+      "Attack simulations",
+      "Real-world scenarios"
+    ],
+    "covered_areas": [
+      "Cybersecurity Fundamentals",
+      "Networking & Network Security",
+      "Ethical Hacking",
+      "Web Application Security",
+      "API Security",
+      "VAPT",
+      "SOC & Blue Team",
+      "Active Directory Security",
+      "Cloud Security",
+      "Advanced Offensive Security"
+    ],
+    "methodology": "Instead of only watching lectures, students learn by doing: Learn → Discover → Analyze → Exploit → Report → Remediate.",
+    "example": "TS-LAB 1 SQL Injection Lab: Students are given a vulnerable web application → identify the endpoint → understand root cause → demonstrate vulnerability → document impact → implement remediation."
+  },
+  "student_benefits": [
+    "Enrolled students receive a unique TS-ID (ThreadSecurity ID).",
+    "Dashboard access is provided to all enrolled students.",
+    "The dashboard includes access to virtual labs for hands-on practice.",
+    "Students can track their enrolled courses, assessments, attendance, and academic reports directly from the dashboard.",
+    "Upon successful completion of a course, certificates can be downloaded directly from the dashboard."
+  ],
+  "enrollment_and_pricing": [
+    "For all questions related to pricing, fees, and enrollment procedures, please visit our contact page at threadsecurity.in/contact."
+  ],
+  "projects": [
+    "All courses include industry-based, real-world capstone projects designed to give hands-on experience before entering the job market."
+  ],
+  "industry_standards": {
+    "overview": "ThreadSecurity curricula are built around industry-grade tools and real-world workflows used by professionals in active AI and cybersecurity roles — not academic simulations.",
+    "tools_and_frameworks": {
+      "cybersecurity": ["Burp Suite", "Nmap", "Wireshark", "Metasploit", "OWASP methodologies", "MITRE ATT&CK", "SIEM platforms", "Nuclei", "Linux security tooling"],
+      "ai": ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "LangChain", "Hugging Face", "FastAPI", "Docker", "Kubernetes", "Vector databases", "LLMOps pipelines"]
+    },
+    "learning_methodology": [
+      "Project-based curriculum: every program includes a capstone real-world project.",
+      "Students work on the same tools and platforms used by industry professionals from day one.",
+      "Learning is structured around practical outcomes — not textbooks or passive theory.",
+      "Virtual labs give students hands-on access to simulated enterprise environments."
+    ],
+    "placement_readiness": [
+      "Students graduate with a portfolio of real projects — not just a certificate.",
+      "Courses are designed to match current job description requirements in AI and cybersecurity roles.",
+      "The curriculum is regularly updated to reflect what employers and recruiters are actively looking for.",
+      "Students build proof-of-work — deployed systems, pentest reports, and AI applications — that can be shown directly in interviews.",
+      "ThreadSecurity prepares students for roles such as Penetration Tester, SOC Analyst, AI Engineer, ML Engineer, Data Scientist, Bug Bounty Hunter, and AI/ML Security Specialist."
+    ],
+    "career_outcomes": "Our goal is simple: every student who completes a ThreadSecurity program should be job-ready, not just certificate-ready. The combination of mentor-led learning, real projects, and industry-standard tools means students are not starting from zero when they walk into an interview."
+  }
+}

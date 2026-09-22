@@ -1,0 +1,134 @@
+/* ==========================================================
+   TSE RESPONSIVE UTILITIES & CONSTRAINT SYSTEM
+   ========================================================== */
+
+/* Constraint-based Container Shells */
+.tse-container-reading {
+  width: 100%;
+  max-width: var(--container-reading);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--gutter-fluid);
+  padding-right: var(--gutter-fluid);
+}
+
+.tse-container {
+  width: 100%;
+  max-width: var(--container-2xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--gutter-fluid);
+  padding-right: var(--gutter-fluid);
+}
+
+.tse-container-fluid {
+  width: 100%;
+  max-width: var(--container-full);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--gutter-fluid);
+  padding-right: var(--gutter-fluid);
+}
+
+/* Safe Area Insets Utilities */
+.safe-top {
+  padding-top: max(var(--sat), 0.75rem);
+}
+.safe-bottom {
+  padding-bottom: max(var(--sab), 0.75rem);
+}
+.safe-left {
+  padding-left: max(var(--sal), 1rem);
+}
+.safe-right {
+  padding-right: max(var(--sar), 1rem);
+}
+
+/* Minimum Touch Target standard (>=44x44px) */
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive 16:9 Video Container */
+.tse-video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 1rem;
+  background-color: #000000;
+}
+
+.tse-video-wrapper iframe,
+.tse-video-wrapper video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Responsive Table Container (converts to scrollable or card view) */
+.tse-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.75rem;
+}
+
+/* Neumorphism Micro-Interaction Utilities */
+.tse-neo-control {
+  background: #f7f9fa;
+  box-shadow: 3px 3px 8px rgba(4, 17, 28, 0.08), -3px -3px 8px #ffffff;
+  border-radius: 12px;
+  transition: all 180ms ease;
+}
+
+.tse-neo-control:active,
+.tse-neo-control.active {
+  box-shadow: inset 2px 2px 4px rgba(4, 17, 28, 0.12), inset -2px -2px 4px #ffffff;
+}
+
+/* Security Glow & Badge Utilities */
+.tse-glow-green {
+  box-shadow: 0 0 20px -2px rgba(49, 209, 124, 0.35);
+}
+
+.tse-badge-green {
+  background: var(--tse-security-green-soft);
+  color: var(--tse-security-green-dark);
+  border: 1px solid rgba(49, 209, 124, 0.3);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0e2a40;
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

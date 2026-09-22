@@ -1,0 +1,102 @@
+{
+  "domain": "Artificial Intelligence",
+  "program_type": "Short-term Course",
+  "title": "AI & Data Science Professional Program",
+  "duration": "45 Days",
+  "courses": [
+    {
+      "course_name": "Python for AI",
+      "description": "Comprehensive foundation in Python programming tailored specifically for Artificial Intelligence applications.",
+      "modules": [
+        "Python Fundamentals",
+        "NumPy, Pandas, EDA (Exploratory Data Analysis)",
+        "Error Handling & GUI",
+        "Git & Industry Workflow",
+        "Industry-Based Project"
+      ],
+      "mapped_skills": [
+        "Python Programming",
+        "Data Manipulation (NumPy, Pandas)",
+        "Exploratory Data Analysis",
+        "Version Control (Git)",
+        "GUI Development",
+        "Software Engineering Workflows"
+      ]
+    },
+    {
+      "course_name": "Data Analysis",
+      "description": "In-depth course on extracting insights from data using Python, Pandas, Excel, and SQL.",
+      "modules": [
+        "Python Programming for Data Analytics",
+        "Data Manipulation and Analysis using Pandas",
+        "Data Visualization",
+        "Business Data Analysis with Excel",
+        "SQL for Data Analysis"
+      ],
+      "mapped_skills": [
+        "Python for Analytics",
+        "Data Manipulation",
+        "Data Visualization",
+        "Excel for Business Analysis",
+        "SQL Querying",
+        "Data Storytelling"
+      ]
+    },
+    {
+      "course_name": "Data Science",
+      "description": "Advanced data science curriculum covering end-to-end data pipelines, business intelligence, and cloud deployment.",
+      "modules": [
+        "Python Programming for Data Analytics",
+        "Data Analysis (NumPy, Pandas, EDA)",
+        "Data Extraction (JSON, Web Scraping)",
+        "Data Visualization & Business Intelligence",
+        "SQL for Data Analysis",
+        "GitHub & Cloud Deployment"
+      ],
+      "mapped_skills": [
+        "Web Scraping & Data Extraction",
+        "Business Intelligence (BI)",
+        "SQL",
+        "Cloud Deployment",
+        "Version Control (GitHub)",
+        "Statistical Analysis"
+      ]
+    },
+    {
+      "course_name": "Machine Learning",
+      "description": "Practical machine learning course focusing on algorithms, model optimization, and real-world deployment.",
+      "modules": [
+        "Python for ML",
+        "Supervised Learning",
+        "Unsupervised Learning",
+        "Model Evaluation and Optimization",
+        "Industry Project"
+      ],
+      "mapped_skills": [
+        "Machine Learning Algorithms",
+        "Supervised & Unsupervised Learning",
+        "Model Evaluation Metrics",
+        "Hyperparameter Optimization",
+        "Predictive Modeling"
+      ]
+    },
+    {
+      "course_name": "Deep Learning",
+      "description": "Intensive deep learning program covering neural networks, mathematics, and model deployment.",
+      "modules": [
+        "Module 1: Foundations of Deep Learning",
+        "Module 2: Mathematical Foundations",
+        "Module 3: Neural Network Fundamentals",
+        "Module 4: Deep Neural Networks",
+        "Module 5: Capstone Project & Deployment"
+      ],
+      "mapped_skills": [
+        "Deep Learning Frameworks",
+        "Neural Networks Architecture",
+        "Applied Mathematics for AI",
+        "Model Deployment",
+        "Advanced Pattern Recognition"
+      ]
+    }
+  ]
+}

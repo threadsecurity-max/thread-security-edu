@@ -1,0 +1,53 @@
+{
+  "domain": "Cybersecurity",
+  "program_type": "Fellowship Programme",
+  "duration": "6 Months (Also available as a 3-Month track with reduced syllabus)",
+  "description": "Advanced, specialized fellowship programs designed for mastering offensive, defensive, and infrastructure security.",
+  "tracks": [
+    {
+      "track_name": "Red Team Operations & Offensive Security",
+      "description": "Comprehensive training in offensive security, penetration testing, and red teaming methodologies to simulate real-world attacks.",
+      "mapped_skills": [
+        "Red Teaming",
+        "Penetration Testing",
+        "Offensive Security",
+        "Vulnerability Assessment",
+        "Exploitation Techniques"
+      ]
+    },
+    {
+      "track_name": "Blue Team Operations & Defensive Security",
+      "description": "In-depth training on defensive security, Security Operations Center (SOC) operations, and threat mitigation to protect enterprise environments.",
+      "mapped_skills": [
+        "Blue Teaming",
+        "Defensive Security",
+        "Threat Hunting",
+        "Network Defense",
+        "SIEM (Security Information and Event Management)",
+        "Incident Detection"
+      ]
+    },
+    {
+      "track_name": "Bug Bounty Hunting & Web Application Security",
+      "description": "Specialized program focused on finding, reporting, and exploiting web application vulnerabilities for bug bounties.",
+      "mapped_skills": [
+        "Bug Bounty Hunting",
+        "Web Application Penetration Testing",
+        "OWASP Top 10",
+        "Vulnerability Discovery",
+        "Secure Code Review"
+      ]
+    },
+    {
+      "track_name": "Linux for Cybersecurity & Security Operations",
+      "description": "Essential Linux operating system skills tailored specifically for security professionals, forensics, and SOC analysts.",
+      "mapped_skills": [
+        "Linux Administration",
+        "Security Operations",
+        "Command Line Proficiency",
+        "System Hardening",
+        "Secure Server Configuration"
+      ]
+    }
+  ]
+}

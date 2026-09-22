@@ -1,0 +1,138 @@
+{
+  "domain": "Artificial Intelligence",
+  "program_type": "Fellowship Programme",
+  "title": "Advanced AI Fellowship",
+  "duration": "6 Months",
+  "tracks": [
+    {
+      "track_name": "Foundational AI",
+      "description": "Comprehensive foundation covering data analysis, backend development, and core ML/DL engineering principles.",
+      "modules": [
+        "Python",
+        "Data Analysis with Python",
+        "Analytics with Excel",
+        "Business Intelligence with Power BI",
+        "ML Engineering",
+        "DL Engineering",
+        "FastAPI and Backend Development",
+        "SQL and Database Engineering",
+        "AI Application Development",
+        "AI Development and DevOps Fundamentals"
+      ],
+      "mapped_skills": [
+        "Python Programming",
+        "Data Analysis",
+        "Power BI / Excel",
+        "Machine Learning Engineering",
+        "Deep Learning",
+        "FastAPI",
+        "Database Engineering (SQL)",
+        "DevOps Fundamentals"
+      ]
+    },
+    {
+      "track_name": "Agentic AI and Intelligent System Engineering",
+      "description": "Advanced curriculum focused on building autonomous AI agents, multi-agent systems, and integrating LLMs into enterprise environments.",
+      "modules": [
+        "Foundations of Generative AI & Large Language Models",
+        "Prompt Engineering and AI Reasoning",
+        "AI Agent Fundamentals",
+        "RAG (Retrieval-Augmented Generation)",
+        "Vector Databases and Knowledge Systems",
+        "Agent Framework and Orchestration",
+        "Multi-Agents System Engineering",
+        "Enterprise AI Integration & Automation",
+        "AI Application Engineering",
+        "Deployment, LLMOps & Production Systems"
+      ],
+      "mapped_skills": [
+        "Generative AI",
+        "Large Language Models (LLMs)",
+        "Prompt Engineering",
+        "Agentic AI Frameworks",
+        "RAG Architecture",
+        "Vector Databases",
+        "Multi-Agent Orchestration",
+        "LLMOps & Production Deployment"
+      ]
+    },
+    {
+      "track_name": "AI Engineering & Generative AI",
+      "description": "In-depth engineering program for designing LLM applications, model fine-tuning, multimodal AI, and enterprise-scale solutions.",
+      "modules": [
+        "Foundations of Generative AI & Large Language Models",
+        "Prompt Engineering and LLM Application Design",
+        "LLM APIs & AI Application Development",
+        "Embeddings, Vector Databases & Semantic Search",
+        "RAG (Retrieval-Augmented Generation)",
+        "Multimodal AI Engineering",
+        "Fine-tuning and Model Customization",
+        "AI Application Engineering",
+        "AI Deployment & LLMOps",
+        "Enterprise AI Solutions & Integration"
+      ],
+      "mapped_skills": [
+        "Generative AI Development",
+        "Prompt Engineering",
+        "Semantic Search & Embeddings",
+        "Multimodal AI",
+        "LLM Fine-tuning",
+        "RAG Integration",
+        "Enterprise AI Solutions",
+        "LLMOps"
+      ]
+    },
+    {
+      "track_name": "AI Infrastructure, Cloud & LLMOps Engineering",
+      "description": "Comprehensive training on cloud infrastructure, containerization, and production deployment of AI systems.",
+      "modules": [
+        "AI Infrastructure Fundamentals",
+        "Cloud Computing for AI",
+        "Docker and Containerization",
+        "Kubernetes & Container Orchestration",
+        "MLOps & LLMOps Foundations",
+        "CI/CD for AI Systems",
+        "Production AI Deployment",
+        "Monitoring, Logging & Observability",
+        "AI Performance Optimization",
+        "Security & Governance for AI Infrastructure",
+        "Enterprise AI Platform Engineering"
+      ],
+      "mapped_skills": [
+        "Cloud Computing",
+        "Docker & Kubernetes",
+        "MLOps & LLMOps",
+        "CI/CD Pipelines",
+        "Model Observability & Monitoring",
+        "Performance Optimization",
+        "AI Infrastructure Security"
+      ]
+    },
+    {
+      "track_name": "AI Security & Responsible AI Engineering",
+      "description": "Focuses on securing AI applications, adversarial testing, privacy, and responsible AI governance.",
+      "modules": [
+        "Foundations of AI Security & Responsible AI",
+        "ML Security",
+        "LLM Security",
+        "AI Red Teaming & Adversarial Testing",
+        "AI Evaluation & Model Validation",
+        "AI Safety Engineering & Guardrails",
+        "Privacy Preserving AI",
+        "Secure AI Application Engineering",
+        "AI Infrastructure Security",
+        "Responsible AI Governance & Compliance",
+        "AI Monitoring & Incident Response"
+      ],
+      "mapped_skills": [
+        "AI Security",
+        "ML/LLM Security",
+        "AI Red Teaming",
+        "Adversarial Testing",
+        "AI Safety & Guardrails",
+        "Data Privacy",
+        "AI Governance & Compliance"
+      ]
+    }
+  ]
+}

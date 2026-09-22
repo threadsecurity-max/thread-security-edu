@@ -1,0 +1,4 @@
+/* Minimal reset, the rest is in App.css */
+* {
+  box-sizing: border-box;
+}

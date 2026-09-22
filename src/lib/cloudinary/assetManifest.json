@@ -1,0 +1,290 @@
+{
+  "/images/CertAI.png": {
+    "localPath": "/images/CertAI.png",
+    "relativePath": "images/CertAI.png",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056957/threads-lms/images/CertAI.png",
+    "publicId": "threads-lms/images/CertAI"
+  },
+  "/images/CertCyber.png": {
+    "localPath": "/images/CertCyber.png",
+    "relativePath": "images/CertCyber.png",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056958/threads-lms/images/CertCyber.png",
+    "publicId": "threads-lms/images/CertCyber"
+  },
+  "/images/DPIIT.jpg": {
+    "localPath": "/images/DPIIT.jpg",
+    "relativePath": "images/DPIIT.jpg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056959/threads-lms/images/DPIIT.jpg",
+    "publicId": "threads-lms/images/DPIIT"
+  },
+  "/images/ISO.jpg": {
+    "localPath": "/images/ISO.jpg",
+    "relativePath": "images/ISO.jpg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056960/threads-lms/images/ISO.jpg",
+    "publicId": "threads-lms/images/ISO"
+  },
+  "/images/student-career.jpg": {
+    "localPath": "/images/student-career.jpg",
+    "relativePath": "images/student-career.jpg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056962/threads-lms/images/student-career.jpg",
+    "publicId": "threads-lms/images/student-career"
+  },
+  "/images/student-counselling.jpg": {
+    "localPath": "/images/student-counselling.jpg",
+    "relativePath": "images/student-counselling.jpg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056963/threads-lms/images/student-counselling.jpg",
+    "publicId": "threads-lms/images/student-counselling"
+  },
+  "/images/Students/Abhay.svg": {
+    "localPath": "/images/Students/Abhay.svg",
+    "relativePath": "images/Students/Abhay.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056964/threads-lms/images/Students/Abhay.svg",
+    "publicId": "threads-lms/images/Students/Abhay"
+  },
+  "/images/Students/Gurmandeep.svg": {
+    "localPath": "/images/Students/Gurmandeep.svg",
+    "relativePath": "images/Students/Gurmandeep.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056967/threads-lms/images/Students/Gurmandeep.svg",
+    "publicId": "threads-lms/images/Students/Gurmandeep"
+  },
+  "/images/Students/Harpreet.svg": {
+    "localPath": "/images/Students/Harpreet.svg",
+    "relativePath": "images/Students/Harpreet.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056970/threads-lms/images/Students/Harpreet.svg",
+    "publicId": "threads-lms/images/Students/Harpreet"
+  },
+  "/images/Students/Jasjot.svg": {
+    "localPath": "/images/Students/Jasjot.svg",
+    "relativePath": "images/Students/Jasjot.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056974/threads-lms/images/Students/Jasjot.svg",
+    "publicId": "threads-lms/images/Students/Jasjot"
+  },
+  "/images/Students/Jatin.svg": {
+    "localPath": "/images/Students/Jatin.svg",
+    "relativePath": "images/Students/Jatin.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056977/threads-lms/images/Students/Jatin.svg",
+    "publicId": "threads-lms/images/Students/Jatin"
+  },
+  "/images/Students/Kashish.svg": {
+    "localPath": "/images/Students/Kashish.svg",
+    "relativePath": "images/Students/Kashish.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056981/threads-lms/images/Students/Kashish.svg",
+    "publicId": "threads-lms/images/Students/Kashish"
+  },
+  "/images/Students/Mehak.svg": {
+    "localPath": "/images/Students/Mehak.svg",
+    "relativePath": "images/Students/Mehak.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056984/threads-lms/images/Students/Mehak.svg",
+    "publicId": "threads-lms/images/Students/Mehak"
+  },
+  "/images/Students/Mohit.svg": {
+    "localPath": "/images/Students/Mohit.svg",
+    "relativePath": "images/Students/Mohit.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056989/threads-lms/images/Students/Mohit.svg",
+    "publicId": "threads-lms/images/Students/Mohit"
+  },
+  "/images/Students/Nishika.svg": {
+    "localPath": "/images/Students/Nishika.svg",
+    "relativePath": "images/Students/Nishika.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056994/threads-lms/images/Students/Nishika.svg",
+    "publicId": "threads-lms/images/Students/Nishika"
+  },
+  "/images/Students/Piya.svg": {
+    "localPath": "/images/Students/Piya.svg",
+    "relativePath": "images/Students/Piya.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790056997/threads-lms/images/Students/Piya.svg",
+    "publicId": "threads-lms/images/Students/Piya"
+  },
+  "/images/Students/Piyush.svg": {
+    "localPath": "/images/Students/Piyush.svg",
+    "relativePath": "images/Students/Piyush.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057001/threads-lms/images/Students/Piyush.svg",
+    "publicId": "threads-lms/images/Students/Piyush"
+  },
+  "/images/Students/Priyanka.svg": {
+    "localPath": "/images/Students/Priyanka.svg",
+    "relativePath": "images/Students/Priyanka.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057006/threads-lms/images/Students/Priyanka.svg",
+    "publicId": "threads-lms/images/Students/Priyanka"
+  },
+  "/images/Students/Shashi.svg": {
+    "localPath": "/images/Students/Shashi.svg",
+    "relativePath": "images/Students/Shashi.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057008/threads-lms/images/Students/Shashi.svg",
+    "publicId": "threads-lms/images/Students/Shashi"
+  },
+  "/images/Students/Sukhjit.svg": {
+    "localPath": "/images/Students/Sukhjit.svg",
+    "relativePath": "images/Students/Sukhjit.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057011/threads-lms/images/Students/Sukhjit.svg",
+    "publicId": "threads-lms/images/Students/Sukhjit"
+  },
+  "/images/Students/Tiksha.svg": {
+    "localPath": "/images/Students/Tiksha.svg",
+    "relativePath": "images/Students/Tiksha.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057015/threads-lms/images/Students/Tiksha.svg",
+    "publicId": "threads-lms/images/Students/Tiksha"
+  },
+  "/images/TSE Border.svg": {
+    "localPath": "/images/TSE Border.svg",
+    "relativePath": "images/TSE Border.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057020/threads-lms/images/TSE_Border.svg",
+    "publicId": "threads-lms/images/TSE_Border"
+  },
+  "/images/TSE Design.svg": {
+    "localPath": "/images/TSE Design.svg",
+    "relativePath": "images/TSE Design.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057027/threads-lms/images/TSE_Design.svg",
+    "publicId": "threads-lms/images/TSE_Design"
+  },
+  "/images/TSE Hero Grid Base.svg": {
+    "localPath": "/images/TSE Hero Grid Base.svg",
+    "relativePath": "images/TSE Hero Grid Base.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057030/threads-lms/images/TSE_Hero_Grid_Base.svg",
+    "publicId": "threads-lms/images/TSE_Hero_Grid_Base"
+  },
+  "/logos/herofill.svg": {
+    "localPath": "/logos/herofill.svg",
+    "relativePath": "logos/herofill.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057033/threads-lms/logos/herofill.svg",
+    "publicId": "threads-lms/logos/herofill"
+  },
+  "/logos/TSE Logo Dark.svg": {
+    "localPath": "/logos/TSE Logo Dark.svg",
+    "relativePath": "logos/TSE Logo Dark.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057037/threads-lms/logos/TSE_Logo_Dark.svg",
+    "publicId": "threads-lms/logos/TSE_Logo_Dark"
+  },
+  "/logos/TSE Logo Light.svg": {
+    "localPath": "/logos/TSE Logo Light.svg",
+    "relativePath": "logos/TSE Logo Light.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057040/threads-lms/logos/TSE_Logo_Light.svg",
+    "publicId": "threads-lms/logos/TSE_Logo_Light"
+  },
+  "/logos/TSE Logo Nav.svg": {
+    "localPath": "/logos/TSE Logo Nav.svg",
+    "relativePath": "logos/TSE Logo Nav.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057042/threads-lms/logos/TSE_Logo_Nav.svg",
+    "publicId": "threads-lms/logos/TSE_Logo_Nav"
+  },
+  "/University Logos/1.svg": {
+    "localPath": "/University Logos/1.svg",
+    "relativePath": "University Logos/1.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057044/threads-lms/University%20Logos/1.svg",
+    "publicId": "threads-lms/University Logos/1"
+  },
+  "/University Logos/2.svg": {
+    "localPath": "/University Logos/2.svg",
+    "relativePath": "University Logos/2.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057046/threads-lms/University%20Logos/2.svg",
+    "publicId": "threads-lms/University Logos/2"
+  },
+  "/University Logos/3.svg": {
+    "localPath": "/University Logos/3.svg",
+    "relativePath": "University Logos/3.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057048/threads-lms/University%20Logos/3.svg",
+    "publicId": "threads-lms/University Logos/3"
+  },
+  "/University Logos/4.svg": {
+    "localPath": "/University Logos/4.svg",
+    "relativePath": "University Logos/4.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057050/threads-lms/University%20Logos/4.svg",
+    "publicId": "threads-lms/University Logos/4"
+  },
+  "/University Logos/5.svg": {
+    "localPath": "/University Logos/5.svg",
+    "relativePath": "University Logos/5.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057052/threads-lms/University%20Logos/5.svg",
+    "publicId": "threads-lms/University Logos/5"
+  },
+  "/University Logos/6.svg": {
+    "localPath": "/University Logos/6.svg",
+    "relativePath": "University Logos/6.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057054/threads-lms/University%20Logos/6.svg",
+    "publicId": "threads-lms/University Logos/6"
+  },
+  "/University Logos/7.svg": {
+    "localPath": "/University Logos/7.svg",
+    "relativePath": "University Logos/7.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057056/threads-lms/University%20Logos/7.svg",
+    "publicId": "threads-lms/University Logos/7"
+  },
+  "/University Logos/8.svg": {
+    "localPath": "/University Logos/8.svg",
+    "relativePath": "University Logos/8.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057058/threads-lms/University%20Logos/8.svg",
+    "publicId": "threads-lms/University Logos/8"
+  },
+  "/University Logos/Gautam Group of colleges.svg": {
+    "localPath": "/University Logos/Gautam Group of colleges.svg",
+    "relativePath": "University Logos/Gautam Group of colleges.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057059/threads-lms/University%20Logos/Gautam_Group_of_colleges.svg",
+    "publicId": "threads-lms/University Logos/Gautam_Group_of_colleges"
+  },
+  "/University Logos/GL Bajaj.svg": {
+    "localPath": "/University Logos/GL Bajaj.svg",
+    "relativePath": "University Logos/GL Bajaj.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057062/threads-lms/University%20Logos/GL_Bajaj.svg",
+    "publicId": "threads-lms/University Logos/GL_Bajaj"
+  },
+  "/University Logos/Govt College Jwala Ji.svg": {
+    "localPath": "/University Logos/Govt College Jwala Ji.svg",
+    "relativePath": "University Logos/Govt College Jwala Ji.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057064/threads-lms/University%20Logos/Govt_College_Jwala_Ji.svg",
+    "publicId": "threads-lms/University Logos/Govt_College_Jwala_Ji"
+  },
+  "/University Logos/Hp University.svg": {
+    "localPath": "/University Logos/Hp University.svg",
+    "relativePath": "University Logos/Hp University.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057068/threads-lms/University%20Logos/Hp_University.svg",
+    "publicId": "threads-lms/University Logos/Hp_University"
+  },
+  "/University Logos/Lala Jagat Nairan.svg": {
+    "localPath": "/University Logos/Lala Jagat Nairan.svg",
+    "relativePath": "University Logos/Lala Jagat Nairan.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057070/threads-lms/University%20Logos/Lala_Jagat_Nairan.svg",
+    "publicId": "threads-lms/University Logos/Lala_Jagat_Nairan"
+  },
+  "/University Logos/LAUREATE INSTITUTE OF MANAGEMENT AND INFORMATION TECHNOLOGY.svg": {
+    "localPath": "/University Logos/LAUREATE INSTITUTE OF MANAGEMENT AND INFORMATION TECHNOLOGY.svg",
+    "relativePath": "University Logos/LAUREATE INSTITUTE OF MANAGEMENT AND INFORMATION TECHNOLOGY.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057072/threads-lms/University%20Logos/LAUREATE_INSTITUTE_OF_MANAGEMENT_AND_INFORMATION_TECHNOLOGY.svg",
+    "publicId": "threads-lms/University Logos/LAUREATE_INSTITUTE_OF_MANAGEMENT_AND_INFORMATION_TECHNOLOGY"
+  },
+  "/University Logos/Pt Sant Ram College.svg": {
+    "localPath": "/University Logos/Pt Sant Ram College.svg",
+    "relativePath": "University Logos/Pt Sant Ram College.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057074/threads-lms/University%20Logos/Pt_Sant_Ram_College.svg",
+    "publicId": "threads-lms/University Logos/Pt_Sant_Ram_College"
+  },
+  "/University Logos/Rajiv Gandhi.svg": {
+    "localPath": "/University Logos/Rajiv Gandhi.svg",
+    "relativePath": "University Logos/Rajiv Gandhi.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057076/threads-lms/University%20Logos/Rajiv_Gandhi.svg",
+    "publicId": "threads-lms/University Logos/Rajiv_Gandhi"
+  },
+  "/University Logos/SVSDPG.svg": {
+    "localPath": "/University Logos/SVSDPG.svg",
+    "relativePath": "University Logos/SVSDPG.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057079/threads-lms/University%20Logos/SVSDPG.svg",
+    "publicId": "threads-lms/University Logos/SVSDPG"
+  },
+  "/University Logos/University of Information Technology.svg": {
+    "localPath": "/University Logos/University of Information Technology.svg",
+    "relativePath": "University Logos/University of Information Technology.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1790057082/threads-lms/University%20Logos/University_of_Information_Technology.svg",
+    "publicId": "threads-lms/University Logos/University_of_Information_Technology"
+  },
+  "/uploads/assignments/mentor-1788933157163-ThreatSuite___Autonomous_VAPT_Platform.pdf": {
+    "localPath": "/uploads/assignments/mentor-1788933157163-ThreatSuite___Autonomous_VAPT_Platform.pdf",
+    "relativePath": "uploads/assignments/mentor-1788933157163-ThreatSuite___Autonomous_VAPT_Platform.pdf",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/raw/upload/v1790057085/threads-lms/uploads/assignments/mentor-1788933157163-ThreatSuite___Autonomous_VAPT_Platform.pdf",
+    "publicId": "threads-lms/uploads/assignments/mentor-1788933157163-ThreatSuite___Autonomous_VAPT_Platform.pdf"
+  },
+  "/uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf": {
+    "localPath": "/uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf",
+    "relativePath": "uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/raw/upload/v1790057086/threads-lms/uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf",
+    "publicId": "threads-lms/uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf"
+  }
+}

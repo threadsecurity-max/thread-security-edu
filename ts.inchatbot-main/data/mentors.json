@@ -1,0 +1,56 @@
+{
+  "mentors": [
+    {
+      "name": "Yash Choudhary",
+      "title": "Cybersecurity Researcher & Mentor | Ethical Hacking | Web & API Security | Digital Forensics | Red Teaming",
+      "domain": "Cybersecurity",
+      "bio": "Yash Choudhary is a passionate Cybersecurity Researcher and Mentor with hands-on experience in ethical hacking, web and API penetration testing, digital forensics, and red team operations. He has practical experience identifying and assessing vulnerabilities such as XSS, SQL Injection, IDOR, SSRF, and authentication flaws. Yash has also worked on mobile, laptop, and network forensic investigations using industry-standard tools. Ranked among the Top 1% on TryHackMe, he actively develops his skills through CTFs, security labs, and real-world simulations. At Thread Security, he guides students through practical, hands-on offensive security scenarios.",
+      "expertise_areas": [
+        "Ethical Hacking",
+        "Web Application Penetration Testing",
+        "API Security Testing",
+        "Digital Forensics",
+        "Red Team Operations",
+        "Vulnerability Assessment (XSS, SQLi, IDOR, SSRF)",
+        "Network Forensics",
+        "Security Operations"
+      ],
+      "tools": [
+        "Burp Suite",
+        "Nmap",
+        "Wireshark",
+        "Metasploit",
+        "TryHackMe labs",
+        "Industry-grade forensics tools"
+      ],
+      "recognition": "Ranked Top 1% globally on TryHackMe",
+      "teaching_focus": "Hands-on authorized offensive security scenarios, CTF challenges, real-world simulations, and practical security lab environments"
+    },
+    {
+      "name": "Er. Simranjit Kaur",
+      "title": "AI Trainer | Machine Learning | Deep Learning | Computer Vision | NLP | AI Automation",
+      "domain": "Artificial Intelligence",
+      "bio": "Er. Simranjit Kaur is a Computer Science enthusiast specializing in Artificial Intelligence and emerging AI technologies, with practical expertise across Machine Learning, Deep Learning, Computer Vision, Natural Language Processing, and AI Automation. Her experience includes designing and developing AI-powered applications such as intelligent agents, predictive systems, computer vision solutions, and automated AI workflows. Her work focuses on translating AI concepts into practical, solution-oriented applications with an emphasis on innovation, automation, and real-world impact. She is particularly passionate about AI education, combining deep technical knowledge with effective teaching methodologies.",
+      "expertise_areas": [
+        "Machine Learning",
+        "Deep Learning",
+        "Computer Vision",
+        "Natural Language Processing (NLP)",
+        "AI Automation",
+        "Intelligent Agent Development",
+        "Predictive Systems",
+        "Generative AI & LLMs"
+      ],
+      "tools": [
+        "Python",
+        "TensorFlow / PyTorch",
+        "Scikit-learn",
+        "OpenCV",
+        "LangChain / LLM frameworks",
+        "Hugging Face Transformers"
+      ],
+      "recognition": "Computer Science professional specializing in applied AI and emerging technologies",
+      "teaching_focus": "Concept-to-real-application teaching, emphasis on innovation, automation, and building practical AI solutions for real-world problems"
+    }
+  ]
+}

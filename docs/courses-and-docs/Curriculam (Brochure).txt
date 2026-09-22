@@ -1,0 +1,1670 @@
+﻿Brochure content
+Brochure Content
+
+
+About: -
+Thread Security is an enterprise-class technology services company with a special focus on cybersecurity, Applied research, and professional training. Founded with the conviction that practical skills and industry. With knowledge as the benchmark of professional excellence, Thread Security applies the same level of rigor in enterprise applications.
+From designing and delivering its education programs to security engagements. We serve enterprise, government and academic clients. This breadth of social interactions, and enhanced by active learning exposure directly influences the way we organize learning, which is based on real environments, social interactions, and active learning, practitioners, and by measurable results.
+Our Vision and Mission are to develop technically competent and future oriented individuals Throughout the workforce in the new technology areas. And to provide focused, industry relevant training that develops student into professionals who are able to distinguish them from the get-go, contributing.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Why do you need to learn AI?
+Artificial Intelligence is no longer a specialised field for research institutions. It has become the supply for the basic infrastructure needed by modern industries, influencing decision-making and management of organizations to take risks, to service customers and to create products.
+The need for professionals with applied AI skills is growing much faster than the number of qualified graduates and re-skilled workers. The absence of the conceptual and practical bases necessary to work with AI systems makes it difficult for organizations to adopt, govern and operationalize.
+ It is an educational void that can only be filled by structured, credible training partnerships between universities and colleges, and corporate L&D functions. Even various industries are relying on AI including:
+Healthcare:  medical imaging and diagnostics
+Finance:  fraud detection and risk assessment
+Retail: personalized product recommendations and inventor management
+Manufacturing:  predictive maintenance and quality control
+Transportation:  route optimization and autonomous driving
+Agriculture:  precision farming and crop yield prediction
+Education:  adaptive learning and virtual tutoring
+Media:  content personalization and digital effects. 
+
+
+
+
+
+
+
+
+
+
+
+
+Why is it better to use Thread Security for AI?
+Thread Security didn't start as an education provider — we started by solving real technical problems for enterprise and government clients. That work is the foundation of what we teach. You're learning from people who answer to outcomes, not just curriculum.
+ Practical, Application-Driven Approach
+ We don't teach AI as a subject. We teach it as a tool you use — on real problems, in real conditions, the way it's applied in active enterprise environments.
+ Instructors Who've Done the Work
+They've operated in the environments they teach about, bringing judgment that can't be taught from a textbook.
+ Current Content, Built to Scale
+AI doesn't stand still — neither do we. Curriculum is reviewed continuously to reflect the field as it actually is, and delivery scales from a single classroom to a full institutional rollout without losing depth.
+Continuous Support
+Learning doesn't end when the session does. Learners stay supported through the program, not just during it.
+Transparent Reporting
+No vague updates. Institutional partners get clear, regular visibility into cohort performance and outcomes.
+Backed by Real Stakes
+Our credibility isn't built on classroom theory. It's tested in enterprise and government engagements where outcomes matter — and that standard carries directly into how we train.
+Thread Security does not simply deliver training. We take responsibility for learning outcomes
+
+
+
+
+
+
+
+
+About the Program
+The simple idea that we follow is that best learning occurs when knowledge is applied in real world-like conditions. This principle is reflected in all program elements, including sequence of program content and program assessment design that enable student’s capability to shine.
+Industry-Aligned Curriculum:
+We develop what learners should know and be able to do from job roles, deployment scenarios and professional benchmarks.
+Practical Learning Approach:
+ The concepts taught in lessons are reinforced on the spot. The learner accesses tools, environments and scenarios that reflect professional settings.
+Hands-On Implementation:
+All Programs have highly structured lab sessions, guided exercises and implementation challenges. Learners are not just "watchers" — they create, set-up, test and troubleshoot.
+Project-Based Learning:
+Learning experiences are based on applied projects. The learner must plan, deliver and present work combining a number of concepts and techniques.
+Our AI & Emerging Technology Programs (Curriculum)
+Explore our industry-aligned training programs designed to equip learners with practical skills, real-world experience, and the confidence to excel in today's AI-driven technology landscape.
+Python for AI
+Build a strong programming foundation with Python, covering core concepts, problem-solving techniques, and essential libraries required for Artificial Intelligence and Data Science applications.
+Industry Standard: 
+ISO/IEC 25010 (Software Quality), ISO/IEC 12207 (Software Life Cycle Processes)
+
+
+
+
+Data Analysis
+Learn to analyse, interpret, and visualize data and analytical techniques to extract meaningful insights and support informed business decisions along with a strong statistical approach using Excel and SQL integration.
+Industry Standard:
+ISO 8000 (Data Quality), ISO/IEC 25012 (Data Quality Model), ISO/IEC 20546 (Big Data Concepts)
+Data Science
+Develop end-to-end data science skills, from data collection, extraction and analysis to visualization using visualization Tools along with Database connectivity, enabling data-driven decision-making across industries.
+Industry Standard:
+ISO 8000 (Data Quality), ISO/IEC 25012 (Data Quality Model), ISO/IEC 20546 (Big Data Concepts)
+Machine Learning
+Learn how intelligent systems are built using supervised and unsupervised learning techniques, model development, evaluation, and optimization through practical implementation.
+Industry Standard: ISO/IEC 23053 (AI Framework Using Machine Learning), ISO/IEC 42001 (AI Management Systems)
+Deep Learning
+Explore advanced neural network architectures and deep learning techniques used in image recognition, natural language processing, and other AI-powered applications associated with both CNN and RNN.
+Industry Standard: 
+ISO/IEC 23053 (AI Framework), ISO/IEC 23894 (AI Risk Management)
+Generative AI & Large Language Models (LLMs)
+Understand the fundamentals of Generative AI, prompt engineering, and Large Language Models while learning how modern AI systems generate text, code, and creative content.
+Industry Standard: 
+ISO/IEC 42001 (AI Management Systems), ISO/IEC 23894 (AI Risk Management), ISO/IEC 38507 (Governance of AI)
+RAG-Based Systems
+Gain practical exposure to Retrieval-Augmented Generation (RAG) architectures by integrating knowledge retrieval with Large Language Models to build context-aware AI applications.
+Industry Standard: 
+ISO/IEC 42001 (AI Management Systems), ISO/IEC 27001 (Information Security), ISO/IEC 23053 (AI Framework)
+Agentic AI & AI Orchestration
+Learn to design autonomous AI agents capable of reasoning, planning, tool integration, and workflow automation for solving complex real-world business problems.
+Industry Standard: 
+ISO/IEC 42001 (AI Management Systems), ISO/IEC 38507 (Governance of AI), ISO/IEC 23894 (AI Risk Management)
+Computer Vision & Image Processing
+Discover how machines interpret visual information using image processing, object detection, image classification, and computer vision techniques for intelligent applications.
+Industry Standard: 
+ISO/IEC 23053 (AI Framework), ISO/IEC 23894 (AI Risk Management)
+Industry Standards Alignment: Our training programs are designed in alignment with internationally recognized ISO/IEC standards and industry best practices to promote quality, responsible AI adoption, secure development practices, effective data management, and practical implementation. The listed standards represent the frameworks and principles incorporated into the learning methodology and should not be interpreted as individual course certifications.
+
+
+
+
+
+
+WHAT YOU WILL GAIN
+You arrive with curiosity. You leave with capability.
+By the end of the program, you will be able to:
+* Apply core techniques to real problems, not just theory
+* Work confidently with the tools and platforms actively used in industry
+* Build, configure, and troubleshoot systems like a professional
+* Take a project from requirement to finished solution
+* Walk into a technical role without the usual learning curve
+Not just this, choosing thread security is a whole package for you to kick start your journey. Tell you why? Apart from the technical we will ensure your complete personality development
+Thread Security provides structured professional development support as part of its programs so that learners will not only be technically capable, but professionally prepared. These are not additional services but are a part of the learning process.
+PDP includes:
+1.         Personality Development
+2.         Business Communication Skills
+3.         Resume & Profile Preparation
+4.         Interview Readiness
+5.         Aptitude & Reasoning Preparation
+6.         Career Mentorship
+7.         Professional Grooming
+ 
+
+
+45 Days Curriculam
+
+
+Python for AI
+Python for AI 
+
+
+Module 1: Python Programming Fundamentals
+* Introduction to AI and Python
+* Google Colab & Development Environment Setup
+* Variables, Data Types, Operators
+* Conditional Statements and Loops
+* Functions and Modular Programming
+* Object-Oriented Programming (OOP)
+* Exception Handling and File Handling
+Task: Student Result Management
+Module 2: Libraries in Python 
+* NumPy Fundamentals and Advanced Operations
+* Pandas Series and DataFrames
+* Data Cleaning and Transformation
+* Data Aggregation and Merging
+* Exploratory Data Analysis (EDA)
+* Data Visualization using Matplotlib and Seaborn
+Task: Netflix Content Analysis
+Module 3: Error knowledge & GUI
+* Knowing and understanding different types of Error 
+* Approaches to resolve error 
+* GUI Development using Tkinter
+Task:Tkinter Based Frontend 
+Module 4: Industry-Based Project
+* Problem Identification and Requirement Analysis
+* Dataset Collection and Preparation
+* Development
+* Deployment using TKinter
+Module 5: Github & Cloud Deployment
+* Git Fundamentals
+* GitHub Collaboration
+* Introduction to Model Lifecycle
+* Industry Development Workflow
+Task: Collaborative Portfolio Repository
+ Possible Standards / ISO Mapping
+Module
+	Relevant ISO
+	Python Fundamentals
+	ISO/IEC 12207
+	NumPy, Pandas, EDA
+	ISO/IEC 25010
+	Error Handling & GUI
+	ISO/IEC 25010
+	Git & Industry Workflow
+	ISO/IEC 12207
+	Industry-Based  Project
+	ISO/IEC 42001
+	
+
+Brochure-Friendly Statement
+Aligned with international best practices in software development, artificial intelligence, and educational quality frameworks, including ISO 21001, ISO/IEC 12207, and ISO/IEC 42001 standards. 
+Course Outcome:
+Upon completion, students will be proficient in writing clean, scalable Python code and automating real-world tasks using industry-standard programming practices. They will develop the problem-solving skills required to build applications and establish a strong foundation for careers in Data Science, Machine Learning, and Artificial Intelligence. 
+Data Analysis
+Data Analysis with AI 
+Module 1: Python Programming for Data Analytics
+* Python Environment Setup
+* Variables and Data Types
+* Conditional Statements and Loops
+* Functions 
+* OOPS Concepts
+* Exception Handling
+Task: Business Record Processing System
+Module 2: Data Manipulation using Numpy & Pandas
+* NumPy Fundamentals
+* Pandas Series and DataFrames
+* Data Cleaning and Preprocessing
+* Data Transformation Techniques
+* Grouping and Aggregation
+* Merging and Joining Datasets
+* Exploratory Data Analysis (EDA)
+Task: Enterprise Data Cleaning & Analytics Pipeline
+Module 3: Data Visualization 
+* Visualization using Matplotlib
+* Interactive Visualizations using Seaborn
+* Dashboard Design Best Practices
+* Business KPI Analysis
+* Predictive Analytics Fundamentals
+Task: Problem based Intelligence Dashboard
+Module 4: Data Analysis with Excel
+* Data Types and Formatting
+* Formulas and Functions
+* Logical Functions (IF, IFS, AND, OR)
+* Data Validation and Data Cleaning
+* Advanced Lookup Functions 
+* Pivot Tables and Pivot Charts
+Task: Executive Sales & Performance Dashboard
+Module 5 : SQL for Data Analysis
+* SQL Fundamentals
+* Data Retrieval and Filtering
+* Sorting and Aggregation
+* Grouping and Summarization
+* Table Joins and Relationships
+* Window Functions
+Task: Sales & Customer Data Analysis using SQL 
+Module 6: Industry Practices & Project
+* Git Fundamentals
+* GitHub Collaboration
+* Version Control Best Practices
+* Portfolio Development
+* Cloud Deployment
+ISO Mapping 
+
+
+Module
+	Relevant ISO Standard
+	Area of Alignment
+	Python Programming for Data Analytics
+	ISO/IEC 12207
+	Software Development Processes
+	Data Manipulation and Analysis using Pandas
+	ISO/IEC 25012
+	Data Quality and Data Processing
+	Data Visualization
+	ISO/IEC 25012, ISO/IEC 25010
+	Data Quality, Reporting and Information Presentation
+	Business Data Analysis with Excel
+	ISO/IEC 25012
+	Data Accuracy, Consistency and Analysis
+	SQL for Data Analysis
+	ISO/IEC 25012, ISO/IEC 11179
+	Data Quality and Data Management
+	
+
+
+
+
+
+Brochure-Friendly ISO Statement
+This program is aligned with internationally recognized standards including ISO 21001, ISO/IEC 12207, ISO/IEC 25010, ISO/IEC 25012, ISO/IEC 11179, and ISO/IEC 42001, ensuring best practices in data analytics, software development, data quality, visualization, and AI-assisted decision-making.
+Course Outcome:
+
+
+Students will be able to transform raw data into meaningful business insights by applying modern data analysis techniques and workflows. They will gain hands-on experience with industry tools to create reports, dashboards, and data-driven solutions commonly expected in Data Analyst and Business Intelligence roles. 
+Data Science
+DATA SCIENCE
+Module 1: Python Programming for Data Analytics
+* Python Environment Setup
+* Variables and Data Types
+* Conditional Statements and Loops
+* Functions and Scope
+* OOP Concepts
+* Exception Handling
+Task: Student Record management System
+Module 2: Data Analysis 
+* NumPy for Numerical Computing and Statistical Analysis
+* Data Handling and Transformation using Pandas
+* Data Cleaning and Preprocessing Techniques
+* Exploratory Data Analysis (EDA) and Insight Generation
+* Insight Generation and analysis
+Task: Real-World Data Analysis using Kaggle Datasets
+Module 3: Data Extraction 
+* Data Acquisition from Multiple Sources
+* Working with JSON Data
+* Web Scraping using Requests and BeautifulSoup
+* Extracting and Processing Web-Based Information
+* Real-World Data Collection Practices
+Task: Automated Web Data Collection and Analysis
+Module 4: Data Visualization & Business Intelligence
+* Data Visualization Fundamentals and Design Principles
+* Creating Charts and Graphs using Matplotlib
+* Statistical Visualization using Seaborn
+* Interactive Dashboards and Visual Analytics with Plotly
+* Business Intelligence Reporting using Power BI
+Task: Interactive Business Intelligence Dashboard 
+Module 5: SQL for Data Analysis
+* Database Fundamentals and Relational Concepts
+* Data Retrieval using SQL Queries
+* Data Filtering, Sorting, and Aggregation Techniques
+* Working with Joins and Multiple Tables
+* Subqueries and Data Analysis Functions
+* Business Reporting and Data Insights using SQL
+* Window functions in SQL
+Task: Sales and Customer Database Analysis
+Module 6: GitHub & Cloud Deployment
+* Git Fundamentals
+* GitHub Repositories
+* Version Control
+* Project Documentation
+* Portfolio Building
+Task: Deploy a Real Time Project on Github
+
+
+Module
+	Relevant ISO Standard
+	Python Programming for Data Analytics
+	ISO/IEC/IEEE 12207 – Software Life Cycle Processes 
+	Data Analysis (NumPy, Pandas, EDA)
+	ISO/IEC 25012 – Data Quality Model
+	Data Extraction (JSON, Web Scraping)
+	ISO/IEC 25012 – Data Acquisition, Integration and Quality Management 
+	Data Visualization & Business Intelligence
+	ISO/IEC 25012 – Data Quality and Information Presentation for Decision Support 
+	SQL for Data Analysis
+	ISO/IEC 9075 – Database Languages (SQL Standard)
+	GitHub & Cloud Deployment
+	ISO/IEC/IEEE 12207 – Software Development and Maintenance Processes 
+	Brochure-Friendly ISO Statement
+Curriculum aligned with ISO/IEC/IEEE 12207, ISO/IEC 25012, ISO/IEC 9075, and ISO/IEC 27001 standards, emphasizing software development, data quality, database management, and information security best practices.
+
+
+
+
+Course Outcome:
+Students will gain end-to-end expertise in the complete data science workflow, from acquiring and processing data to analyzing, visualizing, and deploying data-driven applications. They will build industry-ready projects that demonstrate their ability to solve real business problems using modern data science tools and practices. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Machine Learning
+Machine Learning
+Module 1: Python for Machine Learning
+* NumPy and Pandas
+* Data Preprocessing
+* Feature Engineering
+* Exploratory Data Analysis (EDA)
+* Data Visualization
+Task: Data Preprocessing & EDA Pipeline
+Module 2: Supervised Machine Learning
+* Machine Learning Fundamentals
+* Regression Algorithms
+* Classification Algorithms
+* Cost/Loss Functions
+* Gradient Descent Optimization
+* Model Training & Testing
+* Model Selection Techniques
+Algorithms Covered
+* Linear Regression
+* Logistic Regression
+* Decision Tree
+* Random Forest
+* K-Nearest Neighbors (KNN)
+* Support Vector Machine (SVM)
+Task: Customer Churn Prediction
+Module 3: Unsupervised Learning & Feature Engineering
+* Clustering Techniques
+* Dimensionality Reduction
+* Feature Selection
+* Principal Component Analysis (PCA)
+* Anomaly Detection
+Algorithms Covered
+* K-Means Clustering
+* Hierarchical Clustering
+* DBSCAN
+* PCA
+Task: Customer Segmentation & Pattern Analysis
+Module 4: Model Evaluation & Optimization
+* Performance Evaluation Metrics
+* Cross Validation Techniques
+* Hyperparameter Tuning
+* Overfitting & Underfitting
+* Bias-Variance Tradeoff
+* Ensemble Learning Fundamentals
+* Model Explainability (Feature Importance)
+Task: Machine Learning Model Optimization
+Module 5: Industry Project
+* Problem Identification
+* Dataset Collection & Preparation
+* End-to-End Model Development
+* Model Evaluation & Optimization
+* Project Documentation
+* Portfolio Development
+Industry Project: End-to-End Machine Learning Solution for a Real-World Business Problem.
+Industry & ISO Alignment
+This curriculum is aligned with internationally recognized standards:
+ISO Standard
+	Relevance to the Program
+	ISO 21001
+	Quality learning outcomes, assessments, and project-based education
+	ISO/IEC 12207
+	Software development lifecycle, coding practices, and project implementation
+	ISO/IEC 25010
+	Model quality, evaluation, maintainability, and performance
+	ISO/IEC 25012
+	Data preparation, preprocessing, feature engineering, and analytics
+	ISO/IEC 42001
+	Responsible AI development, machine learning governance, and AI-assisted workflows
+	Brochure-Friendly ISO Statement
+This Machine Learning program is designed in alignment with ISO 21001, ISO/IEC 12207, ISO/IEC 25010, ISO/IEC 25012, and ISO/IEC 42001, ensuring learners develop industry-ready skills in machine learning, data quality, software engineering, and responsible AI practices through hands-on projects and real-world applications.
+
+
+Course Outcomes:
+
+
+Students will develop the ability to build, evaluate, optimize, and deploy machine learning models for predictive analytics and intelligent decision-making. Through practical implementation of industry-standard algorithms, they will be prepared to tackle real-world  challenges and contribute to data-driven products and solutions. 
+Deep Learning
+Deep Learning 
+Module 1: Foundations of Deep Learning 
+* Introduction to Artificial Intelligence, Machine Learning & Deep Learning
+* Evolution and Industry Applications of Deep Learning
+* AI vs ML vs DL
+* Neural Networks: Biological vs Artificial Neurons
+* Components and Workflow of Deep Learning Models
+* TensorFlow, PyTorch & Keras Frameworks
+* Google Colab, Jupyter Notebook & Environment Setup
+* GPU vs CPU, CUDA Basics & Industry Best Practices
+Module 2: Mathematical Foundations for Deep Learning 
+* Linear Algebra: Scalars, Vectors, Matrices & Tensors
+* Matrix Operations and Mathematical Foundations
+* Calculus Concepts for Deep Learning
+* Derivatives, Chain Rule & Gradients
+* Gradient Descent and Optimization Techniques
+* Cost Functions and Loss Functions
+* Convex vs Non-Convex Optimization
+* Probability Concepts for Deep Learning
+ Task: Implement Gradient Descent from Scratch
+Module 3: Neural Network Fundamentals 
+* Logistic Regression and Perceptron Models
+* Binary and Multi-Class Classification
+* Feed Forward Neural Networks
+* Forward & Backward Propagation
+* Activation Functions (Sigmoid, ReLU, Tanh, Softmax)
+* Loss Functions and Model Optimization
+* Weight Initialization and Bias Optimization
+* Vanishing & Exploding Gradient Problems
+ Task: Classification of different objects.
+Module 4: Deep Neural Networks 
+* Deep Neural Network Architecture
+* Hidden Layers and Matrix Computations
+* Hyperparameters and Batch Processing
+* Gradient Descent Variants (Batch, Mini-Batch & SGD)
+* Optimizers (SGD, Momentum, RMSProp & Adam)
+* Learning Rate Scheduling
+* LSTM & GRU Architecture
+* Regularization, Dropout & Batch Normalization
+* Early Stopping and Performance Optimization
+ Task: Loan Approval Prediction
+Module 5: Industry Project & Deployment
+* End-to-End Deep Learning Workflow
+* Model Evaluation Metrics and Performance Analysis
+* Model Saving & TensorFlow/PyTorch Serialization
+* Streamlit & Flask-based Model Deployment
+* GitHub, Documentation & Version Control
+* Resume Building and Interview Preparation
+* Industry Best Practices for AI Deployment
+Project: Develop and Deploy a Real-World Deep Learning Solution.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Industry & ISO Alignment
+
+
+Module
+	Relevant ISO Standard(s)
+	Module 1: Foundations of Deep Learning
+	ISO/IEC 22989:2022 (Artificial Intelligence  AI Concepts and Terminology)
+ISO/IEC 23894:2023 (Artificial Intelligence  Risk Management)
+	Module 2: Mathematical Foundations
+	ISO/IEC 22989:2022
+	Module 3: Neural Network Fundamentals
+	ISO/IEC 23053:2022 (Framework for AI Systems Using Machine Learning)
+	Module 4: Deep Neural Networks
+	ISO/IEC 23053:2022
+ISO/IEC 25010:2023 (Software Product Quality Model)
+	Module 5: Capstone Project & Deployment
+	ISO/IEC 42001:2023
+ISO/IEC 25010:2023
+ISO/IEC 27001:2022 (Information Security Management)
+	Brochure-Friendly ISO Statement
+
+
+ISO/IEC Standards Alignment: Curriculum aligned with internationally recognized ISO/IEC standards for Artificial Intelligence, Machine Learning, Software Quality, AI Governance, and Information Security, ensuring industry-ready skills and best practices. 
+
+
+Course Outcome:
+Students will learn to design and develop advanced deep learning solutions using modern  frameworks for applications such as sequence modeling. By working on industry-oriented projects, they will gain the practical expertise required to build intelligent systems for next-generation applications. 
+Company Profiles
+
+
+TS pvt ltd Previous
+
+
+
+
+ABOUT OUR COMPANY
+WHO WE ARE
+Built to Protect. Designed to Last.
+Thread Security is an enterprise cybersecurity organization founded on a single conviction: Security cannot be a compromise. We exist to protect the organizations, infrastructure, and data that modern economies depend on — and we do it without shortcuts, without black-box solutions, and without the kind of overconfidence that leaves systems exposed.
+What sets us apart is not just technical depth — it is how we work. We bring top offensive security skills and clear methodologies, providing our clients a full picture of our findings, what they mean, and what they should do about it. All engagements are based on accountability and measurable results—from penetration testing to long-term security strategy. We collaborate with businesses, government agencies, and tech firms in industries where "no fails" is the motto.
+Our team is composed of practitioners who have experience in offensive security, red teaming, cloud security, enterprise risk management and security architecture, all of which operate in the same environments as we are protecting. Our Promise We are not only detecting threats, we are preventing them, before they get to your systems!
+Not only do we react, we bolster your posture so you have less for the next threat to work with. We don't just secure systems — We safeguard the continuity, reputation and future of your organization.
+OUR VISION & MISSION WHAT DRIVES US
+ Uncompromising Security. Transparent Practice.
+Thread Security was born to offer practical, uncompromising security to organizations that simply cannot afford downtime, data loss or reputational damage. We don't use jargon or esoteric processes. From the ground up, we implement robust technical expertise and make processes transparent to secure infrastructure and hold it in place as threats change.
+Vision
+Where organisations can be confident that their digital infrastructure is protected by people who are truly prepared to do the job. Mission Provide practical, uncompromising cyber security solutions using a strong technical approach and open dialogue – safeguarding what is important to our clients.
+COMPANY OBJECTIVES
+What we are here to do is live.
+1. Protect Businesses
+Protect critical systems, data and infrastructure from all types of existing and emerging threats.
+2. Prevent Threats
+Proactively test and assess vulnerabilities, remove them before they can be exploited.
+3. Ensure Compliance
+Provide organizations with regulatory & industry security requirements while ensuring operational efficiency.
+4. Enable Growth
+Provide organizations with the security foundation they need to grow, innovate and run with confidence.
+5. Build Long-Term Resilience
+Do more than just respond to incidents — develop security postures that grow over time.
+6. Deliver Transparency
+Give clients full transparency into findings, risk and remediation - no black boxes and no ambiguity. Why choose Thread Security?
+OUR DIFFERENTIATORS
+Security That's Verifiable. A Future Without Tolerance.
+This is because we do our work not out of marketing, but because it stands the test of time. We apply this kind of technical rigour that is found in the real environment of opposition, and we are transparent so that our clients can know exactly what they are getting.
+Practitioner-Led Expertise
+We've worked both offensive and defensive on our team. Transparent Methodology No black boxes. All findings, assessment, and recommendations are recorded and communicated to your team in a meaningful way. Practical, Outcome-Oriented Work There is no need to make reports here. We're here to minimize risk, we are here to minimize risk: and we'll do it measurably and demonstrably, and verifiably.
+Uncompromising Standards
+A small engagement is treated the same as an enterprise-wide program, with respect to level of rigor. Quality is not differentiated. Proactive Over Reactive We are discovering vulnerabilities BEFORE adversaries do — not after they happen.
+Long-Term Security Partnership
+We develop long-lasting relationships with our clients; we get to know them inside and out, and we are always ready to be part of their changing threat environment.
+Enterprise & Government Ready
+Our processes, documentation and delivery quality are designed to meet the needs of complex organizations. Continuous Communication There is never a moment when clients are left in the dark. Clear communication at all stages — from scoping to final report.
+Research-Driven Intelligence
+The methods and knowledge are driven by active security research to keep pace with the changing threat landscape. We are held to measurable results — NOT activity measures. All engagements conclude with a more secure and robust security position.
+OUR SERVICES: WHAT WE DELIVER
+Comprehensive Security. Designed for: Your Environment.
+ From vulnerability discovery and active threat testing to security in the cloud, compliance and long-term strategic advice, Thread Security's service offerings address all aspects of enterprise security. All services are provided by practitioners who have first-hand experience in their field.
+1. Penetration Testing
+Real-world attacks are simulated to find and exploit vulnerabilities before they can be done by attackers. Documented, structured and scoped.
+2. Vulnerability Assessment Ongoing scanning and risk assessment to identify, categorize and rank security vulnerabilities throughout the environment.
+3. Cloud Security Cloud infrastructure, configurations, workloads and data environments assessment and hardening for major cloud platforms.
+4. Threat Monitoring Continuous surveillance and early detection of suspicious activity, deviation and indicators of compromise of your systems.
+5. Incident Response Minimize damage and restore operations through rapid containment, structured investigation, and recovery from cyber incidents.
+6. Security Consulting Compliance, GRC, risk management and long-term security strategy advice for your organization's goals.
+OUR SECURITY PROCESS
+How We Work
+Structured Approach, Continuous Protection.
+No matter what, each Thread Security engagement is based on a repeatable and structured methodology, meaning nothing is being overlooked, nothing is being assumed and every finding is actionable. We link to you from the outset and keep you informed throughout the process, from the beginning workscope to the end of remediation works.
+1. Assess
+We start by getting to know you and your surroundings: the systems, your risk level, your priorities, and your limitations.
+2. Identify
+Using technical analysis, testing and intelligence-led assessment, we identify vulnerabilities and gaps of concern.  
+3. Protect
+We apply and suggest a comprehensive security system specific to your individual environment and risks.
+4. Detect
+We set up monitoring which can detect threats and anomalies in real time before they get to the incident level.             
+5. Respond
+We take action when incidents have happened – containment, investigation and recovery are done immediately at a speed your organization needs.
+6. Improve
+Each engagement is a teacher of the following one. Our security posture is continually improving to make it stronger with time, not just the same.
+VAPT SERVICES
+Vulnerability Assessment & Penetration Testing
+Service Coverage
+Web Application Testing in particular is a leading concern between the Internet and mobile application security breaches. Specifically, Web Application Testing is a major focus area in terms of security breaches between the Internet and mobile applications.
+Information Gathering, Threat Modelling, Vulnerability Analysis, Controlled Exploitation, Privilege Escalation Assessment, Reporting & Remediation Guidance, Post-Exploitation Analysis
+Deliverables
+The family court ordered the husband to pay the child's care provider a monthly allowance. The husband had to pay the child's care provider a monthly allowance as ordered by the family court. The husband was required by the family court to contribute to the child's care provider's monthly allowance.
+All engagements are outscoped, authorized, and fought under formal rules of engagement. Findings are segmented by intensity and shown alongside clearly presented and actionable remediation pathways.
+CERTIFICATIONS & STANDARDS
+OUR STANDARDS
+In keeping with the Global Best Practice.
+The operations and methodologies of Thread Security are geared towards prevailing international security standards and frameworks. This allows our work to align to the compliance and governance requirements of enterprise and government clients, and aligns our processes to be audit ready, audit consistent and audit defensible.
+ISO 27001
+The world standard for managing information security risks: Information Security Management System. SOC 2 Type II
+The security, availability and confidentiality controls are carried out independently over time.
+PCI DSS
+Payment Card Industry Data Security Standard — to be followed by organisations that process cardholder data.
+GDPR
+General Data Protection Regulation (GDPR): Security and privacy in data handling.                
+OWASP
+Our Web and Application Security Scanning services are compliant with OWASP methodologies and current Top 10.        
+NIST CSF
+We apply the NIST Cybersecurity Framework as we offer security consulting and security strategy.
+BRANDS WE PROTECT
+OUR CLIENTS
+A company trusted across the industries and sectors.
+Thread Security supports enterprises in IT, financial, cloud and digital commerce. You have issues you don't want to mess around with and the solution is to trust us to take care of your most important systems.
+[LOGO]
+Microsoft  ·  AWS  ·  Google  ·  Oracle  ·  VMware  ·  Adobe  ·  PayPal  ·  IBM  ·  SAP  ·  Dell  ·  Intel  ·  Cisco
+OUR TEAM
+LEADERSHIP
+Security applied by the Professionals.
+Led by practitioners and not boardroom experts, Thread Security has made it their mission to bring the best expertise in the field to enhance these critical processes. Our Leadership team combines great technical skill with a great vision and they are equally committed to what you call "Security in Action".
+Vishal Kumar  —  Founder & CEO
+Vishal guides Thread Security with a sure and steadfast idea – STARTING SECURITY from a practical expanse, transparent and ready for the real world. He has deep experience in offensive security, red teaming, enterprise risk and how to test, document and continually question security.  Throughout his tenure at Thread Security, the company has gained technical credibility and earned the trust of its clients.
+Mr. Sujal Tiwari — Chief Technology Officer
+Sujal heads product development, engineering and security architecture at Thread Security, guiding technological direction. He brings technical excellence and rigor to all engagements through his background in offensive research and cybersecurity.  His expertise is in creating large-scale, resilient security solutions to meet the shifting needs of enterprise customers and effectively respond to a dynamic threat environment.
+The Leadership in Knowledge-based. Focused on Security.
+BY THE NUMBERS: OUR TRACK RECORD
+Providing Measurable Security Outcomes.
+These are the numbers of engagements made, served clients and our own internal efficiency standards that we follow throughout projects. Their focus is NOT on targets, it's on their results.
+ 
+500+ Projects Secured                
+50+ Enterprise Clients                
+99.9% Threat Detection Accuracy         
+24/7 Monitoring & Response
+8+ Years of Excellence
+Each number listed here suggests an organization that entrusted us with something that was very important to them.
+
+
+TSE Profile
+
+
+
+
+Thread Security Education
+Building the Workforce That Secures Tomorrow.
+ 
+WHO WE ARE
+Where Industry Knowledge Becomes Professional Capability.
+Thread Security Education is the dedicated learning and professional development division of the Thread Security established to address a gap that most training providers do not. It is the distance between what institutions teach and what industry actually demands.
+We are not a traditional training company. We are a practitioner-led education organisation built on the same technical foundations that Thread Security has applied in enterprise and government security engagements. That foundation is what makes our programs different our curriculum is not designed from the outside looking in. It is designed by people who have operated inside the environments our learners are preparing to enter.
+Thread Security Education partners with corporate HR and L&D teams, universities, engineering institutions, and government bodies to deliver structured programs in cybersecurity, artificial intelligence and allied technology disciplines alongside fellowships, industry projects, and applied learning experiences that connect learners directly to professional practice.
+ 
+OUR VISION & MISSION
+WHAT DRIVES US
+Closing the Gap Between Learning and Professional Practice.
+Thread Security Education was established with a single conviction: professional capability in technology cannot be built through passive instruction. It is built through structured, practitioner-led learning that is grounded in how the industry actually operates.
+Our Vision
+To be the most trusted industry-aligned education partner for organisations building technically capable, professionally prepared technology workforces.
+Our Mission
+To deliver structured learning experiences that transform technical knowledge into demonstrable professional capability through programs designed by practitioners, for practitioners.
+OUR OBJECTIVES
+1.     Build Workforce Capability for real industry environments.
+2.     Bridge the Industry Gap.
+3.     Deliver Applied Learning
+4.     Enable Complete Carrer Readiness
+5.     Demonstrate institutional training value.
+WHAT WE OFFER
+From Classrooms to Clients
+Thread Security Education's programs span the full spectrum of in-demand technology disciplines from cybersecurity to artificial. Each program is structured around a consistent aim of industry-aligned curriculum, hands-on implementation, project-based learning, and measurable outcomes.
+-----------------------Training Programs will be added here ---------------------------------------
+ 
+Fellowship & Industry Projects
+Industry Fellowships
+Structured fellowship programs that place learners within real industry contexts working on defined problems, under practitioner mentorship, and producing documented outcomes that demonstrate applied capability to employers.
+Industry Projects
+Applied project engagements where cohorts work on real organisational briefs scoped by Thread Security Education in collaboration with corporate and institutional partners. Learners deliver working solutions, not academic submissions.
+Corporate Training Engagements
+Custom-designed programs for HR and L&D teams seeking to upskill existing workforces in defined technology domains structured around the organisation's specific roles, tools, and operational environment.
+Certification Preparation
+Structured programs aligned to globally recognised certifications giving learners a pathway to credentialled expertise alongside practical capability. 
+HOW WE TEACH
+Capability Is Built Through Practice. Not Passive Instruction.
+The most effective learning happens when knowledge is applied under conditions that reflect professional reality. Our delivery model reflects this at every level from how curriculum is sequenced to how learners are assessed.
+1.         Industry-Aligned Curriculum
+2.         Practitioner-Led Delivery
+3.         Hands-On Labs
+4.         Project Based Learning
+5.         Continuous Assessment
+6.         Outcome Report
+ 
+ 
+OUR DIFFERENTIATORS
+The Standard We Hold Ourselves To.
+01. Backed by a Security Firm
+Our programs are built on the foundations of an active enterprise security organization to ensure every lesson reflects real-world operations.
+02. Practitioner-Led Expertise
+Instructors teach from current, firsthand experience in live environments rather than relying on outdated textbooks.
+03. Outcome-Oriented Delivery
+Every program is built around defined, measurable outcomes. We hold ourselves accountable to what learners can do at the end not just what content was covered.
+04. Current by Design
+Curriculum is reviewed and updated continuously to ensure students train on today's technology, not yesterday's standards.
+05. Scalable Without Compromise
+We deliver the with exact same program quality, instructor calibre, and delivery standards whether training a cohort of 20 or 200.
+06. Transparent Reporting
+Partners receive full, continuous visibility into cohort progress and assessment data throughout the entire engagement at every stage.
+07. Professional Development Included
+Career mentorship, communication skills, resume preparations and interview readiness are fully integrated into our core technical training.
+08. Long-Term Partnership
+We invest in understanding our partners' workforce objectives deeply and we build programs around those objectives, not around a standard catalog.
+09. Compliance & Governance Ready
+Our documentation, reporting, and delivery standards are structured to meet the procurement and governance requirements of corporate HR, L&D, and institutional bodies
+ 
+WHAT YOU WILL GAIN
+You Arrive with Curiosity. You Leave with Capability.
+1.     By the end of any Thread Security Education program, learners will be able to:
+2.     Apply core techniques to real problems Not just explain them in theory
+3.     Work confidently with industry-standard tools, actively used by professionals in the fields.
+4.     Build, configure, and troubleshoot systems the way professionals do.
+5.     Take a project from requirement to finished solution Independently
+6.     Walk into a technical role without the usual learning curve
+ 
+BEYOND TECHNICAL SKILLS
+Professionally Prepared, Not Just Technically
+1.         Personality Development
+2.         Business Communication
+3.         Resume & LinkedIn Preparation
+4.         Mock Interviews
+5.         Aptitude & Reasoning Preparations
+6.         Group Discussions
+7.         Carrer Mentorships
+8.         Professional Grooming
+ 
+OUR TRACK RECORD
+Outcomes That Speak for Themselves.
+ 
+---------------------------------------Stats for the TS education----------------------------------------
+ 
+OUR LEADERS
+Leadership Grounded in Expertise. Focused on Outcomes.
+Vishal Kumar [Founder & CEO]
+Mr. Vishal leads Thread Security Education with the conviction that professional capability must be built on real-world foundations. With deep expertise in offensive security, red teaming, and enterprise risk and a track record of delivering security programs for enterprise and government clients. This brings the same standard of rigour to education that he has applied in active security engagements.  Under his leadership, Thread Security Education is built not around what is easy to teach, but around what professionals actually need to perform
+Sujal Tiwari [Chief Technology Officer]
+Mr. Sujal brings a strong background in cybersecurity, offensive research, and security architecture to Thread Security Education's program design. His focus on scalable, technically rigorous systems directly shapes how programs are structured ensuring that curriculum reflects the current state of the field and that delivery standards hold up as program scale increases. His presence has made a huge impact on hundreds of students who are shaping their lives ahead.
+ 
+PARTNER WITH US
+Let's Build Your Workforce Together.
+Thread Security Education welcomes conversations with corporate HR and L&D teams, universities, engineering institutions, and government bodies seeking a credible, outcomes-driven training partner. We are available to discuss program requirements, cohort structures, fellowship engagements, and institutional partnerships.
+Whether you are looking to upskill an existing team, build a structured training program from scratch, or explore fellowship and industry project opportunities for your institution Thread Security Education is ready to engage.
+Reach out. Let's begin.
+ 
+CONTACT DETAILS
+ADDRESS
+3rd Floor, Vasal Tower, Jalandhar
+PHONE
++91
+EMAIL
+info@threadsecurity.org
+WEBSITE
+threadsecurity.org
+ 
+ 
+
+
+6 Months Fellowship
+
+
+Foundational AI
+FOUNDATIONAL AI
+
+
+Module 1: Programming with Python
+Duration: 3 Weeks
+Python Fundamentals & Advance Concepts
+* Introduction to Python
+* Variables & Data Types
+* List, Dictionary & Set Comprehensions
+* Input & Output
+* Operators
+* Conditional Statements
+* Loops
+* Pattern Programming
+* Functions 
+* Recursion
+* Modules & Packages
+* File Handling
+* Exception Handling
+* Classes & Objects
+* Constructors
+* Inheritance
+* Polymorphism
+* Encapsulation
+* Abstraction
+Module 2: Data Analysis with Python
+Duration: 2 Weeks
+NumPy
+* Arrays
+* Indexing
+* Operations
+* Vectorization
+Pandas
+* Series & DataFrames
+* Data Cleaning
+* Missing Values
+* Feature Engineering
+* GroupBy
+* Merge
+* Concatenation
+Data Visualization
+* Matplotlib
+* Plotly
+* Statistical Visualizations
+* Exploratory Data Analysis (EDA)
+Module 3: Data Analytics with Excel
+Duration: 1 Week
+Excel Fundamentals
+* Data Formatting
+* Tables
+* Named Ranges
+Data Analysis
+* Sorting
+* Filtering
+* Conditional Formatting
+* Data Validation
+* Remove Duplicates
+* Flash Fill
+Excel Functions
+* IF & IFS
+* SUMIF & COUNTIF
+* VLOOKUP
+* XLOOKUP
+* INDEX & MATCH
+* TEXT Functions
+* DATE Functions
+Reporting
+* Pivot Tables
+* Pivot Charts
+* Interactive Dashboards
+* KPI Reporting
+Module 4: Business Intelligence with Power BI
+Duration: 1-2 Weeks
+Power BI Fundamentals
+* Power BI Desktop
+* Power Query
+* Data Import
+* Data Cleaning
+Data Modeling
+* Relationships
+* Star Schema
+* Snowflake Schema
+DAX
+* Calculated Columns
+* Measures
+* CALCULATE
+* FILTER
+* IF
+* SWITCH
+* RANKX
+* Time Intelligence
+Visualization
+* Cards
+* Tables
+* Matrix
+* Charts
+* Maps
+* Slicers
+* KPI Dashboards
+Module 5: Machine Learning Engineering
+Duration: 3 Weeks
+Machine Learning Workflow
+* ML Lifecycle
+* Data Preprocessing
+* Feature Engineering
+* Feature Scaling
+* Train-Test Split
+Supervised Learning
+* Linear Regression
+* Logistic Regression
+* Decision Tree
+* Random Forest
+* SVM
+* KNN
+* Naive Bayes
+Unsupervised Learning
+* K-Means
+* Hierarchical Clustering
+* DBSCAN
+* PCA
+* Apriori Algorithm
+Model Evaluation
+* Confusion Matrix
+* Accuracy
+* Precision
+* Recall
+* F1 Score
+* ROC-AUC
+* Cross Validation
+* Hyperparameter Tuning
+Module 6: Deep Learning Engineering
+Duration: 4 Weeks
+Neural Networks
+* Perceptron
+* ANN
+* Forward Propagation
+* Backpropagation
+* Activation Functions
+* Optimizers
+* Regularization
+TensorFlow & PyTorch
+* Tensor Operations
+* Model Building
+* Training
+* Evaluation
+CNN
+* Image Classification
+* Transfer Learning
+RNN
+* Sequential Data
+* NLP Fundamentals & Preprocessing 
+* LSTM
+* GRU
+Introduction to Transformers
+* Attention Mechanism
+* Transformer Architecture
+* BERT vs GPT (Conceptual)
+
+
+Module 7: FastAPI & Backend Development
+Duration: 3-4 Weeks
+REST API Fundamentals
+* HTTP Methods
+* Status Codes
+* JSON
+* REST Architecture
+FastAPI
+* Routing
+* Path Parameters
+* Query Parameters
+* Request & Response Models
+* Pydantic Validation
+Database Integration
+* PostgreSQL Integration
+* SQLAlchemy / SQLModel
+* CRUD APIs
+Security
+* JWT Authentication
+* Password Hashing
+* Protected Routes
+API Development
+* File Upload APIs
+* Error Handling
+* Swagger Documentation
+Module 8: SQL & Database Engineering
+Duration: 2-3 Weeks
+Database Fundamentals
+* DBMS vs RDBMS
+* Database Design
+* ER Diagrams
+* Normalization
+* Primary & Foreign Keys
+* Constraints
+SQL Programming
+* CRUD Operations
+* Operators
+* Joins
+* Subqueries
+* Views
+* Common Table Expressions (CTEs)
+* Window Functions
+* Stored Procedures (Introduction)
+* Functions
+Transactions & Database Management
+* ACID Properties
+* COMMIT
+* ROLLBACK
+* SAVEPOINT
+* Basic Concurrency Concepts
+Query Optimization
+* Indexes
+* Clustered vs Non-Clustered Indexes (Concept)
+* EXPLAIN
+* EXPLAIN ANALYZE
+* Execution Plans
+* Query Latency
+* Performance Tuning
+* Query Rewriting Best Practices
+SQL for AI
+* Feature Extraction
+* Data Cleaning
+* Aggregations
+* Time-Series Queries
+Module 9: AI Application Development
+Duration: 2 Weeks
+Streamlit
+* Widgets
+* Session State
+* Layouts
+* Charts
+* Forms
+AI Frontend Development
+* Connecting Streamlit with FastAPI
+* File Upload Interface
+* Model Inference
+* Dashboard Development
+Module 10: AI Deployment & DevOps Fundamentals
+Duration: 1 Week
+GitHub & Cloud Deployment
+* Git Fundamentals
+* GitHub Repositories
+* Version Control
+Docker
+* Images
+* Containers
+* Dockerfile
+* Docker Compose
+DevOps Basics
+* CI/CD Concepts
+* Version Control Workflow
+* Model Versioning
+
+
+
+
+Agentic AI
+
+
+
+
+Agentic AI and Intelligent System Engineering 
+Module 1: Foundations of Generative AI & Large Language Models
+Duration: 2 Weeks
+Topics
+* Evolution of AI
+* Generative AI Fundamentals
+* Transformer Architecture
+* LLM Architecture
+* Decoder-only vs Encoder-Decoder Models
+* Tokens & Tokenization
+* Embeddings
+* Context Windows
+* Sampling Techniques
+* Prompting Basics
+* Model Selection
+* Open-source vs Proprietary Models
+* API-based vs Local Models
+* AI Application Architecture
+Module 2: Prompt Engineering & AI Reasoning
+Duration: 2 Weeks
+Topics
+* Prompt Engineering Fundamentals
+* Zero-shot Prompting
+* One-shot Prompting
+* Few-shot Prompting
+* Chain-of-Thought Prompting
+* Self-Consistency
+* Tree of Thoughts (Concept)
+* ReAct Pattern
+* Role Prompting
+* Structured Outputs
+* Prompt Templates
+* Prompt Optimization
+* Prompt Testing
+Module 3: AI Agent Fundamentals
+Duration: 2 Weeks
+Topics
+* What are AI Agents?
+* Agent Architecture
+* Agent Lifecycle
+* Planning
+* Reasoning
+* Tool Calling
+* Memory
+* Reflection
+* Agent Communication
+* Autonomous Decision Making
+* Human-in-the-Loop Systems
+* AI Workflows vs AI Agents
+Module 4: Retrieval-Augmented Generation (RAG)
+Duration: 3 Weeks
+Topics
+* RAG Fundamentals
+* Document Processing
+* Chunking Strategies
+* Embeddings
+* Semantic Search
+* Vector Similarity
+* Hybrid Search
+* Metadata Filtering
+* Reranking
+* Context Management
+* Graph RAG (Introduction)
+* Enterprise Search Concepts
+Module 5: Vector Databases & Knowledge Systems
+Duration: 2 Weeks
+Topics
+* Vector Databases
+* Embedding Models
+* Similarity Search
+* Indexing
+* Collections
+* Metadata
+* Knowledge Graphs (Introduction)
+* Enterprise Knowledge Systems
+* Data Ingestion Pipelines
+Module 6: Agent Frameworks & Orchestration
+Duration: 3 Weeks
+Topics
+* LangChain
+* LangGraph
+* LlamaIndex
+* DSPy (Introduction)
+* OpenAI Agents SDK
+* Workflow Design
+* Tool Calling
+* Memory Management
+* Agent Routing
+* Agent State Management
+Module 7: Multi-Agent Systems Engineering
+Duration: 2 Weeks
+Topics
+* Multi-Agent Architectures
+* Agent Collaboration
+* Agent Communication
+* Task Delegation
+* Coordinator Pattern
+* Planner Pattern
+* Supervisor Pattern
+* Reflection Loops
+* Conflict Resolution
+* Distributed Agents
+Module 8: Enterprise AI Integration & Automation
+Duration: 2 Weeks
+Topics
+* Enterprise APIs
+* REST Integration
+* OAuth Basics
+* Workflow Automation
+* Webhooks
+* CRM Integration
+* ERP Integration
+* Email Automation
+* Calendar Automation
+* Database Integration
+* AI Business Process Automation
+Module 9: AI Application Engineering
+Duration: 2 Weeks
+Topics
+* FastAPI
+* Streamlit
+* Authentication
+* Session Management
+* File Upload Systems
+* Chat Interfaces
+* API Design
+* Backend Architecture
+* Frontend Integration
+* Project Structure
+Module 10: Deployment, LLMOps & Production Systems
+Duration: 2 Weeks
+Topics
+* Docker
+* Docker Compose
+* CI/CD Concepts
+* LLMOps Fundamentals
+* Model Versioning
+* API Scaling
+* Monitoring
+* Logging
+* Observability
+* Cost Optimization
+* Caching
+* Rate Limiting
+
+
+Generative AI
+
+
+
+
+AI Engineering & Generative AI 
+Module 1: Foundations of Generative AI & Large Language Models
+Duration: 2 Weeks
+Topics
+* Evolution of Artificial Intelligence
+* Generative AI Fundamentals
+* Transformer Architecture
+* Encoder vs Decoder Models
+* GPT, BERT, T5, LLaMA, Mistral, Gemma
+* Tokenization
+* Embeddings
+* Context Windows
+* Attention Mechanism
+* Sampling Strategies
+* Model Parameters
+* Open-source vs Proprietary Models
+* AI Application Architecture
+Module 2: Prompt Engineering & LLM Application Design
+Duration: 2 Weeks
+Topics
+* Prompt Engineering Fundamentals
+* Zero-shot, One-shot & Few-shot Prompting
+* Chain-of-Thought Prompting
+* Self-Consistency
+* ReAct (Concept)
+* Structured Outputs
+* JSON Responses
+* Function Calling
+* Prompt Templates
+* Prompt Testing & Evaluation
+* AI Output Optimization
+Module 3: LLM APIs & AI Application Development
+Duration: 2 Weeks
+Topics
+* OpenAI API
+* Gemini API
+* Claude API
+* Hugging Face Inference API
+* API Authentication
+* Streaming Responses
+* Token Usage
+* Cost Optimization
+* Error Handling
+* API Rate Limits
+* Model Selection
+Module 4: Embeddings, Vector Databases & Semantic Search
+Duration: 2 Weeks
+Topics
+* Embeddings
+* Similarity Search
+* Dense vs Sparse Retrieval
+* Semantic Search
+* Hybrid Search
+* Metadata Filtering
+* Vector Indexing
+* Retrieval Strategies
+* Reranking (Introduction)
+Module 5: Retrieval-Augmented Generation (RAG)
+Duration: 3 Weeks
+Topics
+* RAG Architecture
+* Document Loading
+* Chunking Strategies
+* Embedding Pipelines
+* Retrieval Techniques
+* Context Management
+* Prompt Augmentation
+* Query Rewriting
+* Multi-document Retrieval
+* Graph RAG (Introduction)
+* Enterprise Knowledge Systems
+Module 6: Multimodal AI Engineering
+Duration: 2 Weeks
+Topics
+* Vision-Language Models
+* Image Understanding
+* OCR Integration
+* Speech-to-Text
+* Text-to-Speech
+* Audio Processing
+* Image Generation
+* Image Captioning
+* Video AI (Introduction)
+* AI Document Processing
+Module 7: Fine-Tuning & Model Customization
+Duration: 2 Weeks
+Topics
+* Fine-Tuning Fundamentals
+* Transfer Learning for LLMs
+* PEFT
+* LoRA
+* QLoRA
+* Dataset Preparation
+* Instruction Tuning
+* Model Evaluation
+* Quantization (Introduction)
+* Distillation (Concept)
+Module 8: AI Application Engineering
+Duration: 2 Weeks
+Topics
+* FastAPI
+* Streamlit
+* Gradio
+* Authentication
+* Session Management
+* File Upload Systems
+* API Design
+* Backend Architecture
+* Frontend Integration
+* Project Organization
+Module 9: AI Deployment & LLMOps
+Duration: 2 Weeks
+Topics
+* Docker
+* Docker Compose
+* Environment Management
+* Model Versioning
+* CI/CD Concepts
+* Monitoring
+* Logging
+* API Scaling
+* Caching
+* Cost Optimization
+* Deployment Best Practices
+Module 10: Enterprise AI Solutions & Integration
+Duration: 2 Weeks
+Topics
+* Enterprise AI Architecture
+* REST APIs
+* Database Integration
+* Webhooks
+* Authentication
+* AI Integration Patterns
+* CRM & ERP Integration (Concept)
+* Workflow Automation (Introduction)
+* AI Product Design
+* Scalability Considerations
+
+
+AI Infrastructure, Cloud & LLMOps Engineering
+
+
+AI Infrastructure, Cloud & LLMOps Engineering 
+Module 1: AI Infrastructure Fundamentals
+Duration: 2 Weeks
+Topics
+* AI Infrastructure Overview
+* AI System Architecture
+* Cloud Computing Fundamentals
+* Virtual Machines
+* Containers vs Virtual Machines
+* CPU vs GPU vs TPU
+* AI Hardware Basics
+* Networking Fundamentals
+* Linux for AI Engineers
+* File Systems
+* Environment Variables
+* Package Management
+* SSH & Remote Access
+Module 2: Cloud Computing for AI
+Duration: 2 Weeks
+Topics
+* Cloud Service Models (IaaS, PaaS, SaaS)
+* Cloud Storage
+* Compute Services
+* Networking Basics
+* Identity & Access Management (IAM)
+* Secrets Management
+* Object Storage
+* Load Balancers
+* Auto Scaling Concepts
+* Cost Optimization
+* Multi-Cloud Concepts
+Module 3: Docker & Containerization
+Duration: 2 Weeks
+Topics
+* Docker Fundamentals
+* Docker Images
+* Docker Containers
+* Dockerfile
+* Docker Compose
+* Volumes
+* Networks
+* Environment Variables
+* Multi-stage Builds
+* Container Best Practices
+* Image Optimization
+Module 4: Kubernetes & Container Orchestration
+Duration: 3 Weeks
+Topics
+* Kubernetes Architecture
+* Pods
+* Deployments
+* ReplicaSets
+* Services
+* ConfigMaps
+* Secrets
+* Persistent Volumes
+* Ingress
+* Horizontal Pod Autoscaling
+* Helm Basics
+* Rolling Updates
+Module 5: MLOps & LLMOps Foundations
+Duration: 2 Weeks
+Topics
+* MLOps Lifecycle
+* LLMOps Lifecycle
+* Model Registry
+* Experiment Tracking
+* Model Versioning
+* Prompt Versioning
+* Dataset Versioning
+* Pipeline Automation
+* Reproducibility
+Module 6: CI/CD for AI Systems
+Duration: 2 Weeks
+Topics
+* GitHub Actions
+* CI/CD Pipelines
+* Automated Testing
+* Build Automation
+* Docker Image Deployment
+* Infrastructure Automation
+* Release Strategies
+* Rollback Strategies
+Module 7: Production AI Deployment
+Duration: 2 Weeks
+Topics
+* FastAPI Deployment
+* Streamlit Deployment
+* Model Serving
+* API Gateways
+* Reverse Proxy
+* Load Balancing
+* Scaling AI APIs
+* High Availability
+* Serverless AI (Introduction)
+Module 8: Monitoring, Logging & Observability
+Duration: 2 Weeks
+Topics
+* AI Monitoring
+* Infrastructure Monitoring
+* API Monitoring
+* Prompt Monitoring
+* Model Drift
+* Data Drift
+* Log Management
+* Metrics
+* Alerting
+* Dashboards
+* Incident Response
+Module 9: AI Performance Optimization
+Duration: 2 Weeks
+Topics
+* GPU Utilization
+* Batch Processing
+* Request Queuing
+* Caching
+* Redis
+* Rate Limiting
+* Response Time Optimization
+* Cost Optimization
+* Model Quantization (Deployment Perspective)
+* Inference Optimization
+Module 10: Security & Governance for AI Infrastructure
+Duration: 2 Weeks
+Topics
+* AI Infrastructure Security
+* Authentication
+* Authorization
+* JWT
+* API Keys
+* Secrets Management
+* Network Security
+* Encryption Basics
+* AI Governance
+* Compliance Overview
+* Backup & Disaster Recovery
+Module 11: Enterprise AI Platform Engineering
+Duration: 2 Weeks
+Topics
+* AI Platform Architecture
+* Multi-Tenant Systems
+* Workflow Scheduling
+* Message Queues (Introduction)
+* Event-Driven Architecture
+* API Management
+* AI Platform Design
+* Cost Management
+* Scalability Planning
+* Enterprise Integration
+
+
+AI security
+
+
+
+
+AI Security & Responsible AI Engineering
+
+
+Module 1: Foundations of AI Security & Responsible AI
+Duration: 2 Weeks
+Topics
+* Introduction to AI Security
+* AI Threat Landscape
+* AI Attack Surface
+* Secure AI Development Lifecycle
+* Responsible AI Principles
+* AI Ethics
+* Fairness
+* Transparency
+* Explainability
+* Accountability
+* AI Risk Management
+* AI Governance Overview
+* Regulatory Landscape (High Level)
+Module 2: Machine Learning Security
+Duration: 2 Weeks
+Topics
+* ML Pipeline Security
+* Data Poisoning
+* Label Poisoning
+* Model Poisoning
+* Evasion Attacks
+* Model Extraction
+* Membership Inference
+* Data Leakage
+* Privacy Risks
+* Defensive Strategies
+Module 3: LLM Security
+Duration: 3 Weeks
+Topics
+* LLM Threat Model
+* Prompt Injection
+* Indirect Prompt Injection
+* Jailbreak Attacks
+* Prompt Leakage
+* System Prompt Protection
+* Hallucinations
+* Sensitive Data Exposure
+* Tool Abuse
+* Function Calling Risks
+* Secure Prompt Design
+* Output Validation
+Module 4: AI Red Teaming & Adversarial Testing
+Duration: 2 Weeks
+Topics
+* AI Red Team Methodology
+* Threat Modeling
+* Attack Simulation
+* Adversarial Examples
+* Model Robustness Testing
+* Security Test Cases
+* AI Penetration Testing Concepts
+* Vulnerability Reporting
+Module 5: AI Evaluation & Model Validation
+Duration: 2 Weeks
+Topics
+* AI Evaluation Fundamentals
+* Benchmarking
+* Accuracy vs Reliability
+* Hallucination Evaluation
+* Factuality
+* Toxicity Detection
+* Bias Detection
+* Safety Evaluation
+* Prompt Evaluation
+* Human Evaluation
+* Automated Evaluation
+Module 6: AI Safety Engineering & Guardrails
+Duration: 2 Weeks
+Topics
+* AI Guardrails
+* Input Validation
+* Output Filtering
+* Policy Enforcement
+* Safety Classifiers
+* Content Moderation
+* Human-in-the-Loop
+* Secure Tool Calling
+* Secure Agent Design
+* Fail-safe Mechanisms
+Module 7: Privacy-Preserving AI
+Duration: 2 Weeks
+Topics
+* Data Privacy Fundamentals
+* Personally Identifiable Information (PII)
+* Data Anonymization
+* Data Masking
+* Secure Data Handling
+* Differential Privacy (Concept)
+* Federated Learning (Introduction)
+* Encryption Basics
+* Secure Storage
+* Access Control
+Module 8: Secure AI Application Engineering
+Duration: 2 Weeks
+Topics
+* Secure FastAPI Development
+* Authentication
+* Authorization
+* JWT Security
+* API Security
+* Secrets Management
+* Secure Configuration
+* Secure Logging
+* Rate Limiting
+* Input Sanitization
+Module 9: AI Infrastructure Security
+Duration: 2 Weeks
+Topics
+* Container Security
+* Docker Security
+* Kubernetes Security (Introduction)
+* Cloud Security Fundamentals
+* Identity & Access Management
+* Secrets Management
+* Network Security
+* Infrastructure Hardening
+* Secure Deployments
+Module 10: Responsible AI Governance & Compliance
+Duration: 2 Weeks
+Topics
+* AI Governance Frameworks
+* AI Lifecycle Governance
+* AI Documentation
+* Model Cards
+* Datasheets for Datasets
+* AI Audit Trails
+* Risk Registers
+* Compliance Overview
+* Responsible AI Policies
+* AI Incident Management
+Module 11: AI Monitoring & Incident Response
+Duration: 2 Weeks
+Topics
+* Production AI Monitoring
+* Drift Detection
+* Performance Monitoring
+* Security Monitoring
+* Log Analysis
+* AI Incident Response
+* Root Cause Analysis
+* Continuous Improvement
+* Threat Intelligence (Introduction)

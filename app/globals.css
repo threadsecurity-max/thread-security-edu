@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: var(--tse-border);
+  }
+  body {
+    background-color: var(--tse-bg-main);
+    color: var(--tse-text-main);
+    font-family: var(--font-josefin), 'Josefin Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Infinite Marquee Animations */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(calc(-100% - 1.5rem));
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 60s linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 60s linear infinite;
+}
+
+.pause-on-hover:hover .animate-marquee,
+.pause-on-hover:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}
+
