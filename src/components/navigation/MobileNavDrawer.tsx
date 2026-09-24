@@ -34,20 +34,25 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
     setIsOpen(false);
   }, [pathname]);
 
-  // Lock body scroll when drawer is open
+  // Lock body scroll when drawer is open and listen for Escape key
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setIsOpen(false);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
     } else {
       document.body.style.overflow = '';
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isOpen]);
 
   return (
-    <div className="md:hidden flex items-center">
+    <div className="flex items-center">
       <button
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
@@ -76,7 +81,7 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-              className="fixed top-0 right-0 bottom-0 w-[min(100vw-3rem,340px)] bg-white z-50 shadow-2xl flex flex-col safe-top safe-bottom safe-right safe-left border-l border-gray-200"
+              className="fixed top-0 right-0 bottom-0 h-dvh w-[min(100vw-2rem,360px)] bg-white z-50 shadow-2xl flex flex-col safe-top safe-bottom safe-right safe-left border-l border-gray-200"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">

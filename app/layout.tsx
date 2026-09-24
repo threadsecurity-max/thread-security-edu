@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import '@/src/styles/tokens.css';
 import '@/src/styles/typography.css';
@@ -23,6 +23,17 @@ const outfit = Outfit({
 
 import { OrganizationJsonLd } from '@/components/seo/JsonLd';
 import { ChatbotWidget } from '@/src/components/chatbot/ChatbotWidget';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#04111c' },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(

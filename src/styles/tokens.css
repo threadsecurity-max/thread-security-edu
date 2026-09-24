@@ -1,20 +1,28 @@
 :root {
   /* ==========================================================
-     TSE RESPONSIVE DESIGN TOKENS SYSTEM
-     Mobile-first, fluid, constraint-based tokens for all viewports
+     TSE UNIVERSAL RESPONSIVE DESIGN & ADAPTATION SYSTEM
+     Mobile-first, dynamic viewports, safe-area & device-agnostic
      ========================================================== */
 
-  /* Safe Area Insets */
+  /* Safe Area Insets (iOS Notches, Dynamic Island & Android Navigation) */
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
 
-  /* Touch & Interaction Constraints */
+  /* Dynamic & Stable Viewport Units */
+  --dvh: 100dvh;
+  --svh: 100svh;
+  --lvh: 100lvh;
+  --dvw: 100dvw;
+  --svw: 100svw;
+
+  /* Touch & Interaction Standards (WCAG 2.2 AA Compliance) */
   --touch-target-min: 44px;
   --touch-target-comfortable: 48px;
+  --touch-target-large: 56px;
 
-  /* Viewport Breakpoint References */
+  /* Viewport Breakpoint References (for fluid calculations) */
   --bp-xs: 320px;
   --bp-sm: 480px;
   --bp-md: 640px;
@@ -23,17 +31,24 @@
   --bp-2xl: 1280px;
   --bp-3xl: 1440px;
   --bp-4xl: 1920px;
+  --bp-5xl: 2560px;
+  --bp-ultrawide: 3440px;
 
-  /* Container Width Constraints */
+  /* Constraint-Based Container Widths */
   --container-reading: min(100% - 2rem, 68ch);
+  --container-reading-wide: min(100% - 2.5rem, 78ch);
+  --container-xs: min(100% - 1.5rem, 420px);
   --container-sm: min(100% - 2rem, 640px);
   --container-md: min(100% - 2.5rem, 768px);
   --container-lg: min(100% - 3rem, 1024px);
-  --container-xl: min(100% - 4rem, 1280px);
+  --container-xl: min(100% - 3.5rem, 1280px);
   --container-2xl: min(100% - 4rem, 1440px);
+  --container-3xl: min(100% - 4rem, 1600px);
   --container-full: min(100% - 2rem, 1920px);
+  --container-max-ultrawide: 1920px;
 
-  /* Fluid Spacing Scale (320px viewport -> 1920px viewport) */
+  /* Universal Fluid Spacing Scale (320px viewport -> 3840px 4K viewport) */
+  --space-4xs: clamp(0.125rem, 0.1rem + 0.1vw, 0.25rem);    /* 2px -> 4px */
   --space-3xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.375rem);   /* 4px -> 6px */
   --space-2xs: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);      /* 8px -> 12px */
   --space-xs: clamp(0.75rem, 0.65rem + 0.5vw, 1rem);        /* 12px -> 16px */
@@ -46,6 +61,7 @@
 
   /* Fluid Responsive Gutters */
   --gutter-fluid: clamp(1rem, 0.5rem + 2.5vw, 3.5rem);
+  --gutter-compact: clamp(0.75rem, 0.5rem + 1.5vw, 2rem);
 
   /* Brand Primary Tokens */
   --tse-primary: #ffffff;

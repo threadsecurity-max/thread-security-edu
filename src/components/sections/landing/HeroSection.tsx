@@ -47,30 +47,30 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
         </div>
 
         {/* ── FULL-BLEED HIGH-IMPACT H1 HEADLINE ── */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-slate-950 max-w-6xl mx-auto leading-[1.12] mb-6">
-          Master <FlipWords words={heroFlipWords} className="px-1" /> With Placement-Focused Hands-On Practice
+        <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 max-w-6xl mx-auto leading-[1.14] sm:leading-[1.12] mb-6">
+          Master <FlipWords words={heroFlipWords} className="px-1 inline-block" /> With Placement-Focused Hands-On Practice
         </h1>
 
         {/* ── SUBTITLE ── */}
-        <p className="text-base sm:text-xl text-slate-600 max-w-4xl mx-auto mb-9 leading-relaxed font-sans font-medium">
+        <p className="text-sm sm:text-lg md:text-xl text-slate-600 max-w-4xl mx-auto mb-8 sm:mb-9 leading-relaxed font-sans font-medium">
           Thread Security Education (TSE) is North Region&apos;s premier career launcher for Ethical Hacking, SOC Analytics, Cloud DevSecOps, and AI Security. Learn in 100% sandboxed live labs, receive 1-on-1 industry mentorship, and earn verified TS-ID student credentials.
         </p>
 
         {/* ── HIGH-CONVERTING CTA BUTTONS ── */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 mb-10 w-full max-w-xl sm:max-w-none mx-auto">
           <Link href="/contact" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-black text-white hover:bg-slate-800 font-bold text-base shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2.5 cursor-pointer group">
+            <button className="w-full sm:w-auto min-h-[48px] px-6 sm:px-8 py-3.5 sm:py-4 rounded-full bg-black text-white hover:bg-slate-800 font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2.5 cursor-pointer group touch-target">
               <span>Apply For Free Demo Class</span>
               <ArrowRight className="w-5 h-5 text-[#C6FF34] group-hover:translate-x-1 transition-transform" />
             </button>
           </Link>
           <Link href="/courses" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-8 py-4 rounded-full border-2 border-slate-300 text-slate-900 hover:bg-slate-100 font-bold text-base transition-all cursor-pointer">
+            <button className="w-full sm:w-auto min-h-[48px] px-6 sm:px-8 py-3.5 sm:py-4 rounded-full border-2 border-slate-300 text-slate-900 hover:bg-slate-100 font-bold text-sm sm:text-base transition-all cursor-pointer touch-target">
               Explore Career Programs
             </button>
           </Link>
           <Link href="/placements" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-7 py-4 rounded-full bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100 font-bold text-base transition-all cursor-pointer inline-flex items-center justify-center gap-2">
+            <button className="w-full sm:w-auto min-h-[48px] px-5 sm:px-7 py-3.5 sm:py-4 rounded-full bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100 font-bold text-sm sm:text-base transition-all cursor-pointer inline-flex items-center justify-center gap-2 touch-target">
               <Sparkles className="w-4 h-4 text-purple-600" />
               <span>Placement Highlights</span>
             </button>
