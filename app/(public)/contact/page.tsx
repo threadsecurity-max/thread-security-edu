@@ -57,8 +57,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <span className="text-xs font-mono text-gray-500 block uppercase font-bold">Call / WhatsApp Support</span>
-                      <a href="tel:+919876543210" className="text-base font-bold text-black hover:text-[#7E3BED] transition-colors focus:outline-none focus:ring-2 focus:ring-[#7E3BED] rounded">
-                        +91 98765 43210
+                      <a href="tel:+917347398956" className="text-base font-bold text-black hover:text-[#7E3BED] transition-colors focus:outline-none focus:ring-2 focus:ring-[#7E3BED] rounded font-mono">
+                        +91 7347398956
                       </a>
                     </div>
                   </div>
@@ -69,8 +69,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <span className="text-xs font-mono text-gray-500 block uppercase font-bold">Official Admissions Email</span>
-                      <a href="mailto:admissions@threads-edu.com" className="text-base font-bold text-black hover:text-[#7E3BED] transition-colors focus:outline-none focus:ring-2 focus:ring-[#7E3BED] rounded">
-                        admissions@threads-edu.com
+                      <a href="mailto:edu@threadsecurity.in" className="text-base font-bold text-black hover:text-[#7E3BED] transition-colors focus:outline-none focus:ring-2 focus:ring-[#7E3BED] rounded font-mono">
+                        edu@threadsecurity.in
                       </a>
                     </div>
                   </div>
@@ -81,8 +81,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <span className="text-xs font-mono text-gray-500 block uppercase font-bold">Academy Campus Location</span>
-                      <span className="text-sm font-bold text-black block">
-                        North Region Tech Hub, Punjab, India
+                      <span className="text-sm font-semibold text-black block leading-snug">
+                        3rd Floor, Vasal Mall, Opposite Hotel President, Police Line, Jalandhar, Punjab 144001
                       </span>
                     </div>
                   </div>

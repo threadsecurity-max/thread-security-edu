@@ -75,20 +75,22 @@ export function PublicBlogLandingClient({
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto relative pt-4">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search cybersecurity research, threat analysis, web dev..."
-              className="pl-12 pr-28 h-13 rounded-2xl bg-[#121212] border-white/15 text-white placeholder:text-slate-500 font-mono text-sm focus:border-[#C6FF34] shadow-2xl"
-            />
-            <Button
-              type="submit"
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 px-4 rounded-xl"
-            >
-              Search
-            </Button>
+          <form onSubmit={handleSearchSubmit} className="max-w-xl mx-auto pt-4">
+            <div className="relative flex items-center">
+              <Search className="w-5 h-5 absolute left-4 text-slate-400 pointer-events-none z-10" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search cybersecurity research, threat analysis, web dev..."
+                className="w-full pl-12 pr-28 h-12 md:h-13 rounded-2xl bg-[#121212] border-white/15 text-white placeholder:text-slate-500 font-mono text-sm focus:border-[#C6FF34] shadow-2xl"
+              />
+              <Button
+                type="submit"
+                className="absolute right-2 bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 px-4 rounded-xl z-10 cursor-pointer"
+              >
+                Search
+              </Button>
+            </div>
           </form>
 
           {/* Category Filter Pills */}

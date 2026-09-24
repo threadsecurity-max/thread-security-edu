@@ -24,7 +24,7 @@ const navItems = [
   { name: 'Courses', url: '/courses', icon: 'BookOpen' },
   { name: 'Curriculum', url: '/#curriculum-roadmap', icon: 'Layers' },
   { name: 'Projects', url: '/#projects', icon: 'BookOpen' },
-  { name: 'Placements', url: '/placements', icon: 'Briefcase' },
+  // { name: 'Placements', url: '/placements', icon: 'Briefcase' },
   { name: 'Workshops', url: '/workshops', icon: 'Sparkles' },  
   { name: 'Contact Us', url: '/contact', icon: 'Phone' },
 ];

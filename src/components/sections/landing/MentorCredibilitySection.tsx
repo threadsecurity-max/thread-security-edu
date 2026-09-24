@@ -59,25 +59,26 @@ export function MentorCredibilitySection({ mentors }: MentorCredibilitySectionPr
 
         {/* Marquee Track */}
         <div
-          className="flex gap-6 items-center w-max hover:[animation-play-state:paused] py-2 px-4"
+          className="flex gap-6 sm:gap-8 items-center w-max hover:[animation-play-state:paused] py-3 px-4"
           style={{
-            animation: 'marquee-scroll 35s linear infinite',
+            animation: 'marquee-scroll 38s linear infinite',
           }}
         >
           {tripledLogos.map((logo, idx) => (
             <div
               key={`${logo.file}-${idx}`}
-              className="group flex flex-col items-center justify-center shrink-0 w-[170px] bg-slate-50/50 hover:bg-white border border-slate-100 hover:border-slate-200/80 rounded-xl p-3.5 transition-all duration-300 hover:shadow-md cursor-pointer"
+              className="group flex flex-col items-center justify-center shrink-0 w-[240px] sm:w-[260px] bg-slate-50/70 hover:bg-white border border-slate-200/80 hover:border-slate-300 rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:shadow-lg cursor-pointer"
             >
-              <div className="relative w-full h-[55px] mb-2 transition-all duration-300">
+              <div className="relative w-full h-[70px] sm:h-[80px] mb-2.5 transition-all duration-300">
                 <Image
                   src={`/University Logos/${logo.file}`}
                   alt={logo.name}
                   fill
-                  className="object-contain opacity-60 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0"
+                  sizes="(max-width: 640px) 240px, 260px"
+                  className="object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0 group-hover:scale-105"
                 />
               </div>
-              <span className="text-[9px] font-medium text-slate-600 group-hover:text-slate-800 text-center tracking-tight leading-snug line-clamp-1 w-full transition-colors duration-300">
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-700 group-hover:text-slate-900 text-center tracking-tight leading-snug line-clamp-1 w-full transition-colors duration-300">
                 {logo.name}
               </span>
             </div>

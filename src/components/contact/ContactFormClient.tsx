@@ -39,7 +39,7 @@ export function ContactFormClient() {
       await new Promise((resolve) => setTimeout(resolve, 800));
       setSubmitted(true);
     } catch (err: any) {
-      setErrorMessage('Failed to submit counseling request. Please try calling directly or email admissions@threads-edu.com.');
+      setErrorMessage('Failed to submit counseling request. Please try calling directly or email edu@threadsecurity.in.');
     } finally {
       setSubmitting(false);
     }

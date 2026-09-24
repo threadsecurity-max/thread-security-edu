@@ -444,7 +444,7 @@ export function ApplyBatchesSection() {
             </div>
 
             {/* View All Courses CTA Button */}
-            <Link href="#featured-courses" className="w-full">
+            <Link href="/courses" className="w-full">
               <button className="w-full py-4 px-6 rounded-xl bg-[#C6FF34] hover:bg-[#b8f520] text-slate-950 font-semibold shadow-lg shadow-lime-500/10 hover:shadow-lime-500/20 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
                 <span>View All Courses</span>
                 <ArrowRight className="w-4 h-4 text-slate-950" />

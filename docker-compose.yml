@@ -1,0 +1,57 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: threads_edu_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+      - FACULTY_NOTIFY_EMAIL=${FACULTY_NOTIFY_EMAIL}
+      - ADMIN_PASSKEY=${ADMIN_PASSKEY}
+      - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY}
+      - SECURITY_ADMIN_PASSKEY=${SECURITY_ADMIN_PASSKEY}
+      - SECURITY_ADMIN_SECRET_KEY=${SECURITY_ADMIN_SECRET_KEY}
+      - MENTOR_PASSKEY=${MENTOR_PASSKEY}
+      - MENTOR_SECRET_KEY=${MENTOR_SECRET_KEY}
+      - NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - GCP_CLIENT_EMAIL=${GCP_CLIENT_EMAIL}
+      - GCP_PRIVATE_KEY=${GCP_PRIVATE_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: threads_edu_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-threads_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-threads_secure_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-threads_edu_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-threads_user} -d ${POSTGRES_DB:-threads_edu_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

@@ -137,14 +137,14 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                     <span>Projects</span>
                   </Link>
 
-                  <Link
+                  {/* <Link
                     href="/placements"
                     onClick={() => setIsOpen(false)}
                     className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
                   >
                     <Briefcase className="w-5 h-5 text-black" />
                     <span>Placements</span>
-                  </Link>
+                  </Link> */}
 
                   <Link
                     href="/contact"
@@ -176,15 +176,6 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                     >
                       <Layers className="w-4 h-4 text-black" />
                       <span>Learning Pathways</span>
-                    </Link>
-
-                    <Link
-                      href="/contact?topic=success-stories"
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
-                    >
-                      <Code2 className="w-4 h-4 text-black" />
-                      <span>Success Stories</span>
                     </Link>
 
                     <Link

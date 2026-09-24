@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' https://api.cloudinary.com https://api.resend.com https://oauth2.googleapis.com https://www.googleapis.com;
+    connect-src 'self' https://*.onrender.com https://api.cloudinary.com https://api.resend.com https://oauth2.googleapis.com https://www.googleapis.com;
     frame-src 'self' https://widget.cloudinary.com;
     object-src 'none';
     base-uri 'self';
@@ -46,9 +46,17 @@ export async function middleware(request: NextRequest) {
   // CORS Verification for API Routes
   if (pathname.startsWith('/api')) {
     const origin = request.headers.get('origin');
-    const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+    const allowedOrigin = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:8080';
 
-    if (origin && origin !== allowedOrigin && !origin.endsWith('.threadsecurity.in')) {
+    const isTrustedOrigin =
+      !origin ||
+      origin === request.nextUrl.origin ||
+      origin === allowedOrigin ||
+      origin.endsWith('.threadsecurity.in') ||
+      origin.endsWith('.onrender.com') ||
+      origin === 'https://threadsecurity.in';
+
+    if (!isTrustedOrigin) {
       return new NextResponse(
         JSON.stringify({ success: false, error: { code: 'CORS_VIOLATION', message: 'Forbidden origin' } }),
         { status: 403, headers: { 'Content-Type': 'application/json' } }

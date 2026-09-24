@@ -48,14 +48,6 @@ export function MoreDropdown() {
               <span>Workshop Gallery</span>
             </Link>
 
-            <Link
-              href="/contact?topic=success-stories"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-gray-100 transition-colors font-bold text-sm text-black"
-            >
-              <Code2 className="w-4 h-4 text-black shrink-0" />
-              <span>Success Stories</span>
-            </Link>
 
             {/* <Link
               href="/placements"

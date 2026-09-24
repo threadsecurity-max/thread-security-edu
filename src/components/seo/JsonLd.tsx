@@ -19,15 +19,18 @@ export function OrganizationJsonLd() {
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+91-98765-43210',
+      telephone: '+91-7347398956',
       contactType: 'admissions',
-      email: 'threadsecurity@gmail.com',
+      email: 'edu@threadsecurity.in',
       areaServed: 'IN',
       availableLanguage: ['English', 'Hindi', 'Punjabi'],
     },
     address: {
       '@type': 'PostalAddress',
+      streetAddress: '3rd Floor, Vasal Mall, Opposite Hotel President, Police Line',
+      addressLocality: 'Jalandhar',
       addressRegion: 'Punjab',
+      postalCode: '144001',
       addressCountry: 'IN',
     },
   };

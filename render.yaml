@@ -37,3 +37,15 @@ services:
         value: "Thread Security Education <onboarding@resend.dev>"
       - key: FACULTY_NOTIFY_EMAIL
         value: "threadsecurity@gmail.com"
+      - key: ADMIN_PASSKEY
+        sync: false
+      - key: ADMIN_SECRET_KEY
+        sync: false
+      - key: SECURITY_ADMIN_PASSKEY
+        sync: false
+      - key: SECURITY_ADMIN_SECRET_KEY
+        sync: false
+      - key: MENTOR_PASSKEY
+        sync: false
+      - key: MENTOR_SECRET_KEY
+        sync: false

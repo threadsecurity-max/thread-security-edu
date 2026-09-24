@@ -22,10 +22,22 @@ export function validateCsrfOrigin(request: NextRequest): { isValid: boolean; re
     return { isValid: false, reason: 'Missing Origin and Referer headers' };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || `http://${host || 'localhost:8080'}`;
-  const expectedOrigin = new URL(appUrl).origin;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || `http://${host || 'localhost:8080'}`;
+  let expectedOrigin = '';
+  try {
+    expectedOrigin = new URL(appUrl).origin;
+  } catch {
+    expectedOrigin = targetOrigin;
+  }
 
-  if (targetOrigin !== expectedOrigin && !targetOrigin.endsWith('.threadsecurity.in')) {
+  const isTrusted =
+    targetOrigin === expectedOrigin ||
+    targetOrigin === request.nextUrl.origin ||
+    targetOrigin.endsWith('.threadsecurity.in') ||
+    targetOrigin.endsWith('.onrender.com') ||
+    targetOrigin === 'https://threadsecurity.in';
+
+  if (!isTrusted) {
     return { isValid: false, reason: `Origin mismatch: expected ${expectedOrigin}, got ${targetOrigin}` };
   }
 

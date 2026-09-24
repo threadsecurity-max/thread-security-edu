@@ -74,10 +74,11 @@ export function generateOrganizationJsonLd() {
     ],
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+91-9876543210',
+      telephone: '+91-7347398956',
       contactType: 'admissions',
+      email: 'edu@threadsecurity.in',
       areaServed: 'IN',
-      availableLanguage: ['English', 'Hindi'],
+      availableLanguage: ['English', 'Hindi', 'Punjabi'],
     },
   };
 }

@@ -2,27 +2,21 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
-import { Linkedin, Play, X, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Linkedin, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 interface ReviewItem {
-  type: 'text' | 'video';
   id: string;
   name: string;
   role: string;
   avatar: string;
-  // Text review specific
-  quote?: string;
+  quote: string;
   preRole?: string;
   postCompany?: string;
-  // Video review specific
-  videoUrl?: string;
 }
 
 const ALL_REVIEWS: ReviewItem[] = [
   {
     id: 'rev-text-1',
-    type: 'text',
     name: 'Abhay Pathania',
     role: 'Aspiring TSE Bug Bounty Hunter',
     avatar: '/images/Students/Abhay.svg',
@@ -32,7 +26,6 @@ const ALL_REVIEWS: ReviewItem[] = [
   },
   {
     id: 'rev-text-12',
-    type: 'text',
     name: 'Sukhjit Kaur',
     role: 'TSE AI Enthusiast',
     avatar: '/images/Students/Sukhjit.svg',
@@ -41,16 +34,16 @@ const ALL_REVIEWS: ReviewItem[] = [
     postCompany: 'Security Research',
   },
   {
-    id: 'rev-vid-1',
-    type: 'video',
-    name: 'Piya Kholi',
+    id: 'rev-text-11',
+    name: 'Piya Kohli',
     role: 'Pioneer TSE AI Engineer',
     avatar: '/images/Students/Piya.svg',
-    videoUrl: '/Video/IMG_8947.MOV',
+    quote: 'My 45-day training experience at Thread Security was a great learning experience. I learned the basics of Artificial Intelligence and Machine Learning and got practical knowledge through projects. I improved my skills in Python, data preprocessing, and machine learning models.',
+    preRole: 'Information Tech',
+    postCompany: 'AI & ML Trainee',
   },
   {
     id: 'rev-text-2',
-    type: 'text',
     name: 'Jasjot Kaur',
     role: 'TSE Blue Teaming Aspirant',
     avatar: '/images/Students/Jasjot.svg',
@@ -60,7 +53,6 @@ const ALL_REVIEWS: ReviewItem[] = [
   },
   {
     id: 'rev-text-3',
-    type: 'text',
     name: 'Jatin',
     role: 'TSE Pentesting Aspirant',
     avatar: '/images/Students/Jatin.svg',
@@ -69,16 +61,16 @@ const ALL_REVIEWS: ReviewItem[] = [
     postCompany: 'Security Research',
   },
   {
-    id: 'rev-vid-2',
-    type: 'video',
+    id: 'rev-text-9',
     name: 'Shashikant',
-    role: 'Bug Bounty Hunter',
+    role: 'Ambitious Bug Bounty Hunter',
     avatar: '/images/Students/Shashi.svg',
-    videoUrl: '/Video/IMG_8948.MOV',
+    quote: 'I had zero professional cybersecurity experience before joining TSE. The curriculum starts with rock-solid fundamentals and escalates into advanced exploit analysis. The practical capstone projects made all the difference in my career.',
+    preRole: 'Non-IT Background',
+    postCompany: 'Bug Bounty Program',
   },
   {
     id: 'rev-text-4',
-    type: 'text',
     name: 'Kashish Sharma',
     role: 'TSE Offensive Security Aspirant',
     avatar: '/images/Students/Kashish.svg',
@@ -87,7 +79,6 @@ const ALL_REVIEWS: ReviewItem[] = [
   },
   {
     id: 'rev-text-13',
-    type: 'text',
     name: 'Gurmandeep',
     role: 'TSE AI Enthusiast',
     avatar: '/images/Students/Gurmandeep.svg',
@@ -97,7 +88,6 @@ const ALL_REVIEWS: ReviewItem[] = [
   },
   {
     id: 'rev-text-5',
-    type: 'text',
     name: 'Mehak',
     role: 'TSE Application Security Aspirant',
     avatar: '/images/Students/Mehak.svg',
@@ -106,16 +96,16 @@ const ALL_REVIEWS: ReviewItem[] = [
     postCompany: 'AppSec Team',
   },
   {
-    id: 'rev-vid-3',
-    type: 'video',
+    id: 'rev-text-15',
     name: 'Nishika Sehgal',
     role: 'TSE AI Engineer Aspirant',
     avatar: '/images/Students/Nishika.svg',
-    videoUrl: '/Video/IMG_8949.MOV',
+    quote: 'The AI & ML curriculum at Thread Security gave me deep clarity on modern artificial intelligence pipelines, neural networks, and generative modeling. The mentorship and real-time guidance were instrumental in accelerating my technical capabilities.',
+    preRole: 'BCA Graduate',
+    postCompany: 'AI Engineer Trainee',
   },
   {
     id: 'rev-text-6',
-    type: 'text',
     name: 'Mohit',
     role: 'TSE Offensive Security Aspirant',
     avatar: '/images/Students/Mohit.svg',
@@ -125,7 +115,6 @@ const ALL_REVIEWS: ReviewItem[] = [
   },
   {
     id: 'rev-text-7',
-    type: 'text',
     name: 'Piyush Kumar',
     role: 'TSE Cyber Security Aspirant',
     avatar: '/images/Students/Piyush.svg',
@@ -134,16 +123,7 @@ const ALL_REVIEWS: ReviewItem[] = [
     postCompany: 'Security Operations',
   },
   {
-    id: 'rev-vid-4',
-    type: 'video',
-    name: 'Tiksha Dhamija',
-    role: 'Ambitious Ethical Hacker',
-    avatar: '/images/Students/Tiksha.svg',
-    videoUrl: '/Video/IMG_8957.MOV',
-  },
-  {
     id: 'rev-text-8',
-    type: 'text',
     name: 'Priyanka Kumari',
     role: 'Offensive Security Analyst & Ethical Hacker',
     avatar: '/images/Students/Priyanka.svg',
@@ -152,26 +132,7 @@ const ALL_REVIEWS: ReviewItem[] = [
     postCompany: 'Cyber Defense',
   },
   {
-    id: 'rev-text-9',
-    type: 'text',
-    name: 'Shashikant',
-    role: 'Ambitious Bug Bounty Hunter',
-    avatar: '/images/Students/Shashi.svg',
-    quote: 'I had zero professional cybersecurity experience before joining TSE. The curriculum starts with rock-solid fundamentals and escalates into advanced exploit analysis. The practical capstone projects made all the difference in my career.',
-    preRole: 'Non-IT Background',
-    postCompany: 'Bug Bounty Program',
-  },
-  {
-    id: 'rev-vid-5',
-    type: 'video',
-    name: 'Piyush Kumar',
-    role: 'TSE Cyber Security Aspirant',
-    avatar: '/images/Students/Piyush.svg',
-    videoUrl: '/Video/IMG_8985.MOV',
-  },
-  {
     id: 'rev-text-10',
-    type: 'text',
     name: 'Tiksha Dhamija',
     role: 'Ambitious Ethical Hacker',
     avatar: '/images/Students/Tiksha.svg',
@@ -180,18 +141,7 @@ const ALL_REVIEWS: ReviewItem[] = [
     postCompany: 'Threat Intelligence',
   },
   {
-    id: 'rev-text-11',
-    type: 'text',
-    name: 'Piya Kohli',
-    role: 'Pioneer TSE AI Engineer',
-    avatar: '/images/Students/Piya.svg',
-    quote: 'My 45-day training experience at Thread Security was a great learning experience. I learned the basics of Artificial Intelligence and Machine Learning and got practical knowledge through projects. I improved my skills in Python, data preprocessing, and machine learning models.',
-    preRole: 'Information Tech',
-    postCompany: 'AI & ML Trainee',
-  },
-  {
     id: 'rev-text-14',
-    type: 'text',
     name: 'Harpreet Kaur',
     role: 'TSE AI Data-Science Aspirant',
     avatar: '/images/Students/Harpreet.svg',
@@ -269,67 +219,10 @@ function TextReviewCard({ review }: { review: ReviewItem }) {
   );
 }
 
-function VideoReviewCard({ review, onPlay }: { review: ReviewItem; onPlay: (url: string) => void }) {
-  return (
-    <div className="bg-white border border-[#dbebff] rounded-[2rem] p-3 flex flex-col justify-between shadow-sm hover:shadow-md transition-all duration-300 relative group w-[280px] sm:w-[310px] h-[410px] shrink-0">
-      {/* Inner Rounded Card Container with Image */}
-      <div className="relative w-full h-full rounded-[1.5rem] overflow-hidden bg-slate-950 flex flex-col justify-between">
-        {/* Student Video Thumbnail / Cover Photo */}
-        <div className="absolute inset-0 z-0 bg-slate-950">
-          <Image
-            src={review.avatar}
-            alt={review.name}
-            fill
-            sizes="(max-width: 768px) 280px, 310px"
-            className="object-cover transition-transform duration-700 group-hover:scale-105 filter brightness-[0.85] contrast-[1.05]"
-          />
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80 z-10" />
-        </div>
-
-        {/* Center Play Button Overlay with Glow */}
-        <div className="absolute inset-0 flex items-center justify-center z-20">
-          <button
-            onClick={() => onPlay(review.videoUrl || '')}
-            aria-label={`Play video story from ${review.name}`}
-            className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-white text-[#0066c2] shadow-2xl flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300 ring-4 ring-white/30 group-hover:ring-white/60"
-          >
-            <Play className="w-6 h-6 fill-current text-[#0066c2] translate-x-0.5" />
-          </button>
-        </div>
-
-        {/* Empty top spacing */}
-        <div className="relative z-20" />
-
-        {/* Bottom Student Info Bar with Watch Button */}
-        <div className="relative z-20 w-full p-3.5 flex items-center justify-between">
-          <div className="text-left">
-            <p className="text-xs font-bold text-white leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{review.name}</p>
-            <p className="text-[10px] text-slate-300 font-medium truncate max-w-[170px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{review.role}</p>
-          </div>
-          <button
-            onClick={() => onPlay(review.videoUrl || '')}
-            className="inline-flex items-center gap-1 text-[10px] font-semibold text-white/95 bg-white/20 hover:bg-white/30 active:scale-95 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 transition-all cursor-pointer shadow-sm"
-          >
-            <Play className="w-2.5 h-2.5 fill-current" />
-            Watch
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function StudentReviewsSection() {
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const isLocalVideo = (url: string | null) => {
-    if (!url) return false;
-    return url.endsWith('.MOV') || url.endsWith('.mp4') || url.startsWith('/Video/');
-  };
 
   const checkScrollState = useCallback(() => {
     if (!scrollContainerRef.current) return;
@@ -409,11 +302,7 @@ export function StudentReviewsSection() {
         >
           {ALL_REVIEWS.map((review, idx) => (
             <div key={`${review.id}-${idx}`} className="snap-start shrink-0">
-              {review.type === 'text' ? (
-                <TextReviewCard review={review} />
-              ) : (
-                <VideoReviewCard review={review} onPlay={setActiveVideoUrl} />
-              )}
+              <TextReviewCard review={review} />
             </div>
           ))}
         </div>
@@ -438,45 +327,6 @@ export function StudentReviewsSection() {
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
-
-      {/* Video Testimonial Player Dialog Modal */}
-      <Dialog open={!!activeVideoUrl} onOpenChange={(val) => !val && setActiveVideoUrl(null)}>
-        <DialogContent className="max-w-3xl p-0 bg-black overflow-hidden rounded-2xl border-none shadow-2xl">
-          <button 
-            onClick={() => setActiveVideoUrl(null)} 
-            className="absolute top-4 right-4 z-50 w-9 h-9 rounded-full bg-black/60 hover:bg-black text-white flex items-center justify-center cursor-pointer transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          
-          {activeVideoUrl && (
-            <div className="aspect-video w-full flex items-center justify-center bg-black">
-              {isLocalVideo(activeVideoUrl) ? (
-                <video
-                  src={activeVideoUrl}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain"
-                >
-                  <source src={activeVideoUrl} type="video/mp4" />
-                  <source src={activeVideoUrl} type="video/quicktime" />
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <iframe
-                  src={activeVideoUrl}
-                  title="TSE Student Success Story Video Review"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="w-full h-full"
-                />
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
     </section>
   );
