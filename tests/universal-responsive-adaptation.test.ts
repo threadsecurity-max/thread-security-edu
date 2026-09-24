@@ -96,7 +96,7 @@ describe('Universal Responsive Design & Device Adaptation System Test Suite', ()
     it('ensures landing header and chatbot respect safe areas on notched devices', () => {
       expect(landingCss).toContain('padding-top: var(--sat)');
       const chatLauncher = fs.readFileSync(path.join(rootDir, 'src/components/chatbot/ChatLauncher.tsx'), 'utf-8');
-      expect(chatLauncher).toContain('env(safe-area-inset-bottom');
+      expect(chatLauncher).toContain('env(safe-area-inset-bottom');0
     });
   });
 
