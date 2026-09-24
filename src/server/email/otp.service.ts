@@ -65,7 +65,7 @@ export async function sendOtpEmail({
           </div>
           
           <p class="body-text">Target Recipient: <strong>${cleanTarget}</strong></p>
-          <p class="body-text">This code will expire in <strong>10 minutes</strong>. If you did not request access, please ignore this email.</p>
+          <p class="body-text">This code will expire in <strong>30 minutes</strong>. If you did not request access, please ignore this email.</p>
           
           <div class="footer">
             Thread Security Education — Cybersecurity LMS<br>

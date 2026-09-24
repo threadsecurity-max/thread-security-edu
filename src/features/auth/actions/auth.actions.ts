@@ -57,8 +57,10 @@ export async function verifyAdminCredentialsAction(
     return {
       success: true,
       email: res.email || '',
+      maskedEmail: res.maskedEmail || '',
       name: res.name || '',
       tsId: res.tsId || '',
+      warning: res.warning,
     };
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Admin security verification failed.';
@@ -90,8 +92,10 @@ export async function verifyMentorCredentialsAction(
     return {
       success: true,
       email: res.email || '',
+      maskedEmail: res.maskedEmail || '',
       name: res.name || '',
       tsId: res.tsId || '',
+      warning: res.warning,
     };
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Mentor security verification failed.';

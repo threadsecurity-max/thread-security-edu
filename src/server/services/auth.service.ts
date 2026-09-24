@@ -112,34 +112,53 @@ export async function verifySecurityAdminCredentials(secretKey: string, passkey:
   // Reset counters on correct credentials
   await resetFailedAttempts(query);
 
-  // 3. Dispatch OTP to Super Admin Email
-  const superAdminEmail = process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com';
+  const superAdminEmail = (process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com').trim().toLowerCase();
+  const cleanSecKey = secretKey.trim().toLowerCase();
+
+  // Clear any existing OTPs for security admin
+  await (prisma as any).otpVerification.deleteMany({
+    where: {
+      OR: [
+        { emailOrTsId: cleanSecKey },
+        { emailOrTsId: superAdminEmail },
+        { emailOrTsId: 'threadsecurity@gmail.com' },
+        { emailOrTsId: 'tse-sec-admin' },
+      ],
+    },
+  });
+
+  // 3. Dispatch EXACTLY ONE OTP to Super Admin Email
   const code = generate6DigitOtp();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes validity
 
-  // Save OTP in Database under clean secret key identifier
+  // Save OTP in Database under clean secret key identifier and email
   await (prisma as any).otpVerification.create({
     data: {
-      emailOrTsId: secretKey.trim().toLowerCase(),
+      emailOrTsId: cleanSecKey,
       code,
       expiresAt,
     },
   });
 
-  // Also save under super admin notification email
-  await (prisma as any).otpVerification.create({
-    data: {
-      emailOrTsId: superAdminEmail.trim().toLowerCase(),
-      code,
-      expiresAt,
-    },
-  });
+  if (superAdminEmail !== cleanSecKey) {
+    await (prisma as any).otpVerification.create({
+      data: {
+        emailOrTsId: superAdminEmail,
+        code,
+        expiresAt,
+      },
+    });
+  }
 
   const emailResult = await sendOtpEmail({
     toEmail: superAdminEmail,
     studentName: 'Security Operations Admin',
     code,
   });
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[MFA_DEV_DEBUG] Security Admin OTP Code for ${superAdminEmail}: ${code}`);
+  }
 
   await logAuditEvent({
     actorId: undefined,
@@ -209,11 +228,62 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     throw new Error('Invalid Admin Passkey. Verification failed.');
   }
 
+  await resetFailedAttempts(query);
+
+  // Delete previous pending OTPs
+  await (prisma as any).otpVerification.deleteMany({
+    where: {
+      OR: [
+        { emailOrTsId: query.toLowerCase() },
+        { emailOrTsId: user.email.toLowerCase() },
+        ...(user.tsIdentity ? [{ emailOrTsId: user.tsIdentity.tsId.toLowerCase() }] : []),
+      ],
+    },
+  });
+
+  // Generate and dispatch single OTP with 30-minute expiration
+  const code = generate6DigitOtp();
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+  // Save OTP record for user email and query
+  await (prisma as any).otpVerification.create({
+    data: {
+      emailOrTsId: user.email.toLowerCase(),
+      code,
+      expiresAt,
+    },
+  });
+
+  if (query.toLowerCase() !== user.email.toLowerCase()) {
+    await (prisma as any).otpVerification.create({
+      data: {
+        emailOrTsId: query.toLowerCase(),
+        code,
+        expiresAt,
+      },
+    });
+  }
+
+  const emailResult = await sendOtpEmail({
+    toEmail: user.email,
+    studentName: user.name,
+    code,
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[MFA_DEV_DEBUG] Admin OTP Code for ${user.email}: ${code}`);
+  }
+
+  const parts = user.email.split('@');
+  const maskedEmail = `${parts[0][0]}***${parts[0].slice(-1)}@${parts[1]}`;
+
   return {
     success: true,
     email: user.email,
+    maskedEmail,
     name: user.name,
     tsId: user.tsIdentity?.tsId || 'TS-ADMIN',
+    warning: emailResult.warning,
   };
 }
 
@@ -228,7 +298,7 @@ export async function verifyMentorCredentials(
   const query = emailOrTsId.trim();
   await checkLockoutStatus(query);
 
-  const user = await prisma.user.findFirst({
+  let user = await prisma.user.findFirst({
     where: {
       OR: [
         { email: query.toLowerCase() },
@@ -239,6 +309,13 @@ export async function verifyMentorCredentials(
     },
     include: { tsIdentity: true },
   });
+
+  if (!user && verifyMentorSecretKey(query)) {
+    user = await prisma.user.findFirst({
+      where: { role: 'MENTOR' },
+      include: { tsIdentity: true },
+    });
+  }
 
   if (!user || !user.isActive) {
     await recordFailedAttempt(query);
@@ -269,6 +346,52 @@ export async function verifyMentorCredentials(
 
   await resetFailedAttempts(query);
 
+  // Delete previous pending OTPs
+  await (prisma as any).otpVerification.deleteMany({
+    where: {
+      OR: [
+        { emailOrTsId: query.toLowerCase() },
+        { emailOrTsId: user.email.toLowerCase() },
+        ...(user.tsIdentity ? [{ emailOrTsId: user.tsIdentity.tsId.toLowerCase() }] : []),
+      ],
+    },
+  });
+
+  // Generate and dispatch single OTP with 30-minute expiration
+  const code = generate6DigitOtp();
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+  await (prisma as any).otpVerification.create({
+    data: {
+      emailOrTsId: user.email.toLowerCase(),
+      code,
+      expiresAt,
+    },
+  });
+
+  if (query.toLowerCase() !== user.email.toLowerCase()) {
+    await (prisma as any).otpVerification.create({
+      data: {
+        emailOrTsId: query.toLowerCase(),
+        code,
+        expiresAt,
+      },
+    });
+  }
+
+  const emailResult = await sendOtpEmail({
+    toEmail: user.email,
+    studentName: user.name,
+    code,
+  });
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[MFA_DEV_DEBUG] Mentor OTP Code for ${user.email}: ${code}`);
+  }
+
+  const parts = user.email.split('@');
+  const maskedEmail = `${parts[0][0]}***${parts[0].slice(-1)}@${parts[1]}`;
+
   await logAuditEvent({
     actorId: user.id,
     action: 'MENTOR_CREDENTIALS_VERIFIED',
@@ -280,8 +403,10 @@ export async function verifyMentorCredentials(
   return {
     success: true,
     email: user.email,
+    maskedEmail,
     name: user.name,
     tsId: user.tsIdentity?.tsId || 'TSE-MENTOR',
+    warning: emailResult.warning,
   };
 }
 
@@ -350,20 +475,54 @@ export async function requestOtpService(emailOrTsId: string) {
 
   const isMentor = user.role === 'MENTOR';
 
-  // Generate 6-digit code
-  const code = generate6DigitOtp();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const parts = user.email.split('@');
+  const maskedEmail = `${parts[0][0]}***${parts[0].slice(-1)}@${parts[1]}`;
 
-  // Save to database
+  // IF ADMIN OR MENTOR: Return role challenge requirement WITHOUT sending OTP yet.
+  // The single OTP will be dispatched in Step 2 after passkey verification.
+  if (isAdmin || isMentor) {
+    return {
+      success: true,
+      isAdmin,
+      isMentor,
+      maskedEmail,
+      email: user.email,
+      tsId: user.tsIdentity?.tsId || (isAdmin ? 'TS-ADMIN' : 'TSE-MENTOR'),
+    };
+  }
+
+  // STUDENT: Generate & send 1 OTP immediately for Student sign-in
+  await (prisma as any).otpVerification.deleteMany({
+    where: {
+      OR: [
+        { emailOrTsId: query.toLowerCase() },
+        { emailOrTsId: user.email.toLowerCase() },
+        ...(user.tsIdentity ? [{ emailOrTsId: user.tsIdentity.tsId.toLowerCase() }] : []),
+      ],
+    },
+  });
+
+  const code = generate6DigitOtp();
+  const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
   await (prisma as any).otpVerification.create({
     data: {
-      emailOrTsId: query.toLowerCase(),
+      emailOrTsId: user.email.toLowerCase(),
       code,
       expiresAt,
     },
   });
 
-  // Send MFA email via Resend / SMTP
+  if (query.toLowerCase() !== user.email.toLowerCase()) {
+    await (prisma as any).otpVerification.create({
+      data: {
+        emailOrTsId: query.toLowerCase(),
+        code,
+        expiresAt,
+      },
+    });
+  }
+
   const emailResult = await sendOtpEmail({
     toEmail: user.email,
     studentName: user.name,
@@ -371,20 +530,16 @@ export async function requestOtpService(emailOrTsId: string) {
   });
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[MFA_DEV_DEBUG] OTP Code generated for ${user.email} (${user.tsIdentity?.tsId || 'N/A'}): ${code}`);
+    console.log(`[MFA_DEV_DEBUG] Student OTP Code for ${user.email} (${user.tsIdentity?.tsId || 'N/A'}): ${code}`);
   }
-
-  // Mask email for display security (e.g. m***l@gmail.com)
-  const parts = user.email.split('@');
-  const maskedEmail = `${parts[0][0]}***${parts[0].slice(-1)}@${parts[1]}`;
 
   return {
     success: true,
-    isAdmin,
-    isMentor,
+    isAdmin: false,
+    isMentor: false,
     maskedEmail,
     email: user.email,
-    tsId: user.tsIdentity?.tsId || (isMentor ? 'TSE-MENTOR' : 'TS-STUDENT'),
+    tsId: user.tsIdentity?.tsId || 'TS-STUDENT',
     warning: emailResult.warning,
   };
 }
@@ -397,37 +552,75 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
   const cleanCode = code.trim();
   await checkLockoutStatus(query);
 
-  // Check if this is Security Admin OTP Verification
   const superAdminEmail = (process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com').trim().toLowerCase();
   const isSecAdmin =
     verifySecurityAdminSecretKey(query) ||
     query.toLowerCase() === 'tse-sec-admin' ||
     query.toLowerCase() === 'tse-sec-admin-789';
 
-  if (isSecAdmin) {
-    const secOtp = await (prisma as any).otpVerification.findFirst({
-      where: {
-        OR: [
-          { emailOrTsId: query.toLowerCase() },
-          { emailOrTsId: superAdminEmail },
-          { emailOrTsId: 'threadsecurity@gmail.com' },
-        ],
-        code: cleanCode,
-        expiresAt: { gt: new Date() },
-      },
-    });
+  // Find matching user (if exists) so we can check across user.email, user.tsId, or query
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: query.toLowerCase() },
+        { tsIdentity: { tsId: query } },
+        { tsIdentity: { tsId: query.toUpperCase() } },
+        { tsIdentity: { tsId: query.toLowerCase() } },
+      ],
+    },
+    include: { tsIdentity: true },
+  });
 
-    if (!secOtp) {
-      await recordFailedAttempt(query);
-      throw new Error('Invalid or expired 6-digit Security Admin OTP code.');
-    }
+  const identifiersToCheck = [
+    query.toLowerCase(),
+    query.toUpperCase(),
+    query,
+  ];
 
-    // Clear failed attempts
-    await resetFailedAttempts(query);
-    await (prisma as any).otpVerification.delete({ where: { id: secOtp.id } });
+  if (user?.email) identifiersToCheck.push(user.email.toLowerCase());
+  if (user?.tsIdentity?.tsId) {
+    identifiersToCheck.push(user.tsIdentity.tsId.toLowerCase());
+    identifiersToCheck.push(user.tsIdentity.tsId);
+  }
+  if (isSecAdmin || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com') {
+    identifiersToCheck.push(superAdminEmail);
+    identifiersToCheck.push('threadsecurity@gmail.com');
+    identifiersToCheck.push('tse-sec-admin');
+    identifiersToCheck.push('tse-sec-admin-789');
+  }
 
-    // Fetch or provision Security Admin User in DB
-    let adminUser: any = await prisma.user.findFirst({
+  const uniqueIdentifiers = Array.from(new Set(identifiersToCheck));
+
+  const otpRecord = await (prisma as any).otpVerification.findFirst({
+    where: {
+      emailOrTsId: { in: uniqueIdentifiers },
+      code: cleanCode,
+      expiresAt: { gt: new Date() },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (!otpRecord) {
+    await recordFailedAttempt(query);
+    throw new Error('Invalid or expired 6-digit MFA verification code.');
+  }
+
+  // Clear failed attempt counters
+  await resetFailedAttempts(query);
+
+  // Delete matching OTP and stale OTPs for this user / session
+  await (prisma as any).otpVerification.deleteMany({
+    where: {
+      OR: [
+        { id: otpRecord.id },
+        { emailOrTsId: { in: uniqueIdentifiers } },
+      ],
+    },
+  });
+
+  // Handle Security Admin user provisioning/redirection
+  if (isSecAdmin || (user && user.role === 'SECURITY_ADMIN')) {
+    let adminUser: any = user || await prisma.user.findFirst({
       where: { email: superAdminEmail },
       include: { tsIdentity: true },
     });
@@ -481,46 +674,18 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     };
   }
 
-  // Find valid OTP record for normal user
-  const otpRecord = await (prisma as any).otpVerification.findFirst({
-    where: {
-      emailOrTsId: query.toLowerCase(),
-      code: cleanCode,
-      expiresAt: { gt: new Date() },
-    },
-  });
-
-  if (!otpRecord) {
-    await recordFailedAttempt(query);
-    throw new Error('Invalid or expired 6-digit MFA verification code.');
-  }
-
-  // Find user
-  const user = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email: query.toLowerCase() },
-        { tsIdentity: { tsId: query } },
-        { tsIdentity: { tsId: query.toUpperCase() } },
-        { tsIdentity: { tsId: query.toLowerCase() } },
-      ],
-    },
-    include: { tsIdentity: true },
-  });
-
   if (!user || !user.isActive) {
     throw new Error('Account authentication failed.');
   }
 
-  // Clear failed attempt counters
-  await resetFailedAttempts(query);
+  // Admins and Mentors are always granted dashboard access
+  const isGranted =
+    user.role === 'SUPER_ADMIN' ||
+    user.role === 'ACADEMIC_ADMIN' ||
+    user.role === 'SECURITY_ADMIN' ||
+    user.role === 'MENTOR' ||
+    Boolean((user as any).isDashboardAccessGranted);
 
-  // Delete used OTP record
-  await (prisma as any).otpVerification.delete({
-    where: { id: otpRecord.id },
-  });
-
-  const isGranted = (user as any).isDashboardAccessGranted || false;
   const userIp = await getClientIpAddress();
   const userIpIntel = analyzeIpIntelligence(userIp);
 
@@ -551,7 +716,6 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
   } else if (user.role === 'MENTOR') {
     redirectTo = '/mentor';
   } else if (user.role === 'STUDENT' || (user.role as string) === 'GUEST') {
-    // If admin has NOT granted dashboard access yet, route to home page to explore courses
     if (!isGranted) {
       redirectTo = '/?notice=clearance-pending';
     } else {
@@ -564,7 +728,7 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     email: user.email,
     name: user.name,
     role: user.role,
-    tsId: user.tsIdentity?.tsId || null,
+    tsId: user.tsIdentity?.tsId || 'TS-STUDENT',
     isDashboardAccessGranted: isGranted,
     isMentorVerified: user.role === 'MENTOR',
     redirectTo,

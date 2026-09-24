@@ -104,90 +104,108 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                 </button>
               </div>
 
-              {/* Navigation Links List */}
-              <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-                <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">
-                  Core Navigation
-                </div>
-
-                <Link
-                  href="/#curriculum-roadmap"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
-                >
-                  <Layers className="w-5 h-5 text-black" />
-                  <span>Roadmap & Batches</span>
-                </Link>
-
-                <Link
-                  href="/#featured-courses"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
-                >
-                  <BookOpen className="w-5 h-5 text-black" />
-                  <span>Featured Courses</span>
-                </Link>
-
-                <Link
-                  href="/contact"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
-                >
-                  <Phone className="w-5 h-5 text-black" />
-                  <span>Contact Us</span>
-                </Link>
-
-                <div className="pt-4 pb-1">
+                {/* Navigation Links List */}
+                <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
                   <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">
-                    Explore & Career
+                    Core Navigation
                   </div>
-
-                  <Link
-                    href="/workshops"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-[#75a600] bg-lime-50/60 border border-lime-200/60 hover:bg-lime-100/60 transition-colors"
-                  >
-                    <Sparkles className="w-4 h-4 text-[#75a600]" />
-                    <span>Workshop Gallery</span>
-                  </Link>
-
-                  <Link
-                    href="/contact?topic=success-stories"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors mt-1"
-                  >
-                    <Code2 className="w-4 h-4 text-black" />
-                    <span>Success Stories</span>
-                  </Link>
-
-                  {/* <Link
-                    href="/placements"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
-                  >
-                    <Briefcase className="w-4 h-4 text-black" />
-                    <span>Placement Highlights</span>
-                  </Link> */}
-
-                  <Link
-                    href="/contact?topic=hiring"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
-                  >
-                    <Share2 className="w-4 h-4 text-black" />
-                    <span>Hire From Us</span>
-                  </Link>
 
                   <Link
                     href="/courses"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
                   >
-                    <Newspaper className="w-4 h-4 text-black" />
-                    <span>Blogs & Articles</span>
+                    <BookOpen className="w-5 h-5 text-black" />
+                    <span>Featured Courses</span>
                   </Link>
+
+                  <Link
+                    href="/#curriculum-roadmap"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
+                  >
+                    <Layers className="w-5 h-5 text-black" />
+                    <span>Curriculum & Batches</span>
+                  </Link>
+
+                  <Link
+                    href="/#projects"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
+                  >
+                    <Code2 className="w-5 h-5 text-black" />
+                    <span>Projects</span>
+                  </Link>
+
+                  <Link
+                    href="/placements"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
+                  >
+                    <Briefcase className="w-5 h-5 text-black" />
+                    <span>Placements</span>
+                  </Link>
+
+                  <Link
+                    href="/contact"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
+                  >
+                    <Phone className="w-5 h-5 text-black" />
+                    <span>Contact Us</span>
+                  </Link>
+
+                  <div className="pt-4 pb-1">
+                    <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">
+                      Explore & Career
+                    </div>
+
+                    <Link
+                      href="/workshops"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-[#75a600] bg-lime-50/60 border border-lime-200/60 hover:bg-lime-100/60 transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4 text-[#75a600]" />
+                      <span>Workshop Gallery</span>
+                    </Link>
+
+                    <Link
+                      href="/learning-paths"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors mt-1"
+                    >
+                      <Layers className="w-4 h-4 text-black" />
+                      <span>Learning Pathways</span>
+                    </Link>
+
+                    <Link
+                      href="/contact?topic=success-stories"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    >
+                      <Code2 className="w-4 h-4 text-black" />
+                      <span>Success Stories</span>
+                    </Link>
+
+                    <Link
+                      href="/contact?topic=hiring"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    >
+                      <Share2 className="w-4 h-4 text-black" />
+                      <span>Hire From Us</span>
+                    </Link>
+
+                    <Link
+                      href="/blog"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-neutral-700 hover:bg-neutral-100 transition-colors"
+                    >
+                      <Newspaper className="w-4 h-4 text-black" />
+                      <span>Blogs & Articles</span>
+                    </Link>
+                  </div>
                 </div>
-              </div>
 
               {/* Bottom Actions inside Drawer */}
               <div className="p-4 border-t border-gray-100 bg-neutral-50/50 space-y-2">

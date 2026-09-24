@@ -140,21 +140,19 @@ function AuthContent() {
     setSuccessMsg(null);
 
     const credRes = await verifyAdminCredentialsAction(emailOrTsId, adminSecretKey, adminPasskey);
+    setLoading(false);
+
     if (!credRes.success) {
-      setLoading(false);
       setError(credRes.error || 'Admin verification failed.');
       return;
     }
 
-    const otpRes = await requestOtpAction(emailOrTsId);
-    setLoading(false);
-
-    if (!otpRes.success) {
-      setError(otpRes.error || 'Failed to dispatch verification code.');
-    } else {
-      setStep('OTP');
-      setSuccessMsg(`Verification code dispatched to ${otpRes.maskedEmail}.`);
-    }
+    setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
+    setStep('OTP');
+    const msg = credRes.warning
+      ? `Verification code dispatched (${credRes.warning})`
+      : `Verification code dispatched to ${credRes.maskedEmail || 'your admin email'}.`;
+    setSuccessMsg(msg);
   }
 
   async function handleMentorCredsSubmit(e: React.FormEvent) {
@@ -164,21 +162,19 @@ function AuthContent() {
     setSuccessMsg(null);
 
     const credRes = await verifyMentorCredentialsAction(emailOrTsId, mentorSecretKey, mentorPasskey);
+    setLoading(false);
+
     if (!credRes.success) {
-      setLoading(false);
       setError(credRes.error || 'Faculty verification failed.');
       return;
     }
 
-    const otpRes = await requestOtpAction(emailOrTsId);
-    setLoading(false);
-
-    if (!otpRes.success) {
-      setError(otpRes.error || 'Failed to dispatch verification code.');
-    } else {
-      setStep('OTP');
-      setSuccessMsg(`Verification code dispatched to ${otpRes.maskedEmail}.`);
-    }
+    setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
+    setStep('OTP');
+    const msg = credRes.warning
+      ? `Verification code dispatched (${credRes.warning})`
+      : `Verification code dispatched to ${credRes.maskedEmail || 'your faculty email'}.`;
+    setSuccessMsg(msg);
   }
 
   async function handleVerifyOtp(e: React.FormEvent) {
@@ -187,13 +183,15 @@ function AuthContent() {
     setError(null);
 
     const res = await verifyOtpAction(emailOrTsId, otpCode);
-    setLoading(false);
 
     if (!res.success) {
+      setLoading(false);
       setError(res.error || 'Invalid or expired verification code.');
-    } else if (res.redirectTo) {
-      router.push(res.redirectTo);
+      return;
     }
+
+    // Directly navigate to admin panel or destination workspace
+    window.location.href = res.redirectTo || '/admin';
   }
 
   // -------------------------------------------------------------

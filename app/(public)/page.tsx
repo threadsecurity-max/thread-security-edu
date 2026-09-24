@@ -24,8 +24,8 @@ export default async function PublicHomePage({
 }) {
   const session = await getSession();
   const params = searchParams ? await searchParams : {};
-  const isGuestPending = session && !session.isDashboardAccessGranted;
-  const showNotice = params.notice || isGuestPending;
+  const isGuestPending = Boolean(session && (session.role === 'STUDENT' || session.role === 'GUEST') && !session.isDashboardAccessGranted);
+  const showNotice = Boolean(params.notice || isGuestPending);
 
   // Fetch real data from PostgreSQL database with resilient connection retry
   let courses: any[] = [];
