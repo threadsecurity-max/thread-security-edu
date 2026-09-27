@@ -158,6 +158,7 @@ export async function requestOtpAction(emailOrTsId: string) {
     return {
       success: true,
       isAdmin: res.isAdmin,
+      isAdminSecretKey: (res as any).isAdminSecretKey || false,
       isMentor: (res as any).isMentor || false,
       isMentorSecretKey: (res as any).isMentorSecretKey || false,
       isSecurityAdminSecretKey: (res as any).isSecurityAdminSecretKey || false,

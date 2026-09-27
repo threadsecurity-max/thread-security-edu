@@ -1,13 +1,35 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
 // Define route access policies
 const ROLE_ROUTES: Record<string, string[]> = {
   '/admin': ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN'],
-  '/mentor': ['SUPER_ADMIN', 'MENTOR'],
-  '/student': ['SUPER_ADMIN', 'STUDENT'],
+  '/mentor': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'MENTOR'],
+  '/student': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STUDENT'],
 };
+
+interface SessionData {
+  userId: string;
+  email: string;
+  name: string;
+  role: string;
+  tsId: string | null;
+  isDashboardAccessGranted?: boolean;
+  isMentorVerified?: boolean;
+}
+
+function getSessionFromRequest(request: NextRequest): SessionData | null {
+  try {
+    const rawCookie = request.cookies.get('tse_session')?.value;
+    if (!rawCookie) return null;
+    const decoded = Buffer.from(rawCookie, 'base64').toString('utf-8');
+    const session = JSON.parse(decoded) as SessionData;
+    if (!session || !session.userId || !session.role) return null;
+    return session;
+  } catch {
+    return null;
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -67,15 +89,15 @@ export async function middleware(request: NextRequest) {
   // 2. Server-Authoritative Route Protection & RBAC
   for (const [routePrefix, allowedRoles] of Object.entries(ROLE_ROUTES)) {
     if (pathname.startsWith(routePrefix)) {
-      const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET || 'tse-lms-super-secret-jwt-key-2026' });
+      const session = getSessionFromRequest(request);
 
-      if (!token) {
+      if (!session) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('callbackUrl', encodeURIComponent(pathname));
         return NextResponse.redirect(loginUrl);
       }
 
-      const userRole = (token.role as string) || 'GUEST';
+      const userRole = session.role || 'GUEST';
       if (!allowedRoles.includes(userRole)) {
         if (pathname.startsWith('/api')) {
           return new NextResponse(

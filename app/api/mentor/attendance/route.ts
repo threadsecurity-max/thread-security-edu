@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { getSession } from '@/lib/auth/session';
 import { prisma, runTransactionWithOutbox } from '@/server/database/transaction-manager';
 import { AttendanceMarkSchema } from '@/lib/security/validation.schemas';
 import { checkRateLimit } from '@/lib/security/rate-limiter';
@@ -8,17 +8,17 @@ import { AttendanceStatus } from '@prisma/client';
 export async function POST(req: NextRequest) {
   try {
     // 1. Authenticate Request & Role Verification
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || 'tse-lms-super-secret-jwt-key-2026' });
+    const session = await getSession();
 
-    if (!token || !token.sub) {
+    if (!session || !session.userId) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
-    const userRole = (token.role as string) || 'GUEST';
-    if (!['SUPER_ADMIN', 'MENTOR'].includes(userRole)) {
+    const userRole = session.role || 'GUEST';
+    if (!['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'MENTOR'].includes(userRole)) {
       return NextResponse.json(
         { success: false, error: { code: 'FORBIDDEN', message: 'Only assigned mentors or admins can mark attendance' } },
         { status: 403 }
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Rate Limiting (20 submissions / min)
-    const rateLimit = checkRateLimit(`attendance:${token.sub}`, { windowMs: 60000, max: 20 });
+    const rateLimit = checkRateLimit(`attendance:${session.userId}`, { windowMs: 60000, max: 20 });
     if (!rateLimit.success) {
       return NextResponse.json(
         { success: false, error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests. Please try again in 1 minute.' } },
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     // Verify mentor profile & batch assignment (if not SUPER_ADMIN)
     if (userRole !== 'SUPER_ADMIN') {
       const mentorProfile = await prisma.mentorProfile.findUnique({
-        where: { userId: token.sub },
+        where: { userId: session.userId },
         select: { id: true },
       });
 
@@ -105,12 +105,12 @@ export async function POST(req: NextRequest) {
             studentId: rec.studentId,
             status: newStatus,
             remarks: rec.remarks || null,
-            markedBy: token.name || 'Mentor',
+            markedBy: session.name || 'Mentor',
           },
           update: {
             status: newStatus,
             remarks: rec.remarks || null,
-            markedBy: token.name || 'Mentor',
+            markedBy: session.name || 'Mentor',
           },
         });
 
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
             batchId,
             sessionId,
             studentId: rec.studentId,
-            mentorId: token.sub,
+            mentorId: session.userId,
             oldStatus: existingRecord?.status || null,
             newStatus,
             action: existingRecord ? 'MODIFIED' : 'INITIAL_MARK',
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
           payload: {
             batchId,
             sessionId,
-            markedBy: token.sub,
+            markedBy: session.userId,
             updatedRecordsCount: count,
           },
         },

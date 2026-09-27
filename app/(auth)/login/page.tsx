@@ -101,6 +101,9 @@ function AuthContent() {
     } else if ((res as any).isMentor || (res as any).isMentorSecretKey) {
       setMentorSecretKey(cleanInput);
       setStep('MENTOR_CREDS');
+    } else if ((res as any).isAdminSecretKey) {
+      setAdminSecretKey(cleanInput);
+      setStep('ADMIN_CREDS');
     } else if (res.isAdmin) {
       setStep('ADMIN_CREDS');
     } else {
@@ -190,8 +193,14 @@ function AuthContent() {
       return;
     }
 
-    // Directly navigate to admin panel or destination workspace
-    window.location.href = res.redirectTo || '/admin';
+    // Navigate to requested callbackUrl or default role workspace
+    const callbackUrl = searchParams.get('callbackUrl');
+    const destination =
+      callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')
+        ? callbackUrl
+        : res.redirectTo || '/admin';
+
+    window.location.href = destination;
   }
 
   // -------------------------------------------------------------

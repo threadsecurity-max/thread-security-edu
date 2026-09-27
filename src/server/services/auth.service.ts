@@ -189,7 +189,9 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     return verifySecurityAdminCredentials(secretKey, passkey);
   }
 
-  const user = await prisma.user.findFirst({
+  const superAdminEmail = (process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com').trim().toLowerCase();
+
+  let user = await prisma.user.findFirst({
     where: {
       OR: [
         { email: query.toLowerCase() },
@@ -201,6 +203,40 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     include: { tsIdentity: true },
   });
 
+  // If user not found by query, check if query is general admin secret key or configured super admin email
+  if (!user && (verifyGeneralAdminSecretKey(query) || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com')) {
+    user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { role: 'SUPER_ADMIN' },
+          { role: 'ACADEMIC_ADMIN' },
+          { email: superAdminEmail },
+          { email: 'threadsecurity@gmail.com' },
+        ],
+      },
+      include: { tsIdentity: true },
+    });
+
+    if (!user) {
+      user = await (prisma.user as any).create({
+        data: {
+          email: superAdminEmail,
+          name: 'Super Admin',
+          passwordHash: 'MFA_OTP_ONLY',
+          role: 'SUPER_ADMIN',
+          isDashboardAccessGranted: true,
+        },
+        include: { tsIdentity: true },
+      });
+      await prisma.tSIdentity.create({
+        data: {
+          tsId: 'TS-ADMIN',
+          userId: user!.id,
+        },
+      });
+    }
+  }
+
   if (!user || !user.isActive) {
     await recordFailedAttempt(query);
     throw new Error('No active administrator account found matching that Email Address or TS-ID.');
@@ -210,7 +246,8 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
     (user.role as string) === 'SECURITY_ADMIN' ||
-    user.email.toLowerCase() === 'threadsecurity@gmail.com';
+    user.email.toLowerCase() === 'threadsecurity@gmail.com' ||
+    user.email.toLowerCase() === superAdminEmail;
 
   if (!isAdminRole) {
     await recordFailedAttempt(query);
@@ -229,6 +266,7 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
   }
 
   await resetFailedAttempts(query);
+  await resetFailedAttempts(user.email);
 
   // Delete previous pending OTPs
   await (prisma as any).otpVerification.deleteMany({
@@ -236,6 +274,9 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
       OR: [
         { emailOrTsId: query.toLowerCase() },
         { emailOrTsId: user.email.toLowerCase() },
+        { emailOrTsId: superAdminEmail },
+        { emailOrTsId: 'threadsecurity@gmail.com' },
+        { emailOrTsId: 'tse-admin-8080' },
         ...(user.tsIdentity ? [{ emailOrTsId: user.tsIdentity.tsId.toLowerCase() }] : []),
       ],
     },
@@ -245,7 +286,7 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
   const code = generate6DigitOtp();
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-  // Save OTP record for user email and query
+  // Save OTP record for user email, query, and admin aliases
   await (prisma as any).otpVerification.create({
     data: {
       emailOrTsId: user.email.toLowerCase(),
@@ -258,6 +299,16 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     await (prisma as any).otpVerification.create({
       data: {
         emailOrTsId: query.toLowerCase(),
+        code,
+        expiresAt,
+      },
+    });
+  }
+
+  if (superAdminEmail !== user.email.toLowerCase() && superAdminEmail !== query.toLowerCase()) {
+    await (prisma as any).otpVerification.create({
+      data: {
+        emailOrTsId: superAdminEmail,
         code,
         expiresAt,
       },
@@ -417,6 +468,8 @@ export async function requestOtpService(emailOrTsId: string) {
   const query = emailOrTsId.trim();
   await checkLockoutStatus(query);
 
+  const superAdminEmail = (process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com').trim().toLowerCase();
+
   // Check if identifier is the Security Admin Secret Key directly
   if (verifySecurityAdminSecretKey(query)) {
     return {
@@ -424,9 +477,22 @@ export async function requestOtpService(emailOrTsId: string) {
       isSecurityAdminSecretKey: true,
       isAdmin: true,
       isMentor: false,
-      email: process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com',
-      maskedEmail: 't***y@gmail.com',
+      email: superAdminEmail,
+      maskedEmail: `${superAdminEmail[0]}***${superAdminEmail.split('@')[0].slice(-1)}@${superAdminEmail.split('@')[1]}`,
       tsId: 'TSE-SEC-ADMIN',
+    };
+  }
+
+  // Check if identifier is the General Admin Secret Key directly
+  if (verifyGeneralAdminSecretKey(query)) {
+    return {
+      success: true,
+      isAdminSecretKey: true,
+      isAdmin: true,
+      isMentor: false,
+      email: superAdminEmail,
+      maskedEmail: `${superAdminEmail[0]}***${superAdminEmail.split('@')[0].slice(-1)}@${superAdminEmail.split('@')[1]}`,
+      tsId: 'TS-ADMIN',
     };
   }
 
@@ -451,7 +517,7 @@ export async function requestOtpService(emailOrTsId: string) {
   }
 
   // Find user by email OR TS-ID
-  const user = await prisma.user.findFirst({
+  let user = await prisma.user.findFirst({
     where: {
       OR: [
         { email: query.toLowerCase() },
@@ -463,6 +529,26 @@ export async function requestOtpService(emailOrTsId: string) {
     include: { tsIdentity: true },
   });
 
+  // Auto-provision Super Admin if searching for configured admin email
+  if (!user && (query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com')) {
+    user = await (prisma.user as any).create({
+      data: {
+        email: query.toLowerCase(),
+        name: 'Super Admin',
+        passwordHash: 'MFA_OTP_ONLY',
+        role: 'SUPER_ADMIN',
+        isDashboardAccessGranted: true,
+      },
+      include: { tsIdentity: true },
+    });
+    await prisma.tSIdentity.create({
+      data: {
+        tsId: 'TS-ADMIN',
+        userId: user!.id,
+      },
+    });
+  }
+
   if (!user || !user.isActive) {
     throw new Error('No active account found matching that Email Address or TS-ID.');
   }
@@ -471,7 +557,8 @@ export async function requestOtpService(emailOrTsId: string) {
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
     (user.role as string) === 'SECURITY_ADMIN' ||
-    user.email.toLowerCase() === 'threadsecurity@gmail.com';
+    user.email.toLowerCase() === 'threadsecurity@gmail.com' ||
+    user.email.toLowerCase() === superAdminEmail;
 
   const isMentor = user.role === 'MENTOR';
 
@@ -558,8 +645,13 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     query.toLowerCase() === 'tse-sec-admin' ||
     query.toLowerCase() === 'tse-sec-admin-789';
 
+  const isGeneralAdmin =
+    verifyGeneralAdminSecretKey(query) ||
+    query.toLowerCase() === 'tse-admin-8080' ||
+    query.toLowerCase() === 'ts-admin';
+
   // Find matching user (if exists) so we can check across user.email, user.tsId, or query
-  const user = await prisma.user.findFirst({
+  let user = await prisma.user.findFirst({
     where: {
       OR: [
         { email: query.toLowerCase() },
@@ -571,10 +663,28 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     include: { tsIdentity: true },
   });
 
+  if (!user && (isGeneralAdmin || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com')) {
+    user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { role: 'SUPER_ADMIN' },
+          { role: 'ACADEMIC_ADMIN' },
+          { email: superAdminEmail },
+          { email: 'threadsecurity@gmail.com' },
+        ],
+      },
+      include: { tsIdentity: true },
+    });
+  }
+
   const identifiersToCheck = [
     query.toLowerCase(),
     query.toUpperCase(),
     query,
+    'tse-admin-8080',
+    'tse-sec-admin-789',
+    'tse-sec-admin',
+    'ts-admin',
   ];
 
   if (user?.email) identifiersToCheck.push(user.email.toLowerCase());
@@ -582,11 +692,9 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     identifiersToCheck.push(user.tsIdentity.tsId.toLowerCase());
     identifiersToCheck.push(user.tsIdentity.tsId);
   }
-  if (isSecAdmin || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com') {
+  if (isSecAdmin || isGeneralAdmin || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com') {
     identifiersToCheck.push(superAdminEmail);
     identifiersToCheck.push('threadsecurity@gmail.com');
-    identifiersToCheck.push('tse-sec-admin');
-    identifiersToCheck.push('tse-sec-admin-789');
   }
 
   const uniqueIdentifiers = Array.from(new Set(identifiersToCheck));
@@ -605,8 +713,10 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     throw new Error('Invalid or expired 6-digit MFA verification code.');
   }
 
-  // Clear failed attempt counters
-  await resetFailedAttempts(query);
+  // Clear failed attempt counters for all identifiers
+  for (const id of uniqueIdentifiers) {
+    await resetFailedAttempts(id);
+  }
 
   // Delete matching OTP and stale OTPs for this user / session
   await (prisma as any).otpVerification.deleteMany({

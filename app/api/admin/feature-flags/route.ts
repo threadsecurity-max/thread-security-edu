@@ -1,21 +1,21 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/server/database/transaction-manager';
 import { FeatureFlagSchema } from '@/lib/security/validation.schemas';
 
 export async function GET(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || 'tse-lms-super-secret-jwt-key-2026' });
+    const session = await getSession();
 
-    if (!token || !token.sub) {
+    if (!session || !session.userId) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
-    const userRole = (token.role as string) || 'GUEST';
-    if (!['SUPER_ADMIN', 'SECURITY_ADMIN'].includes(userRole)) {
+    const userRole = session.role || 'GUEST';
+    if (!['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN'].includes(userRole)) {
       return NextResponse.json(
         { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
         { status: 403 }
@@ -41,17 +41,17 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || 'tse-lms-super-secret-jwt-key-2026' });
+    const session = await getSession();
 
-    if (!token || !token.sub) {
+    if (!session || !session.userId) {
       return NextResponse.json(
         { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication required' } },
         { status: 401 }
       );
     }
 
-    const userRole = (token.role as string) || 'GUEST';
-    if (!['SUPER_ADMIN', 'SECURITY_ADMIN'].includes(userRole)) {
+    const userRole = session.role || 'GUEST';
+    if (!['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN'].includes(userRole)) {
       return NextResponse.json(
         { success: false, error: { code: 'FORBIDDEN', message: 'Admin access required' } },
         { status: 403 }
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.auditLog.create({
       data: {
-        actorId: token.sub,
+        actorId: session.userId,
         action: 'FEATURE_FLAG_UPDATED',
         entity: 'FeatureFlag',
         entityId: updatedFlag.id,
