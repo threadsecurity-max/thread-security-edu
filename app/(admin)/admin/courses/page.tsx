@@ -67,44 +67,44 @@ export default async function AdminCourseBuilderPage() {
   }
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans relative z-10">
+    <div className="space-y-8 text-slate-900 font-sans relative z-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-200 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight leading-tight">
             Course Management &amp; Builder
           </h1>
-          <p className="text-xs text-red-200/70 font-mono mt-1">
+          <p className="text-xs text-slate-600 font-mono mt-1">
             Create new cybersecurity programs, define module structures, assign mentors, and publish courses.
           </p>
         </div>
       </div>
 
-      {/* New Course Form - Simple Translucent Dark Glass Container */}
-      <div className="p-6 rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl shadow-xl space-y-4 font-mono text-xs">
-        <h3 className="text-base font-bold text-white tracking-tight">Create New Cybersecurity Course</h3>
+      {/* New Course Form - Red Light Theme Card */}
+      <div className="p-6 rounded-3xl bg-white border border-red-200/80 shadow-[0_4px_20px_rgba(220,38,38,0.04)] space-y-4 font-mono text-xs">
+        <h3 className="text-base font-bold text-slate-950 tracking-tight">Create New Cybersecurity Course</h3>
         
         <form action={createCourseAction} className="grid grid-cols-1 sm:grid-cols-12 gap-4">
           <div className="sm:col-span-6">
-            <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+            <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
               Course Title *
             </label>
             <input
               type="text"
               name="title"
               placeholder="e.g. Advanced Network Penetration Testing"
-              className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+              className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
               required
             />
           </div>
 
           <div className="sm:col-span-3">
-            <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+            <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
               Category *
             </label>
             <select
               name="category"
-              className="w-full bg-[#1a060d] border border-red-500/30 text-white text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 font-mono"
+              className="w-full bg-slate-50 border border-red-200 text-slate-950 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white font-mono"
             >
               <option value="VAPT">VAPT &amp; Web Security</option>
               <option value="Cloud Security">Cloud Security</option>
@@ -114,27 +114,27 @@ export default async function AdminCourseBuilderPage() {
           </div>
 
           <div className="sm:col-span-3">
-            <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+            <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
               Duration (Hours) *
             </label>
             <input
               type="number"
               name="durationHours"
               defaultValue="24"
-              className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+              className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
               required
             />
           </div>
 
           <div className="sm:col-span-12">
-            <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+            <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
               Subtitle / Overview *
             </label>
             <input
               type="text"
               name="subtitle"
               placeholder="Short description of outcomes and target skills..."
-              className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+              className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
               required
             />
           </div>
@@ -142,7 +142,7 @@ export default async function AdminCourseBuilderPage() {
           <div className="sm:col-span-12 pt-2">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_20px_rgba(220,38,38,0.4)] border border-white/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500 active:scale-95 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Publish Course To Catalogue</span>
@@ -153,32 +153,32 @@ export default async function AdminCourseBuilderPage() {
 
       {/* Existing Courses List */}
       <div className="space-y-4 font-mono text-xs">
-        <h3 className="text-base font-bold text-white tracking-tight">
+        <h3 className="text-base font-bold text-slate-950 tracking-tight">
           Existing Course Catalogue ({courses.length})
         </h3>
         
-        <div className="overflow-hidden rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl shadow-xl">
+        <div className="overflow-hidden rounded-3xl bg-white border border-red-200/80 shadow-[0_4px_20px_rgba(220,38,38,0.03)]">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#1e070e] text-red-200 border-b border-red-500/20">
+            <thead className="bg-red-50/70 text-red-950 border-b border-red-200/80">
               <tr>
-                <th className="p-4">Course Title</th>
-                <th className="p-4">Category</th>
-                <th className="p-4">Level</th>
-                <th className="p-4">Modules</th>
-                <th className="p-4">Labs</th>
-                <th className="p-4 text-right">Status</th>
+                <th className="p-4 font-bold">Course Title</th>
+                <th className="p-4 font-bold">Category</th>
+                <th className="p-4 font-bold">Level</th>
+                <th className="p-4 font-bold">Modules</th>
+                <th className="p-4 font-bold">Labs</th>
+                <th className="p-4 font-bold text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-red-500/10 text-slate-200">
+            <tbody className="divide-y divide-red-100/80 text-slate-800">
               {courses.map((c) => (
-                <tr key={c.id} className="hover:bg-red-950/30 transition-colors">
-                  <td className="p-4 font-bold text-white text-sm">{c.title}</td>
-                  <td className="p-4 text-slate-300">{c.category}</td>
-                  <td className="p-4 text-slate-300">{c.level}</td>
-                  <td className="p-4 text-slate-300">{c.modules.length} Modules</td>
-                  <td className="p-4 text-slate-300">{c.labs.length} Labs</td>
+                <tr key={c.id} className="hover:bg-red-50/40 transition-colors">
+                  <td className="p-4 font-bold text-slate-950 text-sm">{c.title}</td>
+                  <td className="p-4 text-slate-700">{c.category}</td>
+                  <td className="p-4 text-slate-700">{c.level}</td>
+                  <td className="p-4 text-slate-700">{c.modules.length} Modules</td>
+                  <td className="p-4 text-slate-700">{c.labs.length} Labs</td>
                   <td className="p-4 text-right">
-                    <span className="px-2.5 py-1 rounded-full bg-red-950/60 border border-red-500/40 text-red-300 text-[10px] font-bold">
+                    <span className="px-2.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-[10px] font-bold">
                       {c.status}
                     </span>
                   </td>

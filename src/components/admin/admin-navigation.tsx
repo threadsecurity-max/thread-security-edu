@@ -98,19 +98,19 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
         </div>
 
         {/* Shortcuts */}
-        <div className="space-y-1 pb-3 border-b border-red-500/15 text-xs font-mono">
+        <div className="space-y-1 pb-3 border-b border-red-200/80 text-xs font-mono">
           <Link
             href="/workshops"
-            className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-slate-700 hover:text-red-700 hover:bg-red-50 transition-all font-semibold"
           >
-            <Sparkles className="w-4 h-4 text-red-400" />
+            <Sparkles className="w-4 h-4 text-red-600" />
             <span>Workshops</span>
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all"
+            className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-slate-700 hover:text-red-700 hover:bg-red-50 transition-all font-semibold"
           >
-            <Globe className="w-4 h-4 text-slate-400" />
+            <Globe className="w-4 h-4 text-slate-500" />
             <span>Landing Page</span>
           </Link>
         </div>
@@ -126,15 +126,15 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
                 href={item.href}
                 className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${
                   active
-                    ? 'bg-gradient-to-r from-red-600/30 to-rose-600/10 border border-red-500/40 text-white font-bold shadow-[0_0_15px_rgba(220,38,38,0.15)]'
-                    : 'text-slate-300 hover:text-white hover:bg-red-950/30 hover:border-red-500/20 border border-transparent'
+                    ? 'bg-gradient-to-r from-red-600 to-rose-600 border border-red-500 text-white font-bold shadow-[0_4px_16px_rgba(220,38,38,0.25)]'
+                    : 'text-slate-800 hover:text-red-700 hover:bg-red-50 hover:border-red-200/80 border border-transparent font-medium'
                 }`}
               >
                 <div className="flex items-center gap-2.5 truncate">
-                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-red-400' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-red-600'}`} />
                   <span className="truncate">{item.name}</span>
                 </div>
-                {active && <ChevronRight className="w-3.5 h-3.5 text-red-400 shrink-0 ml-1" />}
+                {active && <ChevronRight className="w-3.5 h-3.5 text-white shrink-0 ml-1" />}
               </Link>
             );
           })}
@@ -142,26 +142,26 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
       </div>
 
       {/* Footer User Info */}
-      <div className="pt-4 border-t border-red-500/20 flex items-center justify-between bg-red-950/20 backdrop-blur-md p-3 rounded-2xl">
+      <div className="pt-4 border-t border-red-200/80 flex items-center justify-between bg-red-50/70 backdrop-blur-md p-3 rounded-2xl border">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-rose-700 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-[0_0_12px_rgba(220,38,38,0.4)] border border-white/20">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-rose-700 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-[0_2px_8px_rgba(220,38,38,0.3)] border border-white">
             {user.name ? user.name[0] : 'A'}
           </div>
           <div className="truncate font-mono">
-            <span className="text-xs font-bold text-white block truncate">
+            <span className="text-xs font-bold text-slate-950 block truncate">
               {user.name || 'Admin'}
             </span>
-            <span className="text-[10px] text-red-400 block font-semibold truncate">
+            <span className="text-[10px] text-red-700 block font-semibold truncate">
               {user.role}
             </span>
           </div>
         </div>
         <Link
           href="/login"
-          className="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors touch-target"
+          className="text-slate-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-100/70 transition-colors touch-target"
           title="Sign Out"
         >
-          <LogOut className="w-4 h-4 text-red-400" />
+          <LogOut className="w-4 h-4 text-red-600" />
         </Link>
       </div>
     </div>
@@ -170,14 +170,14 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
   return (
     <>
       {/* Mobile/Tablet Header Bar (< md) */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0d0306]/95 border-b border-red-500/20 text-white sticky top-0 z-40 safe-top">
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white/95 border-b border-red-200/80 text-slate-950 sticky top-0 z-40 safe-top shadow-sm">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setMobileDrawerOpen(true)}
             aria-label="Open admin navigation menu"
-            className="touch-target p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors"
+            className="touch-target p-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 transition-colors"
           >
-            <Menu className="w-5 h-5 text-red-400" />
+            <Menu className="w-5 h-5 text-red-600" />
           </button>
           <Link href="/admin" className="flex items-center gap-2">
             <img src="/logos/TSE Logo Nav.svg" alt="TSE" className="h-7 w-auto object-contain" />
@@ -185,14 +185,14 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-red-600/20 border border-red-500/40 text-red-300 font-bold">
+          <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-red-100 border border-red-200 text-red-700 font-bold">
             {user.role}
           </span>
         </div>
       </div>
 
       {/* Desktop Sticky Sidebar (>= md) */}
-      <aside className="w-64 bg-[#0d0306]/85 backdrop-blur-2xl border-r border-red-500/20 hidden md:flex flex-col justify-between shrink-0 sticky top-0 h-screen z-30 shadow-[5px_0_30px_rgba(220,38,38,0.05)] p-6">
+      <aside className="w-64 bg-white/95 backdrop-blur-2xl border-r border-red-200/80 hidden md:flex flex-col justify-between shrink-0 sticky top-0 h-screen z-30 shadow-[4px_0_24px_rgba(239,68,68,0.03)] p-6">
         {navContent}
       </aside>
 
@@ -206,14 +206,14 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setMobileDrawerOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 md:hidden"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 md:hidden"
             />
             <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-              className="fixed top-0 left-0 bottom-0 h-dvh w-[min(85vw,320px)] bg-[#0d0306] border-r border-red-500/30 text-white z-50 shadow-2xl p-5 md:hidden safe-top safe-bottom safe-left"
+              className="fixed top-0 left-0 bottom-0 h-dvh w-[min(85vw,320px)] bg-white border-r border-red-200 text-slate-900 z-50 shadow-2xl p-5 md:hidden safe-top safe-bottom safe-left"
             >
               {navContent}
             </motion.aside>

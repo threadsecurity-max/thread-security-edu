@@ -48,21 +48,21 @@ export default async function AdminDashboardOverviewPage() {
   });
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans relative z-10">
+    <div className="space-y-8 text-slate-900 font-sans relative z-10">
       {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-200/80 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight leading-tight">
             Academic &amp; Security Overview
           </h1>
-          <p className="text-xs text-red-200/70 font-mono mt-1">
+          <p className="text-xs text-slate-600 font-mono mt-1">
             Live database analytics, student TS-ID status, course publishing workflows, and audit logging.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link href="/admin/courses">
-            <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_20px_rgba(220,38,38,0.4)] border border-white/20 active:scale-95 transition-all cursor-pointer">
+            <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-700 hover:to-rose-700 text-white font-mono font-bold text-xs shadow-[0_4px_16px_rgba(220,38,38,0.3)] border border-red-500 active:scale-95 transition-all cursor-pointer">
               <Plus className="w-4 h-4" />
               <span>Create New Course</span>
             </button>
@@ -72,40 +72,40 @@ export default async function AdminDashboardOverviewPage() {
 
       {/* METRIC CARDS (REAL DATABASE QUERIES) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="p-6 rounded-3xl bg-[#120408]/80 backdrop-blur-xl border border-red-500/20 hover:border-red-500/40 transition-all shadow-[0_10px_30px_rgba(220,38,38,0.05)]">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 hover:border-red-400 transition-all shadow-[0_4px_20px_rgba(220,38,38,0.04)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono text-red-300/70 uppercase tracking-wider">TOTAL STUDENTS</span>
-            <Users className="w-5 h-5 text-red-400" />
+            <span className="text-[11px] font-mono text-red-700 uppercase tracking-wider font-bold">TOTAL STUDENTS</span>
+            <Users className="w-5 h-5 text-red-600" />
           </div>
-          <span className="text-3xl font-extrabold font-mono text-white block">{totalStudents}</span>
-          <span className="text-xs text-slate-400 block mt-1">Registered TS-ID Accounts</span>
+          <span className="text-3xl font-extrabold font-mono text-slate-950 block">{totalStudents}</span>
+          <span className="text-xs text-slate-500 block mt-1">Registered TS-ID Accounts</span>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#120408]/80 backdrop-blur-xl border border-red-500/20 hover:border-red-500/40 transition-all shadow-[0_10px_30px_rgba(220,38,38,0.05)]">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 hover:border-red-400 transition-all shadow-[0_4px_20px_rgba(220,38,38,0.04)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono text-red-300/70 uppercase tracking-wider">COURSES IN SYSTEM</span>
-            <BookOpen className="w-5 h-5 text-rose-400" />
+            <span className="text-[11px] font-mono text-red-700 uppercase tracking-wider font-bold">COURSES IN SYSTEM</span>
+            <BookOpen className="w-5 h-5 text-rose-600" />
           </div>
-          <span className="text-3xl font-extrabold font-mono text-white block">{totalCourses}</span>
-          <span className="text-xs text-slate-400 block mt-1">Published &amp; Draft Courses</span>
+          <span className="text-3xl font-extrabold font-mono text-slate-950 block">{totalCourses}</span>
+          <span className="text-xs text-slate-500 block mt-1">Published &amp; Draft Courses</span>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#120408]/80 backdrop-blur-xl border border-red-500/20 hover:border-red-500/40 transition-all shadow-[0_10px_30px_rgba(220,38,38,0.05)]">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 hover:border-red-400 transition-all shadow-[0_4px_20px_rgba(220,38,38,0.04)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono text-red-300/70 uppercase tracking-wider">PRACTICAL LABS</span>
-            <Terminal className="w-5 h-5 text-red-400" />
+            <span className="text-[11px] font-mono text-red-700 uppercase tracking-wider font-bold">PRACTICAL LABS</span>
+            <Terminal className="w-5 h-5 text-red-600" />
           </div>
-          <span className="text-3xl font-extrabold font-mono text-white block">{totalLabs}</span>
-          <span className="text-xs text-slate-400 block mt-1">Active Sandbox Targets</span>
+          <span className="text-3xl font-extrabold font-mono text-slate-950 block">{totalLabs}</span>
+          <span className="text-xs text-slate-500 block mt-1">Active Sandbox Targets</span>
         </div>
 
-        <div className="p-6 rounded-3xl bg-[#120408]/80 backdrop-blur-xl border border-red-500/20 hover:border-red-500/40 transition-all shadow-[0_10px_30px_rgba(220,38,38,0.05)]">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 hover:border-red-400 transition-all shadow-[0_4px_20px_rgba(220,38,38,0.04)]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-mono text-red-300/70 uppercase tracking-wider">CERTIFICATES ISSUED</span>
-            <Award className="w-5 h-5 text-rose-400" />
+            <span className="text-[11px] font-mono text-red-700 uppercase tracking-wider font-bold">CERTIFICATES ISSUED</span>
+            <Award className="w-5 h-5 text-rose-600" />
           </div>
-          <span className="text-3xl font-extrabold font-mono text-white block">{totalCertificates}</span>
-          <span className="text-xs text-slate-400 block mt-1">Cryptographically Verified</span>
+          <span className="text-3xl font-extrabold font-mono text-slate-950 block">{totalCertificates}</span>
+          <span className="text-xs text-slate-500 block mt-1">Cryptographically Verified</span>
         </div>
       </div>
 
@@ -115,36 +115,36 @@ export default async function AdminDashboardOverviewPage() {
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">Recent Registered Students ({totalStudents})</h2>
-              <span className="text-[11px] text-red-300/70 font-mono block">Latest registered TS-ID student accounts</span>
+              <h2 className="text-lg font-bold text-slate-950 tracking-tight">Recent Registered Students ({totalStudents})</h2>
+              <span className="text-[11px] text-slate-500 font-mono block">Latest registered TS-ID student accounts</span>
             </div>
-            <Link href="/admin/students" className="text-xs font-mono text-red-400 hover:text-red-300 hover:underline font-bold">
+            <Link href="/admin/students" className="text-xs font-mono text-red-600 hover:text-red-700 hover:underline font-bold">
               View Full Directory ({totalStudents}) →
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl shadow-xl">
+          <div className="overflow-hidden rounded-3xl bg-white border border-red-200/80 shadow-[0_4px_20px_rgba(220,38,38,0.03)]">
             <div className="max-h-[420px] overflow-y-auto">
               <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-[#1e070e] text-red-200 border-b border-red-500/20 sticky top-0 z-10">
+                <thead className="bg-red-50/80 text-slate-900 border-b border-red-200 sticky top-0 z-10">
                   <tr>
-                    <th className="p-3.5">Student Name</th>
-                    <th className="p-3.5">TS-ID</th>
-                    <th className="p-3.5">Email Address</th>
-                    <th className="p-3.5 text-right">Status</th>
+                    <th className="p-3.5 font-bold">Student Name</th>
+                    <th className="p-3.5 font-bold">TS-ID</th>
+                    <th className="p-3.5 font-bold">Email Address</th>
+                    <th className="p-3.5 text-right font-bold">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-red-500/10 text-slate-200">
+                <tbody className="divide-y divide-red-100 text-slate-800">
                   {studentsList.map((s) => (
-                    <tr key={s.id} className="hover:bg-red-950/30 transition-colors">
-                      <td className="p-3.5 font-bold text-white">{s.name}</td>
+                    <tr key={s.id} className="hover:bg-red-50/50 transition-colors">
+                      <td className="p-3.5 font-bold text-slate-950">{s.name}</td>
                       <td className="p-3.5">
-                        <span className="px-2 py-0.5 rounded bg-red-950/60 border border-red-500/40 text-red-300 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded bg-red-100 border border-red-200 text-red-700 text-[10px] font-bold">
                           {s.tsIdentity?.tsId || 'N/A'}
                         </span>
                       </td>
-                      <td className="p-3.5 text-slate-400 text-[11px]">{s.email}</td>
-                      <td className="p-3.5 text-right font-bold text-red-400">ACTIVE</td>
+                      <td className="p-3.5 text-slate-600 text-[11px]">{s.email}</td>
+                      <td className="p-3.5 text-right font-bold text-red-600">ACTIVE</td>
                     </tr>
                   ))}
                 </tbody>
@@ -156,20 +156,20 @@ export default async function AdminDashboardOverviewPage() {
         {/* Security Audit Feed */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white tracking-tight">Live Audit Feed ({totalAuditLogs})</h2>
-            <Link href="/admin/audit" className="text-xs font-mono text-red-400 hover:text-red-300 hover:underline">
+            <h2 className="text-lg font-bold text-slate-950 tracking-tight">Live Audit Feed ({totalAuditLogs})</h2>
+            <Link href="/admin/audit" className="text-xs font-mono text-red-600 hover:text-red-700 hover:underline font-bold">
               Full Audit Logs
             </Link>
           </div>
 
-          <div className="p-5 rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl space-y-3 font-mono text-xs shadow-xl">
+          <div className="p-5 rounded-3xl bg-white border border-red-200/80 space-y-3 font-mono text-xs shadow-[0_4px_20px_rgba(220,38,38,0.03)]">
             {recentAuditLogs.map((log) => (
-              <div key={log.id} className="p-3.5 rounded-2xl bg-white/[0.03] border border-red-500/15 space-y-1">
+              <div key={log.id} className="p-3.5 rounded-2xl bg-red-50/50 border border-red-100 space-y-1">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-red-400 font-bold">{log.action}</span>
+                  <span className="text-red-600 font-bold">{log.action}</span>
                   <span className="text-slate-500">{new Date(log.createdAt).toLocaleTimeString()}</span>
                 </div>
-                <p className="text-slate-300 text-[11px] truncate">{log.details || `Entity: ${log.entity}`}</p>
+                <p className="text-slate-700 text-[11px] truncate">{log.details || `Entity: ${log.entity}`}</p>
               </div>
             ))}
           </div>

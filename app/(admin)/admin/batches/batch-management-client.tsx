@@ -300,30 +300,30 @@ export function BatchManagementClient({
   };
 
   return (
-    <div className="space-y-6 text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Top Header & DB Persistence Status Banner */}
-      <div className="p-5 rounded-2xl bg-gradient-to-r from-red-950/40 via-red-900/30 to-black/60 backdrop-blur-xl border border-red-500/20 text-white shadow-[0_4px_25px_rgba(220,38,38,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 rounded-3xl bg-white border border-red-200/80 text-slate-950 shadow-[0_4px_20px_rgba(220,38,38,0.04)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-[10px] flex items-center gap-1">
-              <Database className="w-3 h-3 text-red-400" />
+            <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] flex items-center gap-1 font-bold">
+              <Database className="w-3 h-3 text-red-600" />
               PostgreSQL DB Persisted
             </Badge>
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-xs text-slate-500 font-mono">
               Real-Time Batch & Attendance Synchronization
             </span>
           </div>
-          <h1 className="text-xl font-bold font-mono text-white flex items-center gap-2">
+          <h1 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
             Academic Batches, Timetable Calendar & Attendance Audit
           </h1>
-          <p className="text-xs text-slate-300 mt-1 max-w-3xl">
+          <p className="text-xs text-slate-600 mt-1 max-w-3xl">
             Schedule lecture sessions via the interactive calendar, track mentor delivery on specific dates, and manage student attendance logs with full database storage.
           </p>
         </div>
 
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_20px_rgba(220,38,38,0.3)] border border-white/20 active:scale-95 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
+          className="px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500 active:scale-95 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Conduct New Batch</span>
@@ -331,13 +331,13 @@ export function BatchManagementClient({
       </div>
 
       {/* Main Tab Navigation Bar */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-black/60 border border-red-500/20 backdrop-blur-md">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-red-200/80 shadow-[0_2px_12px_rgba(220,38,38,0.03)]">
         <button
           onClick={() => setActiveTab('cohorts')}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'cohorts'
-              ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] border border-red-400'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
+              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
           }`}
         >
           <Layers className="w-4 h-4" />
@@ -348,11 +348,11 @@ export function BatchManagementClient({
           onClick={() => setActiveTab('calendar')}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'calendar'
-              ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] border border-red-400'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
+              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
           }`}
         >
-          <Calendar className="w-4 h-4 text-red-300" />
+          <Calendar className="w-4 h-4" />
           <span>Interactive Lecture Calendar</span>
         </button>
 
@@ -360,11 +360,11 @@ export function BatchManagementClient({
           onClick={() => setActiveTab('audit')}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'audit'
-              ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] border border-red-400'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
+              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
           }`}
         >
-          <CheckSquare className="w-4 h-4 text-emerald-400" />
+          <CheckSquare className="w-4 h-4" />
           <span>Lecture Delivery & Attendance Audit</span>
         </button>
 
@@ -372,14 +372,14 @@ export function BatchManagementClient({
           onClick={() => setActiveTab('corrections')}
           className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'corrections'
-              ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(220,38,38,0.4)] border border-red-400'
-              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
+              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
           }`}
         >
-          <AlertCircle className="w-4 h-4 text-amber-400" />
+          <AlertCircle className="w-4 h-4 text-amber-500" />
           <span>Attendance Corrections</span>
           {pendingCorrectionsCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-amber-500 text-black shadow-sm">
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-amber-500 text-black shadow-xs">
               {pendingCorrectionsCount}
             </span>
           )}
@@ -398,72 +398,72 @@ export function BatchManagementClient({
             return (
               <Card
                 key={batch.id}
-                className="bg-red-950/20 backdrop-blur-xl border border-red-500/20 text-white hover:border-red-500/40 transition-all rounded-2xl flex flex-col justify-between shadow-[0_4px_25px_rgba(220,38,38,0.05)]"
+                className="bg-white border border-red-200/80 text-slate-950 hover:border-red-400 hover:shadow-md transition-all rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(220,38,38,0.03)]"
               >
                 <div>
                   <CardHeader className="p-5 pb-3">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <Badge
                         variant="outline"
-                        className="font-mono text-[10px] text-red-300 border-red-500/40 bg-red-950/40"
+                        className="font-mono text-[10px] text-red-700 border-red-200 bg-red-50 font-bold"
                       >
                         {batch.batchCode}
                       </Badge>
                       <Badge
                         className={`text-[10px] font-mono ${
                           batch.status === 'ACTIVE'
-                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                            : 'bg-slate-500/20 text-slate-300'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-slate-100 text-slate-600 border border-slate-200'
                         }`}
                       >
                         {batch.status}
                       </Badge>
                     </div>
-                    <CardTitle className="text-base font-bold font-sans text-white">
+                    <CardTitle className="text-base font-bold font-sans text-slate-950">
                       {batch.title}
                     </CardTitle>
                   </CardHeader>
 
-                  <CardContent className="p-5 pt-0 space-y-3.5 text-xs text-slate-300">
-                    <div className="p-3 rounded-xl bg-black/40 border border-red-500/20 space-y-1.5 font-mono text-[11px]">
+                  <CardContent className="p-5 pt-0 space-y-3.5 text-xs text-slate-700">
+                    <div className="p-3 rounded-2xl bg-red-50/40 border border-red-200/80 space-y-1.5 font-mono text-[11px]">
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-slate-400">
-                          <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
+                        <span className="flex items-center gap-1.5 text-slate-500">
+                          <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
                           Faculty Lead:
                         </span>
-                        <strong className="text-white font-bold truncate max-w-[150px]">
+                        <strong className="text-slate-950 font-bold truncate max-w-[150px]">
                           {batch.mentor?.user?.name || 'Unassigned'}
                         </strong>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-slate-400">
+                        <span className="flex items-center gap-1.5 text-slate-500">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           Schedule:
                         </span>
-                        <span className="text-[10px] text-red-300 font-bold truncate max-w-[150px]">
+                        <span className="text-[10px] text-red-700 font-bold truncate max-w-[150px]">
                           {batch.schedule || 'Mon/Wed/Fri 7-9 PM'}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-slate-400">
+                        <span className="flex items-center gap-1.5 text-slate-500">
                           <BookOpen className="w-3.5 h-3.5 text-slate-400" />
                           Lectures Conducted:
                         </span>
-                        <strong className="text-white">{sessionCount} Live Classes</strong>
+                        <strong className="text-slate-950">{sessionCount} Live Classes</strong>
                       </div>
                     </div>
 
                     {/* Enrollment Progress bar */}
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px] font-mono">
-                        <span>Enrolled Students:</span>
-                        <strong className="text-red-300 font-bold">
+                        <span className="text-slate-600">Enrolled Students:</span>
+                        <strong className="text-red-700 font-bold">
                           {studentCount} / {batch.maxCapacity} Max
                         </strong>
                       </div>
-                      <div className="w-full bg-black/60 h-2 rounded-full overflow-hidden border border-red-500/20">
+                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-red-100">
                         <div
                           className="bg-gradient-to-r from-red-600 to-rose-600 h-full rounded-full transition-all"
                           style={{
@@ -476,21 +476,21 @@ export function BatchManagementClient({
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="p-4 border-t border-red-500/10 flex items-center justify-between gap-2">
+                <div className="p-4 border-t border-red-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => setSelectedBatchForStudents(batch)}
-                    className="flex-1 px-3 py-2 rounded-full bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-500/30 font-mono font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="flex-1 px-3 py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-mono font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
                   >
-                    <Users className="w-3.5 h-3.5 text-red-400" />
+                    <Users className="w-3.5 h-3.5 text-red-600" />
                     <span>Student Roster ({studentCount})</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedBatchForSessions(batch)}
-                    className="px-3 py-2 rounded-full bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 font-mono font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="px-3 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-mono font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
                     title="View Live Lectures & Attendance"
                   >
-                    <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                    <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Attendance</span>
                   </button>
                 </div>
@@ -504,15 +504,15 @@ export function BatchManagementClient({
       {/* 📅 TAB 2: INTERACTIVE LECTURE CALENDAR & CONDUCT SESSION */}
       {/* ========================================================================= */}
       {activeTab === 'calendar' && (
-        <div className="p-6 rounded-3xl bg-red-950/20 backdrop-blur-xl border border-red-500/20 space-y-6 shadow-[0_4px_25px_rgba(220,38,38,0.05)]">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 space-y-6 shadow-[0_4px_20px_rgba(220,38,38,0.04)]">
           {/* Calendar Header Controls */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-500/20 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-200 pb-4">
             <div>
-              <h2 className="text-xl font-bold font-mono text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-red-400" />
+              <h2 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-red-600" />
                 {monthName} Lecture Schedule
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 Click any calendar date cell to schedule a lecture, or click existing session badges to review/mark attendance.
               </p>
             </div>
@@ -520,16 +520,16 @@ export function BatchManagementClient({
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setCalendarMonth(new Date(year, month - 1, 1))}
-                className="p-2 rounded-xl bg-black/50 hover:bg-red-950 text-slate-300 hover:text-white border border-red-500/30 cursor-pointer transition-all"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 border border-slate-200 cursor-pointer transition-all"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="font-mono text-sm font-bold text-red-300 min-w-[120px] text-center">
+              <span className="font-mono text-sm font-bold text-red-700 min-w-[120px] text-center">
                 {monthName}
               </span>
               <button
                 onClick={() => setCalendarMonth(new Date(year, month + 1, 1))}
-                className="p-2 rounded-xl bg-black/50 hover:bg-red-950 text-slate-300 hover:text-white border border-red-500/30 cursor-pointer transition-all"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 border border-slate-200 cursor-pointer transition-all"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -537,9 +537,9 @@ export function BatchManagementClient({
           </div>
 
           {/* Monthly Calendar Grid */}
-          <div className="border border-red-500/20 rounded-2xl overflow-hidden bg-black/60">
+          <div className="border border-red-200 rounded-2xl overflow-hidden bg-white shadow-xs">
             {/* Days of Week Header */}
-            <div className="grid grid-cols-7 border-b border-red-500/20 bg-red-950/40 text-center font-mono text-xs font-bold text-red-300 py-2.5">
+            <div className="grid grid-cols-7 border-b border-red-200 bg-red-50/70 text-center font-mono text-xs font-bold text-red-950 py-2.5">
               <span>SUN</span>
               <span>MON</span>
               <span>TUE</span>
@@ -550,10 +550,10 @@ export function BatchManagementClient({
             </div>
 
             {/* Calendar Cells */}
-            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-red-500/10 text-xs">
+            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-red-100 text-xs">
               {/* Padding Days Before First Day of Month */}
               {Array.from({ length: firstDayIndex }).map((_, idx) => (
-                <div key={`pad-${idx}`} className="h-28 bg-black/20 p-2 text-slate-700 pointer-events-none" />
+                <div key={`pad-${idx}`} className="h-28 bg-slate-50/40 p-2 text-slate-300 pointer-events-none" />
               ))}
 
               {/* Days of the Month */}
@@ -582,21 +582,21 @@ export function BatchManagementClient({
                   <div
                     key={`day-${dayNum}`}
                     onClick={() => handleCalendarDayClick(dayNum)}
-                    className={`h-32 p-2 border-red-500/10 hover:bg-red-950/30 transition-colors cursor-pointer flex flex-col justify-between group ${
-                      isToday ? 'bg-red-950/50 border border-red-500/40' : 'bg-black/40'
+                    className={`h-32 p-2 border-red-100 hover:bg-red-50/40 transition-colors cursor-pointer flex flex-col justify-between group ${
+                      isToday ? 'bg-red-50/70 border border-red-300' : 'bg-white'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
                         className={`font-mono text-xs font-bold px-2 py-0.5 rounded-full ${
                           isToday
-                            ? 'bg-red-600 text-white shadow-[0_0_8px_rgba(220,38,38,0.6)]'
-                            : 'text-slate-300 group-hover:text-red-300'
+                            ? 'bg-red-600 text-white shadow-[0_2px_8px_rgba(220,38,38,0.4)]'
+                            : 'text-slate-700 group-hover:text-red-700'
                         }`}
                       >
                         {dayNum}
                       </span>
-                      <span className="text-[9px] text-slate-600 group-hover:text-red-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                      <span className="text-[9px] text-slate-400 group-hover:text-red-600 font-mono opacity-0 group-hover:opacity-100 transition-opacity font-bold">
                         + Schedule
                       </span>
                     </div>
@@ -616,14 +616,14 @@ export function BatchManagementClient({
                               e.stopPropagation();
                               openAttendanceModal(sess, sess.batch);
                             }}
-                            className="p-1.5 rounded-lg bg-red-950/80 hover:bg-red-900 border border-red-500/40 text-[10px] font-mono space-y-0.5 shadow-sm transition-all"
+                            className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-[10px] font-mono space-y-0.5 shadow-xs transition-all"
                             title="Click to Review & Mark Attendance"
                           >
-                            <div className="flex items-center justify-between text-red-200">
-                              <span className="font-bold truncate max-w-[80px]">{sess.batchCode}</span>
-                              <span className="text-[9px] text-red-300 font-bold">{sessTime}</span>
+                            <div className="flex items-center justify-between text-red-900 font-bold">
+                              <span className="truncate max-w-[80px]">{sess.batchCode}</span>
+                              <span className="text-[9px] text-red-700">{sessTime}</span>
                             </div>
-                            <span className="text-white block truncate text-[10px]">{sess.title}</span>
+                            <span className="text-slate-900 block truncate text-[10px]">{sess.title}</span>
                           </div>
                         );
                       })}
@@ -640,59 +640,59 @@ export function BatchManagementClient({
       {/* 🔍 TAB 3: DEDICATED LECTURE DELIVERY & ATTENDANCE AUDIT LEDGER */}
       {/* ========================================================================= */}
       {activeTab === 'audit' && (
-        <div className="p-6 rounded-3xl bg-red-950/20 backdrop-blur-xl border border-red-500/20 space-y-6 shadow-[0_4px_25px_rgba(220,38,38,0.05)] font-sans">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 space-y-6 shadow-[0_4px_20px_rgba(220,38,38,0.04)] font-sans">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-500/20 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-200 pb-4">
             <div>
-              <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-[10px] mb-1">
+              <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] mb-1 font-bold">
                 ATTENDANCE AUDIT LEDGER
               </Badge>
-              <h2 className="text-xl font-bold font-mono text-white flex items-center gap-2">
-                <CheckSquare className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
+                <CheckSquare className="w-5 h-5 text-emerald-600" />
                 Date & Lecture Inspection Ledger
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 Audit every lecture delivered on any specific date, verify faculty agenda logs, and inspect student check-in records.
               </p>
             </div>
 
             <button
               onClick={loadDeliveredLectures}
-              className="px-4 py-2 rounded-full bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-500/30 font-mono font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-mono font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+              <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
               <span>Refresh Ledger</span>
             </button>
           </div>
 
           {/* Filter Bar */}
-          <div className="p-4 rounded-2xl bg-black/60 border border-red-500/30 space-y-3 font-mono text-xs">
-            <span className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-red-400" />
+          <div className="p-4 rounded-2xl bg-slate-50 border border-red-200 space-y-3 font-mono text-xs">
+            <span className="font-bold text-slate-950 uppercase text-[11px] flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-red-600" />
               Filter Delivered Lectures by Date, Cohort & Faculty
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1 font-bold">
+                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-bold">
                   Select Specific Date
                 </label>
                 <input
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full bg-black/60 border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs"
+                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1 font-bold">
+                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-bold">
                   Filter by Cohort / Batch
                 </label>
                 <select
                   value={batchFilter}
                   onChange={(e) => setBatchFilter(e.target.value)}
-                  className="w-full bg-[#1a080d] border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs"
+                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
                 >
                   <option value="ALL">-- All Batches --</option>
                   {batches.map((b) => (
@@ -704,13 +704,13 @@ export function BatchManagementClient({
               </div>
 
               <div>
-                <label className="block text-[10px] text-slate-400 uppercase mb-1 font-bold">
+                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-bold">
                   Filter by Faculty Lead
                 </label>
                 <select
                   value={mentorFilter}
                   onChange={(e) => setMentorFilter(e.target.value)}
-                  className="w-full bg-[#1a080d] border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs"
+                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
                 >
                   <option value="ALL">-- All Mentors --</option>
                   {mentors.map((m) => (
@@ -724,9 +724,9 @@ export function BatchManagementClient({
 
             {(dateFilter || batchFilter !== 'ALL' || mentorFilter !== 'ALL') && (
               <div className="flex justify-between items-center pt-1">
-                <span className="text-[11px] text-slate-300">
+                <span className="text-[11px] text-slate-700">
                   Showing filtered delivered lectures for:{' '}
-                  <strong className="text-red-300">
+                  <strong className="text-red-700">
                     {dateFilter ? new Date(dateFilter).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }) : 'All Dates'}
                   </strong>
                 </span>
@@ -737,7 +737,7 @@ export function BatchManagementClient({
                     setBatchFilter('ALL');
                     setMentorFilter('ALL');
                   }}
-                  className="text-[11px] text-red-300 hover:text-white underline cursor-pointer"
+                  className="text-[11px] text-red-600 hover:text-red-800 underline cursor-pointer font-bold"
                 >
                   Reset Filters
                 </button>
@@ -747,7 +747,7 @@ export function BatchManagementClient({
 
           {/* Delivered Lectures Audit List */}
           {loadingLectures ? (
-            <div className="p-8 text-center text-slate-400 font-mono">Loading delivered lectures ledger...</div>
+            <div className="p-8 text-center text-slate-500 font-mono">Loading delivered lectures ledger...</div>
           ) : deliveredLectures.length === 0 ? (
             <div className="p-8 text-center text-slate-500 font-mono">No delivered lectures recorded yet.</div>
           ) : (
@@ -777,58 +777,58 @@ export function BatchManagementClient({
                   return (
                     <div
                       key={sess.id}
-                      className="p-5 rounded-2xl bg-black/40 border border-red-500/20 space-y-3 hover:border-red-500/40 transition-all"
+                      className="p-5 rounded-3xl bg-white border border-red-200/80 space-y-3 hover:border-red-400 shadow-[0_4px_20px_rgba(220,38,38,0.03)] transition-all"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-red-500/10 pb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-red-100 pb-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <Badge className="bg-red-950 text-red-300 border-red-500/30 text-[10px]">
+                            <Badge className="bg-red-50 text-red-700 border-red-200 text-[10px] font-bold">
                               {sess.batchCode}
                             </Badge>
-                            <span className="font-bold text-white text-sm">{sess.title}</span>
+                            <span className="font-bold text-slate-950 text-sm">{sess.title}</span>
                           </div>
-                          <span className="text-[11px] text-slate-300 block mt-1 font-sans">
-                            Faculty Lead: <strong className="text-white">{sess.mentorName}</strong> ({sess.mentorEmail})
+                          <span className="text-[11px] text-slate-600 block mt-1 font-sans">
+                            Faculty Lead: <strong className="text-slate-950">{sess.mentorName}</strong> ({sess.mentorEmail})
                           </span>
                         </div>
 
                         <div className="flex flex-col items-end gap-1">
-                          <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold font-mono">
+                          <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold font-mono">
                             {sess.attendancePercentage}% Attendance Rate
                           </Badge>
-                          <span className="text-[11px] text-red-300 font-mono font-bold">
+                          <span className="text-[11px] text-red-700 font-mono font-bold">
                             📅 {formattedDate} • {formattedTime}
                           </span>
                         </div>
                       </div>
 
                       {/* Agenda & Deliverables */}
-                      <div className="p-3 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                        <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                        <span className="text-[10px] text-slate-500 uppercase font-bold block">
                           Delivered Topic & Agenda
                         </span>
-                        <p className="text-slate-200 text-xs leading-relaxed font-sans">
+                        <p className="text-slate-800 text-xs leading-relaxed font-sans">
                           {sess.agenda || 'Standard hands-on live lecture and lab instruction.'}
                         </p>
                       </div>
 
                       {/* Attendance Breakdown Pills */}
                       <div className="grid grid-cols-4 gap-2 text-center text-[10px]">
-                        <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/30">
-                          <span className="text-slate-400 block">Present</span>
-                          <span className="text-sm font-bold text-emerald-300 block">{sess.presentCount}</span>
+                        <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                          <span className="text-slate-600 block font-bold">Present</span>
+                          <span className="text-sm font-bold text-emerald-700 block">{sess.presentCount}</span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/30">
-                          <span className="text-slate-400 block">Late</span>
-                          <span className="text-sm font-bold text-amber-300 block">{sess.lateCount}</span>
+                        <div className="p-2.5 rounded-2xl bg-amber-50 border border-amber-200">
+                          <span className="text-slate-600 block font-bold">Late</span>
+                          <span className="text-sm font-bold text-amber-700 block">{sess.lateCount}</span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-red-950/40 border border-red-500/30">
-                          <span className="text-slate-400 block">Absent</span>
-                          <span className="text-sm font-bold text-red-300 block">{sess.absentCount}</span>
+                        <div className="p-2.5 rounded-2xl bg-red-50 border border-red-200">
+                          <span className="text-slate-600 block font-bold">Absent</span>
+                          <span className="text-sm font-bold text-red-700 block">{sess.absentCount}</span>
                         </div>
-                        <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-500/30">
-                          <span className="text-slate-400 block">Excused</span>
-                          <span className="text-sm font-bold text-purple-300 block">{sess.excusedCount}</span>
+                        <div className="p-2.5 rounded-2xl bg-purple-50 border border-purple-200">
+                          <span className="text-slate-600 block font-bold">Excused</span>
+                          <span className="text-sm font-bold text-purple-700 block">{sess.excusedCount}</span>
                         </div>
                       </div>
 
@@ -836,15 +836,15 @@ export function BatchManagementClient({
                       {sess.records?.length > 0 && (
                         <div className="pt-2">
                           <details className="group">
-                            <summary className="text-xs text-red-300 hover:text-white cursor-pointer select-none font-bold flex items-center gap-1.5 p-2 rounded-xl bg-red-950/30 border border-red-500/20">
-                              <UserCheck className="w-4 h-4 text-emerald-400" />
+                            <summary className="text-xs text-red-700 hover:text-red-800 cursor-pointer select-none font-bold flex items-center gap-1.5 p-2 rounded-xl bg-red-50 border border-red-200">
+                              <UserCheck className="w-4 h-4 text-emerald-600" />
                               <span>View Lecture Student Check-In List ({sess.records.length} Students Tracked)</span>
                             </summary>
 
-                            <div className="mt-3 max-h-56 overflow-y-auto rounded-xl border border-red-500/20 bg-black/60">
+                            <div className="mt-3 max-h-56 overflow-y-auto rounded-2xl border border-red-200 bg-white">
                               <table className="w-full text-left text-[11px] font-mono">
                                 <thead>
-                                  <tr className="bg-white/5 border-b border-red-500/20 text-slate-400 uppercase text-[10px]">
+                                  <tr className="bg-red-50/70 border-b border-red-200 text-red-950 uppercase text-[10px] font-bold">
                                     <th className="p-2.5">Student</th>
                                     <th className="p-2.5">TS-ID</th>
                                     <th className="p-2.5">Status</th>
@@ -852,30 +852,30 @@ export function BatchManagementClient({
                                     <th className="p-2.5">Remarks / Lab Hash</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-red-500/10">
+                                <tbody className="divide-y divide-red-100 text-slate-800">
                                   {sess.records.map((r: any) => (
-                                    <tr key={r.id} className="hover:bg-white/5 transition-colors">
-                                      <td className="p-2.5 font-bold text-white">{r.studentName}</td>
-                                      <td className="p-2.5 text-red-300">{r.tsId}</td>
+                                    <tr key={r.id} className="hover:bg-red-50/40 transition-colors">
+                                      <td className="p-2.5 font-bold text-slate-950">{r.studentName}</td>
+                                      <td className="p-2.5 text-red-700 font-bold">{r.tsId}</td>
                                       <td className="p-2.5">
                                         <span
                                           className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                                             r.status === 'PRESENT'
-                                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                               : r.status === 'ABSENT'
-                                              ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                                              ? 'bg-red-50 text-red-700 border border-red-200'
                                               : r.status === 'LATE'
-                                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                              : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                              : 'bg-purple-50 text-purple-700 border border-purple-200'
                                           }`}
                                         >
                                           {r.status}
                                         </span>
                                       </td>
-                                      <td className="p-2.5 text-slate-400">
+                                      <td className="p-2.5 text-slate-600">
                                         {r.checkInTime ? new Date(r.checkInTime).toLocaleTimeString() : 'N/A'}
                                       </td>
-                                      <td className="p-2.5 text-slate-300 max-w-[200px] truncate font-sans">
+                                      <td className="p-2.5 text-slate-700 max-w-[200px] truncate font-sans">
                                         {r.remarks || 'Standard lecture check-in.'}
                                       </td>
                                     </tr>
@@ -898,41 +898,41 @@ export function BatchManagementClient({
       {/* 🛡️ TAB 4: MENTOR ATTENDANCE CORRECTION REQUESTS REVIEW */}
       {/* ========================================================================= */}
       {activeTab === 'corrections' && (
-        <div className="p-6 rounded-3xl bg-red-950/20 backdrop-blur-xl border border-red-500/20 space-y-6 shadow-[0_4px_25px_rgba(220,38,38,0.05)] font-sans">
+        <div className="p-6 rounded-3xl bg-white border border-red-200/80 space-y-6 shadow-[0_4px_20px_rgba(220,38,38,0.04)] font-sans">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-500/20 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-200 pb-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Badge className="bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono text-[10px]">
+                <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-mono text-[10px] font-bold">
                   IMMUTABLE AUDIT WORKFLOW
                 </Badge>
                 {pendingCorrectionsCount > 0 && (
-                  <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-[10px]">
+                  <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] font-bold">
                     {pendingCorrectionsCount} PENDING ACTION
                   </Badge>
                 )}
               </div>
-              <h2 className="text-xl font-bold font-mono text-white flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-amber-400" />
+              <h2 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-amber-600" />
                 Mentor Attendance Correction Requests
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 Review and approve or reject attendance correction requests submitted by mentors after the batch 24-hour attendance edit window has locked.
               </p>
             </div>
 
             <button
               onClick={loadCorrectionRequests}
-              className="px-4 py-2 rounded-full bg-red-950/60 hover:bg-red-900/60 text-amber-300 border border-amber-500/30 font-mono font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-mono font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
               <span>Refresh Requests</span>
             </button>
           </div>
 
           {/* Filter Bar */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-slate-400">Filter Status:</span>
+            <span className="text-xs font-mono text-slate-600">Filter Status:</span>
             {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((st) => {
               const count =
                 st === 'ALL'
@@ -944,8 +944,8 @@ export function BatchManagementClient({
                   onClick={() => setCorrectionFilter(st)}
                   className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                     correctionFilter === st
-                      ? 'bg-amber-500 text-black font-black'
-                      : 'bg-black/40 text-slate-400 hover:text-white border border-white/10'
+                      ? 'bg-amber-500 text-black font-black shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-950 border border-slate-200'
                   }`}
                 >
                   {st} ({count})
@@ -956,18 +956,18 @@ export function BatchManagementClient({
 
           {/* Requests List */}
           {loadingCorrections ? (
-            <div className="p-8 text-center text-xs font-mono text-slate-400">
+            <div className="p-8 text-center text-xs font-mono text-slate-500">
               Loading attendance correction requests from database...
             </div>
           ) : correctionRequests.filter(
               (r) => correctionFilter === 'ALL' || r.status === correctionFilter
             ).length === 0 ? (
-            <div className="p-10 rounded-2xl bg-black/40 border border-red-500/10 text-center space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-              <p className="text-sm font-mono text-slate-300">
+            <div className="p-10 rounded-3xl bg-slate-50 border border-red-100 text-center space-y-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+              <p className="text-sm font-mono text-slate-950 font-bold">
                 No correction requests found for filter: {correctionFilter}
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600">
                 When mentors request an attendance change for past locked sessions, they will appear here for administrator review.
               </p>
             </div>
@@ -997,76 +997,76 @@ export function BatchManagementClient({
                   return (
                     <div
                       key={req.id}
-                      className="p-5 rounded-2xl bg-black/50 border border-red-500/20 hover:border-amber-500/30 transition-all space-y-4 shadow-sm"
+                      className="p-5 rounded-3xl bg-white border border-red-200/80 hover:border-amber-400 transition-all space-y-4 shadow-[0_4px_20px_rgba(220,38,38,0.03)]"
                     >
                       {/* Top Bar */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-red-100 pb-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
                               req.status === 'PENDING'
-                                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse'
+                                ? 'bg-amber-50 text-amber-700 border border-amber-300 animate-pulse'
                                 : req.status === 'APPROVED'
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                : 'bg-red-500/20 text-red-300 border border-red-500/40'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-red-50 text-red-700 border border-red-200'
                             }`}
                           >
                             {req.status}
                           </span>
-                          <Badge className="bg-red-950/60 text-red-300 border border-red-500/30 font-mono text-[10px]">
+                          <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px]">
                             {batchCode}
                           </Badge>
-                          <span className="text-xs text-slate-400 font-mono">
+                          <span className="text-xs text-slate-500 font-mono">
                             Requested on: {requestDate}
                           </span>
                         </div>
 
-                        <div className="text-xs text-slate-400 font-mono">
-                          Mentor: <span className="text-white font-bold">{mentorName}</span>
+                        <div className="text-xs text-slate-600 font-mono">
+                          Mentor: <span className="text-slate-950 font-bold">{mentorName}</span>
                         </div>
                       </div>
 
                       {/* Details Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
                         {/* Student Info */}
-                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                           <span className="text-slate-500 text-[10px] uppercase font-bold block">
                             Target Student
                           </span>
-                          <p className="text-sm font-bold text-white font-sans">{studentName}</p>
-                          <p className="text-xs text-red-400">{studentTsId}</p>
+                          <p className="text-sm font-bold text-slate-950 font-sans">{studentName}</p>
+                          <p className="text-xs text-red-600 font-bold">{studentTsId}</p>
                         </div>
 
                         {/* Session Info */}
-                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                           <span className="text-slate-500 text-[10px] uppercase font-bold block">
                             Lecture Session
                           </span>
-                          <p className="text-sm font-bold text-white font-sans truncate">
+                          <p className="text-sm font-bold text-slate-950 font-sans truncate">
                             {sessionTitle}
                           </p>
-                          <p className="text-xs text-slate-400">{sessionDate}</p>
+                          <p className="text-xs text-slate-600">{sessionDate}</p>
                         </div>
 
                         {/* Status Change */}
-                        <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                           <span className="text-slate-500 text-[10px] uppercase font-bold block">
                             Attendance Change
                           </span>
                           <div className="flex items-center gap-2 pt-0.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 text-slate-300">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-800">
                               {req.currentStatus}
                             </span>
-                            <span className="text-slate-500">→</span>
+                            <span className="text-slate-400">→</span>
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                                 req.requestedStatus === 'PRESENT'
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                   : req.requestedStatus === 'ABSENT'
-                                  ? 'bg-red-500/20 text-red-300 border border-red-500/40'
+                                  ? 'bg-red-50 text-red-700 border border-red-200'
                                   : req.requestedStatus === 'LATE'
-                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                                  : 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-purple-50 text-purple-700 border border-purple-200'
                               }`}
                             >
                               {req.requestedStatus}
@@ -1076,21 +1076,21 @@ export function BatchManagementClient({
                       </div>
 
                       {/* Mentor's Reason */}
-                      <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-1">
-                        <span className="text-[10px] font-mono font-bold text-amber-400 uppercase flex items-center gap-1.5">
-                          <MessageSquare className="w-3 h-3" />
+                      <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-1">
+                        <span className="text-[10px] font-mono font-bold text-amber-800 uppercase flex items-center gap-1.5">
+                          <MessageSquare className="w-3 h-3 text-amber-600" />
                           Mentor Justification & Notes
                         </span>
-                        <p className="text-xs text-slate-200 font-sans leading-relaxed">
+                        <p className="text-xs text-slate-800 font-sans leading-relaxed">
                           &quot;{req.reason}&quot;
                         </p>
                       </div>
 
                       {/* Administrative Review Section */}
                       {req.status === 'PENDING' ? (
-                        <div className="pt-2 border-t border-white/10 space-y-3">
+                        <div className="pt-2 border-t border-red-100 space-y-3">
                           <div>
-                            <label className="block text-[10px] font-mono text-slate-400 mb-1">
+                            <label className="block text-[10px] font-mono text-slate-600 mb-1 font-bold">
                               ADMIN AUDIT NOTES / REASON FOR DECISION:
                             </label>
                             <input
@@ -1100,7 +1100,7 @@ export function BatchManagementClient({
                                 setReviewNotes({ ...reviewNotes, [req.id]: e.target.value })
                               }
                               placeholder="e.g., Verified mentor medical justification receipt. Approved change."
-                              className="w-full bg-black/60 border border-red-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400 font-sans"
+                              className="w-full bg-slate-50 border border-red-200 rounded-2xl px-4 py-2.5 text-xs text-slate-950 placeholder:text-slate-400 focus:outline-none focus:border-amber-500 focus:bg-white font-sans"
                             />
                           </div>
 
@@ -1108,7 +1108,7 @@ export function BatchManagementClient({
                             <button
                               disabled={isProcessing}
                               onClick={() => handleAdminReview(req.id, 'APPROVED')}
-                              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                              className="px-5 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                             >
                               <CheckCircle2 className="w-4 h-4" />
                               <span>{isProcessing ? 'Processing...' : 'Approve Correction'}</span>
@@ -1117,7 +1117,7 @@ export function BatchManagementClient({
                             <button
                               disabled={isProcessing}
                               onClick={() => handleAdminReview(req.id, 'REJECTED')}
-                              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                              className="px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                             >
                               <XCircle className="w-4 h-4" />
                               <span>{isProcessing ? 'Processing...' : 'Reject Request'}</span>
@@ -1125,14 +1125,14 @@ export function BatchManagementClient({
                           </div>
                         </div>
                       ) : (
-                        <div className="pt-2 border-t border-white/10 text-xs font-mono flex items-center justify-between text-slate-400">
+                        <div className="pt-2 border-t border-red-100 text-xs font-mono flex items-center justify-between text-slate-600">
                           <div>
                             Reviewed on:{' '}
-                            <span className="text-white">
+                            <span className="text-slate-950 font-bold">
                               {req.reviewedAt ? new Date(req.reviewedAt).toLocaleString() : 'N/A'}
                             </span>
                             {req.adminNotes && (
-                              <span className="ml-3 italic text-slate-300 font-sans">
+                              <span className="ml-3 italic text-slate-700 font-sans">
                                 Note: &quot;{req.adminNotes}&quot;
                               </span>
                             )}
@@ -1140,8 +1140,8 @@ export function BatchManagementClient({
                           <Badge
                             className={`font-mono text-[10px] ${
                               req.status === 'APPROVED'
-                                ? 'bg-emerald-500/20 text-emerald-300'
-                                : 'bg-red-500/20 text-red-300'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
                             }`}
                           >
                             {req.status}
@@ -1158,47 +1158,47 @@ export function BatchManagementClient({
 
       {/* 🚀 CONDUCT NEW BATCH DIALOG */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md bg-[#0d0306] border border-red-500/30 text-white rounded-3xl p-6 font-sans">
-          <DialogHeader className="border-b border-red-500/20 pb-3">
-            <DialogTitle className="text-lg font-bold font-mono text-white flex items-center gap-2">
-              <Plus className="w-5 h-5 text-red-400" />
+        <DialogContent className="max-w-md bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 font-sans">
+          <DialogHeader className="border-b border-red-100 pb-3">
+            <DialogTitle className="text-lg font-bold font-mono text-slate-950 flex items-center gap-2">
+              <Plus className="w-5 h-5 text-red-600" />
               Conduct New Academic Batch / Cohort
             </DialogTitle>
           </DialogHeader>
 
           {feedbackMsg && (
-            <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-mono">
+            <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
               {feedbackMsg}
             </div>
           )}
 
           <form onSubmit={handleCreateBatch} className="space-y-3.5 text-xs font-mono">
             <div>
-              <label className="block text-slate-300 font-bold mb-1">BATCH CODE / ID *</label>
+              <label className="block text-slate-700 font-bold mb-1">BATCH CODE / ID *</label>
               <input
                 name="batchCode"
                 placeholder="e.g. TSE-COHORT-2026-GAMMA"
                 required
-                className="w-full bg-black/50 border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs uppercase"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs uppercase focus:outline-none focus:border-red-500 focus:bg-white"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-bold mb-1">COHORT TITLE *</label>
+              <label className="block text-slate-700 font-bold mb-1">COHORT TITLE *</label>
               <input
                 name="title"
                 placeholder="e.g. Advanced Bug Bounty & Web Application Security"
                 required
-                className="w-full bg-black/50 border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">COURSE CURRICULUM</label>
+                <label className="block text-slate-700 font-bold mb-1">COURSE CURRICULUM</label>
                 <select
                   name="courseId"
-                  className="w-full bg-[#1a080d] border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs"
+                  className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white"
                 >
                   <option value="">-- General Track --</option>
                   {courses.map((c) => (
@@ -1210,10 +1210,10 @@ export function BatchManagementClient({
               </div>
 
               <div>
-                <label className="block text-slate-300 font-bold mb-1">FACULTY MENTOR</label>
+                <label className="block text-slate-700 font-bold mb-1">FACULTY MENTOR</label>
                 <select
                   name="mentorId"
-                  className="w-full bg-[#1a080d] border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs"
+                  className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white"
                 >
                   <option value="">-- Assign Mentor --</option>
                   {mentors.map((m) => (
@@ -1227,36 +1227,36 @@ export function BatchManagementClient({
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-300 font-bold mb-1">START DATE *</label>
-                <input type="date" name="startDate" required className="w-full bg-black/50 border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs" />
+                <label className="block text-slate-700 font-bold mb-1">START DATE *</label>
+                <input type="date" name="startDate" required className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white" />
               </div>
               <div>
-                <label className="block text-slate-300 font-bold mb-1">MAX CAPACITY</label>
-                <input type="number" name="maxCapacity" defaultValue="30" className="w-full bg-black/50 border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs" />
+                <label className="block text-slate-700 font-bold mb-1">MAX CAPACITY</label>
+                <input type="number" name="maxCapacity" defaultValue="30" className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white" />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-bold mb-1">SCHEDULE & TIMINGS</label>
+              <label className="block text-slate-700 font-bold mb-1">SCHEDULE & TIMINGS</label>
               <input
                 name="schedule"
                 defaultValue="Mon / Wed / Fri • 7:00 PM - 9:00 PM IST"
-                className="w-full bg-black/50 border border-red-500/30 text-white rounded-xl px-3 py-2 text-xs font-mono"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:border-red-500 focus:bg-white"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-red-500/20">
+            <div className="flex justify-end gap-2 pt-3 border-t border-red-100">
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(false)}
-                className="px-4 py-2 rounded-full bg-white/10 text-white text-xs font-mono cursor-pointer"
+                className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-mono font-bold text-xs cursor-pointer shadow-[0_0_12px_rgba(220,38,38,0.3)]"
+                className="px-5 py-2 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-mono font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500"
               >
                 {loading ? 'Creating...' : 'Launch Batch'}
               </button>
@@ -1271,33 +1271,33 @@ export function BatchManagementClient({
           open={!!selectedBatchForStudents}
           onOpenChange={(open) => !open && setSelectedBatchForStudents(null)}
         >
-          <DialogContent className="max-w-2xl bg-[#0d0306] border border-red-500/30 text-white rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
-            <DialogHeader className="border-b border-red-500/20 pb-3">
+          <DialogContent className="max-w-2xl bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
+            <DialogHeader className="border-b border-red-100 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-[10px] mb-1">
+                  <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] mb-1 font-bold">
                     {selectedBatchForStudents.batchCode}
                   </Badge>
-                  <DialogTitle className="text-lg font-bold font-mono text-white">
+                  <DialogTitle className="text-lg font-bold font-mono text-slate-950">
                     Batch Student Roster & TS-ID Enrollment
                   </DialogTitle>
                 </div>
-                <Badge variant="outline" className="font-mono text-xs text-red-300 border-red-500/30">
+                <Badge variant="outline" className="font-mono text-xs text-red-700 border-red-200 bg-red-50">
                   {selectedBatchForStudents.students?.length || 0} Students Enrolled
                 </Badge>
               </div>
             </DialogHeader>
 
             {feedbackMsg && (
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-mono">
+              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
                 {feedbackMsg}
               </div>
             )}
 
             <div className="py-3 space-y-4 flex-1 overflow-hidden flex flex-col text-xs font-mono">
-              <form onSubmit={handleFastEnrollByTsId} className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 space-y-2">
-                <span className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">
-                  <UserPlus className="w-3.5 h-3.5 text-red-400" />
+              <form onSubmit={handleFastEnrollByTsId} className="p-4 rounded-2xl bg-red-50/50 border border-red-200/80 space-y-2">
+                <span className="font-bold text-slate-950 uppercase text-[11px] flex items-center gap-1.5">
+                  <UserPlus className="w-3.5 h-3.5 text-red-600" />
                   Fast Enroll Student by Student ID (TS-ID / Email)
                 </span>
                 <div className="flex gap-2">
@@ -1306,12 +1306,12 @@ export function BatchManagementClient({
                     placeholder="Enter Student TS-ID (e.g. TS-C126, TS-A103) or Email..."
                     value={tsIdInput}
                     onChange={(e) => setTsIdInput(e.target.value)}
-                    className="flex-1 bg-black/60 border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs placeholder:text-slate-500"
+                    className="flex-1 bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs placeholder:text-slate-400 focus:outline-none focus:border-red-500"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs cursor-pointer shadow-[0_0_10px_rgba(220,38,38,0.3)] whitespace-nowrap"
+                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(220,38,38,0.25)] whitespace-nowrap border border-red-500"
                   >
                     Enroll Student
                   </button>
@@ -1319,16 +1319,16 @@ export function BatchManagementClient({
               </form>
 
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-500" />
+                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
                 <input
                   placeholder="Filter student directory by Name, Email, or TS-ID..."
                   value={searchStudent}
                   onChange={(e) => setSearchStudent(e.target.value)}
-                  className="w-full bg-black/50 border border-red-500/20 text-white pl-9 pr-3 py-2 rounded-xl text-xs"
+                  className="w-full bg-slate-50 border border-red-200 text-slate-950 pl-9 pr-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500 focus:bg-white"
                 />
               </div>
 
-              <div className="flex-1 overflow-y-auto border border-red-500/20 rounded-2xl divide-y divide-red-500/10 bg-black/40">
+              <div className="flex-1 overflow-y-auto border border-red-200 rounded-2xl divide-y divide-red-100 bg-white">
                 {filteredStudents.map((student) => {
                   const isAssigned = student.batchId === selectedBatchForStudents.id;
                   const tsId = student.user?.tsIdentity?.tsId || 'TS-STUDENT';
@@ -1336,18 +1336,18 @@ export function BatchManagementClient({
                   return (
                     <div
                       key={student.id}
-                      className="p-3 flex items-center justify-between gap-3 hover:bg-red-950/30 transition-colors"
+                      className="p-3 flex items-center justify-between gap-3 hover:bg-red-50/40 transition-colors"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-white">
+                          <span className="font-bold text-xs text-slate-950">
                             {student.user?.name || 'Student'}
                           </span>
-                          <span className="font-mono text-[10px] text-red-300 bg-red-950/60 px-2 py-0.5 rounded border border-red-500/30">
+                          <span className="font-mono text-[10px] text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200 font-bold">
                             {tsId}
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-400 block font-sans">
+                        <span className="text-[11px] text-slate-600 block font-sans">
                           {student.user?.email} • Goal: {student.careerGoal || 'Cyber Security'}
                         </span>
                       </div>
@@ -1356,7 +1356,7 @@ export function BatchManagementClient({
                         <button
                           disabled={loading}
                           onClick={() => handleAssignStudent(student.id, null)}
-                          className="px-3 py-1.5 rounded-full bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95"
+                          className="px-3 py-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95"
                         >
                           Remove from Batch
                         </button>
@@ -1366,9 +1366,9 @@ export function BatchManagementClient({
                           onClick={() =>
                             handleAssignStudent(student.id, selectedBatchForStudents.id)
                           }
-                          className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
                         >
-                          <Plus className="w-3 h-3 text-red-400" />
+                          <Plus className="w-3 h-3 text-red-600" />
                           <span>Assign</span>
                         </button>
                       )}
@@ -1378,10 +1378,10 @@ export function BatchManagementClient({
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-red-500/20">
+            <div className="flex justify-end pt-3 border-t border-red-100">
               <button
                 onClick={() => setSelectedBatchForStudents(null)}
-                className="px-4 py-1.5 rounded-full bg-white/10 text-white font-mono text-xs cursor-pointer"
+                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs cursor-pointer font-bold"
               >
                 Done
               </button>
@@ -1396,33 +1396,33 @@ export function BatchManagementClient({
           open={!!selectedBatchForSessions}
           onOpenChange={(open) => !open && setSelectedBatchForSessions(null)}
         >
-          <DialogContent className="max-w-2xl bg-[#0d0306] border border-red-500/30 text-white rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
-            <DialogHeader className="border-b border-red-500/20 pb-3">
+          <DialogContent className="max-w-2xl bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
+            <DialogHeader className="border-b border-red-100 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-[10px] mb-1">
+                  <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] mb-1 font-bold">
                     {selectedBatchForSessions.batchCode}
                   </Badge>
-                  <DialogTitle className="text-lg font-bold font-mono text-white">
+                  <DialogTitle className="text-lg font-bold font-mono text-slate-950">
                     Conducted Lectures & Attendance Ledger
                   </DialogTitle>
                 </div>
-                <Badge variant="outline" className="font-mono text-xs text-red-300 border-red-500/30">
+                <Badge variant="outline" className="font-mono text-xs text-red-700 border-red-200 bg-red-50">
                   {selectedBatchForSessions.sessions?.length || 0} Lectures Conducted
                 </Badge>
               </div>
             </DialogHeader>
 
             {feedbackMsg && (
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-mono">
+              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
                 {feedbackMsg}
               </div>
             )}
 
             <div className="py-3 space-y-4 flex-1 overflow-y-auto text-xs font-mono">
-              <form onSubmit={handleCreateSession} className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 space-y-3">
-                <span className="font-bold text-white uppercase text-[11px] flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-red-400" />
+              <form onSubmit={handleCreateSession} className="p-4 rounded-2xl bg-red-50/50 border border-red-200/80 space-y-3">
+                <span className="font-bold text-slate-950 uppercase text-[11px] flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-red-600" />
                   Schedule / Conduct Lecture Session
                 </span>
 
@@ -1433,14 +1433,14 @@ export function BatchManagementClient({
                     value={newSessionTitle}
                     onChange={(e) => setNewSessionTitle(e.target.value)}
                     required
-                    className="bg-black/60 border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs"
+                    className="bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
                   />
                   <input
                     type="datetime-local"
                     value={newSessionDate}
                     onChange={(e) => setNewSessionDate(e.target.value)}
                     required
-                    className="bg-black/60 border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs"
+                    className="bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
                   />
                 </div>
 
@@ -1449,45 +1449,45 @@ export function BatchManagementClient({
                   placeholder="Session Agenda / Target Labs..."
                   value={newSessionAgenda}
                   onChange={(e) => setNewSessionAgenda(e.target.value)}
-                  className="w-full bg-black/60 border border-red-500/30 text-white px-3 py-2 rounded-xl text-xs"
+                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
                 />
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs cursor-pointer shadow-[0_0_10px_rgba(220,38,38,0.3)]"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500"
                 >
                   Schedule Session
                 </button>
               </form>
 
               <div className="space-y-2">
-                <span className="font-bold text-slate-300 block uppercase text-[11px]">
+                <span className="font-bold text-slate-800 block uppercase text-[11px]">
                   Conducted Lecture Sessions ({selectedBatchForSessions.sessions?.length || 0})
                 </span>
 
                 {(!selectedBatchForSessions.sessions || selectedBatchForSessions.sessions.length === 0) ? (
-                  <div className="p-6 text-center text-slate-500 font-sans border border-red-500/20 rounded-2xl">
+                  <div className="p-6 text-center text-slate-500 font-sans border border-red-100 rounded-2xl bg-slate-50">
                     No lecture sessions recorded for this batch yet.
                   </div>
                 ) : (
                   selectedBatchForSessions.sessions.map((sess: any) => (
                     <div
                       key={sess.id}
-                      className="p-3.5 rounded-2xl bg-black/40 border border-red-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      className="p-3.5 rounded-2xl bg-white border border-red-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <Badge className="bg-red-950 text-red-300 border-red-500/30 text-[9px]">
+                          <Badge className="bg-red-50 text-red-700 border-red-200 text-[9px] font-bold">
                             Session {sess.sessionNumber}
                           </Badge>
-                          <span className="font-bold text-white text-xs">{sess.title}</span>
+                          <span className="font-bold text-slate-950 text-xs">{sess.title}</span>
                         </div>
-                        <span className="text-[11px] text-slate-400 block mt-1">
+                        <span className="text-[11px] text-slate-600 block mt-1">
                           Date: {new Date(sess.sessionDate).toLocaleString()} • Duration: {sess.durationMins}m
                         </span>
                         {sess.agenda && (
-                          <span className="text-[10px] text-red-300 block font-sans mt-0.5">
+                          <span className="text-[10px] text-red-700 block font-sans mt-0.5">
                             Agenda: {sess.agenda}
                           </span>
                         )}
@@ -1495,9 +1495,9 @@ export function BatchManagementClient({
 
                       <button
                         onClick={() => openAttendanceModal(sess, selectedBatchForSessions)}
-                        className="px-4 py-2 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-mono text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap"
+                        className="px-4 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-mono text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap"
                       >
-                        <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                        <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
                         <span>Mark / Review Attendance ({sess.attendanceRecords?.length || 0})</span>
                       </button>
                     </div>
@@ -1506,10 +1506,10 @@ export function BatchManagementClient({
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-red-500/20">
+            <div className="flex justify-end pt-3 border-t border-red-100">
               <button
                 onClick={() => setSelectedBatchForSessions(null)}
-                className="px-4 py-1.5 rounded-full bg-white/10 text-white font-mono text-xs cursor-pointer"
+                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs cursor-pointer font-bold"
               >
                 Close
               </button>
@@ -1524,35 +1524,35 @@ export function BatchManagementClient({
           open={!!selectedSessionForAttendance}
           onOpenChange={(open) => !open && setSelectedSessionForAttendance(null)}
         >
-          <DialogContent className="max-w-2xl bg-[#0d0306] border border-red-500/30 text-white rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
-            <DialogHeader className="border-b border-red-500/20 pb-3">
+          <DialogContent className="max-w-2xl bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
+            <DialogHeader className="border-b border-red-100 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-[10px] mb-1">
+                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[10px] mb-1 font-bold">
                     ATTENDANCE LEDGER
                   </Badge>
-                  <DialogTitle className="text-base font-bold font-mono text-white">
+                  <DialogTitle className="text-base font-bold font-mono text-slate-950">
                     {selectedSessionForAttendance.session.title}
                   </DialogTitle>
                 </div>
-                <span className="text-xs text-slate-400 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   {selectedSessionForAttendance.batch.batchCode}
                 </span>
               </div>
             </DialogHeader>
 
             {feedbackMsg && (
-              <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs font-mono">
+              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
                 {feedbackMsg}
               </div>
             )}
 
             <div className="py-3 space-y-3 flex-1 overflow-y-auto text-xs font-mono">
-              <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/20 text-slate-300 text-[11px]">
+              <div className="p-3 rounded-2xl bg-red-50/50 border border-red-200 text-slate-700 text-[11px]">
                 Toggle attendance status for each enrolled student in this cohort and click <strong>Save Attendance Ledger</strong>.
               </div>
 
-              <div className="border border-red-500/20 rounded-2xl divide-y divide-red-500/10 bg-black/40">
+              <div className="border border-red-200 rounded-2xl divide-y divide-red-100 bg-white">
                 {selectedSessionForAttendance.batch.students?.length === 0 ? (
                   <div className="p-6 text-center text-slate-500">
                     No students currently enrolled in this batch. Fast-enroll students via Student Roster.
@@ -1563,13 +1563,13 @@ export function BatchManagementClient({
                     const tsId = student.user?.tsIdentity?.tsId || 'TS-STUDENT';
 
                     return (
-                      <div key={student.id} className="p-3 space-y-2 hover:bg-white/5 transition-colors">
+                      <div key={student.id} className="p-3 space-y-2 hover:bg-red-50/30 transition-colors">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
-                            <span className="font-bold text-white text-xs block">
+                            <span className="font-bold text-slate-950 text-xs block">
                               {student.user?.name}
                             </span>
-                            <span className="text-[10px] text-red-300 block">
+                            <span className="text-[10px] text-red-700 block font-bold">
                               {tsId} • {student.user?.email}
                             </span>
                           </div>
@@ -1585,13 +1585,13 @@ export function BatchManagementClient({
                                 className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
                                   status === st
                                     ? st === 'PRESENT'
-                                      ? 'bg-emerald-500 text-black border border-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                                      ? 'bg-emerald-600 text-white border border-emerald-600 shadow-[0_2px_8px_rgba(16,185,129,0.3)]'
                                       : st === 'ABSENT'
-                                      ? 'bg-red-600 text-white border border-red-400 shadow-[0_0_8px_rgba(239,68,68,0.4)]'
+                                      ? 'bg-red-600 text-white border border-red-600 shadow-[0_2px_8px_rgba(239,68,68,0.3)]'
                                       : st === 'LATE'
-                                      ? 'bg-amber-500 text-black border border-amber-400'
-                                      : 'bg-purple-500 text-white border border-purple-400'
-                                    : 'bg-white/5 text-slate-400 border border-white/10 hover:text-white'
+                                      ? 'bg-amber-500 text-black border border-amber-500'
+                                      : 'bg-purple-600 text-white border border-purple-600'
+                                    : 'bg-slate-100 text-slate-600 border border-slate-200 hover:text-slate-950'
                                 }`}
                               >
                                 {st}
@@ -1607,7 +1607,7 @@ export function BatchManagementClient({
                           onChange={(e) =>
                             setAttendanceRemarks((prev) => ({ ...prev, [student.id]: e.target.value }))
                           }
-                          className="w-full bg-black/60 border border-red-500/20 text-white px-3 py-1.5 rounded-xl text-[11px] placeholder:text-slate-600"
+                          className="w-full bg-slate-50 border border-red-200 text-slate-950 px-3 py-1.5 rounded-xl text-[11px] placeholder:text-slate-400 focus:outline-none focus:border-red-500 focus:bg-white"
                         />
                       </div>
                     );
@@ -1616,11 +1616,11 @@ export function BatchManagementClient({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-red-500/20">
+            <div className="flex justify-end gap-2 pt-3 border-t border-red-100">
               <button
                 type="button"
                 onClick={() => setSelectedSessionForAttendance(null)}
-                className="px-4 py-1.5 rounded-full bg-white/10 text-white text-xs font-mono cursor-pointer"
+                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono cursor-pointer font-bold"
               >
                 Cancel
               </button>
@@ -1628,7 +1628,7 @@ export function BatchManagementClient({
                 type="button"
                 disabled={loading}
                 onClick={handleSaveAttendance}
-                className="px-5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-mono font-bold text-xs cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                className="px-5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-mono font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(16,185,129,0.25)] border border-emerald-500"
               >
                 {loading ? 'Saving...' : 'Save Attendance Ledger'}
               </button>

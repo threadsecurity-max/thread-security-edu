@@ -67,14 +67,14 @@ export default async function AdminStudentDirectoryPage({
   });
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans relative z-10">
+    <div className="space-y-8 text-slate-900 font-sans relative z-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-200 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight leading-tight">
             Student &amp; Guest Identity Directory
           </h1>
-          <p className="text-xs text-red-200/70 font-mono mt-1">
+          <p className="text-xs text-slate-600 font-mono mt-1">
             Manage student TS-ID credentials, grant/revoke dashboard access with a single toggle, and audit student access.
           </p>
         </div>
@@ -84,8 +84,8 @@ export default async function AdminStudentDirectoryPage({
           <Link href="/admin/students?status=ALL">
             <span className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer font-bold ${
               statusFilter === 'ALL'
-                ? 'bg-red-600 text-white border-red-500 shadow-[0_0_12px_rgba(220,38,38,0.4)]'
-                : 'bg-white/5 border-white/10 text-slate-300 hover:text-white'
+                ? 'bg-red-600 text-white border-red-600 shadow-[0_2px_10px_rgba(220,38,38,0.25)]'
+                : 'bg-white border-red-200 text-slate-700 hover:text-slate-950 hover:border-red-300'
             }`}>
               All ({totalCount})
             </span>
@@ -93,8 +93,8 @@ export default async function AdminStudentDirectoryPage({
           <Link href="/admin/students?status=APPROVED">
             <span className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer font-bold inline-flex items-center gap-1 ${
               statusFilter === 'APPROVED'
-                ? 'bg-emerald-600 text-white border-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30 hover:border-emerald-400'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-[0_2px_10px_rgba(16,185,129,0.25)]'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-300'
             }`}>
               <Unlock className="w-3 h-3 mr-1" /> Approved ({approvedCount})
             </span>
@@ -102,8 +102,8 @@ export default async function AdminStudentDirectoryPage({
           <Link href="/admin/students?status=PENDING">
             <span className={`px-3 py-1.5 rounded-full border transition-all cursor-pointer font-bold inline-flex items-center gap-1 ${
               statusFilter === 'PENDING'
-                ? 'bg-amber-600 text-white border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
-                : 'bg-amber-950/40 text-amber-300 border-amber-500/30 hover:border-amber-400'
+                ? 'bg-amber-600 text-white border-amber-600 shadow-[0_2px_10px_rgba(245,158,11,0.25)]'
+                : 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300'
             }`}>
               <Lock className="w-3 h-3 mr-1" /> Pending ({pendingCount})
             </span>
@@ -111,11 +111,11 @@ export default async function AdminStudentDirectoryPage({
         </div>
       </div>
 
-      {/* Add New Student Account Container - Simple Translucent Dark Glass */}
-      <div className="p-6 rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl shadow-xl space-y-4 font-mono text-xs">
-        <div className="flex items-center gap-2 border-b border-red-500/20 pb-3">
-          <UserPlus className="w-4 h-4 text-red-400" />
-          <h3 className="text-base font-bold text-white tracking-tight">
+      {/* Add New Student Account Container - Red Light Theme Card */}
+      <div className="p-6 rounded-3xl bg-white border border-red-200/80 shadow-[0_4px_20px_rgba(220,38,38,0.04)] space-y-4 font-mono text-xs">
+        <div className="flex items-center gap-2 border-b border-red-100 pb-3">
+          <UserPlus className="w-4 h-4 text-red-600" />
+          <h3 className="text-base font-bold text-slate-950 tracking-tight">
             Provision New Student Account &amp; TS-ID
           </h3>
         </div>
@@ -129,39 +129,39 @@ export default async function AdminStudentDirectoryPage({
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-              <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+              <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
                 Student Full Name *
               </label>
               <input
                 type="text"
                 name="name"
                 placeholder="e.g. Rahul Sharma"
-                className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+              <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
                 Email Address *
               </label>
               <input
                 type="email"
                 name="email"
                 placeholder="e.g. rahul.sharma@gmail.com"
-                className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+              <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
                 Specialization Track *
               </label>
               <select
                 name="track"
                 defaultValue="CYBER"
-                className="w-full bg-[#1a060d] border border-red-500/30 text-white text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 font-mono font-bold"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white font-mono font-bold"
               >
                 <option value="CYBER">🛡️ Cybersecurity Track (TS-CXXX)</option>
                 <option value="AI">🤖 AI &amp; ML Track (TS-AXXX)</option>
@@ -169,26 +169,26 @@ export default async function AdminStudentDirectoryPage({
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+              <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
                 Contact Phone
               </label>
               <input
                 type="text"
                 name="phone"
                 placeholder="e.g. +91 98765-43210"
-                className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono text-red-300/80 uppercase tracking-wider mb-1.5 font-bold">
+              <label className="block text-[11px] font-mono text-slate-700 uppercase tracking-wider mb-1.5 font-bold">
                 Career Objective
               </label>
               <input
                 type="text"
                 name="careerGoal"
                 placeholder="e.g. VAPT / AI Engineer"
-                className="w-full bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
+                className="w-full bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl px-4 py-3 focus:outline-none focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20 transition-all font-mono"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ export default async function AdminStudentDirectoryPage({
           <div className="flex justify-end pt-2">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_20px_rgba(220,38,38,0.4)] border border-white/20 active:scale-95 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500 active:scale-95 transition-all cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               <span>Provision Track Student Account &amp; TS-ID</span>
@@ -206,7 +206,7 @@ export default async function AdminStudentDirectoryPage({
       </div>
 
       {/* Search & Segregation Filters */}
-      <div className="p-4 rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl flex flex-col md:flex-row gap-3 items-center justify-between font-mono text-xs shadow-xl">
+      <div className="p-4 rounded-3xl bg-white border border-red-200/80 flex flex-col md:flex-row gap-3 items-center justify-between font-mono text-xs shadow-[0_4px_20px_rgba(220,38,38,0.03)]">
         <form method="GET" className="flex-1 w-full flex gap-3">
           <input type="hidden" name="status" value={statusFilter} />
           <div className="relative flex-1">
@@ -216,36 +216,36 @@ export default async function AdminStudentDirectoryPage({
               name="q"
               defaultValue={query}
               placeholder="Search by student name, email, contact number, or TS-ID (e.g. TS-C126 or TS-A103)..."
-              className="w-full pl-10 pr-4 py-2.5 bg-red-950/30 border border-red-500/30 text-white placeholder:text-slate-500 text-xs rounded-2xl focus:outline-none focus:border-red-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-red-200 text-slate-950 placeholder:text-slate-400 text-xs rounded-2xl focus:outline-none focus:border-red-500 focus:bg-white"
             />
           </div>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white font-bold border border-white/15 transition-all cursor-pointer"
+            className="px-5 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold border border-red-600 transition-all cursor-pointer shadow-xs"
           >
             Search
           </button>
         </form>
 
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-slate-400 font-mono">Filter:</span>
+          <span className="text-slate-500 font-mono">Filter:</span>
           <Link href={`/admin/students?q=${query}&status=ALL`}>
-            <span className={`px-3 py-1.5 rounded-full cursor-pointer transition-all ${
-              statusFilter === 'ALL' ? 'bg-red-600 text-white font-bold' : 'bg-white/5 text-slate-300 hover:text-white'
+            <span className={`px-3 py-1.5 rounded-full cursor-pointer transition-all border ${
+              statusFilter === 'ALL' ? 'bg-red-600 text-white font-bold border-red-600' : 'bg-white text-slate-700 border-red-200 hover:border-red-300'
             }`}>
               All
             </span>
           </Link>
           <Link href={`/admin/students?q=${query}&status=APPROVED`}>
-            <span className={`px-3 py-1.5 rounded-full cursor-pointer transition-all ${
-              statusFilter === 'APPROVED' ? 'bg-emerald-600 text-white font-bold' : 'bg-white/5 text-slate-300 hover:text-white'
+            <span className={`px-3 py-1.5 rounded-full cursor-pointer transition-all border ${
+              statusFilter === 'APPROVED' ? 'bg-emerald-600 text-white font-bold border-emerald-600' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-300'
             }`}>
               Approved
             </span>
           </Link>
           <Link href={`/admin/students?q=${query}&status=PENDING`}>
-            <span className={`px-3 py-1.5 rounded-full cursor-pointer transition-all ${
-              statusFilter === 'PENDING' ? 'bg-amber-600 text-white font-bold' : 'bg-white/5 text-slate-300 hover:text-white'
+            <span className={`px-3 py-1.5 rounded-full cursor-pointer transition-all border ${
+              statusFilter === 'PENDING' ? 'bg-amber-600 text-white font-bold border-amber-600' : 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-300'
             }`}>
               Pending Guests
             </span>
@@ -254,10 +254,10 @@ export default async function AdminStudentDirectoryPage({
       </div>
 
       {/* Students Table */}
-      <div className="overflow-hidden rounded-3xl bg-[#120408]/90 border border-red-500/20 backdrop-blur-xl shadow-xl">
+      <div className="overflow-hidden rounded-3xl bg-white border border-red-200/80 shadow-[0_4px_20px_rgba(220,38,38,0.03)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-[#1e070e] text-red-200 border-b border-red-500/20 uppercase tracking-wider">
+            <thead className="bg-red-50/70 text-red-950 border-b border-red-200/80 uppercase tracking-wider">
               <tr>
                 <th className="p-4 font-bold">TS-ID Identity</th>
                 <th className="p-4 font-bold">Student Full Name</th>
@@ -268,10 +268,10 @@ export default async function AdminStudentDirectoryPage({
                 <th className="p-4 font-bold text-right">Access Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-red-500/10 text-slate-200">
+            <tbody className="divide-y divide-red-100/80 text-slate-800">
               {students.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 font-sans">
+                  <td colSpan={7} className="p-8 text-center text-slate-500 font-sans">
                     No student records matching your query or filter.
                   </td>
                 </tr>
@@ -281,40 +281,40 @@ export default async function AdminStudentDirectoryPage({
                   const isApproved = (student as any).isDashboardAccessGranted;
 
                   return (
-                    <tr key={student.id} className="hover:bg-red-950/30 transition-colors">
+                    <tr key={student.id} className="hover:bg-red-50/40 transition-colors">
                       <td className="p-4">
-                        <span className="px-2.5 py-1 rounded bg-red-950/60 border border-red-500/40 text-red-300 font-bold text-[11px]">
+                        <span className="px-2.5 py-1 rounded-md bg-red-50 border border-red-200 text-red-700 font-bold text-[11px]">
                           {tsId}
                         </span>
                       </td>
-                      <td className="p-4 font-bold text-white text-sm">
+                      <td className="p-4 font-bold text-slate-950 text-sm">
                         {student.name}
                       </td>
-                      <td className="p-4 text-slate-300">
+                      <td className="p-4 text-slate-700">
                         <div className="font-mono text-xs">{student.email}</div>
                         {student.studentProfile?.phone && (
-                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
-                            <Phone className="w-3 h-3 text-red-400" />
+                          <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                            <Phone className="w-3 h-3 text-red-500" />
                             {student.studentProfile.phone}
                           </div>
                         )}
                       </td>
-                      <td className="p-4 text-slate-300 max-w-xs truncate">
+                      <td className="p-4 text-slate-600 max-w-xs truncate">
                         {student.studentProfile?.careerGoal || 'Cybersecurity Specialist'}
                       </td>
                       <td className="p-4 text-center">
                         {isApproved ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
-                            <Unlock className="w-3 h-3 text-emerald-400" /> ACTIVE
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                            <Unlock className="w-3 h-3 text-emerald-600" /> ACTIVE
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-950/60 text-amber-300 border border-amber-500/40 text-[10px] font-bold">
-                            <Lock className="w-3 h-3 text-amber-400" /> GUEST / PENDING
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
+                            <Lock className="w-3 h-3 text-amber-600" /> GUEST / PENDING
                           </span>
                         )}
                       </td>
                       <td className="p-4 text-center">
-                        <span className="font-bold text-white">{student.enrollments.length}</span>
+                        <span className="font-bold text-slate-950">{student.enrollments.length}</span>
                       </td>
                       <td className="p-4 text-right">
                         <StudentActionsClient
