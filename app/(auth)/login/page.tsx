@@ -193,6 +193,8 @@ function AuthContent() {
       return;
     }
 
+    setSuccessMsg('Authentication verified! Navigating to your secure workspace...');
+
     // Navigate to requested callbackUrl or default role workspace
     const callbackUrl = searchParams.get('callbackUrl');
     const destination =
@@ -200,7 +202,8 @@ function AuthContent() {
         ? callbackUrl
         : res.redirectTo || '/admin';
 
-    window.location.href = destination;
+    // Force reliable full-page navigation to initialize server layout and session
+    window.location.replace(destination);
   }
 
   // -------------------------------------------------------------

@@ -871,6 +871,60 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     };
   }
 
+  // Handle Super Admin / General Admin user provisioning & redirection
+  if (isGeneralAdmin || (user && (user.role === 'SUPER_ADMIN' || user.role === 'ACADEMIC_ADMIN'))) {
+    let adminUser: any = user || await prisma.user.findFirst({
+      where: {
+        OR: [
+          { role: 'SUPER_ADMIN' },
+          { email: superAdminEmail },
+          { email: 'edu@threadsecurity.in' },
+          { email: 'threadsecurity@gmail.com' },
+        ],
+      },
+      include: { tsIdentity: true },
+    });
+
+    if (!adminUser) {
+      adminUser = await (prisma.user as any).create({
+        data: {
+          email: superAdminEmail,
+          name: 'Super Admin',
+          passwordHash: 'MFA_OTP_ONLY',
+          role: 'SUPER_ADMIN',
+          isDashboardAccessGranted: true,
+        },
+        include: { tsIdentity: true },
+      });
+      await prisma.tSIdentity.create({
+        data: {
+          tsId: 'TSE-ADMIN-8080',
+          userId: adminUser.id,
+        },
+      });
+    }
+
+    const clientIp = await getClientIpAddress();
+    await logAuditEvent({
+      actorId: adminUser?.id,
+      action: 'ADMIN_LOGIN_SUCCESS',
+      entity: 'USER',
+      entityId: adminUser?.id,
+      ipAddress: clientIp,
+      details: 'Super Admin authenticated successfully via MFA OTP.',
+    });
+
+    return {
+      id: adminUser.id,
+      email: adminUser.email,
+      name: adminUser.name,
+      role: 'SUPER_ADMIN',
+      tsId: adminUser.tsIdentity?.tsId || 'TSE-ADMIN-8080',
+      isDashboardAccessGranted: true,
+      redirectTo: '/admin',
+    };
+  }
+
   if (!user || !user.isActive) {
     throw new Error('Account authentication failed.');
   }
