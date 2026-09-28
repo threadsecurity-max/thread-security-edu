@@ -12,7 +12,14 @@ const ROLE_ROUTES: Record<string, string[]> = {
 
 function getSessionFromRequest(request: NextRequest): UserSession | null {
   try {
-    const rawCookie = request.cookies.get('tse_session')?.value;
+    let rawCookie = request.cookies.get('tse_session')?.value;
+    if (!rawCookie) {
+      const cookieHeader = request.headers.get('cookie') || '';
+      const match = cookieHeader.match(/(?:^|;\s*)tse_session=([^;]+)/);
+      if (match) {
+        rawCookie = match[1];
+      }
+    }
     if (!rawCookie) return null;
     return verifySessionToken(rawCookie);
   } catch {
