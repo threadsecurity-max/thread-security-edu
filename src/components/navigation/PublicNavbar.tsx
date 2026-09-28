@@ -17,7 +17,7 @@ import {
   Phone,
 } from 'lucide-react';
 import { MoreDropdown } from '@/components/navigation/MoreDropdown';
-import { logoutAction } from '@/features/auth/actions/auth.actions';
+import { LogoutButton } from '@/components/navigation/LogoutButton';
 import { MobileNavDrawer } from '@/components/navigation/MobileNavDrawer';
 
 const navItems = [

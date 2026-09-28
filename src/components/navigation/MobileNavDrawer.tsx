@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LogoutButton } from '@/components/navigation/LogoutButton';
 
 interface MobileNavDrawerProps {
   session?: any;
@@ -201,33 +202,36 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
               {/* Bottom Actions inside Drawer */}
               <div className="p-4 border-t border-gray-100 bg-neutral-50/50 space-y-2">
                 {session ? (
-                  session.role !== 'STUDENT' || session.isDashboardAccessGranted ? (
-                    <Link
-                      href={
-                        session.role === 'SECURITY_ADMIN'
-                          ? '/admin/security-analyst'
-                          : session.role === 'SUPER_ADMIN' || session.role === 'ACADEMIC_ADMIN'
-                          ? '/admin'
-                          : session.role === 'MENTOR'
-                          ? '/mentor'
-                          : '/student'
-                      }
-                      onClick={() => setIsOpen(false)}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-black text-white font-bold text-sm shadow-md active:scale-[0.99] transition-transform"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-[#C6FF34]" />
-                      <span>Back to Dashboard ({session.role})</span>
-                    </Link>
-                  ) : (
-                    <Link
-                      href="/courses"
-                      onClick={() => setIsOpen(false)}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-black text-white font-bold text-sm shadow-md"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      <span>Discover Curriculum</span>
-                    </Link>
-                  )
+                  <>
+                    {session.role !== 'STUDENT' || session.isDashboardAccessGranted ? (
+                      <Link
+                        href={
+                          session.role === 'SECURITY_ADMIN'
+                            ? '/admin/security-analyst'
+                            : session.role === 'SUPER_ADMIN' || session.role === 'ACADEMIC_ADMIN'
+                            ? '/admin'
+                            : session.role === 'MENTOR'
+                            ? '/mentor'
+                            : '/student'
+                        }
+                        onClick={() => setIsOpen(false)}
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-black text-white font-bold text-sm shadow-md active:scale-[0.99] transition-transform"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-[#C6FF34]" />
+                        <span>Back to Dashboard ({session.role})</span>
+                      </Link>
+                    ) : (
+                      <Link
+                        href="/courses"
+                        onClick={() => setIsOpen(false)}
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-black text-white font-bold text-sm shadow-md"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        <span>Discover Curriculum</span>
+                      </Link>
+                    )}
+                    <LogoutButton showText className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-red-200 bg-red-50 text-red-700 font-bold text-sm hover:bg-red-100" />
+                  </>
                 ) : (
                   <>
                     <Link

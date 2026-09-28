@@ -44,7 +44,7 @@ export function FlipWords({
   const currentClassName = typeof currentItem === 'string' ? '' : currentItem.className;
 
   return (
-    <span className="inline-flex relative items-center justify-center min-w-[280px] sm:min-w-[360px] md:min-w-[420px] text-center">
+    <span className="inline-block relative text-center">
       <AnimatePresence
         mode="wait"
         onExitComplete={() => {
@@ -55,9 +55,9 @@ export function FlipWords({
           key={currentWord + '-' + currentWordIndex}
           initial={{
             opacity: 0,
-            y: 20,
-            rotateX: 90,
-            scale: 0.95,
+            y: 16,
+            rotateX: 60,
+            scale: 0.98,
           }}
           animate={{
             opacity: 1,
@@ -67,20 +67,17 @@ export function FlipWords({
           }}
           exit={{
             opacity: 0,
-            y: -25,
-            rotateX: -90,
+            y: -16,
+            rotateX: -60,
             filter: 'blur(4px)',
-            scale: 0.95,
-            position: 'absolute',
+            scale: 0.98,
           }}
           transition={{
-            type: 'spring',
-            stiffness: 140,
-            damping: 14,
-            mass: 0.75,
+            duration: 0.35,
+            ease: 'easeInOut',
           }}
           className={cn(
-            'inline-block origin-center select-none transform-gpu whitespace-nowrap',
+            'inline-block origin-center select-none transform-gpu',
             currentClassName,
             className
           )}
@@ -97,26 +94,17 @@ export function FlipWords({
                   key={letter + '-' + letterIndex}
                   initial={{
                     opacity: 0,
-                    y: 12,
-                    rotateX: 90,
-                    filter: 'blur(3px)',
+                    y: 8,
                   }}
                   animate={{
                     opacity: 1,
                     y: 0,
-                    rotateX: 0,
-                    filter: 'blur(0px)',
                   }}
                   transition={{
-                    type: 'spring',
-                    stiffness: 180,
-                    damping: 12,
-                    delay: wordIndex * 0.08 + letterIndex * 0.025,
+                    duration: 0.25,
+                    delay: wordIndex * 0.05 + letterIndex * 0.02,
                   }}
                   className="inline-block"
-                  style={{
-                    transformStyle: 'preserve-3d',
-                  }}
                 >
                   {letter}
                 </motion.span>
