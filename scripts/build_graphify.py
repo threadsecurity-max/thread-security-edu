@@ -12,8 +12,7 @@ from graphify.build import build_from_json
 from graphify.cluster import cluster, score_all
 from graphify.analyze import god_nodes, surprising_connections, suggest_questions
 from graphify.report import generate
-from graphify.export import to_json
-from graphify.viz import generate_html
+from graphify.export import to_json, to_html
 
 input_path = Path('.')
 
@@ -47,19 +46,22 @@ communities = cluster(G)
 cohesion = score_all(G, communities)
 gods = god_nodes(G)
 surprises = surprising_connections(G, communities)
-questions = suggest_questions(G, communities)
+labels = {cid: f'Community {cid}' for cid in communities}
+questions = suggest_questions(G, communities, labels)
 
-report_md = generate(G, communities, cohesion, gods, surprises, questions, detection, {'input': 0, 'output': 0})
+report_md = generate(G, communities, cohesion, labels, gods, surprises, detection, {'input': 0, 'output': 0}, str(input_path.resolve()), suggested_questions=questions)
 (out_dir / 'GRAPH_REPORT.md').write_text(report_md, encoding='utf-8')
-(out_dir / 'graph.json').write_text(to_json(G, communities), encoding='utf-8')
+to_json(G, communities, 'graphify-out/graph.json', community_labels=labels)
 
 print('--- Step 5: Generating Interactive HTML Visualization ---')
-html_str = generate_html(G, communities)
-(out_dir / 'graph.html').write_text(html_str, encoding='utf-8')
+to_html(G, communities, 'graphify-out/graph.html', community_labels=labels)
 
-print('--- GRAPHIFY GENERATION COMPLETE ---')
+print('\n=============================================')
+print('        GRAPHIFY GENERATION COMPLETE         ')
+print('=============================================')
 print(f"Total Nodes: {G.number_of_nodes()}")
 print(f"Total Edges: {G.number_of_edges()}")
 print(f"Detected Communities: {len(communities)}")
 print(f"Interactive Graph: file:///{Path('graphify-out/graph.html').resolve().as_posix()}")
 print(f"Graph Report: file:///{Path('graphify-out/GRAPH_REPORT.md').resolve().as_posix()}")
+print(f"Graph JSON: file:///{Path('graphify-out/graph.json').resolve().as_posix()}")
