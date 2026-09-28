@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/server/database/prisma';
+import { signSessionToken } from '@/lib/auth/session';
+import crypto from 'crypto';
 
 export async function GET(req: Request) {
   try {
@@ -14,7 +16,7 @@ export async function GET(req: Request) {
       });
       if (mentor) {
         const res = NextResponse.redirect(new URL(target, req.url));
-        const sessionData = JSON.stringify({
+        const sessionPayload = {
           userId: mentor.id,
           email: mentor.email,
           name: mentor.name,
@@ -22,16 +24,19 @@ export async function GET(req: Request) {
           tsId: mentor.tsIdentity?.tsId || 'TSE-MENTOR',
           isDashboardAccessGranted: true,
           isMentorVerified: true,
-        });
-        const base64Data = Buffer.from(sessionData).toString('base64');
-        res.cookies.set('tse_session', base64Data, {
+        };
+        const signedToken = signSessionToken(sessionPayload);
+        res.cookies.set('tse_session', signedToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
           maxAge: 60 * 60 * 24 * 7,
         });
-        res.cookies.set('tse_mentor_clearance', 'true', {
+
+        const authSecret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || 'threadsecurity-master-hmac-secret-key-2026-secure';
+        const clearanceToken = crypto.createHmac('sha256', authSecret).update('mentor-clearance-verified').digest('hex');
+        res.cookies.set('tse_mentor_clearance', clearanceToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
@@ -47,16 +52,16 @@ export async function GET(req: Request) {
       });
       if (student) {
         const res = NextResponse.redirect(new URL(target, req.url));
-        const sessionData = JSON.stringify({
+        const sessionPayload = {
           userId: student.id,
           email: student.email,
           name: student.name,
           role: student.role,
           tsId: student.tsIdentity?.tsId || 'TSE-STUDENT',
           isDashboardAccessGranted: true,
-        });
-        const base64Data = Buffer.from(sessionData).toString('base64');
-        res.cookies.set('tse_session', base64Data, {
+        };
+        const signedToken = signSessionToken(sessionPayload);
+        res.cookies.set('tse_session', signedToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',

@@ -42,19 +42,30 @@ export function signSessionToken(payload: UserSession): string {
  */
 export function verifySessionToken(token: string): UserSession | null {
   try {
-    if (!token || !token.includes('.')) {
+    if (!token) return null;
+    let cleanToken = decodeURIComponent(token).trim();
+    if (cleanToken.startsWith('"') && cleanToken.endsWith('"')) {
+      cleanToken = cleanToken.slice(1, -1);
+    }
+
+    if (!cleanToken.includes('.')) {
       // Transition fallback for backward compatibility during active migration
       try {
-        const rawDecoded = Buffer.from(token, 'base64').toString('utf-8');
+        const rawDecoded = Buffer.from(cleanToken, 'base64').toString('utf-8');
         const parsed = JSON.parse(rawDecoded) as UserSession;
         if (parsed && parsed.userId && parsed.role) return parsed;
       } catch {
-        return null;
+        try {
+          const direct = JSON.parse(cleanToken) as UserSession;
+          if (direct && direct.userId && direct.role) return direct;
+        } catch {
+          return null;
+        }
       }
       return null;
     }
 
-    const [base64Payload, signature] = token.split('.');
+    const [base64Payload, signature] = cleanToken.split('.');
     if (!base64Payload || !signature) return null;
 
     const expectedHmac = crypto
