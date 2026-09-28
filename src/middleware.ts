@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkIpRateLimit, extractIpFromHeaders } from '@/lib/security/ip-guard';
+import { verifySessionToken, type UserSession } from '@/lib/auth/session';
 
 // Define route access policies
 const ROLE_ROUTES: Record<string, string[]> = {
@@ -9,24 +10,11 @@ const ROLE_ROUTES: Record<string, string[]> = {
   '/student': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STUDENT'],
 };
 
-interface SessionData {
-  userId: string;
-  email: string;
-  name: string;
-  role: string;
-  tsId: string | null;
-  isDashboardAccessGranted?: boolean;
-  isMentorVerified?: boolean;
-}
-
-function getSessionFromRequest(request: NextRequest): SessionData | null {
+function getSessionFromRequest(request: NextRequest): UserSession | null {
   try {
     const rawCookie = request.cookies.get('tse_session')?.value;
     if (!rawCookie) return null;
-    const decoded = Buffer.from(rawCookie, 'base64').toString('utf-8');
-    const session = JSON.parse(decoded) as SessionData;
-    if (!session || !session.userId || !session.role) return null;
-    return session;
+    return verifySessionToken(rawCookie);
   } catch {
     return null;
   }
@@ -48,6 +36,33 @@ export async function middleware(request: NextRequest) {
             error: {
               code: 'RATE_LIMIT_EXCEEDED',
               message: `Too many authentication attempts. Please try again in ${rateLimit.retryAfterSeconds} seconds.`,
+            },
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'Retry-After': String(rateLimit.retryAfterSeconds),
+            },
+          }
+        );
+      }
+    }
+  }
+
+  // Rate Limiting for Public High-Abuse Endpoints (Contact & Certificate Verification)
+  if (pathname.startsWith('/api/contact') || pathname.startsWith('/api/verify') || pathname === '/contact') {
+    const clientIp = extractIpFromHeaders(request.headers);
+    const rateLimit = checkIpRateLimit(clientIp, 10, 60);
+
+    if (!rateLimit.allowed) {
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(
+          JSON.stringify({
+            success: false,
+            error: {
+              code: 'RATE_LIMIT_EXCEEDED',
+              message: `Rate limit exceeded. Please wait ${rateLimit.retryAfterSeconds} seconds before trying again.`,
             },
           }),
           {
