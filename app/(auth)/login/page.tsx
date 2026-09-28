@@ -252,13 +252,22 @@ function AuthContent() {
           callbackUrl = decodeURIComponent(callbackUrl);
         } catch {}
       }
-      const destination =
-        callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')
-          ? callbackUrl
-          : res.redirectTo || '/admin';
+
+      let destination = res.redirectTo || '/admin';
+      if (callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')) {
+        const userRole = res.user?.role || '';
+        // Only allow callbackUrl if user role is authorized for it
+        if (callbackUrl.startsWith('/admin') && (userRole === 'SUPER_ADMIN' || userRole === 'SECURITY_ADMIN' || userRole === 'ACADEMIC_ADMIN')) {
+          destination = callbackUrl;
+        } else if (callbackUrl.startsWith('/mentor') && (userRole === 'MENTOR' || userRole === 'SUPER_ADMIN')) {
+          destination = callbackUrl;
+        } else if (callbackUrl.startsWith('/student') && (userRole === 'STUDENT' || userRole === 'SUPER_ADMIN')) {
+          destination = callbackUrl;
+        }
+      }
 
       // Force reliable full-page navigation to initialize server layout and session
-      window.location.replace(destination);
+      window.location.href = destination;
     } catch {
       setLoading(false);
       setError('Verification network error. Please try again.');
