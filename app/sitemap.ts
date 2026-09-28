@@ -63,74 +63,75 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 2. Dynamic Course Routes (Masterclasses)
-  const courseRoutes: MetadataRoute.Sitemap = MASTER_COURSES.map((course) => ({
-    url: `${baseUrl}/courses/${course.slug}`,
-    lastModified: now,
-    changeFrequency: 'weekly',
-    priority: 0.9,
-  }));
+  // 2. Dynamic Course Routes (Master Registry + DB Courses)
+  const courseSlugSet = new Set<string>();
+  const courseRoutes: MetadataRoute.Sitemap = [];
 
-  // 3. Dynamic Workshops Routes
-  let workshopRoutes: MetadataRoute.Sitemap = [];
+  MASTER_COURSES.forEach((course) => {
+    if (course.slug && !courseSlugSet.has(course.slug)) {
+      courseSlugSet.add(course.slug);
+      courseRoutes.push({
+        url: `${baseUrl}/courses/${course.slug}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      });
+    }
+  });
+
   try {
-    const workshops = await (prisma as any).workshop.findMany({
-      select: { id: true, title: true, updatedAt: true, createdAt: true },
+    const dbCourses = await prisma.course.findMany({
+      select: { slug: true, updatedAt: true, createdAt: true },
     });
-    workshopRoutes = (workshops || []).map((w: any) => ({
-      url: `${baseUrl}/workshops#workshop-${w.id}`,
-      lastModified: w.updatedAt || w.createdAt || now,
-      changeFrequency: 'daily',
-      priority: 0.85,
-    }));
+    dbCourses.forEach((c) => {
+      if (c.slug && !courseSlugSet.has(c.slug)) {
+        courseSlugSet.add(c.slug);
+        courseRoutes.push({
+          url: `${baseUrl}/courses/${c.slug}`,
+          lastModified: c.updatedAt || c.createdAt || now,
+          changeFrequency: 'weekly',
+          priority: 0.9,
+        });
+      }
+    });
   } catch (error) {
-    console.error('[Sitemap] Failed to fetch workshops for sitemap:', error);
+    console.error('[Sitemap] Failed to fetch database courses for sitemap:', error);
   }
 
-  // 4. Dynamic Blog Post & Category Routes
+  // 3. Dynamic Blog Post & Category Routes
   let blogRoutes: MetadataRoute.Sitemap = [];
   try {
     const publishedBlogs = await (prisma as any).blog.findMany({
       where: { status: 'PUBLISHED' },
       select: { slug: true, updatedAt: true, publishedAt: true },
     });
-    blogRoutes = (publishedBlogs || []).map((b: any) => ({
-      url: `${baseUrl}/blog/${b.slug}`,
-      lastModified: b.updatedAt || b.publishedAt || now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    }));
+    (publishedBlogs || []).forEach((b: any) => {
+      if (b.slug) {
+        blogRoutes.push({
+          url: `${baseUrl}/blog/${b.slug}`,
+          lastModified: b.updatedAt || b.publishedAt || now,
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        });
+      }
+    });
 
     const blogCategories = await (prisma as any).blogCategory.findMany({
       select: { slug: true, updatedAt: true },
     });
-    const categoryRoutes: MetadataRoute.Sitemap = (blogCategories || []).map((c: any) => ({
-      url: `${baseUrl}/blog?category=${c.slug}`,
-      lastModified: c.updatedAt || now,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    }));
-
-    blogRoutes = [...blogRoutes, ...categoryRoutes];
+    (blogCategories || []).forEach((c: any) => {
+      if (c.slug) {
+        blogRoutes.push({
+          url: `${baseUrl}/blog?category=${c.slug}`,
+          lastModified: c.updatedAt || now,
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        });
+      }
+    });
   } catch (error) {
     console.error('[Sitemap] Failed to fetch blogs for sitemap:', error);
   }
 
-  // 5. Dynamic Learning Paths Routes
-  let pathRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const paths = await (prisma as any).learningPath.findMany({
-      select: { slug: true, updatedAt: true },
-    });
-    pathRoutes = (paths || []).map((p: any) => ({
-      url: `${baseUrl}/learning-paths/${p.slug}`,
-      lastModified: p.updatedAt || now,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    }));
-  } catch (error) {
-    console.error('[Sitemap] Failed to fetch learning paths for sitemap:', error);
-  }
-
-  return [...staticRoutes, ...courseRoutes, ...workshopRoutes, ...blogRoutes, ...pathRoutes];
+  return [...staticRoutes, ...courseRoutes, ...blogRoutes];
 }
