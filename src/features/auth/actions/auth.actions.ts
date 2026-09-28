@@ -32,7 +32,14 @@ export async function verifySecurityAdminChallengeAction(secretKey: string, pass
       warning: res.warning,
     };
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Security Admin verification failed.';
+    let errorMessage = 'Security Admin verification failed.';
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      if ('errors' in err && Array.isArray((err as any).errors)) {
+        errorMessage = (err as any).errors.map((e: any) => e.message || String(e)).join('; ');
+      }
+    }
+    console.error('[SECURITY_ADMIN_AUTH_ERROR]', errorMessage, err);
     return {
       success: false,
       error: errorMessage,
@@ -63,7 +70,14 @@ export async function verifyAdminCredentialsAction(
       warning: res.warning,
     };
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Admin security verification failed.';
+    let errorMessage = 'Admin security verification failed.';
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      if ('errors' in err && Array.isArray((err as any).errors)) {
+        errorMessage = (err as any).errors.map((e: any) => e.message || String(e)).join('; ');
+      }
+    }
+    console.error('[ADMIN_AUTH_CREDS_ERROR]', errorMessage, err);
     return {
       success: false,
       error: errorMessage,
@@ -207,7 +221,16 @@ export async function verifyOtpAction(emailOrTsId: string, code: string) {
       redirectTo: user.redirectTo,
     };
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Verification failed.';
+    let errorMessage = 'Verification failed.';
+    if (err instanceof Error) {
+      errorMessage = err.message;
+      if ('errors' in err && Array.isArray((err as any).errors)) {
+        errorMessage = (err as any).errors.map((e: any) => e.message || String(e)).join('; ');
+      }
+    } else if (typeof err === 'string') {
+      errorMessage = err;
+    }
+    console.error('[AUTH_VERIFY_OTP_ERROR]', errorMessage, err);
     return {
       success: false,
       error: errorMessage,
