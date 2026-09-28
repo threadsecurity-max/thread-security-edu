@@ -13,7 +13,8 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "package:hostinger": "node scripts/prepare-hostinger-bundle.cjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "graphify": "python scripts/build_graphify.py"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
