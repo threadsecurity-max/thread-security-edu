@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { checkIpRateLimit, extractIpFromHeaders } from '@/lib/security/ip-guard';
 
 // Define route access policies
 const ROLE_ROUTES: Record<string, string[]> = {
@@ -34,7 +35,34 @@ function getSessionFromRequest(request: NextRequest): SessionData | null {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Generate Nonce & Construct Security Headers
+  // 1. IP Rate Limiting for Authentication & Verification Endpoints
+  if (pathname.startsWith('/api/auth') || pathname === '/login') {
+    const clientIp = extractIpFromHeaders(request.headers);
+    const rateLimit = checkIpRateLimit(clientIp, 15, 60);
+
+    if (!rateLimit.allowed) {
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(
+          JSON.stringify({
+            success: false,
+            error: {
+              code: 'RATE_LIMIT_EXCEEDED',
+              message: `Too many authentication attempts. Please try again in ${rateLimit.retryAfterSeconds} seconds.`,
+            },
+          }),
+          {
+            status: 429,
+            headers: {
+              'Content-Type': 'application/json',
+              'Retry-After': String(rateLimit.retryAfterSeconds),
+            },
+          }
+        );
+      }
+    }
+  }
+
+  // 2. Generate Nonce & Construct Security Headers
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://upload-widget.cloudinary.com;

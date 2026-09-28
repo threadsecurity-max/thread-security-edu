@@ -15,10 +15,12 @@ import { getClientIpAddress, analyzeIpIntelligence } from '../../lib/security/ip
 
 /**
  * Security Lockout & Rate-Limiting Helpers
+ * Supports Dual-Key Tracking (Target Identifier + Origin Client IP)
  */
-export async function checkLockoutStatus(identifier: string) {
+export async function checkLockoutStatus(identifier: string, clientIp?: string) {
   const cleanId = identifier.trim().toLowerCase();
   try {
+    // 1. Check Identifier Lockout
     const lockout = await (prisma as any).securityLockout.findUnique({
       where: { identifier: cleanId },
     });
@@ -27,19 +29,34 @@ export async function checkLockoutStatus(identifier: string) {
       const remainingMins = Math.ceil((new Date(lockout.lockedUntil).getTime() - Date.now()) / (60 * 1000));
       throw new Error(`Security Lockout Active: Too many failed access attempts. Access blocked for 15 minutes (${remainingMins} min remaining).`);
     }
+
+    // 2. Check IP Lockout (if client IP provided)
+    if (clientIp && clientIp !== '127.0.0.1' && clientIp !== '::1' && clientIp !== 'localhost') {
+      const ipKey = `ip:${clientIp.trim()}`;
+      const ipLockout = await (prisma as any).securityLockout.findUnique({
+        where: { identifier: ipKey },
+      });
+
+      if (ipLockout && ipLockout.lockedUntil && new Date(ipLockout.lockedUntil) > new Date()) {
+        const remainingMins = Math.ceil((new Date(ipLockout.lockedUntil).getTime() - Date.now()) / (60 * 1000));
+        throw new Error(`Security Ban Active: Too many suspicious attempts from IP address ${clientIp}. Access blocked for 30 minutes (${remainingMins} min remaining).`);
+      }
+    }
+
     return lockout;
   } catch (err: unknown) {
-    if (err instanceof Error && err.message.startsWith('Security Lockout Active')) {
+    if (err instanceof Error && (err.message.startsWith('Security Lockout') || err.message.startsWith('Security Ban'))) {
       throw err;
     }
     return null;
   }
 }
 
-export async function recordFailedAttempt(identifier: string) {
+export async function recordFailedAttempt(identifier: string, clientIp?: string) {
   const cleanId = identifier.trim().toLowerCase();
   let attempts = 1;
   try {
+    // 1. Record Identifier Attempt Counter
     const lockout = await (prisma as any).securityLockout.findUnique({
       where: { identifier: cleanId },
     });
@@ -57,10 +74,10 @@ export async function recordFailedAttempt(identifier: string) {
         actorId: undefined,
         action: 'SECURITY_LOCKOUT_TRIGGERED',
         entity: 'USER',
-        details: `15-minute security lockout activated for ${cleanId} after ${attempts} failed attempts.`,
+        details: `15-minute security lockout activated for ${cleanId} after ${attempts} failed attempts. Origin IP: ${clientIp || 'unknown'}.`,
       });
 
-      throw new Error('Security Lockout Triggered: Excessive failed verification attempts. Access blocked for 15 minutes.');
+      throw new Error('Security Lockout Triggered: Excessive failed verification attempts (5/5). Access blocked for 15 minutes.');
     } else {
       await (prisma as any).securityLockout.upsert({
         where: { identifier: cleanId },
@@ -68,20 +85,61 @@ export async function recordFailedAttempt(identifier: string) {
         create: { identifier: cleanId, failedAttempts: attempts },
       });
     }
+
+    // 2. Record IP Attempt Counter (bans IP after 7 cumulative failed attempts)
+    if (clientIp && clientIp !== '127.0.0.1' && clientIp !== '::1' && clientIp !== 'localhost') {
+      const ipKey = `ip:${clientIp.trim()}`;
+      const ipRecord = await (prisma as any).securityLockout.findUnique({
+        where: { identifier: ipKey },
+      });
+      const ipAttempts = (ipRecord?.failedAttempts || 0) + 1;
+
+      if (ipAttempts >= 7) {
+        const ipLockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes IP ban
+        await (prisma as any).securityLockout.upsert({
+          where: { identifier: ipKey },
+          update: { failedAttempts: ipAttempts, lockedUntil: ipLockedUntil },
+          create: { identifier: ipKey, failedAttempts: ipAttempts, lockedUntil: ipLockedUntil },
+        });
+
+        await logAuditEvent({
+          actorId: undefined,
+          action: 'SECURITY_IP_BAN_TRIGGERED',
+          entity: 'USER',
+          details: `30-minute IP security ban activated for IP ${clientIp} after ${ipAttempts} failed login attempts across multiple targets.`,
+        });
+
+        throw new Error(`Security Ban Triggered: Excessive failed attempts from IP ${clientIp}. Access blocked for 30 minutes.`);
+      } else {
+        await (prisma as any).securityLockout.upsert({
+          where: { identifier: ipKey },
+          update: { failedAttempts: ipAttempts },
+          create: { identifier: ipKey, failedAttempts: ipAttempts },
+        });
+      }
+    }
   } catch (err: unknown) {
-    if (err instanceof Error && err.message.startsWith('Security Lockout')) {
+    if (err instanceof Error && (err.message.startsWith('Security Lockout') || err.message.startsWith('Security Ban'))) {
       throw err;
     }
   }
 }
 
-export async function resetFailedAttempts(identifier: string) {
+export async function resetFailedAttempts(identifier: string, clientIp?: string) {
   const cleanId = identifier.trim().toLowerCase();
   try {
     await (prisma as any).securityLockout.updateMany({
       where: { identifier: cleanId },
       data: { failedAttempts: 0, lockedUntil: null },
     });
+
+    if (clientIp) {
+      const ipKey = `ip:${clientIp.trim()}`;
+      await (prisma as any).securityLockout.updateMany({
+        where: { identifier: ipKey },
+        data: { failedAttempts: 0, lockedUntil: null },
+      });
+    }
   } catch {
     // Ignore if record doesn't exist
   }
@@ -724,7 +782,22 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
 
   if (!otpRecord) {
     await recordFailedAttempt(query);
-    throw new Error('Invalid or expired 6-digit MFA verification code.');
+
+    const currentLockout = await (prisma as any).securityLockout.findUnique({
+      where: { identifier: query.trim().toLowerCase() },
+    });
+    const failedCount = currentLockout?.failedAttempts || 1;
+
+    if (failedCount >= 3) {
+      // 3-Strike Self-Destruct: permanently delete active OTPs to stop brute-forcing
+      await (prisma as any).otpVerification.deleteMany({
+        where: { emailOrTsId: { in: uniqueIdentifiers } },
+      });
+      throw new Error('Security Alert: Maximum OTP attempts exceeded (3/3). This verification code has been revoked. Please re-authenticate.');
+    }
+
+    const remaining = Math.max(1, 3 - failedCount);
+    throw new Error(`Invalid or expired 6-digit MFA verification code. (${remaining} attempts remaining before revocation).`);
   }
 
   // Clear failed attempt counters for all identifiers
