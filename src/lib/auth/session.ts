@@ -99,7 +99,13 @@ export function verifySessionToken(token: string): UserSession | null {
       return null;
     }
 
-    const jsonStr = Buffer.from(base64Payload, 'base64url').toString('utf-8');
+    let jsonStr: string;
+    try {
+      jsonStr = Buffer.from(base64Payload, 'base64url').toString('utf-8');
+    } catch {
+      const standardB64 = base64Payload.replace(/-/g, '+').replace(/_/g, '/');
+      jsonStr = Buffer.from(standardB64, 'base64').toString('utf-8');
+    }
     const session = JSON.parse(jsonStr) as UserSession;
     if (!session || !session.userId || !session.role) return null;
     return session;

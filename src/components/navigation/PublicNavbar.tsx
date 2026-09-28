@@ -79,12 +79,11 @@ export async function PublicNavbar() {
                         ? '/mentor'
                         : '/student'
                     }
+                    className="landing-btn-primary text-xs sm:text-sm font-bold font-mono inline-flex items-center gap-1.5 cursor-pointer"
                   >
-                    <button className="landing-btn-primary text-xs sm:text-sm font-bold font-mono">
-                      <LayoutDashboard className="w-4 h-4" />
-                      <span>Back to Dashboard</span>
-                      <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded font-normal ml-1 hidden lg:inline">({session.role})</span>
-                    </button>
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Back to Dashboard</span>
+                    <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded font-normal ml-1 hidden lg:inline">({session.role})</span>
                   </Link>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -92,11 +91,9 @@ export async function PublicNavbar() {
                       <Lock className="w-3.5 h-3.5 text-amber-600" />
                       <span>{session.tsId || 'Guest TS-ID'}</span>
                     </div>
-                    <Link href="/courses">
-                      <button className="landing-btn-primary text-xs sm:text-sm">
-                        <Sparkles className="w-4 h-4" />
-                        Discover Curriculum
-                      </button>
+                    <Link href="/courses" className="landing-btn-primary text-xs sm:text-sm inline-flex items-center gap-1.5 cursor-pointer">
+                      <Sparkles className="w-4 h-4" />
+                      <span>Discover Curriculum</span>
                     </Link>
                   </div>
                 )}
