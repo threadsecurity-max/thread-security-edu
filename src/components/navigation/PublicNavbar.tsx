@@ -101,17 +101,8 @@ export async function PublicNavbar() {
                   </div>
                 )}
 
-                {/* Quick Logout Form */}
-                <form
-                  action={async () => {
-                    'use server';
-                    await logoutAction();
-                  }}
-                >
-                  <button type="submit" title="Sign Out" className="landing-btn-outline px-2.5">
-                    <LogOut className="w-4 h-4 text-gray-700" />
-                  </button>
-                </form>
+                {/* Quick Logout Button */}
+                <LogoutButton />
               </div>
             ) : (
               <>
