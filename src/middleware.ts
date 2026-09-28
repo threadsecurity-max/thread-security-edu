@@ -136,7 +136,7 @@ export async function middleware(request: NextRequest) {
 
       if (!session) {
         const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('callbackUrl', encodeURIComponent(pathname));
+        loginUrl.searchParams.set('callbackUrl', pathname);
         return NextResponse.redirect(loginUrl);
       }
 

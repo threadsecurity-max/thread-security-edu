@@ -245,7 +245,13 @@ function AuthContent() {
       setSuccessMsg('Authentication verified! Navigating to your secure workspace...');
 
       // Navigate to requested callbackUrl or default role workspace
-      const callbackUrl = searchParams.get('callbackUrl');
+      const rawCallbackUrl = searchParams.get('callbackUrl');
+      let callbackUrl = rawCallbackUrl;
+      if (callbackUrl) {
+        try {
+          callbackUrl = decodeURIComponent(callbackUrl);
+        } catch {}
+      }
       const destination =
         callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')
           ? callbackUrl
