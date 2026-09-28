@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { checkIpRateLimit, extractIpFromHeaders } from '@/lib/security/ip-guard';
-import { verifySessionToken, type UserSession } from '@/lib/auth/session';
+import { verifySessionToken, type UserSession } from '@/lib/auth/session-token';
 
 // Define route access policies
 const ROLE_ROUTES: Record<string, string[]> = {
@@ -157,7 +157,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
 
-      const userRole = session.role || 'GUEST';
+      const userRole = (session.role || 'GUEST').toUpperCase();
       if (!allowedRoles.includes(userRole)) {
         if (pathname.startsWith('/api')) {
           return new NextResponse(

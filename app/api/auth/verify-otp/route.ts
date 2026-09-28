@@ -5,9 +5,8 @@ import {
   SESSION_COOKIE_NAME,
   MENTOR_CLEARANCE_COOKIE,
   SESSION_MAX_AGE,
-  getAuthSecret,
+  generateMentorClearanceToken,
 } from '@/lib/auth/session';
-import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,12 +45,15 @@ export async function POST(req: NextRequest) {
       redirectTo: user.redirectTo,
     });
 
-    const isProd = process.env.NODE_ENV === 'production';
+    const proto = req.headers.get('x-forwarded-proto') || (req.nextUrl.protocol === 'https:' ? 'https' : 'http');
+    const isHttps = proto === 'https' || req.nextUrl.protocol === 'https:';
+    const isLocalhost = req.headers.get('host')?.includes('localhost') || req.headers.get('host')?.includes('127.0.0.1');
+    const isSecure = isHttps || (process.env.NODE_ENV === 'production' && !isLocalhost);
 
     // Set signed session cookie
     response.cookies.set(SESSION_COOKIE_NAME, signedToken, {
       httpOnly: true,
-      secure: isProd,
+      secure: isSecure,
       sameSite: 'lax',
       path: '/',
       maxAge: SESSION_MAX_AGE,
@@ -59,14 +61,11 @@ export async function POST(req: NextRequest) {
 
     // If Mentor role, grant mentor clearance cookie
     if (user.role === 'MENTOR') {
-      const clearanceToken = crypto
-        .createHmac('sha256', getAuthSecret())
-        .update('mentor-clearance-verified')
-        .digest('hex');
+      const clearanceToken = generateMentorClearanceToken();
 
       response.cookies.set(MENTOR_CLEARANCE_COOKIE, clearanceToken, {
         httpOnly: true,
-        secure: isProd,
+        secure: isSecure,
         sameSite: 'lax',
         path: '/',
         maxAge: SESSION_MAX_AGE,

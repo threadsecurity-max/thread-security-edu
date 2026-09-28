@@ -255,7 +255,7 @@ function AuthContent() {
 
       let destination = res.redirectTo || '/admin';
       if (callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')) {
-        const userRole = res.user?.role || '';
+        const userRole = (res.user?.role || '').toUpperCase();
         // Only allow callbackUrl if user role is authorized for it
         if (callbackUrl.startsWith('/admin') && (userRole === 'SUPER_ADMIN' || userRole === 'SECURITY_ADMIN' || userRole === 'ACADEMIC_ADMIN')) {
           destination = callbackUrl;
