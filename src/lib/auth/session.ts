@@ -11,9 +11,9 @@ export interface UserSession {
   isMentorVerified?: boolean;
 }
 
-const SESSION_COOKIE_NAME = 'tse_session';
-const MENTOR_CLEARANCE_COOKIE = 'tse_mentor_clearance';
-const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+export const SESSION_COOKIE_NAME = 'tse_session';
+export const MENTOR_CLEARANCE_COOKIE = 'tse_mentor_clearance';
+export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export function getAuthSecrets(): string[] {
   const secrets = [

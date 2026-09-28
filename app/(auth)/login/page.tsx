@@ -3,14 +3,6 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  requestOtpAction,
-  verifyOtpAction,
-  registerAction,
-  verifyAdminCredentialsAction,
-  verifyMentorCredentialsAction,
-  verifySecurityAdminChallengeAction,
-} from '@/features/auth/actions/auth.actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -69,7 +61,7 @@ function AuthContent() {
   }
 
   // -------------------------------------------------------------
-  // SIGN IN FLOW HANDLERS
+  // SIGN IN FLOW HANDLERS (Via Bulletproof REST API Endpoints)
   // -------------------------------------------------------------
   async function handleIdentifierSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,34 +76,44 @@ function AuthContent() {
       return;
     }
 
-    const res = await requestOtpAction(cleanInput);
-    setLoading(false);
+    try {
+      const response = await fetch('/api/auth/request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailOrTsId: cleanInput }),
+      });
+      const res = await response.json();
+      setLoading(false);
 
-    if (!res.success) {
-      setError(res.error || 'Account authentication failed. Please check your credentials.');
-      return;
-    }
+      if (!res.success) {
+        setError(res.error || 'Account authentication failed. Please check your credentials.');
+        return;
+      }
 
-    setMaskedEmail(res.maskedEmail || res.email || cleanInput);
+      setMaskedEmail(res.maskedEmail || res.email || cleanInput);
 
-    if (res.isSecurityAdminSecretKey) {
-      setEnteredSecAdminKey(cleanInput);
-      setIsSecAdminFlow(true);
-      setStep('SEC_ADMIN_PASSKEY');
-    } else if ((res as any).isMentor || (res as any).isMentorSecretKey) {
-      setMentorSecretKey(cleanInput);
-      setStep('MENTOR_CREDS');
-    } else if ((res as any).isAdminSecretKey) {
-      setAdminSecretKey(cleanInput);
-      setStep('ADMIN_CREDS');
-    } else if (res.isAdmin) {
-      setStep('ADMIN_CREDS');
-    } else {
-      setStep('OTP');
-      const msg = res.warning
-        ? `Verification code dispatched (${res.warning})`
-        : `A 6-digit verification code was sent to ${res.maskedEmail}. Check your inbox.`;
-      setSuccessMsg(msg);
+      if (res.isSecurityAdminSecretKey) {
+        setEnteredSecAdminKey(cleanInput);
+        setIsSecAdminFlow(true);
+        setStep('SEC_ADMIN_PASSKEY');
+      } else if (res.isMentor || res.isMentorSecretKey) {
+        setMentorSecretKey(cleanInput);
+        setStep('MENTOR_CREDS');
+      } else if (res.isAdminSecretKey) {
+        setAdminSecretKey(cleanInput);
+        setStep('ADMIN_CREDS');
+      } else if (res.isAdmin) {
+        setStep('ADMIN_CREDS');
+      } else {
+        setStep('OTP');
+        const msg = res.warning
+          ? `Verification code dispatched (${res.warning})`
+          : `A 6-digit verification code was sent to ${res.maskedEmail}. Check your inbox.`;
+        setSuccessMsg(msg);
+      }
+    } catch {
+      setLoading(false);
+      setError('Connection issue during authentication. Please try again.');
     }
   }
 
@@ -122,18 +124,28 @@ function AuthContent() {
     setSuccessMsg(null);
 
     const secretKey = enteredSecAdminKey || emailOrTsId.trim();
-    const res = await verifySecurityAdminChallengeAction(secretKey, secAdminPasskey);
-    setLoading(false);
+    try {
+      const response = await fetch('/api/auth/sec-admin-creds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secretKey, passkey: secAdminPasskey }),
+      });
+      const res = await response.json();
+      setLoading(false);
 
-    if (!res.success) {
-      setError(res.error || 'Passkey verification failed.');
-      return;
+      if (!res.success) {
+        setError(res.error || 'Passkey verification failed.');
+        return;
+      }
+
+      setMaskedEmail(res.maskedEmail || 'Security Admin');
+      setStep('OTP');
+      setEmailOrTsId(secretKey);
+      setSuccessMsg('Passkey verified. 6-digit code dispatched.');
+    } catch {
+      setLoading(false);
+      setError('Passkey verification failed due to a network error.');
     }
-
-    setMaskedEmail(res.maskedEmail || 'Security Admin');
-    setStep('OTP');
-    setEmailOrTsId(secretKey);
-    setSuccessMsg('Passkey verified. 6-digit code dispatched.');
   }
 
   async function handleAdminCredsSubmit(e: React.FormEvent) {
@@ -142,20 +154,34 @@ function AuthContent() {
     setError(null);
     setSuccessMsg(null);
 
-    const credRes = await verifyAdminCredentialsAction(emailOrTsId, adminSecretKey, adminPasskey);
-    setLoading(false);
+    try {
+      const response = await fetch('/api/auth/admin-creds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailOrTsId,
+          secretKey: adminSecretKey,
+          passkey: adminPasskey,
+        }),
+      });
+      const credRes = await response.json();
+      setLoading(false);
 
-    if (!credRes.success) {
-      setError(credRes.error || 'Admin verification failed.');
-      return;
+      if (!credRes.success) {
+        setError(credRes.error || 'Admin verification failed.');
+        return;
+      }
+
+      setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
+      setStep('OTP');
+      const msg = credRes.warning
+        ? `Verification code dispatched (${credRes.warning})`
+        : `Verification code dispatched to ${credRes.maskedEmail || 'your admin email'}.`;
+      setSuccessMsg(msg);
+    } catch {
+      setLoading(false);
+      setError('Admin verification failed. Please try again.');
     }
-
-    setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
-    setStep('OTP');
-    const msg = credRes.warning
-      ? `Verification code dispatched (${credRes.warning})`
-      : `Verification code dispatched to ${credRes.maskedEmail || 'your admin email'}.`;
-    setSuccessMsg(msg);
   }
 
   async function handleMentorCredsSubmit(e: React.FormEvent) {
@@ -164,20 +190,34 @@ function AuthContent() {
     setError(null);
     setSuccessMsg(null);
 
-    const credRes = await verifyMentorCredentialsAction(emailOrTsId, mentorSecretKey, mentorPasskey);
-    setLoading(false);
+    try {
+      const response = await fetch('/api/auth/mentor-creds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailOrTsId,
+          secretKey: mentorSecretKey,
+          passkey: mentorPasskey,
+        }),
+      });
+      const credRes = await response.json();
+      setLoading(false);
 
-    if (!credRes.success) {
-      setError(credRes.error || 'Faculty verification failed.');
-      return;
+      if (!credRes.success) {
+        setError(credRes.error || 'Faculty verification failed.');
+        return;
+      }
+
+      setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
+      setStep('OTP');
+      const msg = credRes.warning
+        ? `Verification code dispatched (${credRes.warning})`
+        : `Verification code dispatched to ${credRes.maskedEmail || 'your faculty email'}.`;
+      setSuccessMsg(msg);
+    } catch {
+      setLoading(false);
+      setError('Faculty verification failed. Please try again.');
     }
-
-    setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
-    setStep('OTP');
-    const msg = credRes.warning
-      ? `Verification code dispatched (${credRes.warning})`
-      : `Verification code dispatched to ${credRes.maskedEmail || 'your faculty email'}.`;
-    setSuccessMsg(msg);
   }
 
   async function handleVerifyOtp(e: React.FormEvent) {
@@ -185,25 +225,38 @@ function AuthContent() {
     setLoading(true);
     setError(null);
 
-    const res = await verifyOtpAction(emailOrTsId, otpCode);
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          emailOrTsId,
+          code: otpCode,
+        }),
+      });
+      const res = await response.json();
 
-    if (!res.success) {
+      if (!res.success) {
+        setLoading(false);
+        setError(res.error || 'Invalid or expired verification code.');
+        return;
+      }
+
+      setSuccessMsg('Authentication verified! Navigating to your secure workspace...');
+
+      // Navigate to requested callbackUrl or default role workspace
+      const callbackUrl = searchParams.get('callbackUrl');
+      const destination =
+        callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')
+          ? callbackUrl
+          : res.redirectTo || '/admin';
+
+      // Force reliable full-page navigation to initialize server layout and session
+      window.location.replace(destination);
+    } catch {
       setLoading(false);
-      setError(res.error || 'Invalid or expired verification code.');
-      return;
+      setError('Verification network error. Please try again.');
     }
-
-    setSuccessMsg('Authentication verified! Navigating to your secure workspace...');
-
-    // Navigate to requested callbackUrl or default role workspace
-    const callbackUrl = searchParams.get('callbackUrl');
-    const destination =
-      callbackUrl && callbackUrl.startsWith('/') && !callbackUrl.startsWith('/login')
-        ? callbackUrl
-        : res.redirectTo || '/admin';
-
-    // Force reliable full-page navigation to initialize server layout and session
-    window.location.replace(destination);
   }
 
   // -------------------------------------------------------------
@@ -226,20 +279,29 @@ function AuthContent() {
     setError(null);
     setSuccessMsg(null);
 
-    const res = await registerAction({
-      name: fullName,
-      email: signupEmail.trim(),
-      password: signupPassword,
-      confirmPassword: signupPassword,
-      careerGoal: `${experienceLevel} Cybersecurity Specialist`,
-    });
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: fullName,
+          email: signupEmail.trim(),
+          password: signupPassword,
+          confirmPassword: signupPassword,
+          careerGoal: `${experienceLevel} Cybersecurity Specialist`,
+        }),
+      });
+      const res = await response.json();
+      setLoading(false);
 
-    setLoading(false);
-
-    if (!res.success) {
-      setError(res.error || 'Registration failed. Please review your details.');
-    } else if (res.redirectTo) {
-      router.push(res.redirectTo);
+      if (!res.success) {
+        setError(res.error || 'Registration failed. Please review your details.');
+      } else if (res.redirectTo) {
+        window.location.replace(res.redirectTo);
+      }
+    } catch {
+      setLoading(false);
+      setError('Registration request failed. Please try again.');
     }
   }
 
