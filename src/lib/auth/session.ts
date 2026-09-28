@@ -30,6 +30,16 @@ export function getAuthSecret(): string {
   return getAuthSecrets()[0] || 'tse_super_secret_session_key_2026_cybersecurity_lms';
 }
 
+export function constantTimeCompare(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
+
 /**
  * Signs payload with HMAC-SHA256 to prevent cookie tampering
  */
@@ -76,22 +86,19 @@ export function verifySessionToken(token: string): UserSession | null {
 
     const candidateSecrets = getAuthSecrets();
     let signatureMatches = false;
-    const receivedBuffer = Buffer.from(signature, 'hex');
 
     for (const sec of candidateSecrets) {
-      const expectedHmac = crypto
-        .createHmac('sha256', sec)
-        .update(base64Payload)
-        .digest('hex');
-      const expectedBuffer = Buffer.from(expectedHmac, 'hex');
+      try {
+        const expectedHmac = crypto
+          .createHmac('sha256', sec)
+          .update(base64Payload)
+          .digest('hex');
 
-      if (
-        expectedBuffer.length === receivedBuffer.length &&
-        crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
-      ) {
-        signatureMatches = true;
-        break;
-      }
+        if (constantTimeCompare(expectedHmac, signature)) {
+          signatureMatches = true;
+          break;
+        }
+      } catch {}
     }
 
     if (!signatureMatches) {
