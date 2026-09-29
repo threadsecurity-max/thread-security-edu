@@ -53,7 +53,7 @@ export async function sendOtpEmail({
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">THREAD SECURITY <span>ACADEMY</span></div>
+            <div class="logo">THREAD SECURITY <span>EDUCATION</span></div>
           </div>
           
           <h2 class="title">Student Portal Verification Code</h2>

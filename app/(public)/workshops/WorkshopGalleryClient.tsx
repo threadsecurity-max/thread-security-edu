@@ -1058,7 +1058,7 @@ export function WorkshopGalleryClient({ userRole, initialWorkshops: serverInitia
                     <div className="relative z-10 space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse" />
-                        <span className="font-mono text-xs font-bold text-pink-300 tracking-wider">THREAD ACADEMY</span>
+                        <span className="font-mono text-xs font-bold text-pink-300 tracking-wider">THREAD SECURITY EDUCATION</span>
                         <span className="text-[10px] bg-pink-500/20 text-pink-300 border border-pink-500/30 px-2 py-0.5 rounded font-mono font-bold uppercase">
                           SUPER ADMIN
                         </span>

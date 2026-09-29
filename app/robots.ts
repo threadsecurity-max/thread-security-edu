@@ -11,7 +11,16 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/',
+          '/favicon.ico',
+          '/icon.png',
+          '/apple-touch-icon.png',
+          '/site.webmanifest',
+          '/manifest.webmanifest',
+          '/images/',
+          '/logos/',
+        ],
         disallow: [
           '/admin/',
           '/(admin)/',
@@ -24,8 +33,11 @@ export default function robots(): MetadataRoute.Robots {
           '/_next/',
           '/login',
           '/register',
-          '/*.json',
         ],
+      },
+      {
+        userAgent: 'Googlebot-Image',
+        allow: '/',
       },
       {
         userAgent: 'Googlebot',

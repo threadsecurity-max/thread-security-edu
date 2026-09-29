@@ -100,7 +100,7 @@ export function PublicFooter() {
             </Link>
             
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              Premier Cybersecurity &amp; AI Academy providing live hands-on sandboxed labs, mentor-led masterclasses, and verified TS-ID credentials.
+              Premier Cybersecurity &amp; AI Education Institute providing live hands-on sandboxed labs, mentor-led masterclasses, and verified TS-ID credentials.
             </p>
 
             {/* Email Pill & Direct Call Block */}
@@ -133,7 +133,7 @@ export function PublicFooter() {
               </div>
             </div>
 
-            {/* Academy Campus Address */}
+            {/* Education Campus Address */}
             <div className="flex items-start gap-2.5 pt-2 text-xs text-slate-400 max-w-sm">
               <MapPin className="w-4 h-4 text-[#C6FF34] shrink-0 mt-0.5" />
               <span className="leading-snug">

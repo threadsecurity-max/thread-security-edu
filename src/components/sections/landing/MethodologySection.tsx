@@ -83,14 +83,14 @@ export function MethodologySection() {
               <div className="absolute bottom-3 inset-x-3 sm:inset-x-4 flex items-center justify-between text-white z-10">
                 <div>
                   <p className="text-xs sm:text-sm font-semibold tracking-tight text-white drop-shadow-sm">
-                    Live Academy Instruction
+                    Live Mentor-Led Training
                   </p>
                   <p className="text-[10px] sm:text-[11px] text-slate-200 drop-shadow-sm">
                     Senior Industry Faculty • Hands-On Red &amp; Blue Team Drills
                   </p>
                 </div>
                 <span className="hidden sm:inline-block px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md text-[10px] uppercase font-bold tracking-wider text-white border border-white/20">
-                  TSE Academy
+                  Thread Security Education
                 </span>
               </div>
             </div>
@@ -163,7 +163,7 @@ export function MethodologySection() {
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Real In-Person &amp; Online Mentors</span>
                 </div>
-                <span className="text-[10px] text-violet-600 font-semibold">TSE Academy</span>
+                <span className="text-[10px] text-violet-600 font-semibold">Thread Security Education</span>
               </div>
             </div>
           </motion.div>

@@ -20,14 +20,14 @@ const heroFlipWords = [
 export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
   return (
     <section 
-      aria-label="Cybersecurity and AI Training Academy Overview"
+      aria-label="Cybersecurity and AI Training and Education Overview"
       className="relative pt-8 sm:pt-14 pb-16 md:pb-28 overflow-hidden bg-white text-slate-900 text-center"
     >
       {/* Ambient background glows & grid canvas */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[800px] pointer-events-none z-0 opacity-70 select-none overflow-hidden flex items-center justify-center">
         <Image
           src="/images/TSE Hero Grid Base.svg"
-          alt="Cybersecurity and AI Academy Network Background Grid"
+          alt="Cybersecurity and AI Training Network Background Grid"
           width={1400}
           height={800}
           priority
@@ -41,7 +41,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
         {/* ── TOP BADGE BAR ── */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100/90 border border-slate-200/80 text-slate-900 text-xs sm:text-sm font-semibold tracking-wide mb-6 shadow-xs backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-mono text-purple-700 font-bold">NORTH REGION&apos;S #1 PRACTICAL ACADEMY</span>
+          <span className="font-mono text-purple-700 font-bold">NORTH INDIA&apos;S #1 CYBER TRAINING INSTITUTE</span>
           <span className="text-slate-300 font-light">|</span>
           <span className="text-slate-700 font-medium">94% Placement Success</span>
         </div>

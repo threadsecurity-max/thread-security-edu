@@ -49,7 +49,7 @@ export default function NotFound() {
           <Link href="/">
             <Button className="bg-[#C6FF34] hover:bg-[#b2f218] text-black font-bold font-mono text-xs px-6 py-3 rounded-2xl flex items-center gap-2 shadow-[0_0_25px_rgba(198,255,52,0.3)] hover:shadow-[0_0_35px_rgba(198,255,52,0.45)] transition-all cursor-pointer">
               <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-              <span>Return to Academy</span>
+              <span>Return to Thread Security Education</span>
             </Button>
           </Link>
           

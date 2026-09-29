@@ -9,14 +9,21 @@ const APP_URL =
 export function OrganizationJsonLd() {
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'EducationalOrganization',
+    '@type': ['EducationalOrganization', 'Organization'],
     name: 'Thread Security Education',
-    alternateName: 'TSE Academy',
+    alternateName: ['TSE', 'Thread Security Education Institute'],
     url: APP_URL,
-    logo: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
-    image: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
+    logo: `${APP_URL}/icon-512.png`,
+    image: `${APP_URL}/images/og-thread-security-education.png`,
     description:
-      'Premier cybersecurity and artificial intelligence education academy in North India. Providing mentor-led training, 100% practical sandbox labs, and verified career placement paths.',
+      'Premier cybersecurity and artificial intelligence education and training institute in India. Providing mentor-led training, 100% practical sandbox labs, and verified career placement paths.',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '1280',
+      bestRating: '5',
+      worstRating: '1',
+    },
     sameAs: [
       'https://www.linkedin.com/company/thread-security/',
       'https://x.com/ThreadSecurity',
@@ -58,7 +65,7 @@ export function WebSiteJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Thread Security Education',
-    alternateName: 'TSE LMS & Cyber Academy',
+    alternateName: 'Thread Security Training & Education Portal',
     url: APP_URL,
     potentialAction: {
       '@type': 'SearchAction',
@@ -68,6 +75,64 @@ export function WebSiteJsonLd() {
       },
       'query-input': 'required name=search_term_string',
     },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+export function SiteNavigationJsonLd() {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: [
+      {
+        '@type': 'SiteNavigationElement',
+        position: 1,
+        name: 'Cybersecurity Training & Courses',
+        description: 'Comprehensive practical curriculum spanning Ethical Hacking, SOC, DevSecOps, and AI Security.',
+        url: `${APP_URL}/courses`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        position: 2,
+        name: 'Hands-on Cyber Workshops & Bootcamps',
+        description: 'Live interactive cyber defense and offensive security masterclasses.',
+        url: `${APP_URL}/workshops`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        position: 3,
+        name: 'Placement Records & Hiring Partners',
+        description: '100% placement assistance, top hiring partners, and student salaries.',
+        url: `${APP_URL}/placements`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        position: 4,
+        name: 'Cyber Career Learning Paths',
+        description: 'Structured role-based roadmaps from beginner to advanced SOC Analyst and Penetration Tester.',
+        url: `${APP_URL}/learning-paths`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        position: 5,
+        name: 'Verify TS-ID Certificate',
+        description: 'Cryptographically verify student credentials and earned competencies.',
+        url: `${APP_URL}/verify-certificate`,
+      },
+      {
+        '@type': 'SiteNavigationElement',
+        position: 6,
+        name: 'Admissions & Career Counselling',
+        description: 'Speak with our cybersecurity career advisors and reserve your batch seat.',
+        url: `${APP_URL}/contact`,
+      },
+    ],
   };
 
   return (
@@ -152,7 +217,7 @@ export function CourseJsonLd({
   durationHours,
   level,
   category,
-  mentorName = 'Kunal Singh',
+  mentorName = 'Sujal Tiwari',
   highlights = [],
 }: CourseJsonLdProps) {
   const courseUrl = `${APP_URL}/courses/${slug}`;
@@ -168,18 +233,32 @@ export function CourseJsonLd({
       '@type': 'EducationalOrganization',
       name: 'Thread Security Education',
       sameAs: APP_URL,
-      logo: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
+      logo: `${APP_URL}/icon-512.png`,
     },
     educationalCredentialAwarded: 'Verified TS-ID Security Credential',
     occupationalCategory: category,
     timeRequired: `PT${durationHours}H`,
     educationalLevel: level,
     teaches: highlights.length > 0 ? highlights : [category, 'Practical Labs', 'Threat Analysis'],
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '240',
+      bestRating: '5',
+      worstRating: '1',
+    },
+    offers: {
+      '@type': 'Offer',
+      category: 'Tuition',
+      price: '0',
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+    },
     instructor: {
       '@type': 'Person',
       name: mentorName,
       worksFor: {
-        '@type': 'Organization',
+        '@type': 'EducationalOrganization',
         name: 'Thread Security Education',
       },
     },

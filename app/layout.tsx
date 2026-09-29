@@ -21,7 +21,7 @@ const outfit = Outfit({
   preload: true,
 });
 
-import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd';
+import { OrganizationJsonLd, WebSiteJsonLd, SiteNavigationJsonLd } from '@/components/seo/JsonLd';
 import { ChatbotWidget } from '@/src/components/chatbot/ChatbotWidget';
 
 export const viewport: Viewport = {
@@ -44,21 +44,27 @@ const APP_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'Thread Security Education (TSE) — Practical Cybersecurity & AI Training Academy',
-    template: '%s | Thread Security Education (TSE)',
+    default: 'Thread Security Education — Advanced Cybersecurity & AI Training Institute',
+    template: '%s | Thread Security Education',
   },
   description:
-    "North India's premier Cybersecurity & AI Training Academy. Master Ethical Hacking, SOC Operations, DevSecOps, and AI Security with 100% practical sandboxed labs, 1-on-1 mentorship, and placement support.",
+    "India's premier Cybersecurity & AI Education & Training Institute. Master Ethical Hacking, SOC Analyst (L1/L2), Penetration Testing, DevSecOps, and AI Security with 100% practical sandboxed labs, 1-on-1 industry mentorship, and verified placement support.",
   keywords: [
-    'Cybersecurity Training Punjab',
-    'AI Security Engineering',
-    'Ethical Hacking Course',
-    'SOC Analyst Training',
+    'Cybersecurity Training',
+    'Cybersecurity Education',
+    'Ethical Hacking Course & Certification',
+    'SOC Analyst Training L1 L2',
+    'Hands-on Cyber Defense Training',
+    'DevSecOps Training & Certification',
+    'AI Security Engineering Course',
     'Thread Security Education',
-    'TSE Academy',
-    'VAPT Certification',
-    'DevSecOps',
-    'Practical Sandboxed Labs',
+    'TSE Cyber Range',
+    'VAPT Training Punjab India',
+    'Live Mentor-Led Cyber Training',
+    'Industrial Cybersecurity Internship',
+    'Placement Guaranteed Cybersecurity Training',
+    'Practical Sandboxed Security Labs',
+    'Cybersecurity Training Institute India',
   ],
   alternates: {
     canonical: '/',
@@ -69,34 +75,42 @@ export const metadata: Metadata = {
   authors: [{ name: 'Thread Security Education Team' }],
   icons: {
     icon: [
-      { url: '/logos/TSE Logo Light.svg', media: '(prefers-color-scheme: light)' },
-      { url: '/logos/TSE Logo Dark.svg', media: '(prefers-color-scheme: dark)' },
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/icon.png', sizes: '48x48', type: 'image/png' },
+      { url: '/icon-96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    shortcut: '/logos/TSE Logo Light.svg',
-    apple: '/logos/TSE Logo Light.svg',
+    shortcut: '/favicon.ico',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   openGraph: {
-    title: 'Thread Security Education — Practical Cybersecurity & AI Training Academy',
+    title: 'Thread Security Education — Expert-Led Cybersecurity & AI Training',
     description:
-      'Master Ethical Hacking, SOC Operations, DevSecOps, and AI Security with 100% practical sandboxed labs, expert mentorship, and verified TS-ID certificates.',
+      'Master Ethical Hacking, SOC Operations, DevSecOps, and AI Security with 100% practical sandboxed labs, 1-on-1 industry mentorship, and verified TS-ID credentials.',
     siteName: 'Thread Security Education',
     type: 'website',
     locale: 'en_US',
+    url: APP_URL,
     images: [
       {
-        url: '/logos/TSE Logo Dark.svg',
+        url: '/images/og-thread-security-education.png',
         width: 1200,
         height: 630,
-        alt: 'Thread Security Education LMS',
+        type: 'image/png',
+        alt: 'Thread Security Education — Expert-Led Cybersecurity & AI Training Institute',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Thread Security Education — Cybersecurity & AI LMS',
+    title: 'Thread Security Education — Expert-Led Cybersecurity & AI Training',
     description:
-      'Structured curriculum, practical sandboxed labs, expert mentorship, and cryptographically verified certificates.',
-    images: ['/logos/TSE Logo Dark.svg'],
+      'Master Ethical Hacking, SOC Operations, DevSecOps, and AI Security with 100% practical sandboxed labs, 1-on-1 industry mentorship, and verified TS-ID credentials.',
+    images: ['/images/og-thread-security-education.png'],
   },
 };
 
@@ -108,6 +122,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
       <head>
+        {/* Favicons & Site Web Manifest for Googlebot & Mobile Viewports */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.png" type="image/png" sizes="48x48" />
+        <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <link rel="manifest" href="/site.webmanifest" />
+
         {/* Preload critical LCP hero image asset */}
         <link rel="preload" as="image" href="/images/TSE Design.svg" fetchPriority="high" />
         <link rel="preload" as="image" href="/images/TSE Hero Grid Base.svg" fetchPriority="high" />
@@ -115,6 +136,7 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col font-sans bg-white text-black antialiased">
         <OrganizationJsonLd />
         <WebSiteJsonLd />
+        <SiteNavigationJsonLd />
         {children}
         <ChatbotWidget />
       </body>

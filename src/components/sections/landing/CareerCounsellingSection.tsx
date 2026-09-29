@@ -86,7 +86,7 @@ export function CareerCounsellingSection() {
                 </h2>
 
                 <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl">
-                  Upskill & Upgrade your career with Thread Academy at your own pace. Speak to our expert career counsellors to map your journey in Cybersecurity & AI.
+                  Upskill & Upgrade your career with Thread Security Education at your own pace. Speak to our expert career counsellors to map your journey in Cybersecurity & AI.
                 </p>
               </div>
 
@@ -113,7 +113,7 @@ export function CareerCounsellingSection() {
                         {/* Brand Logo/Header */}
                         <div className="relative z-10 flex items-center gap-2">
                           <span className="font-semibold tracking-wider text-lg">THREAD</span>
-                          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded uppercase font-medium tracking-widest">ACADEMY</span>
+                          <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded uppercase font-medium tracking-widest">EDUCATION</span>
                         </div>
 
                         {/* Middle Pitch message */}

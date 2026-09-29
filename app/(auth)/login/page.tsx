@@ -349,7 +349,7 @@ function AuthContent() {
                 Thread Security
               </span>
               <span className="text-[11px] font-mono text-purple-300/70 tracking-wider uppercase">
-                Cyber Range & Academy
+                Cyber Range & Training Portal
               </span>
             </div>
           </Link>
@@ -423,7 +423,7 @@ function AuthContent() {
             <p className="text-xs sm:text-sm text-purple-300/70">
               {activeTab === 'signin'
                 ? 'Access your cyber range, labs, and security clearance.'
-                : "Join Thread Security Academy — It's free"}
+                : "Join Thread Security Education — It's free"}
             </p>
           </div>
 
@@ -892,7 +892,7 @@ function AuthContent() {
                 disabled={loading}
                 className="w-full h-11 bg-gradient-to-r from-purple-600 via-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-[0_4px_20px_rgba(124,58,237,0.35)] transition-all flex items-center justify-center gap-2 text-sm pt-1"
               >
-                {loading ? 'Creating Account & TS-ID...' : 'Join the Academy'}
+                {loading ? 'Creating Account & TS-ID...' : 'Join Thread Security Education'}
                 <ArrowRight className="w-4 h-4" />
               </Button>
 

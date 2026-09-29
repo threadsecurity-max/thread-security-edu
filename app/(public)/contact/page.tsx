@@ -99,7 +99,7 @@ export default function ContactPage() {
                       <MapPin className="w-5 h-5 text-security-green" />
                     </div>
                     <div>
-                      <span className="text-xs font-mono text-gray-500 block uppercase font-bold">Academy Campus Location</span>
+                      <span className="text-xs font-mono text-gray-500 block uppercase font-bold">Education Campus Location</span>
                       <span className="text-sm font-semibold text-black block leading-snug">
                         3rd Floor, Vasal Mall, Opposite Hotel President, Police Line, Jalandhar, Punjab 144001
                       </span>

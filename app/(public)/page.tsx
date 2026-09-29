@@ -21,28 +21,28 @@ export const dynamic = 'force-dynamic';
 
 const HOMEPAGE_FAQS = [
   {
-    question: "What makes Thread Security Education's curriculum different from standard training programs?",
-    answer: "Unlike theoretical bootcamps, our curriculum is 100% lab-first. You start attacking and defending live systems in sandboxed environments from day one. All modules are mapped directly to standard industry frameworks like OWASP Top 10 and MITRE ATT&CK.",
+    question: "What makes Thread Security Education's hands-on cybersecurity training curriculum different from standard courses?",
+    answer: "Unlike theoretical bootcamps, our curriculum is 100% lab-first. You start attacking and defending live systems in sandboxed cloud environments from day one. All modules are mapped directly to standard industry frameworks including OWASP Top 10 and MITRE ATT&CK.",
   },
   {
-    question: 'Which specialization track should I choose to get hired quickly?',
-    answer: 'Both Cybersecurity and AI roles are in high demand. If you enjoy threat hunting, network monitoring, and system defense, our Blue Team / SOC track is best. For securing cloud infrastructures and CI/CD pipelines, choose DevSecOps.',
+    question: 'Which cybersecurity training specialization track should I choose to get hired as a SOC Analyst or Ethical Hacker?',
+    answer: 'Both Cybersecurity defense and offensive roles are in high demand. If you enjoy threat hunting, incident response, network monitoring, and system defense, our Blue Team / SOC Analyst (L1/L2) track is best. For offensive security and ethical hacking, choose our Penetration Testing track.',
   },
   {
-    question: 'Do you prepare students for top industry certifications?',
-    answer: 'Yes. While our primary focus is operational competence, our specialized tracks thoroughly prepare you for key credentials like CEH, CompTIA Security+, AWS Certified Security, and OSCP through practical hands-on labs.',
+    question: 'Do you prepare students for top industry cybersecurity certifications like CEH, CompTIA Security+, and OSCP?',
+    answer: 'Yes. While our primary focus is operational competence, our specialized tracks thoroughly prepare you for key global credentials like CEH, CompTIA Security+, AWS Certified Security, and OSCP through practical hands-on labs and exam drills.',
   },
   {
-    question: 'What kind of credentials will I receive upon graduation?',
-    answer: 'You will receive a TS-ID (Thread Security Identifier) verified credential. It is a secure digital record on our directory that lets employers cryptographically verify your lab accomplishments, progress, and capstone scores.',
+    question: 'What kind of credentials and certificates will I receive upon completing training at Thread Security Education?',
+    answer: 'You will receive a TS-ID (Thread Security Identifier) cryptographically verified credential. It is a secure digital record on our national directory that lets enterprise employers verify your lab accomplishments, competencies, and capstone scores.',
   },
   {
-    question: 'Do I need a high-end computer to run the virtual sandboxed labs?',
-    answer: 'No. Our sandboxed lab environments run entirely in the cloud. You only need a standard web browser and an internet connection to spawn live targets and execute exploitation exercises.',
+    question: 'Do I need prior coding experience or a high-end computer to join Thread Security Education live training labs?',
+    answer: 'No. Our sandboxed cyber labs run entirely in the high-speed cloud. You only need a standard web browser and an internet connection to spawn live virtual targets and execute exploitation exercises.',
   },
   {
-    question: 'How does the placement program connect students to companies?',
-    answer: 'We have direct recruitment partnerships with top consulting firms, financial institutions, and technology corporations. Once you pass your capstone and lab validations, you get referred directly to open roles.',
+    question: 'How does the 100% placement assistance program connect students with top cybersecurity companies?',
+    answer: 'We have direct recruitment partnerships with top consulting firms, financial institutions, and cybersecurity corporations. Once you pass your capstone and lab validations, you receive 1-on-1 resume reviews, mock technical interviews, and direct referrals to hiring partners.',
   },
 ];
 

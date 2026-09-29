@@ -331,7 +331,7 @@ export function CertificatesSection() {
                   {/* Brand Logo/Header */}
                   <div className="relative z-10 flex items-center gap-2">
                     <span className="font-semibold tracking-wider text-lg">THREAD</span>
-                    <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded uppercase font-medium tracking-widest">ACADEMY</span>
+                    <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded uppercase font-medium tracking-widest">EDUCATION</span>
                   </div>
 
                   {/* Middle Pitch message */}
