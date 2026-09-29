@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
 
     if (!secretKey || typeof secretKey !== 'string' || secretKey.trim().length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Please enter the Admin Secret Key (e.g. TSE-ADMIN-8080).' },
+        { success: false, error: 'Please enter the Admin Secret Key (e.g. TSE-HIER-DUMMY).' },
         { status: 400 }
       );
     }
