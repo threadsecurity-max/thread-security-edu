@@ -1,5 +1,99 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
-import { prisma } from '../../src/server/database/prisma';
+
+const otpStore: any[] = [];
+const userStore: any[] = [
+  {
+    id: 'admin_1',
+    email: 'threadsecurity@gmail.com',
+    name: 'Super Admin',
+    role: 'SUPER_ADMIN',
+    isActive: true,
+    isApproved: true,
+  },
+  {
+    id: 'mentor_1',
+    email: 'TSE-MENTOR-78987',
+    name: 'Mentor Faculty',
+    role: 'MENTOR',
+    isActive: true,
+    isApproved: true,
+  },
+  {
+    id: 'sec_admin_1',
+    email: 'TSE-SEC-ADMIN-789',
+    name: 'Security Admin',
+    role: 'SECURITY_ADMIN',
+    isActive: true,
+    isApproved: true,
+  },
+];
+
+vi.mock('../../src/server/database/prisma', () => {
+  return {
+    prisma: {
+      $connect: vi.fn().mockResolvedValue(true),
+      otpVerification: {
+        create: vi.fn().mockImplementation(({ data }) => {
+          const item = { id: `otp_${Date.now()}`, ...data, createdAt: new Date() };
+          otpStore.push(item);
+          return Promise.resolve(item);
+        }),
+        findFirst: vi.fn().mockImplementation(({ where }) => {
+          let matches = [...otpStore];
+          if (where?.identifier) matches = matches.filter((o) => o.identifier === where.identifier);
+          if (where?.code && typeof where.code === 'string') matches = matches.filter((o) => o.code === where.code);
+          return Promise.resolve(matches[matches.length - 1] || null);
+        }),
+        deleteMany: vi.fn().mockResolvedValue({ count: 1 }),
+      },
+      user: {
+        findUnique: vi.fn().mockImplementation(({ where }) => {
+          const u = userStore.find((user) => user.email === where?.email || user.id === where?.id);
+          return Promise.resolve(u ? { ...u, tsIdentity: { tsId: 'TS-ID-1' } } : null);
+        }),
+        findFirst: vi.fn().mockImplementation(({ where }) => {
+          const u = userStore.find((user) => {
+            if (!where) return true;
+            if (where.email && user.email === where.email) return true;
+            if (where.role && user.role === where.role) return true;
+            if (where.id && user.id === where.id) return true;
+            if (where.OR && Array.isArray(where.OR)) {
+              return where.OR.some((condition: any) => {
+                if (condition.role && user.role === condition.role) return true;
+                if (condition.email && user.email === condition.email) return true;
+                return false;
+              });
+            }
+            return false;
+          });
+          return Promise.resolve(u ? { ...u, tsIdentity: { tsId: 'TS-ID-1' } } : null);
+        }),
+        create: vi.fn().mockImplementation(({ data }) => {
+          const u = { id: `usr_${Date.now()}`, isActive: true, isApproved: true, ...data };
+          userStore.push(u);
+          return Promise.resolve({ ...u, tsIdentity: { tsId: 'TS-ID-1' } });
+        }),
+        upsert: vi.fn().mockImplementation(({ where, update, create }) => {
+          let u = userStore.find((user) => user.email === where.email);
+          if (!u) {
+            u = { id: `usr_${Date.now()}`, isActive: true, isApproved: true, ...create };
+            userStore.push(u);
+          }
+          return Promise.resolve({ ...u, tsIdentity: { tsId: 'TS-ID-1' } });
+        }),
+      },
+      mentorProfile: {
+        findFirst: vi.fn().mockResolvedValue({ id: 'mentor_prof_1' }),
+      },
+      tSIdentity: {
+        create: vi.fn().mockResolvedValue({ id: 'tsid_1', tsId: 'TS-ADMIN' }),
+      },
+      auditLog: {
+        create: vi.fn().mockResolvedValue({ id: 'log_1' }),
+      },
+    },
+  };
+});
 
 // Mock sendOtpEmail to avoid waiting for live external Resend HTTP API network requests in unit tests
 vi.mock('../../src/server/email/otp.service', async () => {
@@ -17,6 +111,7 @@ import {
   verifyMentorCredentials,
   verifyOtpService,
 } from '../../src/server/services/auth.service';
+import { prisma } from '../../src/server/database/prisma';
 
 describe('Full Authentication & Authorization Verification Suite', () => {
   const originalEnv = { ...process.env };

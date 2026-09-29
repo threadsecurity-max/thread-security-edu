@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
-import dynamic from 'next/dynamic';
 import '@/src/styles/tokens.css';
 import '@/src/styles/typography.css';
 import '@/src/styles/glass.css';
@@ -23,12 +22,7 @@ const outfit = Outfit({
 });
 
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd';
-
-// Dynamically import ChatbotWidget to avoid blocking initial main thread and preserve 100/100 INP/LCP
-const ChatbotWidget = dynamic(
-  () => import('@/src/components/chatbot/ChatbotWidget').then((mod) => mod.ChatbotWidget),
-  { ssr: false }
-);
+import { ChatbotWidget } from '@/src/components/chatbot/ChatbotWidget';
 
 export const viewport: Viewport = {
   width: 'device-width',
