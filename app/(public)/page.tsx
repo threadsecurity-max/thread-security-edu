@@ -178,7 +178,7 @@ export default async function PublicHomePage({
       <ChallengesSection />
 
       {/* Comprehensive Cybersecurity & AI Training Programs Directory */}
-      <CyberTrainingDirectorySection />
+      {/* <CyberTrainingDirectorySection /> */}
 
       {/* FAQ Section */}
       <FaqSection />
