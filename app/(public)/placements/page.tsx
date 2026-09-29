@@ -1,7 +1,12 @@
 import { Metadata } from 'next';
+import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import PlacementHighlightsClient from '../placements/PlacementHighlightsClient';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  'https://threadsecurity.in';
 
 export const metadata: Metadata = {
   title: 'Placement Highlights & Alumni Career Outcomes | Thread Security',
@@ -25,5 +30,15 @@ export const metadata: Metadata = {
 };
 
 export default function PlacementsPage() {
-  return <PlacementHighlightsClient />;
+  return (
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Placements', url: '/placements' },
+        ]}
+      />
+      <PlacementHighlightsClient />
+    </>
+  );
 }

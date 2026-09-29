@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -103,7 +104,13 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             <Menu className="w-5 h-5 text-[#C6FF34]" />
           </button>
           <Link href="/mentor" className="flex items-center gap-2">
-            <img src="/logos/TSE Logo Nav.svg" alt="TSE Logo" className="h-7 w-auto" />
+            <Image
+              src="/logos/TSE Logo Nav.svg"
+              alt="TSE Logo"
+              width={28}
+              height={28}
+              className="h-7 w-auto"
+            />
             <span className="text-xs font-mono font-bold tracking-wider text-white">MENTOR PORTAL</span>
           </Link>
         </div>
@@ -129,7 +136,13 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                  <img src="/logos/TSE Logo Nav.svg" alt="TSE Logo" className="h-7 w-auto" />
+                  <Image
+                    src="/logos/TSE Logo Nav.svg"
+                    alt="TSE Logo"
+                    width={28}
+                    height={28}
+                    className="h-7 w-auto"
+                  />
                   <span className="text-xs font-mono font-bold text-white">TSE MENTOR</span>
                 </div>
                 <button
@@ -203,9 +216,11 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
       <aside className="w-64 bg-[#0a0a0a] border-r border-white/10 text-white hidden md:flex flex-col justify-between p-4 shrink-0">
         <div className="space-y-6">
           <Link href="/mentor" className="flex items-center gap-3 group" title="TSE Mentor Portal">
-            <img
+            <Image
               src="/logos/TSE Logo Nav.svg"
               alt="Thread Security Education Logo"
+              width={40}
+              height={40}
               className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </Link>

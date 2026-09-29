@@ -1,6 +1,10 @@
 import React from 'react';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  'https://threadsecurity.in';
 
 export function OrganizationJsonLd() {
   const schema = {
@@ -10,7 +14,9 @@ export function OrganizationJsonLd() {
     alternateName: 'TSE Academy',
     url: APP_URL,
     logo: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
-    description: 'Premier cybersecurity and artificial intelligence education academy. Providing mentor-led training, 100% practical sandbox labs, and verified career placement paths.',
+    image: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
+    description:
+      'Premier cybersecurity and artificial intelligence education academy in North India. Providing mentor-led training, 100% practical sandbox labs, and verified career placement paths.',
     sameAs: [
       'https://www.linkedin.com/company/thread-security/',
       'https://x.com/ThreadSecurity',
@@ -33,6 +39,64 @@ export function OrganizationJsonLd() {
       postalCode: '144001',
       addressCountry: 'IN',
     },
+    founder: {
+      '@type': 'Person',
+      name: 'Kunal Singh',
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+export function WebSiteJsonLd() {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Thread Security Education',
+    alternateName: 'TSE LMS & Cyber Academy',
+    url: APP_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${APP_URL}/courses?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+export interface FaqItemSchema {
+  question: string;
+  answer: string;
+}
+
+export function FaqJsonLd({ faqs }: { faqs: FaqItemSchema[] }) {
+  if (!faqs || faqs.length === 0) return null;
+
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
   };
 
   return (
@@ -101,7 +165,7 @@ export function CourseJsonLd({
     courseCode: courseCode || slug,
     url: courseUrl,
     provider: {
-      '@type': 'Organization',
+      '@type': 'EducationalOrganization',
       name: 'Thread Security Education',
       sameAs: APP_URL,
       logo: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
@@ -206,7 +270,7 @@ export function ArticleJsonLd({
       name: authorName,
     },
     publisher: {
-      '@type': 'Organization',
+      '@type': 'EducationalOrganization',
       name: 'Thread Security Education',
       logo: {
         '@type': 'ImageObject',
@@ -214,6 +278,50 @@ export function ArticleJsonLd({
       },
     },
     image: imageUrl ? [imageUrl] : [`${APP_URL}/logos/TSE%20Logo%20Dark.svg`],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+export interface VideoObjectJsonLdProps {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  uploadDate: string;
+  contentUrl?: string;
+  embedUrl?: string;
+}
+
+export function VideoObjectJsonLd({
+  name,
+  description,
+  thumbnailUrl,
+  uploadDate,
+  contentUrl,
+  embedUrl,
+}: VideoObjectJsonLdProps) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name,
+    description,
+    thumbnailUrl,
+    uploadDate,
+    ...(contentUrl ? { contentUrl } : {}),
+    ...(embedUrl ? { embedUrl } : {}),
+    publisher: {
+      '@type': 'EducationalOrganization',
+      name: 'Thread Security Education',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
+      },
+    },
   };
 
   return (

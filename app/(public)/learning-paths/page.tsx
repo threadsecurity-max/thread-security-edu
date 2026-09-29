@@ -3,11 +3,16 @@ import Link from 'next/link';
 import { prisma } from '@/server/database/prisma';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Layers, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import ScrollFloat from '@/components/ui/ScrollFloat';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  'https://threadsecurity.in';
 
 export const metadata: Metadata = {
   title: 'Structured Cybersecurity Learning Paths | Career Roadmaps',
@@ -128,10 +133,17 @@ export default async function LearningPathsPage() {
   }
 
   return (
-    <div className="py-16 bg-[#F7F9FA] min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-left mb-12">
-          <Badge variant="security" className="mb-2">CAREER ROADMAPS</Badge>
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Learning Paths', url: '/learning-paths' },
+        ]}
+      />
+      <div className="py-16 bg-[#F7F9FA] min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-left mb-12">
+            <Badge variant="security" className="mb-2">CAREER ROADMAPS</Badge>
           <ScrollFloat
             as="h1"
             animationDuration={0.8}
@@ -194,5 +206,6 @@ export default async function LearningPathsPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

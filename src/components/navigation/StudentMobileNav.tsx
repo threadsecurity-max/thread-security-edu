@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -71,9 +72,11 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <Link href="/" onClick={() => setDrawerOpen(false)}>
-                    <img
+                    <Image
                       src="/logos/TSE Logo Nav.svg"
-                      alt="TSE"
+                      alt="Thread Security Education"
+                      width={32}
+                      height={32}
                       className="h-8 w-auto object-contain"
                     />
                   </Link>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Menu,
@@ -87,9 +88,11 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                 <div className="flex items-center gap-2">
-                  <img
+                  <Image
                     src="/logos/TSE Logo Dark.svg"
-                    alt="TSE"
+                    alt="Thread Security Education"
+                    width={28}
+                    height={28}
                     className="h-7 w-auto object-contain"
                   />
                   <span className="font-black text-sm tracking-tight text-black">

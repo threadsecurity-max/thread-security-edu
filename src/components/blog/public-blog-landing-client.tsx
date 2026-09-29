@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -139,11 +140,14 @@ export function PublicBlogLandingClient({
               <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-7 space-y-4 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 md:p-8 hover:border-white/20 transition-all group shadow-2xl">
                   {featuredBlog.media?.[0]?.url || featuredBlog.coverImageId ? (
-                    <div className="rounded-2xl overflow-hidden aspect-[1080/711] border border-white/10 bg-black">
-                      <img
+                    <div className="rounded-2xl overflow-hidden aspect-[1080/711] border border-white/10 bg-black relative">
+                      <Image
                         src={featuredBlog.media?.[0]?.url || '/placeholder-blog.png'}
                         alt={featuredBlog.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 600px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     </div>
                   ) : null}
@@ -235,8 +239,14 @@ export function PublicBlogLandingClient({
                     >
                       <div className="space-y-3">
                         {b.media?.[0]?.url && (
-                          <div className="rounded-xl overflow-hidden aspect-[1080/711] border border-white/10 bg-black">
-                            <img src={b.media[0].url} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          <div className="rounded-xl overflow-hidden aspect-[1080/711] border border-white/10 bg-black relative">
+                            <Image
+                              src={b.media[0].url}
+                              alt={b.title}
+                              fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
                           </div>
                         )}
 

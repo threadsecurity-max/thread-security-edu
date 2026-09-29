@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowLeft,
   Clock,
@@ -119,8 +120,15 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
         {/* Featured Hero Cover Image */}
         {blog.media?.[0]?.url && (
-          <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-white/10 bg-black aspect-[1080/711] mb-12 shadow-2xl">
-            <img src={blog.media[0].url} alt={blog.media[0].altText || blog.title} className="w-full h-full object-cover" />
+          <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-white/10 bg-black aspect-[1080/711] relative mb-12 shadow-2xl">
+            <Image
+              src={blog.media[0].url}
+              alt={blog.media[0].altText || blog.title}
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 896px"
+              className="object-cover"
+            />
           </div>
         )}
 

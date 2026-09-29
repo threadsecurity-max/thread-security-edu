@@ -1,5 +1,7 @@
 import { prisma } from '@/server/database/prisma';
 import { getSession } from '@/lib/auth/session';
+import { MASTER_COURSES } from '@/lib/courses/courseRegistry';
+import { FaqJsonLd, CourseListJsonLd } from '@/components/seo/JsonLd';
 import { GuestClearanceBanner } from '@/components/sections/landing/GuestClearanceBanner';
 import { HeroSection } from '@/components/sections/landing/HeroSection';
 import { ImpactStatsSection } from '@/components/sections/landing/ImpactStatsSection';
@@ -16,6 +18,33 @@ import { CourseRoadmapSection } from '@/components/sections/landing/CourseRoadma
 import { StudentReviewsSection } from '@/components/sections/landing/StudentReviewsSection';
 
 export const dynamic = 'force-dynamic';
+
+const HOMEPAGE_FAQS = [
+  {
+    question: "What makes Thread Security Education's curriculum different from standard training programs?",
+    answer: "Unlike theoretical bootcamps, our curriculum is 100% lab-first. You start attacking and defending live systems in sandboxed environments from day one. All modules are mapped directly to standard industry frameworks like OWASP Top 10 and MITRE ATT&CK.",
+  },
+  {
+    question: 'Which specialization track should I choose to get hired quickly?',
+    answer: 'Both Cybersecurity and AI roles are in high demand. If you enjoy threat hunting, network monitoring, and system defense, our Blue Team / SOC track is best. For securing cloud infrastructures and CI/CD pipelines, choose DevSecOps.',
+  },
+  {
+    question: 'Do you prepare students for top industry certifications?',
+    answer: 'Yes. While our primary focus is operational competence, our specialized tracks thoroughly prepare you for key credentials like CEH, CompTIA Security+, AWS Certified Security, and OSCP through practical hands-on labs.',
+  },
+  {
+    question: 'What kind of credentials will I receive upon graduation?',
+    answer: 'You will receive a TS-ID (Thread Security Identifier) verified credential. It is a secure digital record on our directory that lets employers cryptographically verify your lab accomplishments, progress, and capstone scores.',
+  },
+  {
+    question: 'Do I need a high-end computer to run the virtual sandboxed labs?',
+    answer: 'No. Our sandboxed lab environments run entirely in the cloud. You only need a standard web browser and an internet connection to spawn live targets and execute exploitation exercises.',
+  },
+  {
+    question: 'How does the placement program connect students to companies?',
+    answer: 'We have direct recruitment partnerships with top consulting firms, financial institutions, and technology corporations. Once you pass your capstone and lab validations, you get referred directly to open roles.',
+  },
+];
 
 export default async function PublicHomePage({
   searchParams,
@@ -98,8 +127,18 @@ export default async function PublicHomePage({
     ];
   }
 
+  const courseListItems = MASTER_COURSES.map((c) => ({
+    name: c.title,
+    description: c.description,
+    url: `/courses/${c.slug}`,
+  }));
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
+      {/* Search Engine Rich Snippet Schemas */}
+      <FaqJsonLd faqs={HOMEPAGE_FAQS} />
+      <CourseListJsonLd courses={courseListItems} />
+
       {/* Guest Explorer Clearance Banner */}
       {showNotice && <GuestClearanceBanner session={session} />}
 

@@ -3,16 +3,35 @@ import { Phone, Mail, MapPin, Clock, Headphones } from 'lucide-react';
 import { ContactFormClient } from '@/components/contact/ContactFormClient';
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  'https://threadsecurity.in';
+
 export const metadata: Metadata = {
-  title: 'Contact Admissions & Counseling — Thread Security Education (TSE)',
+  title: 'Contact Admissions & Career Counseling — Thread Security Education (TSE)',
   description: 'Connect with Thread Security Education admissions & career counseling team. Book a free 1-on-1 demo session for Cybersecurity & AI engineering masterclasses.',
+  keywords: [
+    'Contact Thread Security',
+    'Cybersecurity Admissions',
+    'Career Counseling Jalandhar',
+    'AI Security Mentorship Demo',
+    'Thread Security Education',
+  ],
   alternates: {
-    canonical: 'https://threads-edu.com/contact',
+    canonical: `${APP_URL}/contact`,
   },
   openGraph: {
     title: 'Contact Admissions & Counseling | Thread Security Education',
     description: 'Book a free demo session and consult with senior faculty on Cybersecurity and AI engineering career pathways.',
-    url: 'https://threads-edu.com/contact',
+    url: `${APP_URL}/contact`,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Contact Admissions & Counseling | Thread Security Education',
+    description: 'Book a free demo session and consult with senior faculty.',
   },
 };
 
@@ -21,8 +40,8 @@ export default function ContactPage() {
     <>
       <BreadcrumbJsonLd
         items={[
-          { name: 'Home', url: 'https://threads-edu.com' },
-          { name: 'Contact Admissions', url: 'https://threads-edu.com/contact' },
+          { name: 'Home', url: '/' },
+          { name: 'Contact Admissions', url: '/contact' },
         ]}
       />
       <div className="min-h-screen bg-white text-black py-12 md:py-20 px-4 sm:px-6 lg:px-8">

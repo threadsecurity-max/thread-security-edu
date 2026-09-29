@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -80,9 +81,11 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
         {/* Brand Logo & Title */}
         <div className="flex items-center justify-between">
           <Link href="/admin" className="flex items-center gap-3 group" title="Return to Admin Dashboard">
-            <img
+            <Image
               src="/logos/TSE Logo Nav.svg"
               alt="Thread Security Education Logo"
+              width={36}
+              height={36}
               className="h-9 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </Link>
@@ -180,7 +183,13 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
             <Menu className="w-5 h-5 text-red-600" />
           </button>
           <Link href="/admin" className="flex items-center gap-2">
-            <img src="/logos/TSE Logo Nav.svg" alt="TSE" className="h-7 w-auto object-contain" />
+            <Image
+              src="/logos/TSE Logo Nav.svg"
+              alt="Thread Security Education"
+              width={28}
+              height={28}
+              className="h-7 w-auto object-contain"
+            />
           </Link>
         </div>
 

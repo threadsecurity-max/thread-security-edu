@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Outfit } from 'next/font/google';
+import dynamic from 'next/dynamic';
 import '@/src/styles/tokens.css';
 import '@/src/styles/typography.css';
 import '@/src/styles/glass.css';
@@ -21,8 +22,13 @@ const outfit = Outfit({
   preload: true,
 });
 
-import { OrganizationJsonLd } from '@/components/seo/JsonLd';
-import { ChatbotWidget } from '@/src/components/chatbot/ChatbotWidget';
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/seo/JsonLd';
+
+// Dynamically import ChatbotWidget to avoid blocking initial main thread and preserve 100/100 INP/LCP
+const ChatbotWidget = dynamic(
+  () => import('@/src/components/chatbot/ChatbotWidget').then((mod) => mod.ChatbotWidget),
+  { ssr: false }
+);
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -35,10 +41,14 @@ export const viewport: Viewport = {
   ],
 };
 
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  'https://threadsecurity.in';
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:8080'
-  ),
+  metadataBase: new URL(APP_URL),
   title: {
     default: 'Thread Security Education (TSE) — Practical Cybersecurity & AI Training Academy',
     template: '%s | Thread Security Education (TSE)',
@@ -110,6 +120,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col font-sans bg-white text-black antialiased">
         <OrganizationJsonLd />
+        <WebSiteJsonLd />
         {children}
         <ChatbotWidget />
       </body>

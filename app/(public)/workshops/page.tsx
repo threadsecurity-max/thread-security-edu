@@ -1,9 +1,14 @@
 import { Metadata } from 'next';
 import { getSession } from '@/lib/auth/session';
 import { prisma } from '@/server/database/prisma';
+import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { WorkshopGalleryClient, WorkshopItem } from './WorkshopGalleryClient';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXTAUTH_URL ||
+  'https://threadsecurity.in';
 
 export const metadata: Metadata = {
   title: 'Cybersecurity Workshops & Live Bootcamps | Hands-on Training',
@@ -62,9 +67,17 @@ export default async function WorkshopsPage() {
   ]);
 
   return (
-    <WorkshopGalleryClient
-      userRole={session?.role ?? null}
-      initialWorkshops={initialWorkshops.length > 0 ? initialWorkshops : undefined}
-    />
+    <>
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Workshops', url: '/workshops' },
+        ]}
+      />
+      <WorkshopGalleryClient
+        userRole={session?.role ?? null}
+        initialWorkshops={initialWorkshops.length > 0 ? initialWorkshops : undefined}
+      />
+    </>
   );
 }
