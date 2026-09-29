@@ -261,12 +261,18 @@ export function CareersSection() {
         
         {/* ── SECTION TOP HEADLINE ── */}
         <div className="text-center max-w-3xl mb-8 sm:mb-12">
+          <span className="inline-block text-xs font-mono font-bold tracking-widest text-[#C6FF34] uppercase mb-3 px-3 py-1 rounded-full bg-[#C6FF34]/10 border border-[#C6FF34]/20">
+            JOB-ORIENTED CYBER SECURITY CAREERS &amp; PLACEMENT TRAINING
+          </span>
           <h2 className="text-2xl sm:text-4xl md:text-7xl font-bold uppercase text-white tracking-tight leading-[1.15]">
             Seamless pathways to plug <br className="hidden sm:inline" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400">
               talent into the industry
             </span>
           </h2>
+          <p className="text-xs sm:text-sm text-slate-300 mt-3 font-normal max-w-2xl mx-auto">
+            Practical, hands-on cybersecurity courses designed to launch high-demand careers as SOC Analyst, Ethical Hacker, VAPT Specialist, and DevSecOps Engineer after BTech, BCA, MCA, or career transition.
+          </p>
         </div>
 
         {/* ── SYNCHRONIZED SYMMETRICAL ARC MARQUEE WITH LARGE CENTRAL TSE LOGO ── */}

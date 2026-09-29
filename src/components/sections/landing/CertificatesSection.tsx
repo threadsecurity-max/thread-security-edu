@@ -124,8 +124,8 @@ export function CertificatesSection() {
             </span>
           </h2>
 
-          <p className="mt-4 text-xs sm:text-base text-slate-300/90 max-w-2xl mx-auto font-normal leading-relaxed">
-            Validate your expertise with verifiable credentials recognized by top tier enterprises, government bodies, and cybersecurity frameworks worldwide.
+          <p className="mt-4 text-xs sm:text-base text-slate-300/90 max-w-3xl mx-auto font-normal leading-relaxed">
+            Validate your practical skills with industry-recognized cyber security certifications and cryptographically verifiable TS-ID credentials. Comprehensive hands-on exam preparation for CEH v13 (EC-Council), CompTIA Security+ (SY0-701), OSCP, eJPT, and cloud defense standards.
           </p>
         </div>
 

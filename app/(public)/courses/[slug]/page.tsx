@@ -56,22 +56,38 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${course.title} | TSE Masterclass`;
+  const title = `${course.title} | Thread Security Education`;
   const description = course.description || course.subtitle;
   const canonicalUrl = `${APP_URL}/courses/${slug}`;
+
+  const keywords = [
+    course.title,
+    course.category,
+    'cyber security course',
+    'cybersecurity training',
+    'cyber security certification course',
+    'professional cybersecurity training',
+    'practical cyber security course',
+    'hands-on cybersecurity course',
+    'job oriented cyber security course',
+    'cyber security course in Jalandhar',
+    'cyber security training in Jalandhar',
+    'cyber security course Punjab',
+    'ethical hacking course Punjab',
+    '45 days cyber security course',
+    '6 month cyber security industrial training',
+    'cyber security internship for BTech students',
+    'CEH certification course',
+    'CompTIA Security+ training',
+    'OSCP training',
+    'Thread Security Education',
+    'Verified TS-ID Certification',
+  ];
 
   return {
     title,
     description,
-    keywords: [
-      course.title,
-      course.category,
-      'Cybersecurity Training',
-      'AI Security Course',
-      'Hands-on Sandboxed Labs',
-      'Thread Security Education',
-      'Verified TS-ID Certification',
-    ],
+    keywords,
     alternates: {
       canonical: canonicalUrl,
     },
@@ -83,7 +99,7 @@ export async function generateMetadata({
       siteName: 'Thread Security Education',
       images: [
         {
-          url: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
+          url: `${APP_URL}/images/og-thread-security-education.png`,
           width: 1200,
           height: 630,
           alt: `${course.title} — Thread Security Education`,
@@ -94,7 +110,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: [`${APP_URL}/logos/TSE%20Logo%20Dark.svg`],
+      images: [`${APP_URL}/images/og-thread-security-education.png`],
     },
   };
 }

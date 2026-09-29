@@ -51,6 +51,168 @@ export interface MasterCourseData {
 }
 
 export const MASTER_COURSES: MasterCourseData[] = [
+  // ── FLAGSHIP COMPREHENSIVE CYBERSECURITY PROGRAM ──
+  {
+    id: 'flagship-cyber-1',
+    slug: 'cyber-security-course',
+    title: 'Professional Cyber Security Course & Industrial Training (Ethical Hacking, VAPT & SOC)',
+    subtitle: 'Comprehensive job-oriented cybersecurity training program. Master Ethical Hacking, VAPT, SOC Operations, Bug Bounty, Cloud Security, and Incident Response with 100% hands-on sandboxed labs in Jalandhar, Punjab & Online.',
+    description: 'Thread Security Education’s flagship Cyber Security Course is designed for beginners, engineering students (BTech, BCA, MCA), freshers, and working professionals looking to launch a high-growth career in cybersecurity. Featuring 45-Day Summer Training, 6-Month Industrial Training & Internship, and Full-Stack Career Accelerator tracks with CEH v13, CompTIA Security+, and OSCP exam preparation, live sandboxed cyber range labs, 1-on-1 expert mentorship, and 100% placement support in Jalandhar, Punjab and across India.',
+    track: 'cyber',
+    category: 'Complete Cyber Security & Defense',
+    level: 'Beginner',
+    durationHours: 120,
+    modulesCount: 24,
+    labsCount: 80,
+    highlights: [
+      '45 Days / 6 Weeks Summer Training & 6 Months Industrial Internship Options',
+      '100% Practical Sandboxed Cloud Labs & Cyber Range Drills',
+      'Dual Specialization: Offensive Security (Ethical Hacking/VAPT) & Defensive Security (SOC/Blue Team)',
+      'Global Certification Preparation: CEH v13, CompTIA Security+, OSCP, eJPT & Verifiable TS-ID',
+      '100% Placement Assistance: Resume Building, Mock Technical Interviews & Direct Partner Hiring Referrals',
+      'Offline Classroom Training in Jalandhar, Punjab + Live Online Interactive Batches Across India',
+    ],
+    prerequisites: [
+      'No prior cybersecurity or coding experience required — starts from scratch',
+      'Basic familiarity with computers and internet concepts',
+      'Ideal for BTech, BCA, MCA, BSC IT, Diploma students, freshers, and working professionals',
+    ],
+    learningOutcomes: [
+      'Master complete fundamentals of networking, Linux command line, and cybersecurity architecture',
+      'Perform end-to-end vulnerability assessment and penetration testing (VAPT) across web, network, and mobile targets',
+      'Hunt threats and monitor security incidents using enterprise SIEM tools including Splunk, Wazuh, and Microsoft Sentinel',
+      'Discover and responsibly report high-severity security vulnerabilities on Bug Bounty platforms (HackerOne, Bugcrowd)',
+      'Execute defensive incident response playbooks aligned with MITRE ATT&CK and OWASP Top 10 frameworks',
+      'Earn industry-recognized, cryptographically verifiable TS-ID credentials and prepare for CEH, Security+, and OSCP exams',
+    ],
+    toolsCovered: [
+      'Kali Linux',
+      'Burp Suite Professional',
+      'Metasploit Framework',
+      'Nmap',
+      'Wireshark',
+      'Splunk Enterprise',
+      'Wazuh EDR/SIEM',
+      'OWASP ZAP',
+      'Ghidra',
+      'Docker',
+      'AWS Security',
+      'Python for Cybersecurity',
+    ],
+    mentor: {
+      name: 'Kunal Singh',
+      role: 'Principal Security Architect & Offensive Operations Lead',
+      company: 'Thread Security Education',
+      bio: 'Over a decade leading enterprise penetration testing, red teaming, and threat modeling for global fintech and SaaS corporations. Certified ethical hacker and senior security trainer.',
+    },
+    modules: [
+      {
+        id: 'cs-m1',
+        title: 'Module 1: Cyber Security Fundamentals & Networking Architecture',
+        description: 'OSI model, TCP/IP handshake, DNS, DHCP, subnetting, packet analysis with Wireshark, and Linux security administration.',
+        lessons: [
+          { id: 'cs-l1', title: 'Cybersecurity Threat Landscape & Attack Surfaces in 2026', durationMinutes: 45, type: 'VIDEO' },
+          { id: 'cs-l2', title: 'Network Protocol Deep Dive: TCP, UDP, ICMP, and HTTP/S', durationMinutes: 50, type: 'VIDEO' },
+          { id: 'cs-l3', title: 'Hands-on Wireshark Packet Inspection & Traffic Capture', durationMinutes: 60, type: 'LAB' },
+          { id: 'cs-l4', title: 'Linux Command Line & Permissions Hardening for Security Analysts', durationMinutes: 55, type: 'LAB' },
+        ],
+      },
+      {
+        id: 'cs-m2',
+        title: 'Module 2: Practical Ethical Hacking & Footprinting (Reconnaissance)',
+        description: 'Passive & active reconnaissance, OSINT investigation, DNS enumeration, port scanning with Nmap, and vulnerability scanning.',
+        lessons: [
+          { id: 'cs-l5', title: 'OSINT Frameworks & Passive Reconnaissance Techniques', durationMinutes: 50, type: 'VIDEO' },
+          { id: 'cs-l6', title: 'Advanced Nmap Port Scanning, NSE Scripting, and Service Fingerprinting', durationMinutes: 65, type: 'LAB' },
+          { id: 'cs-l7', title: 'Automated Target Enumeration with Sublist3r and Amass', durationMinutes: 45, type: 'LAB' },
+        ],
+      },
+      {
+        id: 'cs-m3',
+        title: 'Module 3: Web Application Security & OWASP Top 10 Exploitation',
+        description: 'Deep exploitation of SQL Injection, Cross-Site Scripting (XSS), CSRF, IDOR, SSRF, and business logic flaws using Burp Suite Pro.',
+        lessons: [
+          { id: 'cs-l8', title: 'Intercepting and Modifying Web Traffic with Burp Suite Pro', durationMinutes: 55, type: 'LAB' },
+          { id: 'cs-l9', title: 'SQL Injection: Union-Based, Blind, and Second-Order Exploitation', durationMinutes: 70, type: 'LAB' },
+          { id: 'cs-l10', title: 'Cross-Site Scripting (Reflected, Stored, DOM) & CSP Bypass', durationMinutes: 60, type: 'LAB' },
+          { id: 'cs-l11', title: 'Server-Side Request Forgery (SSRF) & Broken Access Control (IDOR)', durationMinutes: 65, type: 'LAB' },
+        ],
+      },
+      {
+        id: 'cs-m4',
+        title: 'Module 4: Network Penetration Testing & Vulnerability Assessment (VAPT)',
+        description: 'Exploiting network services, SMB relay attacks, Metasploit automation, password cracking with Hashcat, and CVSS report writing.',
+        lessons: [
+          { id: 'cs-l12', title: 'Vulnerability Assessment Methodologies: WSTG & PTES Standards', durationMinutes: 45, type: 'VIDEO' },
+          { id: 'cs-l13', title: 'Metasploit Framework: Listeners, Payloads, and Post-Exploitation', durationMinutes: 65, type: 'LAB' },
+          { id: 'cs-l14', title: 'Credential Dumping, Hash Extraction, and Hashcat Cracking', durationMinutes: 50, type: 'LAB' },
+          { id: 'cs-l15', title: 'Writing Industry-Standard VAPT Audit Reports with Remediation Advice', durationMinutes: 55, type: 'VIDEO' },
+        ],
+      },
+      {
+        id: 'cs-m5',
+        title: 'Module 5: SOC Analyst Operations, SIEM Monitoring & Incident Response',
+        description: 'Blue team defense, log aggregation, Splunk SIEM querying, Wazuh EDR detection engineering, and incident response triage.',
+        lessons: [
+          { id: 'cs-l16', title: 'SOC Architecture: Tier 1, 2, 3 Responsibilities & Incident Lifecycle', durationMinutes: 45, type: 'VIDEO' },
+          { id: 'cs-l17', title: 'Splunk Enterprise Search Processing Language (SPL) for Threat Detection', durationMinutes: 65, type: 'LAB' },
+          { id: 'cs-l18', title: 'Analyzing Windows Event Logs for Ransomware & Privilege Escalation', durationMinutes: 60, type: 'LAB' },
+          { id: 'cs-l19', title: 'Wazuh Open-Source SIEM & Endpoint Security Agent Rules', durationMinutes: 55, type: 'LAB' },
+        ],
+      },
+      {
+        id: 'cs-m6',
+        title: 'Module 6: Cloud Security, DevSecOps & AI Security Fundamentals',
+        description: 'Securing AWS and Azure clouds, Docker container security, CI/CD pipeline security gates, and AI / LLM prompt injection defenses.',
+        lessons: [
+          { id: 'cs-l20', title: 'AWS Cloud Security: IAM Policies, S3 Buckets, and GuardDuty Monitoring', durationMinutes: 50, type: 'VIDEO' },
+          { id: 'cs-l21', title: 'Container Security: Docker CIS Benchmarks & Trivy Vulnerability Scans', durationMinutes: 55, type: 'LAB' },
+          { id: 'cs-l22', title: 'AI Red Teaming: OWASP Top 10 for LLMs & Prompt Injection Defense', durationMinutes: 60, type: 'LAB' },
+        ],
+      },
+      {
+        id: 'cs-m7',
+        title: 'Module 7: Capstone Real-World Cyber Range Simulation & Certification Drills',
+        description: 'Multi-host enterprise network penetration test and incident containment exercise. CEH, Security+, and OSCP exam practice.',
+        lessons: [
+          { id: 'cs-l23', title: 'Full-Scope Red Team vs Blue Team Enterprise Simulation', durationMinutes: 120, type: 'LAB' },
+          { id: 'cs-l24', title: 'CEH v13 & CompTIA Security+ Exam Preparation Drills & Mock Tests', durationMinutes: 60, type: 'QUIZ' },
+        ],
+      },
+    ],
+    labs: [
+      { id: 'csl-1', title: 'Lab 1: Deploying Kali Linux & Setting Up Sandboxed Attack Range', objective: 'Configure virtual network adapters, isolated subnets, and security proxy bridges.', skills: 'Virtualization, Network Isolation, Kali Linux', estimatedMinutes: 45 },
+      { id: 'csl-2', title: 'Lab 2: Enterprise Network Reconnaissance & Port Scanning', objective: 'Scan full 65535 ports on hardened Linux and Windows servers without triggering alerts.', skills: 'Nmap, Stealth Scanning, Banner Grabbing', estimatedMinutes: 50 },
+      { id: 'csl-3', title: 'Lab 3: Exploiting Second-Order SQL Injection in E-Commerce App', objective: 'Extract sensitive database hashes using sqlmap and manual SQL injection vectors.', skills: 'SQLi, Database Exploitation, Burp Suite', estimatedMinutes: 60 },
+      { id: 'csl-4', title: 'Lab 4: Cracking Active Directory Kerberos Tickets (Kerberoasting)', objective: 'Request TGS service tickets for SPN accounts and crack passwords offline with Hashcat.', skills: 'Active Directory, Kerberos, Password Auditing', estimatedMinutes: 65 },
+      { id: 'csl-5', title: 'Lab 5: Splunk SIEM Detection Rule Creation for Pass-the-Hash', objective: 'Detect lateral movement in Windows security logs (Event ID 4624 Type 9).', skills: 'Splunk, SIEM Rule Writing, Threat Hunting', estimatedMinutes: 55 },
+      { id: 'csl-6', title: 'Lab 6: Investigating Live Ransomware Attack with Wazuh & Memory Dump', objective: 'Identify patient-zero process, isolate compromised endpoints, and extract C2 indicators.', skills: 'Incident Response, Memory Forensics, Wazuh', estimatedMinutes: 70 },
+      { id: 'csl-7', title: 'Lab 7: Cloud Bucket IAM Misconfiguration & Lateral Privilege Escalation', objective: 'Audit AWS S3 bucket policies and escalate IAM roles to administrator privileges.', skills: 'AWS Security, IAM Auditing, Cloud Defense', estimatedMinutes: 50 },
+      { id: 'csl-8', title: 'Lab 8: Capstone Multi-Stage Red Team Exercise', objective: 'Compromise perimeter web server, pivot to internal network, and capture administrative flag.', skills: 'Full-Scope Penetration Testing, Pivoting, Reporting', estimatedMinutes: 90 },
+    ],
+    faqs: [
+      {
+        q: 'Who can enroll in this Cyber Security Course?',
+        a: 'This course is built for beginners, college students (BTech, BCA, MCA, BSc IT, Diploma), fresh graduates, and IT working professionals who want to transition into cybersecurity. No prior hacking or coding experience is required.',
+      },
+      {
+        q: 'Do you offer 45 Days Summer Training and 6 Months Industrial Training for college students in Punjab?',
+        a: 'Yes! We provide accredited 45 Days / 6 Weeks Summer Training and 6 Months Industrial Training with official internship completion letters and university project reports for engineering and computer science students.',
+      },
+      {
+        q: 'What is the location of the offline training institute?',
+        a: 'Our physical training center is located at 3rd Floor, Vasal Mall, Opposite Hotel President, Police Line, Jalandhar, Punjab 144001. We also offer live interactive online batches with full cloud lab access for students across India.',
+      },
+      {
+        q: 'Does this course prepare me for CEH, CompTIA Security+, and OSCP certifications?',
+        a: 'Yes. The syllabus is mapped directly to EC-Council CEH v13, CompTIA Security+ (SY0-701), and offensive security standards (OSCP/eJPT). You will also receive an official, cryptographically verifiable TS-ID certificate from Thread Security Education.',
+      },
+      {
+        q: 'What placement support is provided after completing the course?',
+        a: 'We provide 100% placement support including 1-on-1 resume optimization, cybersecurity portfolio building, mock technical interviews, and direct referrals to hiring partners in India and abroad for SOC Analyst, VAPT, and Security Engineer roles.',
+      },
+    ],
+  },
   // ── CYBERSECURITY TRACK (8 COURSES) ──
   {
     id: 'cyber-1',

@@ -7,40 +7,55 @@ import { CoursesSplitClient } from './CoursesSplitClient';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
 
 export const metadata: Metadata = {
-  title: 'Courses & Academic Catalogue | Cybersecurity & AI Masterclasses',
-  description: 'Explore 16 practical, mentor-led masterclasses across Cybersecurity Architecture (Lime Track) and Artificial Intelligence Systems (Violet Track). 100% hands-on sandboxed labs and verified TS-ID credentials.',
+  title: 'Cyber Security Courses & Training Programs | Ethical Hacking, VAPT & AI Security',
+  description:
+    'Explore industry-recognized cyber security courses, 45 days summer training, and 6 months industrial internships in Jalandhar, Punjab & Online. Master Ethical Hacking, VAPT, SOC Operations, DevSecOps, and AI Security with 100% sandboxed cloud labs and placement assistance.',
   keywords: [
-    'Cybersecurity Courses',
-    'AI Security Training',
-    'Ethical Hacking Course',
-    'SOC Analyst Training',
-    'DevSecOps Certification',
-    'LLM Red Teaming',
-    'VAPT Masterclass',
+    'cyber security course',
+    'cybersecurity training',
+    'cyber security course in Jalandhar',
+    'cybersecurity training in Jalandhar',
+    'cyber security course Punjab',
+    'ethical hacking course',
+    'ethical hacking training Jalandhar',
+    'VAPT course',
+    'penetration testing training',
+    'SOC analyst course',
+    '45 days cyber security course',
+    '6 month cyber security industrial training',
+    'cyber security internship for BTech students',
+    'job oriented cyber security course',
+    'cyber security bootcamp India',
+    'CEH certification course',
+    'CompTIA Security+ training',
+    'OSCP training',
+    'hands-on cybersecurity course',
     'Thread Security Education',
   ],
   alternates: {
     canonical: `${APP_URL}/courses`,
   },
   openGraph: {
-    title: 'Courses & Academic Catalogue | Thread Security Education',
-    description: 'Explore 16 practical, mentor-led masterclasses across Cybersecurity Architecture and AI Systems. 100% hands-on sandboxed labs.',
+    title: 'Cyber Security Courses & Training Programs | Thread Security Education',
+    description:
+      'Explore industry-recognized cyber security courses, 45 days summer training, and 6 months industrial internships in Jalandhar, Punjab & Online. 100% hands-on sandboxed labs.',
     url: `${APP_URL}/courses`,
     type: 'website',
     images: [
       {
-        url: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,
+        url: `${APP_URL}/images/og-thread-security-education.png`,
         width: 1200,
         height: 630,
-        alt: 'Courses Catalogue — Thread Security Education',
+        alt: 'Cyber Security Courses Catalogue — Thread Security Education',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Courses & Academic Catalogue | Thread Security Education',
-    description: 'Explore 16 practical, mentor-led masterclasses across Cybersecurity and AI.',
-    images: [`${APP_URL}/logos/TSE%20Logo%20Dark.svg`],
+    title: 'Cyber Security Courses & Training Programs | Thread Security Education',
+    description:
+      'Explore 17 practical, mentor-led masterclasses across Cybersecurity and AI with 100% hands-on labs and placement support.',
+    images: [`${APP_URL}/images/og-thread-security-education.png`],
   },
 };
 

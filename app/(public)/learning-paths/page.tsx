@@ -15,23 +15,52 @@ const APP_URL =
   'https://threadsecurity.in';
 
 export const metadata: Metadata = {
-  title: 'Structured Cybersecurity Learning Paths | Career Roadmaps',
-  description: 'Step-by-step career progression tracks in Offensive Security, SOC Operations, DevSecOps, and AI Red Teaming designed to accelerate professional transitions.',
+  title: 'Cyber Security Career Roadmaps & Learning Paths | Beginner to Expert',
+  description:
+    'Step-by-step cyber security roadmaps and learning paths for beginners, BTech, and BCA college students. Learn how to become a SOC Analyst, Ethical Hacker, Penetration Tester, or DevSecOps Engineer with structured hands-on milestones.',
   keywords: [
-    'Cybersecurity Learning Paths',
-    'Ethical Hacking Career Roadmap',
-    'SOC Analyst Roadmap',
-    'DevSecOps Career Path',
+    'cyber security roadmap for beginners',
+    'cybersecurity career roadmap',
+    'ethical hacking roadmap',
+    'how to start cyber security career',
+    'how to become a SOC analyst',
+    'how to become ethical hacker',
+    'how to become penetration tester',
+    'how to become cybersecurity engineer',
+    'cyber security career course after 12th',
+    'cybersecurity career after BTech',
+    'cybersecurity career after BCA',
+    'SOC analyst roadmap',
+    'VAPT roadmap',
+    'cloud security roadmap',
+    'DevSecOps security roadmap',
+    'cybersecurity skills roadmap',
     'Thread Security Education',
   ],
   alternates: {
     canonical: `${APP_URL}/learning-paths`,
   },
   openGraph: {
-    title: 'Cybersecurity Learning Paths | Thread Security Education',
-    description: 'Step-by-step career progression tracks in Offensive Security, SOC Operations, DevSecOps, and AI Red Teaming.',
+    title: 'Cyber Security Career Roadmaps & Learning Paths | Thread Security Education',
+    description:
+      'Step-by-step career progression tracks in Offensive Security, SOC Operations, DevSecOps, and AI Red Teaming.',
     url: `${APP_URL}/learning-paths`,
     type: 'website',
+    images: [
+      {
+        url: `${APP_URL}/images/og-thread-security-education.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Cyber Security Learning Paths — Thread Security Education',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cyber Security Career Roadmaps & Learning Paths | Thread Security Education',
+    description:
+      'Structured roadmaps from beginner to expert SOC Analyst, Penetration Tester, and AI Security Engineer.',
+    images: [`${APP_URL}/images/og-thread-security-education.png`],
   },
 };
 

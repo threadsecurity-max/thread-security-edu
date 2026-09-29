@@ -10,7 +10,28 @@ import { MentorsSection } from '@/components/courses/MentorsSection';
 import { CourseCTA } from '@/components/courses/CourseCTA';
 
 const DEFAULT_COURSES: CourseItem[] = [
-  // ── CYBERSECURITY TRACK (8 COURSES: 2 Beginner, 2 Intermediate, 2 Advanced, 2 Expert) ──
+  // ── FLAGSHIP COMPREHENSIVE CYBERSECURITY PROGRAM ──
+  {
+    id: 'flagship-cyber-1',
+    slug: 'cyber-security-course',
+    title: 'Professional Cyber Security Course & Industrial Training (Ethical Hacking, VAPT & SOC)',
+    subtitle: 'Comprehensive job-oriented cybersecurity training program. Master Ethical Hacking, VAPT, SOC Operations, Bug Bounty, Cloud Security, and Incident Response with 100% hands-on sandboxed labs in Jalandhar, Punjab & Online.',
+    track: 'cyber',
+    category: 'Complete Cyber Security & Defense',
+    level: 'Beginner',
+    durationHours: 120,
+    modulesCount: 24,
+    labsCount: 80,
+    highlights: [
+      '45 Days & 6 Months Industrial Training Options',
+      '100% Practical Sandboxed Cloud Labs',
+      'CEH v13, Security+ & OSCP Exam Prep',
+      '100% Placement Assistance with Direct Referrals',
+    ],
+    mentorName: 'Kunal Singh',
+    mentorCompany: 'Principal Security Architect',
+  },
+  // ── CYBERSECURITY SPECIALIZATION MASTERCLASSES ──
   {
     id: 'cyber-1',
     slug: 'web-application-security-vapt',

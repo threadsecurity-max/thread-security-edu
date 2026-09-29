@@ -74,7 +74,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/courses/${course.slug}`,
         lastModified: now,
         changeFrequency: 'weekly',
-        priority: 0.9,
+        priority: course.slug === 'cyber-security-course' ? 1.0 : 0.9,
       });
     }
   });

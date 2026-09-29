@@ -75,12 +75,18 @@ export function ApplyBatchesSection() {
 
         {/* ── SECTION HEADER ── */}
         <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
+          <span className="inline-block text-xs font-mono font-bold tracking-widest text-blue-600 uppercase mb-3 px-3 py-1 rounded-full bg-blue-50 border border-blue-200">
+            JALANDHAR CAMPUS &amp; ONLINE INDIA BATCHES
+          </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">
               Apply
             </span>{' '}
             for Upcoming Batches
           </h2>
+          <p className="text-xs sm:text-sm text-slate-600 mt-3 font-normal max-w-2xl mx-auto">
+            Offline classroom batches in Jalandhar, Punjab &amp; live interactive online classes. Flexible schedules for 45 Days Summer Training, 6 Months Industrial Internships, and Weekend Batches for Working Professionals.
+          </p>
         </div>
 
         {/* ── TWO-COLUMN LAYOUT WITH 'OR' DIVIDER ── */}

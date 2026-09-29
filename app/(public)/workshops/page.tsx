@@ -11,23 +11,54 @@ const APP_URL =
   'https://threadsecurity.in';
 
 export const metadata: Metadata = {
-  title: 'Cybersecurity Workshops & Live Bootcamps | Hands-on Training',
-  description: 'Participate in live hands-on cybersecurity workshops, red teaming bootcamps, and cloud defense masterclasses led by industry practitioners at Thread Security Education.',
+  title: 'Cybersecurity Workshops, 45 Days Summer Training & 6 Month Internships',
+  description:
+    'Enroll in accredited 45 days cyber security summer training, 6 weeks bootcamps, and 6 months industrial internships in Jalandhar, Punjab & Online. Hands-on ethical hacking, VAPT, bug bounty, and AI security workshops for BTech, BCA & MCA college students.',
   keywords: [
-    'Cybersecurity Workshops',
-    'Ethical Hacking Bootcamps',
-    'Live Security Seminars',
-    'Hands-on Hacking Labs',
+    '45 days cyber security course',
+    '45 days cybersecurity training',
+    '45 days cyber security internship',
+    '45 days cyber security industrial training',
+    '45 days ethical hacking course',
+    '45 days VAPT course',
+    '6 week cyber security course',
+    '6 weeks cybersecurity training',
+    '6 month cyber security course',
+    '6 months cybersecurity training',
+    '6 month cyber security internship',
+    '6 month cyber security industrial training',
+    '45 days cyber security course Jalandhar',
+    '6 month cyber security course Punjab',
+    'cyber security internship for BTech students',
+    'cyber security industrial training for BCA students',
+    'cybersecurity workshops',
+    'ethical hacking summer training',
     'Thread Security Education',
   ],
   alternates: {
     canonical: `${APP_URL}/workshops`,
   },
   openGraph: {
-    title: 'Cybersecurity Workshops & Bootcamps | Thread Security Education',
-    description: 'Participate in live hands-on cybersecurity workshops led by senior industry practitioners.',
+    title: 'Cybersecurity Workshops, 45 Days Summer Training & 6 Month Internships | Thread Security Education',
+    description:
+      'Enroll in accredited 45 days cyber security summer training and 6 months industrial internships in Jalandhar, Punjab & Online.',
     url: `${APP_URL}/workshops`,
     type: 'website',
+    images: [
+      {
+        url: `${APP_URL}/images/og-thread-security-education.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Cybersecurity Workshops & Industrial Training — Thread Security Education',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cybersecurity Workshops & 45-Day / 6-Month Internships | Thread Security Education',
+    description:
+      'Accredited 45 days summer training and 6 months industrial internships with live sandboxed labs and university credit letters.',
+    images: [`${APP_URL}/images/og-thread-security-education.png`],
   },
 };
 

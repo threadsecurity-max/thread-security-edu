@@ -16,6 +16,7 @@ import { FaqSection } from '@/components/sections/landing/FaqSection';
 import { ApplyBatchesSection } from '@/components/sections/landing/ApplyBatchesSection';
 import { CourseRoadmapSection } from '@/components/sections/landing/CourseRoadmapSection';
 import { StudentReviewsSection } from '@/components/sections/landing/StudentReviewsSection';
+import { CyberTrainingDirectorySection } from '@/components/sections/landing/CyberTrainingDirectorySection';
 
 export const dynamic = 'force-dynamic';
 
@@ -175,6 +176,9 @@ export default async function PublicHomePage({
 
       {/* Challenges Section */}
       <ChallengesSection />
+
+      {/* Comprehensive Cybersecurity & AI Training Programs Directory */}
+      <CyberTrainingDirectorySection />
 
       {/* FAQ Section */}
       <FaqSection />
