@@ -41,7 +41,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
       {/* ── WHOLE-SCREEN HERO BACKGROUND: TSE Design Hero Student ── */}
       <div className="absolute inset-0 w-full h-full pointer-events-none z-0 select-none overflow-hidden">
         <Image
-          src="/images/TSE Design Hero Student.svg"
+          src="/images/TSE Hero Design.svg"
           alt="Cybersecurity and AI Training Network Background - Students and Global Platform"
           fill
           priority
