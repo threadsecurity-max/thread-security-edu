@@ -39,19 +39,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
       className="relative pt-8 sm:pt-14 pb-16 md:pb-28 overflow-hidden bg-white text-slate-900 text-center"
     >
       {/* ── WHOLE-SCREEN HERO BACKGROUND: TSE Design Hero Student ── */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 select-none overflow-hidden">
-        <Image
-          src="/images/TSE Hero Design.svg"
-          alt="Cybersecurity and AI Training Network Background - Students and Global Platform"
-          fill
-          priority
-          sizes="100vw"
-          className="w-full h-full object-cover object-center transition-all duration-700 opacity-60 sm:opacity-75"
-        />
-        {/* Ambient overlay to ensure crisp contrast and readability of foreground elements */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/55 to-white/90" />
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] sm:w-[900px] h-[350px] bg-gradient-to-tr from-purple-200/40 via-lime-100/30 to-indigo-100/40 rounded-full blur-[100px] pointer-events-none" />
-      </div>
+      
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 

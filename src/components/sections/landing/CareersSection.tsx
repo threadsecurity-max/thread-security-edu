@@ -564,6 +564,7 @@ function CareerNode({ career }: { career: CareerCard }) {
           src={career.image}
           alt={career.title}
           fill
+          unoptimized
           className="object-cover transition-transform duration-700 group-hover:scale-108 filter brightness-[0.75] contrast-[1.05]"
           sizes="(max-w-768px) 180px, 210px"
           loading="lazy"

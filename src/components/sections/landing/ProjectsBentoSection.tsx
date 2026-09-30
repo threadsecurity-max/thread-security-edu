@@ -462,6 +462,7 @@ export function ProjectsBentoSection() {
                 src={selectedProject.image}
                 alt={selectedProject.title}
                 fill
+                unoptimized
                 className="object-cover filter contrast-[1.05]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -580,6 +581,7 @@ function InteractiveBentoCard({
         src={project.image}
         alt={project.title}
         fill
+        unoptimized
         className={`object-cover transition-transform duration-700 ease-out filter contrast-[1.08] ${
           isHovered ? 'scale-110 brightness-[0.8]' : 'scale-100 brightness-[0.68]'
         }`}
