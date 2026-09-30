@@ -15,26 +15,26 @@ const heroFlipWords = [
   { text: 'Artificial Intelligence', className: 'text-[#7E3BED]' },
   { text: 'Cloud DevSecOps', className: 'text-[#0284c7]' },
   { text: 'SOC Operations', className: 'text-[#d97706]' },
-  { text: 'Data Engineer' , className: 'text-[#14b8a6]'},
-  { text: 'RAG Engineer' , className: 'text-[#8b5cf6]'},
-  { text: 'Data Science' , className: 'text-[#ef4444]'},
-  { text: 'Ethical Hacking' , className: 'text-[#3b82f6]'},
-  { text: 'Offensive Security' , className: 'text-[#94a3b8]'},
-  { text: 'Red Team' , className: 'text-[#f97316]'},
-  { text: 'Blue Team' , className: 'text-[#14b8a6]'},
-  { text: 'Purple Team' , className: 'text-[#8b5cf6]'},
-  { text: 'AI Engineer' , className: 'text-[#ef4444]'},
-  { text: 'ML Engineer' , className: 'text-[#3b82f6]'},
-  { text: 'AI Security' , className: 'text-[#94a3b8]'},
-  { text: 'RAG Engineer' , className: 'text-[#8b5cf6]'},
-  { text: 'Prompt Engineer' , className: 'text-[#ef4444]'},
-  { text: 'LLM Engineer' , className: 'text-[#3b82f6]'},
-  
+  { text: 'Data Engineer', className: 'text-[#14b8a6]' },
+  { text: 'RAG Engineer', className: 'text-[#8b5cf6]' },
+  { text: 'Data Science', className: 'text-[#ef4444]' },
+  { text: 'Ethical Hacking', className: 'text-[#3b82f6]' },
+  { text: 'Offensive Security', className: 'text-[#94a3b8]' },
+  { text: 'Red Team', className: 'text-[#f97316]' },
+  { text: 'Blue Team', className: 'text-[#14b8a6]' },
+  { text: 'Purple Team', className: 'text-[#8b5cf6]' },
+  { text: 'AI Engineer', className: 'text-[#ef4444]' },
+  { text: 'ML Engineer', className: 'text-[#3b82f6]' },
+  { text: 'AI Security', className: 'text-[#94a3b8]' },
+  { text: 'RAG Engineer', className: 'text-[#8b5cf6]' },
+  { text: 'Prompt Engineer', className: 'text-[#ef4444]' },
+  { text: 'LLM Engineer', className: 'text-[#3b82f6]' },
+
 ];
 
 export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
   return (
-    <section 
+    <section
       aria-label="Cybersecurity and AI Training and Education Overview"
       className="relative pt-8 sm:pt-14 pb-16 md:pb-28 overflow-hidden bg-white text-slate-900 text-center"
     >
@@ -54,7 +54,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         {/* ── TOP BADGE BAR ── */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100/90 border border-slate-200/80 text-slate-900 text-xs sm:text-sm font-semibold tracking-wide mb-6 shadow-xs backdrop-blur-md">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
