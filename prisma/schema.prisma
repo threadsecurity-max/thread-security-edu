@@ -55,6 +55,28 @@ enum CertificateStatus {
   EXPIRED
 }
 
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuestionBankStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  CREATED
+  IN_PROGRESS
+  SUBMITTED
+  AUTO_SUBMITTED
+  EXPIRED
+  CANCELLED
+}
+
+
 model User {
   id                        String          @id @default(cuid())
   email                     String          @unique
@@ -81,6 +103,7 @@ model User {
   notifications Notification[]
   assignmentSubmissions AssignmentSubmission[]
   blogRevisions         BlogRevision[]
+  testAttempts          TestAttempt[]
 
   @@index([email])
 }
@@ -175,6 +198,7 @@ model Course {
   modules       Module[]
   labs          Lab[]
   assessments   Assessment[]
+  bankQuestions BankQuestion[]
   enrollments   Enrollment[]
   certificates  Certificate[]
   learningPaths CourseInPath[]
@@ -433,17 +457,238 @@ model LabAttempt {
 }
 
 model Assessment {
-  id          String              @id @default(cuid())
-  courseId    String
-  course      Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  title       String
-  description String
-  passingScore Float              @default(70.0)
-  questions   Question[]
-  attempts    AssessmentAttempt[]
-  status      AssessmentStatus    @default(PUBLISHED)
-  createdAt   DateTime            @default(now())
+  id                       String              @id @default(cuid())
+  courseId                 String
+  course                   Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  categoryId               String?
+  category                 TestCategory?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  title                    String
+  slug                     String?
+  description              String
+  instructions             String?
+  durationMinutes          Int                 @default(30)
+  totalMarks               Float               @default(100.0)
+  passingScore             Float               @default(70.0)
+  questionsPerAttempt      Int                 @default(20)
+  maxAttempts              Int                 @default(3) // 0 = unlimited
+  status                   AssessmentStatus    @default(DRAFT)
+  
+  // Randomization & Anti-cheating Settings
+  randomQuestionSelection  Boolean             @default(true)
+  randomQuestionOrder      Boolean             @default(true)
+  randomOptionOrder        Boolean             @default(true)
+  difficultyBalancing      Boolean             @default(true)
+  categoryBalancing        Boolean             @default(true)
+  questionVariants         Boolean             @default(true)
+  preventDuplicateFamilies Boolean             @default(true)
+  autoSave                 Boolean             @default(true)
+  autoSubmit               Boolean             @default(true)
+  fullScreen               Boolean             @default(false)
+  tabSwitchDetection       Boolean             @default(true)
+  copyPasteRestriction     Boolean             @default(true)
+  rightClickRestriction    Boolean             @default(true)
+
+  // Blueprint Distribution
+  easyPercent              Float               @default(40.0)
+  mediumPercent            Float               @default(40.0)
+  hardPercent              Float               @default(20.0)
+  categoryDistributionJson String?             // e.g. [{"categoryId":"...", "percentage": 30}]
+
+  questions                Question[]          // Legacy relation preserved
+  attempts                 AssessmentAttempt[] // Legacy relation preserved
+  testAttempts             TestAttempt[]       // Full test attempt snapshot engine
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @default(now()) @updatedAt
+
+  @@index([courseId])
+  @@index([categoryId])
+  @@index([status])
 }
+
+model TestCategory {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  slug        String         @unique
+  description String?
+  isActive    Boolean        @default(true)
+  questions   BankQuestion[]
+  assessments Assessment[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model QuestionFamily {
+  id          String         @id @default(cuid())
+  code        String         @unique // e.g. AUTH-001, NET-002, WEB-005
+  name        String
+  topic       String?
+  description String?
+  questions   BankQuestion[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([code])
+}
+
+model BankQuestion {
+  id                String             @id @default(cuid())
+  questionFamilyId  String?
+  family            QuestionFamily?    @relation(fields: [questionFamilyId], references: [id], onDelete: SetNull)
+  courseId          String?
+  course            Course?            @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  categoryId        String
+  category          TestCategory       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  topic             String
+  learningObjective String?
+  difficulty        DifficultyLevel    @default(MEDIUM)
+  questionType      String             @default("MCQ") // MCQ, SINGLE_CORRECT
+  marks             Float              @default(1.0)
+  questionText      String
+  explanation       String?
+  status            QuestionBankStatus @default(ACTIVE)
+  options           QuestionOption[]
+  attemptQuestions  AttemptQuestion[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([categoryId])
+  @@index([difficulty])
+  @@index([courseId])
+  @@index([questionFamilyId])
+  @@index([status])
+}
+
+model QuestionOption {
+  id             String          @id @default(cuid())
+  questionId     String
+  question       BankQuestion    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  optionText     String
+  isCorrect      Boolean         @default(false)
+  orderIndex     Int             @default(0)
+  attemptOptions AttemptOption[]
+
+  @@index([questionId])
+}
+
+model TestAttempt {
+  id                 String             @id @default(cuid())
+  assessmentId       String
+  assessment         Assessment         @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attemptNumber      Int                @default(1)
+  randomSeed         String
+  startedAt          DateTime           @default(now())
+  expiresAt          DateTime
+  submittedAt        DateTime?
+  status             AttemptStatus      @default(IN_PROGRESS)
+
+  score              Float              @default(0.0)
+  obtainedMarks      Float              @default(0.0)
+  totalMarks         Float              @default(0.0)
+  percentage         Float              @default(0.0)
+  passed             Boolean            @default(false)
+  totalQuestions     Int                @default(0)
+  correctCount       Int                @default(0)
+  wrongCount         Int                @default(0)
+  unansweredCount    Int                @default(0)
+  timeTakenSeconds   Int                @default(0)
+
+  attemptQuestions   AttemptQuestion[]
+  studentAnswers     StudentAnswer[]
+  events             AttemptEvent[]
+  result             AssessmentResult?
+
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([assessmentId])
+  @@index([userId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model AttemptQuestion {
+  id             String          @id @default(cuid())
+  attemptId      String
+  attempt        TestAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       BankQuestion    @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  displayOrder   Int
+  marks          Float           @default(1.0)
+  attemptOptions AttemptOption[]
+  answers        StudentAnswer[]
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+model AttemptOption {
+  id                String          @id @default(cuid())
+  attemptQuestionId String
+  attemptQuestion   AttemptQuestion @relation(fields: [attemptQuestionId], references: [id], onDelete: Cascade)
+  optionId          String
+  option            QuestionOption  @relation(fields: [optionId], references: [id], onDelete: Restrict)
+  displayOrder      Int
+
+  @@unique([attemptQuestionId, optionId])
+  @@index([attemptQuestionId])
+  @@index([optionId])
+}
+
+model StudentAnswer {
+  id                String          @id @default(cuid())
+  attemptId         String
+  attempt           TestAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptQuestionId String
+  attemptQuestion   AttemptQuestion @relation(fields: [attemptQuestionId], references: [id], onDelete: Cascade)
+  selectedOptionId  String?
+  answeredAt        DateTime        @default(now())
+  isCorrect         Boolean?
+  marksAwarded      Float?
+
+  @@unique([attemptId, attemptQuestionId])
+  @@index([attemptId])
+  @@index([attemptQuestionId])
+}
+
+model AttemptEvent {
+  id        String      @id @default(cuid())
+  attemptId String
+  attempt   TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  eventType String
+  metadata  String?
+  timestamp DateTime    @default(now())
+
+  @@index([attemptId])
+  @@index([eventType])
+  @@index([timestamp])
+}
+
+model AssessmentResult {
+  id                      String      @id @default(cuid())
+  attemptId               String      @unique
+  attempt                 TestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  totalQuestions          Int
+  correctAnswers          Int
+  wrongAnswers            Int
+  unansweredQuestions     Int
+  totalMarks              Float
+  obtainedMarks           Float
+  percentage              Float
+  passed                  Boolean
+  timeTakenSeconds        Int
+  categoryBreakdownJson   String?
+  difficultyBreakdownJson String?
+  createdAt               DateTime    @default(now())
+
+  @@index([attemptId])
+}
+
 
 model Question {
   id           String   @id @default(cuid())

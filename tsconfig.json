@@ -29,6 +29,9 @@
       ],
       "@app/*": [
         "./app/*"
+      ],
+      "@prisma/client": [
+        "./node_modules/.prisma/client"
       ]
     }
   },

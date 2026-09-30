@@ -1166,7 +1166,7 @@ const COURSES_DATA: CourseItem[] = [
         ],
       },
       '3months': {
-        durationText: '3 Months Mastery',
+        durationText: '3 Months Novice',
         modules: [
           {
             id: 'py3m-1',
@@ -3483,7 +3483,7 @@ function CourseApplicationModal({
 
   const durationLabels: Record<DurationType, string> = {
     '45days': '45 Days Sprint',
-    '3months': '3 Months Mastery',
+    '3months': '3 Months Novice',
     '6months': '6 Months Fellowship',
   };
 
@@ -3849,7 +3849,7 @@ export function CourseRoadmapSection() {
 
   const durationLabels: Record<DurationType, string> = {
     '45days': '45 Days Sprint',
-    '3months': '3 Months Mastery',
+    '3months': '3 Months Novice',
     '6months': '6 Months Fellowship',
   };
 
@@ -3916,7 +3916,7 @@ export function CourseRoadmapSection() {
         {/* ── DURATION TABS + DOMAIN FILTER + HORIZONTAL MARQUEE ── */}
         <div className="flex flex-col items-center gap-5 mb-8">
           
-          {/* Top Duration Switcher (6 Months Fellowship | 3 Months Mastery | 45 Days Sprint) */}
+          {/* Top Duration Switcher (6 Months Fellowship | 3 Months Novice | 45 Days Sprint) */}
           <div className="flex items-center gap-3 text-xs flex-wrap justify-center">
             <span className={`font-medium uppercase tracking-wider text-[11px] ${
               isCyber ? 'text-slate-400' : 'text-slate-500'
@@ -3959,7 +3959,7 @@ export function CourseRoadmapSection() {
                   {dur === '6months' && <Rocket className="w-3.5 h-3.5" />}
                   {dur === '3months' && <Target className="w-3.5 h-3.5" />}
                   {dur === '45days' && <Zap className="w-3.5 h-3.5" />}
-                  <span>{dur === '6months' ? '6 Months Fellowship' : dur === '3months' ? '3 Months Mastery' : '45 Days Sprint'}</span>
+                  <span>{dur === '6months' ? '6 Months Fellowship' : dur === '3months' ? '3 Months Novice' : '45 Days Sprint'}</span>
                 </button>
               ))}
             </div>

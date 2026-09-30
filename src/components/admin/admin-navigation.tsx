@@ -13,6 +13,7 @@ import {
   Cpu,
   ShieldAlert,
   ShieldCheck,
+  Award,
   LogOut,
   Globe,
   Sparkles,
@@ -59,6 +60,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
 
   const navItems = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
+    { name: 'Assessments & Tests', href: '/admin/assessments', icon: Award },
     { name: 'Courses Going On', href: '/admin/courses', icon: BookOpen },
     { name: 'Student Directory', href: '/admin/students', icon: Users },
     { name: 'Batch Conduction', href: '/admin/batches', icon: Layers },

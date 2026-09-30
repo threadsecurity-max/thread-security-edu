@@ -9,7 +9,7 @@ interface StatItem {
 
 const STATS_DATA: StatItem[] = [
   {
-    value: '2000+',
+    value: '3000+',
     label: 'Students Empowered',
   },
   {

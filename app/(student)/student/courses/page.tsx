@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Terminal,
   FileText,
+  Cpu,
 } from 'lucide-react';
 
 export const revalidate = 60;
@@ -141,6 +142,12 @@ export default async function StudentCoursesPage() {
                       <Link href={`/courses/${course.slug}`} className="w-full md:w-auto">
                         <Button variant="outline" className="w-full md:w-auto text-xs font-mono">
                           View Syllabus
+                        </Button>
+                      </Link>
+                      <Link href="/student/assessments" className="w-full md:w-auto">
+                        <Button variant="ghost" className="w-full md:w-auto text-xs font-mono text-slate-700 hover:text-primary gap-1.5 border border-dashed border-slate-300">
+                          <Cpu className="w-3.5 h-3.5 text-security-blue" />
+                          Assessments
                         </Button>
                       </Link>
                     </div>
