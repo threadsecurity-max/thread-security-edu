@@ -75,6 +75,20 @@ export function QuestionBankClient({
   ]);
   const [savingQuestion, setSavingQuestion] = useState(false);
   const [formError, setFormError] = useState('');
+  
+  // Global UX Messages
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [globalErrorMsg, setGlobalErrorMsg] = useState<string | null>(null);
+
+  const displaySuccess = (msg: string) => {
+    setSuccessMsg(msg);
+    setTimeout(() => setSuccessMsg(null), 3000);
+  };
+  
+  const displayError = (msg: string) => {
+    setGlobalErrorMsg(msg);
+    setTimeout(() => setGlobalErrorMsg(null), 5000);
+  };
 
   // Import State
   const [importText, setImportText] = useState('');
@@ -162,12 +176,14 @@ export function QuestionBankClient({
       });
       const json = await res.json();
       if (json.success) {
+        displaySuccess('Question duplicated successfully');
         fetchQuestions(page);
       } else {
-        alert(json.error || 'Failed duplicating');
+        displayError(json.error || 'Failed duplicating question');
       }
     } catch (err) {
       console.error(err);
+      displayError('Network error while duplicating');
     }
   };
 
@@ -179,12 +195,14 @@ export function QuestionBankClient({
       });
       const json = await res.json();
       if (json.success) {
+        displaySuccess('Question deleted successfully');
         fetchQuestions(page);
       } else {
-        alert(json.error || 'Failed deleting question');
+        displayError(json.error || 'Failed deleting question');
       }
     } catch (err) {
       console.error(err);
+      displayError('Network error while deleting');
     }
   };
 
@@ -244,6 +262,7 @@ export function QuestionBankClient({
       const json = await res.json();
 
       if (json.success) {
+        displaySuccess(editingQuestion ? 'Question updated' : 'Question created');
         setShowEditor(false);
         fetchQuestions(page);
       } else {
@@ -297,12 +316,13 @@ export function QuestionBankClient({
       const json = await res.json();
       if (json.success) {
         setImportReport(json.report);
+        displaySuccess(`Successfully imported ${json.report?.successful || 0} questions.`);
         fetchQuestions(1);
       } else {
-        alert(json.error || 'Import failed');
+        displayError(json.error || 'Import failed');
       }
     } catch (err: any) {
-      alert(`Invalid format: ${err.message}`);
+      displayError(`Invalid format: ${err.message}`);
     } finally {
       setImporting(false);
     }
@@ -310,6 +330,20 @@ export function QuestionBankClient({
 
   return (
     <div className="space-y-6">
+      {/* Global Notifications */}
+      {successMsg && (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg flex items-center gap-2 text-sm font-medium animate-in fade-in slide-in-from-top-4">
+          <CheckCircle2 className="w-4 h-4" />
+          {successMsg}
+        </div>
+      )}
+      {globalErrorMsg && (
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-lg flex items-center gap-2 text-sm font-medium animate-in fade-in slide-in-from-top-4">
+          <AlertCircle className="w-4 h-4" />
+          {globalErrorMsg}
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

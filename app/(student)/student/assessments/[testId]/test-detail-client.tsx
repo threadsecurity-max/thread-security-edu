@@ -108,9 +108,9 @@ export function TestDetailClient({ test }: TestDetailProps) {
       </div>
 
       {/* Main Container */}
-      <Card className="p-6 sm:p-8 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-8">
+      <Card className="p-4 sm:p-6 md:p-8 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-6 sm:space-y-8">
         {/* Title Header */}
-        <div className="space-y-3 pb-6 border-b border-slate-100">
+        <div className="space-y-2.5 sm:space-y-3 pb-5 sm:pb-6 border-b border-slate-100">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="secondary" className="font-mono text-xs bg-slate-100 text-slate-700">
               {test.courseTitle}
@@ -126,51 +126,51 @@ export function TestDetailClient({ test }: TestDetailProps) {
             )}
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight break-words">
             {test.title}
           </h1>
 
-          <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-3xl">
             {test.description}
           </p>
         </div>
 
         {/* Specifications Matrix */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5">
+          <div className="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span className="font-mono uppercase text-[10px]">QUESTIONS</span>
+              <HelpCircle className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-mono uppercase text-[10px] truncate">QUESTIONS</span>
             </div>
-            <div className="text-xl font-bold text-slate-900">{test.questionsPerAttempt}</div>
-            <span className="text-[11px] text-slate-500">Randomized variant set</span>
+            <div className="text-lg sm:text-xl font-bold text-slate-900">{test.questionsPerAttempt}</div>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 block truncate">Randomized variant set</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
+          <div className="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="font-mono uppercase text-[10px]">DURATION</span>
+              <Clock className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-mono uppercase text-[10px] truncate">DURATION</span>
             </div>
-            <div className="text-xl font-bold text-slate-900">{test.durationMinutes} Minutes</div>
-            <span className="text-[11px] text-slate-500">Authoritative countdown</span>
+            <div className="text-lg sm:text-xl font-bold text-slate-900">{test.durationMinutes} Mins</div>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 block truncate">Authoritative countdown</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
+          <div className="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-              <Award className="w-3.5 h-3.5" />
-              <span className="font-mono uppercase text-[10px]">TOTAL MARKS</span>
+              <Award className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-mono uppercase text-[10px] truncate">TOTAL MARKS</span>
             </div>
-            <div className="text-xl font-bold text-slate-900">{test.totalMarks} Marks</div>
-            <span className="text-[11px] text-slate-500">Passing: {test.passingScore}%</span>
+            <div className="text-lg sm:text-xl font-bold text-slate-900">{test.totalMarks} Marks</div>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 block truncate">Passing: {test.passingScore}%</span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
+          <div className="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-100/80 space-y-1">
             <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="font-mono uppercase text-[10px]">ATTEMPTS LEFT</span>
+              <RotateCcw className="w-3.5 h-3.5 shrink-0" />
+              <span className="font-mono uppercase text-[10px] truncate">ATTEMPTS LEFT</span>
             </div>
-            <div className="text-xl font-bold text-slate-900">{test.attemptsRemaining}</div>
-            <span className="text-[11px] text-slate-500">{test.attemptsUsed} used so far</span>
+            <div className="text-lg sm:text-xl font-bold text-slate-900">{test.attemptsRemaining}</div>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 block truncate">{test.attemptsUsed} used so far</span>
           </div>
         </div>
 
@@ -252,11 +252,10 @@ export function TestDetailClient({ test }: TestDetailProps) {
           <Button
             onClick={handleStartOrResume}
             disabled={isStarting || isLimitReached}
-            className={`w-full sm:w-auto px-8 py-3 font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
-              hasActiveAttempt
+            className={`w-full sm:w-auto px-8 py-3 font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${hasActiveAttempt
                 ? 'bg-amber-600 hover:bg-amber-700 text-white'
                 : 'bg-slate-900 hover:bg-slate-800 text-white'
-            }`}
+              }`}
           >
             {isStarting ? (
               <>

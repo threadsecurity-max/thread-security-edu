@@ -71,7 +71,7 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
       </div>
 
       {/* ── HERO SCORECARD ── */}
-      <Card className="p-6 sm:p-8 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-8 relative overflow-hidden">
+      <Card className="p-4 sm:p-6 md:p-8 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-6 sm:space-y-8 relative overflow-hidden">
         {/* Accent Bar */}
         <div
           className={`absolute top-0 left-0 right-0 h-1.5 ${
@@ -80,9 +80,9 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
         />
 
         {/* Top Details */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-5 sm:pb-6 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
               <Badge variant="secondary" className="font-mono text-xs bg-slate-100 text-slate-700">
                 {scorecard.courseTitle}
               </Badge>
@@ -90,20 +90,20 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
                 Attempt #{scorecard.attemptNumber}
               </Badge>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight break-words">
               {scorecard.testTitle}
             </h1>
           </div>
 
-          <div>
+          <div className="shrink-0">
             {scorecard.passed ? (
-              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-300 font-mono text-sm px-3.5 py-1.5 flex items-center gap-1.5 shadow-xs">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-300 font-mono text-xs sm:text-sm px-3 sm:px-3.5 py-1.5 flex items-center gap-1.5 shadow-xs w-fit">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>QUALIFIED / PASSED</span>
               </Badge>
             ) : (
-              <Badge className="bg-rose-50 text-rose-700 border border-rose-300 font-mono text-sm px-3.5 py-1.5 flex items-center gap-1.5 shadow-xs">
-                <XCircle className="w-4 h-4 text-rose-600" />
+              <Badge className="bg-rose-50 text-rose-700 border border-rose-300 font-mono text-xs sm:text-sm px-3 sm:px-3.5 py-1.5 flex items-center gap-1.5 shadow-xs w-fit">
+                <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>DID NOT PASS</span>
               </Badge>
             )}
@@ -111,63 +111,63 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
         </div>
 
         {/* Big Metrics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block truncate">
               FINAL SCORE
             </span>
-            <div className="text-3xl font-black text-slate-900">
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">
               {scorecard.obtainedMarks}
-              <span className="text-base text-slate-400 font-bold"> / {scorecard.totalMarks}</span>
+              <span className="text-sm sm:text-base text-slate-400 font-bold"> / {scorecard.totalMarks}</span>
             </div>
-            <span className="text-xs font-bold text-slate-600 font-mono">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-600 font-mono block">
               Grade: {scorecard.percentage}%
             </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block truncate">
               PASSING BENCHMARK
             </span>
-            <div className="text-3xl font-black text-slate-900">{scorecard.passingScore}%</div>
-            <span className="text-xs text-slate-500 font-mono">Required threshold</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">{scorecard.passingScore}%</div>
+            <span className="text-[10px] sm:text-xs text-slate-500 font-mono block">Required threshold</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block truncate">
               TIME CONSUMED
             </span>
-            <div className="text-3xl font-black text-slate-900">
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 truncate">
               {formatDuration(scorecard.timeTakenSeconds)}
             </div>
-            <span className="text-xs text-slate-500 font-mono">Authoritative duration</span>
+            <span className="text-[10px] sm:text-xs text-slate-500 font-mono block">Authoritative duration</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">
+          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 text-center space-y-1">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block truncate">
               ACCURACY RATIO
             </span>
-            <div className="text-3xl font-black text-slate-900">
+            <div className="text-2xl sm:text-3xl font-black text-slate-900">
               {scorecard.correctAnswers}
-              <span className="text-base text-slate-400 font-bold"> / {scorecard.totalQuestions}</span>
+              <span className="text-sm sm:text-base text-slate-400 font-bold"> / {scorecard.totalQuestions}</span>
             </div>
-            <span className="text-xs text-slate-500 font-mono">Questions correct</span>
+            <span className="text-[10px] sm:text-xs text-slate-500 font-mono block">Questions correct</span>
           </div>
         </div>
 
         {/* Tally Pill */}
-        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 grid grid-cols-3 gap-2 text-center text-xs font-mono">
+        <div className="p-3 sm:p-4 rounded-xl bg-slate-50 border border-slate-100 grid grid-cols-3 gap-2 text-center text-xs font-mono">
           <div>
-            <span className="text-slate-400 block text-[10px] uppercase">CORRECT</span>
-            <span className="font-bold text-emerald-600 text-sm">+{scorecard.correctAnswers}</span>
+            <span className="text-slate-400 block text-[9px] sm:text-[10px] uppercase">CORRECT</span>
+            <span className="font-bold text-emerald-600 text-xs sm:text-sm">+{scorecard.correctAnswers}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px] uppercase">WRONG</span>
-            <span className="font-bold text-rose-600 text-sm">{scorecard.wrongAnswers}</span>
+            <span className="text-slate-400 block text-[9px] sm:text-[10px] uppercase">WRONG</span>
+            <span className="font-bold text-rose-600 text-xs sm:text-sm">{scorecard.wrongAnswers}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px] uppercase">UNANSWERED</span>
-            <span className="font-bold text-slate-500 text-sm">{scorecard.unansweredQuestions}</span>
+            <span className="text-slate-400 block text-[9px] sm:text-[10px] uppercase">UNANSWERED</span>
+            <span className="font-bold text-slate-500 text-xs sm:text-sm">{scorecard.unansweredQuestions}</span>
           </div>
         </div>
 
@@ -265,13 +265,13 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
             {detailedReview.questions.map((q) => (
               <Card
                 key={q.attemptQuestionId}
-                className={`p-6 bg-white rounded-2xl border shadow-xs space-y-4 transition-all ${
+                className={`p-4 sm:p-6 bg-white rounded-2xl border shadow-xs space-y-4 transition-all ${
                   q.isCorrect ? 'border-emerald-200' : 'border-rose-200'
                 }`}
               >
                 {/* Header */}
-                <div className="flex items-center justify-between gap-2 pb-3 border-b border-slate-100 text-xs font-mono">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 text-xs font-mono">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                     <span className="font-bold text-slate-800">QUESTION {q.displayOrder}</span>
                     <Badge variant="outline" className="text-[10px]">
                       {q.category}
@@ -281,21 +281,21 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
                     </Badge>
                   </div>
 
-                  <div>
+                  <div className="w-fit">
                     {q.isCorrect ? (
-                      <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> +{q.marksAwarded} Marks (Correct)
+                      <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-bold flex items-center gap-1 text-[11px]">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" /> +{q.marksAwarded} Marks (Correct)
                       </span>
                     ) : (
-                      <span className="text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 font-bold flex items-center gap-1">
-                        <XCircle className="w-3 h-3 text-rose-600" /> 0 / {q.marks} Marks (Incorrect)
+                      <span className="text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 font-bold flex items-center gap-1 text-[11px]">
+                        <XCircle className="w-3 h-3 text-rose-600 shrink-0" /> 0 / {q.marks} Marks (Incorrect)
                       </span>
                     )}
                   </div>
                 </div>
 
                 {/* Prompt */}
-                <p className="text-sm font-bold text-slate-900 leading-relaxed">{q.questionText}</p>
+                <p className="text-sm font-bold text-slate-900 leading-relaxed break-words">{q.questionText}</p>
 
                 {/* Choices breakdown */}
                 <div className="space-y-2 pt-1">
@@ -314,16 +314,16 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
                     return (
                       <div
                         key={opt.optionId}
-                        className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 ${optionBorder}`}
+                        className={`p-3 rounded-xl border text-xs flex items-start justify-between gap-2.5 sm:gap-3 ${optionBorder}`}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <span className="w-5 h-5 rounded font-mono font-bold text-[10px] bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                        <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                          <span className="w-5 h-5 rounded font-mono font-bold text-[10px] bg-white border border-slate-200 flex items-center justify-center shrink-0 mt-0.5">
                             {String.fromCharCode(65 + optIdx)}
                           </span>
-                          <span>{opt.optionText}</span>
+                          <span className="break-words leading-relaxed pt-0.5">{opt.optionText}</span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10px]">
+                        <div className="flex items-center gap-1.5 shrink-0 font-mono text-[10px] mt-0.5">
                           {isCorrectAnswer && (
                             <span className="text-emerald-700 font-bold flex items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5" /> Correct Answer
@@ -346,7 +346,7 @@ export function ResultClient({ scorecard, detailedReview }: ResultClientProps) {
                     <span className="font-bold font-mono text-[10px] uppercase text-slate-500 block">
                       EXPLANATION & REMEDIATION
                     </span>
-                    <p className="leading-relaxed">{q.explanation}</p>
+                    <p className="leading-relaxed break-words">{q.explanation}</p>
                   </div>
                 )}
               </Card>

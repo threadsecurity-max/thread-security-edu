@@ -125,40 +125,40 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
       </div>
 
       {/* ── METRIC TILES ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">AVAILABLE</span>
-          <div className="text-2xl font-black text-slate-900">{summary.availableCount}</div>
-          <span className="text-[11px] text-slate-500">Ready to attempt</span>
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+        <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+          <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider block">AVAILABLE</span>
+          <div className="text-xl sm:text-2xl font-black text-slate-900">{summary.availableCount}</div>
+          <span className="text-[10px] sm:text-[11px] text-slate-500">Ready to attempt</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-amber-200/80 shadow-xs space-y-1">
-          <span className="text-[11px] font-mono text-amber-600 uppercase tracking-wider block">IN PROGRESS</span>
-          <div className="text-2xl font-black text-amber-600">{summary.inProgressCount}</div>
-          <span className="text-[11px] text-amber-700/80">Pending completion</span>
+        <div className="p-3 sm:p-4 rounded-xl bg-white border border-amber-200/80 shadow-xs space-y-1">
+          <span className="text-[10px] sm:text-[11px] font-mono text-amber-600 uppercase tracking-wider block">IN PROGRESS</span>
+          <div className="text-xl sm:text-2xl font-black text-amber-600">{summary.inProgressCount}</div>
+          <span className="text-[10px] sm:text-[11px] text-amber-700/80">Pending completion</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">COMPLETED</span>
-          <div className="text-2xl font-black text-slate-900">{summary.totalCompleted}</div>
-          <span className="text-[11px] text-slate-500">Total attempts logged</span>
+        <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+          <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider block">COMPLETED</span>
+          <div className="text-xl sm:text-2xl font-black text-slate-900">{summary.totalCompleted}</div>
+          <span className="text-[10px] sm:text-[11px] text-slate-500">Total attempts logged</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-emerald-200/80 shadow-xs space-y-1">
-          <span className="text-[11px] font-mono text-emerald-600 uppercase tracking-wider block">TESTS PASSED</span>
-          <div className="text-2xl font-black text-emerald-600">{summary.testsPassed}</div>
-          <span className="text-[11px] text-emerald-700/80">Qualification benchmark met</span>
+        <div className="p-3 sm:p-4 rounded-xl bg-white border border-emerald-200/80 shadow-xs space-y-1">
+          <span className="text-[10px] sm:text-[11px] font-mono text-emerald-600 uppercase tracking-wider block">TESTS PASSED</span>
+          <div className="text-xl sm:text-2xl font-black text-emerald-600">{summary.testsPassed}</div>
+          <span className="text-[10px] sm:text-[11px] text-emerald-700/80">Benchmark met</span>
         </div>
 
-        <div className="p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1 col-span-2 lg:col-span-1">
-          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">AVERAGE SCORE</span>
-          <div className="text-2xl font-black text-slate-900">{summary.averageScore}%</div>
-          <span className="text-[11px] text-slate-500">Historical performance</span>
+        <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1 col-span-2 lg:col-span-1">
+          <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider block">AVERAGE SCORE</span>
+          <div className="text-xl sm:text-2xl font-black text-slate-900">{summary.averageScore}%</div>
+          <span className="text-[10px] sm:text-[11px] text-slate-500">Historical performance</span>
         </div>
       </div>
 
       {/* ── FILTER & SEARCH BAR ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
@@ -170,7 +170,7 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
                   ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
@@ -182,12 +182,12 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
         </div>
 
         {/* Search & Category Filter */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           {categories.length > 1 && (
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer"
+              className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer w-full sm:w-auto"
             >
               <option value="all">All Domains</option>
               {categories.map((cat) => (
@@ -213,7 +213,7 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
 
       {/* ── ASSESSMENTS GRID ── */}
       {filtered.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+        <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
           <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
             <Cpu className="w-6 h-6" />
           </div>
@@ -225,7 +225,7 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
           {filtered.map((item) => {
             const isPassed = item.status === 'Passed';
             const isFailed = item.status === 'Failed';
@@ -235,7 +235,7 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
             return (
               <Card
                 key={item.id}
-                className="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-5 relative overflow-hidden group"
+                className="p-4 sm:p-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 sm:space-y-5 relative overflow-hidden group"
               >
                 {/* Status indicator bar */}
                 <div
