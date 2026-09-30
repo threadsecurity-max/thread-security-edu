@@ -68,7 +68,7 @@ export function PublicFooter() {
     <footer className="relative bg-white text-slate-800 border-t border-slate-200/90 pt-16 pb-8 overflow-hidden font-sans">
       
       {/* ── GIANT GRAY WATERMARK AT BACKGROUND (More Width, Less Height) ── */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[1720px] pointer-events-none select-none z-0 overflow-hidden flex items-end justify-center opacity-[0.06] grayscale">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[1720px] pointer-events-none select-none z-0 overflow-hidden flex items-end justify-center opacity-[0.1] grayscale">
         <Image
           src="/images/thread security footer.svg"
           alt="Thread Security Background Watermark"
