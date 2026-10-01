@@ -28,7 +28,7 @@ export default async function StudentCertificatesPage() {
         </p>
       </div>
 
-      {student?.certificates.length === 0 ? (
+      {(!student?.certificates || student.certificates.length === 0) ? (
         <div className="p-12 text-center bg-white rounded-2xl border border-border">
           <Award className="w-12 h-12 text-muted mx-auto mb-3" />
           <h3 className="tse-h4 text-primary">No certificates issued yet</h3>
@@ -41,7 +41,7 @@ export default async function StudentCertificatesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {student?.certificates.map((cert) => (
+          {(student?.certificates || []).map((cert) => (
             <Card key={cert.id} className="p-6 bg-[#04111C] text-white border-2 border-security-green/40 shadow-xl space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-10 h-10 rounded-xl bg-security-green text-primary-dark flex items-center justify-center font-bold">

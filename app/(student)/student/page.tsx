@@ -50,10 +50,10 @@ export default async function StudentDashboardPage() {
 
   const studentName = student?.name || 'Kunal Verma';
   const tsId = student?.tsIdentity?.tsId || 'TSE-2026-8F4K29';
-  const activeEnrollment = student?.enrollments[0];
+  const activeEnrollment = student?.enrollments?.[0];
   const currentCourse = activeEnrollment?.course;
-  const currentModule = currentCourse?.modules[0];
-  const currentLesson = currentModule?.lessons[0];
+  const currentModule = currentCourse?.modules?.[0];
+  const currentLesson = currentModule?.lessons?.[0];
 
   return (
     <div className="space-y-8">
@@ -117,7 +117,7 @@ export default async function StudentDashboardPage() {
               <Progress value={50} className="h-2.5 bg-slate-800" />
               <div className="flex justify-between text-xs font-mono text-slate-400">
                 <span>{currentModule?.title}</span>
-                <span>Lesson 1 of {currentModule?.lessons.length}</span>
+                <span>Lesson 1 of {currentModule?.lessons?.length || 1}</span>
               </div>
             </div>
 
@@ -145,7 +145,7 @@ export default async function StudentDashboardPage() {
           </div>
 
           <div className="space-y-4">
-            {student?.enrollments.map((e) => (
+            {(student?.enrollments || []).map((e) => (
               <Card key={e.id} className="p-6 tse-glass-card">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                   <div>
@@ -156,7 +156,7 @@ export default async function StudentDashboardPage() {
                     <h3 className="tse-h4 text-primary">{e.course.title}</h3>
                     <p className="text-xs text-muted mt-0.5 line-clamp-1">{e.course.subtitle}</p>
                   </div>
-                  <Link href={`/student/courses/${e.course.id}/learn/${e.course.modules[0]?.lessons[0]?.id || ''}`}>
+                  <Link href={`/student/courses/${e.course.id}/learn/${e.course.modules?.[0]?.lessons?.[0]?.id || ''}`}>
                     <Button variant="default" size="sm" className="shrink-0 gap-2">
                       Enter Player
                       <ArrowRight className="w-4 h-4" />
@@ -185,7 +185,7 @@ export default async function StudentDashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {student?.labAttempts.map((la) => (
+              {(student?.labAttempts || []).map((la) => (
                 <Card key={la.id} className="p-5 border-l-4 border-l-security-green">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="security" className="text-[10px] font-mono">{la.state}</Badge>
@@ -211,7 +211,7 @@ export default async function StudentDashboardPage() {
           <Card className="p-6">
             <h3 className="text-xs font-mono text-muted uppercase tracking-wider mb-4">Verified Skill Metrics</h3>
             <div className="space-y-3">
-              {student?.studentProfile?.skills.map((s) => (
+              {(student?.studentProfile?.skills || []).map((s) => (
                 <div key={s.id} className="space-y-1">
                   <div className="flex justify-between text-xs font-mono">
                     <span className="text-primary font-medium">{s.skillName}</span>
@@ -243,12 +243,12 @@ export default async function StudentDashboardPage() {
           )}
 
           {/* Certificate Card */}
-          {student?.certificates[0] && (
+          {student?.certificates?.[0] && (
             <Card className="p-6 bg-[#04111C] text-white border border-security-green/30 space-y-3">
               <Award className="w-7 h-7 text-security-green" />
               <div>
                 <span className="text-xs font-mono text-security-green font-bold block">EARNED CREDENTIAL</span>
-                <h4 className="font-bold text-white text-sm mt-0.5">{student.certificates[0].course.title}</h4>
+                <h4 className="font-bold text-white text-sm mt-0.5">{student.certificates[0].course?.title}</h4>
                 <span className="text-xs font-mono text-slate-400 block mt-1">ID: {student.certificates[0].certificateId}</span>
               </div>
               <Link href={`/verify-certificate?id=${student.certificates[0].certificateId}`}>

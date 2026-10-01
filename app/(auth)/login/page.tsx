@@ -19,6 +19,18 @@ import {
   Shield,
 } from 'lucide-react';
 
+function parseErrorMessage(err: unknown, fallback: string = 'An error occurred'): string {
+  if (!err) return fallback;
+  if (typeof err === 'string') return err;
+  if (typeof err === 'object') {
+    const obj = err as Record<string, any>;
+    if (typeof obj.message === 'string') return obj.message;
+    if (typeof obj.error === 'string') return obj.error;
+    if (obj.error && typeof obj.error.message === 'string') return obj.error.message;
+  }
+  return fallback;
+}
+
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -86,7 +98,7 @@ function AuthContent() {
       setLoading(false);
 
       if (!res.success) {
-        setError(res.error || 'Account authentication failed. Please check your credentials.');
+        setError(parseErrorMessage(res.error, 'Account authentication failed. Please check your credentials.'));
         return;
       }
 
@@ -106,10 +118,15 @@ function AuthContent() {
         setStep('ADMIN_CREDS');
       } else {
         setStep('OTP');
-        const msg = res.warning
-          ? `Verification code dispatched (${res.warning})`
-          : `A 6-digit verification code was sent to ${res.maskedEmail}. Check your inbox.`;
-        setSuccessMsg(msg);
+        if (res.debugOtp) {
+          setOtpCode(res.debugOtp);
+          setSuccessMsg(`Verification Code: ${res.debugOtp} (Direct access code provided)`);
+        } else {
+          const msg = res.warning
+            ? `Verification code dispatched (${res.warning})`
+            : `A 6-digit verification code was sent to ${res.maskedEmail}. Check your inbox.`;
+          setSuccessMsg(msg);
+        }
       }
     } catch {
       setLoading(false);
@@ -134,14 +151,19 @@ function AuthContent() {
       setLoading(false);
 
       if (!res.success) {
-        setError(res.error || 'Passkey verification failed.');
+        setError(parseErrorMessage(res.error, 'Passkey verification failed.'));
         return;
       }
 
       setMaskedEmail(res.maskedEmail || 'Security Admin');
       setStep('OTP');
       setEmailOrTsId(secretKey);
-      setSuccessMsg('Passkey verified. 6-digit code dispatched.');
+      if (res.debugOtp) {
+        setOtpCode(res.debugOtp);
+        setSuccessMsg(`Passkey verified. Verification Code: ${res.debugOtp}`);
+      } else {
+        setSuccessMsg('Passkey verified. 6-digit code dispatched.');
+      }
     } catch {
       setLoading(false);
       setError('Passkey verification failed due to a network error.');
@@ -168,16 +190,21 @@ function AuthContent() {
       setLoading(false);
 
       if (!credRes.success) {
-        setError(credRes.error || 'Admin verification failed.');
+        setError(parseErrorMessage(credRes.error, 'Admin verification failed.'));
         return;
       }
 
       setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
       setStep('OTP');
-      const msg = credRes.warning
-        ? `Verification code dispatched (${credRes.warning})`
-        : `Verification code dispatched to ${credRes.maskedEmail || 'your admin email'}.`;
-      setSuccessMsg(msg);
+      if (credRes.debugOtp) {
+        setOtpCode(credRes.debugOtp);
+        setSuccessMsg(`Verification Code: ${credRes.debugOtp} (Direct access code provided)`);
+      } else {
+        const msg = credRes.warning
+          ? `Verification code dispatched (${credRes.warning})`
+          : `Verification code dispatched to ${credRes.maskedEmail || 'your admin email'}.`;
+        setSuccessMsg(msg);
+      }
     } catch {
       setLoading(false);
       setError('Admin verification failed. Please try again.');
@@ -204,16 +231,21 @@ function AuthContent() {
       setLoading(false);
 
       if (!credRes.success) {
-        setError(credRes.error || 'Faculty verification failed.');
+        setError(parseErrorMessage(credRes.error, 'Faculty verification failed.'));
         return;
       }
 
       setMaskedEmail(credRes.maskedEmail || credRes.email || emailOrTsId);
       setStep('OTP');
-      const msg = credRes.warning
-        ? `Verification code dispatched (${credRes.warning})`
-        : `Verification code dispatched to ${credRes.maskedEmail || 'your faculty email'}.`;
-      setSuccessMsg(msg);
+      if (credRes.debugOtp) {
+        setOtpCode(credRes.debugOtp);
+        setSuccessMsg(`Verification Code: ${credRes.debugOtp} (Direct access code provided)`);
+      } else {
+        const msg = credRes.warning
+          ? `Verification code dispatched (${credRes.warning})`
+          : `Verification code dispatched to ${credRes.maskedEmail || 'your faculty email'}.`;
+        setSuccessMsg(msg);
+      }
     } catch {
       setLoading(false);
       setError('Faculty verification failed. Please try again.');
@@ -238,7 +270,7 @@ function AuthContent() {
 
       if (!res.success) {
         setLoading(false);
-        setError(res.error || 'Invalid or expired verification code.');
+        setError(parseErrorMessage(res.error, 'Invalid or expired verification code.'));
         return;
       }
 
@@ -310,7 +342,7 @@ function AuthContent() {
       setLoading(false);
 
       if (!res.success) {
-        setError(res.error || 'Registration failed. Please review your details.');
+        setError(parseErrorMessage(res.error, 'Registration failed. Please review your details.'));
       } else if (res.redirectTo) {
         window.location.replace(res.redirectTo);
       }
@@ -320,7 +352,9 @@ function AuthContent() {
     }
   }
 
-  const isLockedOut = error?.includes('Security Lockout Active') || error?.includes('Access blocked for 15 minutes');
+  const isLockedOut =
+    typeof error === 'string' &&
+    (error.includes('Security Lockout Active') || error.includes('Access blocked for 15 minutes'));
 
   return (
     <div className="min-h-screen w-full flex flex-col lg:flex-row bg-[#0b0819] text-white font-sans selection:bg-purple-600 selection:text-white relative overflow-hidden">

@@ -43,17 +43,22 @@ export async function middleware(request: NextRequest) {
   // 1. IP Rate Limiting for Authentication & Verification Endpoints
   if (pathname.startsWith('/api/auth') || pathname === '/login') {
     const clientIp = extractIpFromHeaders(request.headers);
-    const rateLimit = checkIpRateLimit(clientIp, 15, 60);
+    const isLocalDev =
+      process.env.NODE_ENV === 'development' ||
+      clientIp === '127.0.0.1' ||
+      clientIp === '::1' ||
+      clientIp === 'localhost';
+
+    const maxRequests = isLocalDev ? 500 : 60;
+    const rateLimit = checkIpRateLimit(clientIp, maxRequests, 60);
 
     if (!rateLimit.allowed) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse(
           JSON.stringify({
             success: false,
-            error: {
-              code: 'RATE_LIMIT_EXCEEDED',
-              message: `Too many authentication attempts. Please try again in ${rateLimit.retryAfterSeconds} seconds.`,
-            },
+            error: `Too many authentication attempts. Please try again in ${rateLimit.retryAfterSeconds} seconds.`,
+            code: 'RATE_LIMIT_EXCEEDED',
           }),
           {
             status: 429,
@@ -70,17 +75,22 @@ export async function middleware(request: NextRequest) {
   // Rate Limiting for Public High-Abuse Endpoints (Contact & Certificate Verification)
   if (pathname.startsWith('/api/contact') || pathname.startsWith('/api/verify') || pathname === '/contact') {
     const clientIp = extractIpFromHeaders(request.headers);
-    const rateLimit = checkIpRateLimit(clientIp, 10, 60);
+    const isLocalDev =
+      process.env.NODE_ENV === 'development' ||
+      clientIp === '127.0.0.1' ||
+      clientIp === '::1' ||
+      clientIp === 'localhost';
+
+    const maxRequests = isLocalDev ? 300 : 30;
+    const rateLimit = checkIpRateLimit(clientIp, maxRequests, 60);
 
     if (!rateLimit.allowed) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse(
           JSON.stringify({
             success: false,
-            error: {
-              code: 'RATE_LIMIT_EXCEEDED',
-              message: `Rate limit exceeded. Please wait ${rateLimit.retryAfterSeconds} seconds before trying again.`,
-            },
+            error: `Rate limit exceeded. Please wait ${rateLimit.retryAfterSeconds} seconds before trying again.`,
+            code: 'RATE_LIMIT_EXCEEDED',
           }),
           {
             status: 429,

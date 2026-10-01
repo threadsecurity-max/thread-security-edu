@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       success: true,
       maskedEmail: res.maskedEmail,
       warning: res.warning,
+      debugOtp: (res as any).debugOtp,
     });
   } catch (err: unknown) {
     let errorMessage = 'Security Admin verification failed.';

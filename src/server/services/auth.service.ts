@@ -214,7 +214,8 @@ export async function verifySecurityAdminCredentials(secretKey: string, passkey:
     code,
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  const isDev = process.env.NODE_ENV === 'development';
+  if (isDev) {
     console.log(`[MFA_DEV_DEBUG] Security Admin OTP Code for ${superAdminEmail}: ${code}`);
   }
 
@@ -231,7 +232,8 @@ export async function verifySecurityAdminCredentials(secretKey: string, passkey:
   return {
     success: true,
     maskedEmail,
-    warning: emailResult.warning,
+    warning: emailResult.warning || (!emailResult.success ? `Verification code: ${code}` : undefined),
+    debugOtp: (isDev || !emailResult.success) ? code : undefined,
   };
 }
 
@@ -379,7 +381,8 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     code,
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  const isDev = process.env.NODE_ENV === 'development';
+  if (isDev) {
     console.log(`[MFA_DEV_DEBUG] Admin OTP Code for ${user.email}: ${code}`);
   }
 
@@ -392,7 +395,8 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     maskedEmail,
     name: user.name,
     tsId: user.tsIdentity?.tsId || 'TS-ADMIN',
-    warning: emailResult.warning,
+    warning: emailResult.warning || (!emailResult.success ? `Verification code: ${code}` : undefined),
+    debugOtp: (isDev || !emailResult.success) ? code : undefined,
   };
 }
 
@@ -494,7 +498,8 @@ export async function verifyMentorCredentials(
     code,
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  const isDev = process.env.NODE_ENV === 'development';
+  if (isDev) {
     console.log(`[MFA_DEV_DEBUG] Mentor OTP Code for ${user.email}: ${code}`);
   }
 
@@ -515,7 +520,8 @@ export async function verifyMentorCredentials(
     maskedEmail,
     name: user.name,
     tsId: user.tsIdentity?.tsId || 'TSE-MENTOR',
-    warning: emailResult.warning,
+    warning: emailResult.warning || (!emailResult.success ? `Verification code: ${code}` : undefined),
+    debugOtp: (isDev || !emailResult.success) ? code : undefined,
   };
 }
 
@@ -674,7 +680,8 @@ export async function requestOtpService(emailOrTsId: string) {
     code,
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  const isDev = process.env.NODE_ENV === 'development';
+  if (isDev) {
     console.log(`[MFA_DEV_DEBUG] Student OTP Code for ${user.email} (${user.tsIdentity?.tsId || 'N/A'}): ${code}`);
   }
 
@@ -685,7 +692,8 @@ export async function requestOtpService(emailOrTsId: string) {
     maskedEmail,
     email: user.email,
     tsId: user.tsIdentity?.tsId || 'TS-STUDENT',
-    warning: emailResult.warning,
+    warning: emailResult.warning || (!emailResult.success ? `Verification code: ${code}` : undefined),
+    debugOtp: (isDev || !emailResult.success) ? code : undefined,
   };
 }
 

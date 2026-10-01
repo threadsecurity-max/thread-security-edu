@@ -63,7 +63,8 @@ export function TestDetailClient({ test }: TestDetailProps) {
   const [isStarting, setIsStarting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const hasActiveAttempt = !!test.activeAttemptId;
+  const previousAttempts = test?.previousAttempts || [];
+  const hasActiveAttempt = !!test?.activeAttemptId;
   const isLimitReached =
     typeof test.attemptsRemaining === 'number' && test.attemptsRemaining <= 0 && !hasActiveAttempt;
 
@@ -278,7 +279,7 @@ export function TestDetailClient({ test }: TestDetailProps) {
       </Card>
 
       {/* ── PREVIOUS ATTEMPTS TABLE ── */}
-      {test.previousAttempts.length > 0 && (
+      {previousAttempts.length > 0 && (
         <Card className="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs space-y-4">
           <h3 className="text-sm font-bold text-slate-900 font-mono uppercase tracking-wider flex items-center gap-2">
             <Award className="w-4 h-4 text-slate-500" />
@@ -298,7 +299,7 @@ export function TestDetailClient({ test }: TestDetailProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {test.previousAttempts.map((att) => (
+                {previousAttempts.map((att) => (
                   <tr key={att.id} className="hover:bg-slate-50/50">
                     <td className="py-3 font-bold text-slate-800">Attempt #{att.attemptNumber}</td>
                     <td className="py-3 text-slate-500">

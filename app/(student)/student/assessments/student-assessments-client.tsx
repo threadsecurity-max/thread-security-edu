@@ -77,10 +77,18 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const { assessments, summary } = initialData;
+  const assessments = initialData?.assessments || [];
+  const summary = initialData?.summary || {
+    totalCompleted: 0,
+    testsPassed: 0,
+    inProgressCount: 0,
+    availableCount: 0,
+    averageScore: 0,
+  };
 
   // Filter assessments
   const filtered = assessments.filter((item) => {
+    if (!item) return false;
     // Tab filter
     if (activeTab === 'available' && item.status !== 'Available' && item.status !== 'Not Started') return false;
     if (activeTab === 'in-progress' && item.status !== 'In Progress') return false;
@@ -93,16 +101,16 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
-        item.title.toLowerCase().includes(q) ||
-        item.courseTitle.toLowerCase().includes(q) ||
-        item.categoryName.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q)
+        (item.title || '').toLowerCase().includes(q) ||
+        (item.courseTitle || '').toLowerCase().includes(q) ||
+        (item.categoryName || '').toLowerCase().includes(q) ||
+        (item.description || '').toLowerCase().includes(q)
       );
     }
     return true;
   });
 
-  const categories = Array.from(new Set(assessments.map((a) => a.categoryName)));
+  const categories = Array.from(new Set(assessments.map((a) => a.categoryName).filter(Boolean)));
 
   return (
     <div className="space-y-8">

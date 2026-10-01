@@ -436,11 +436,11 @@ export function AdminAssessmentsClient({ initialTests, overview }: AdminAssessme
               </div>
 
               {/* Warnings or Errors */}
-              {simulationData.validation.errors.length > 0 && (
+              {(simulationData?.validation?.errors?.length || 0) > 0 && (
                 <div className="p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 space-y-1">
                   <span className="font-bold block">Deficit Details:</span>
                   <ul className="list-disc list-inside space-y-0.5">
-                    {simulationData.validation.errors.map((e: string, i: number) => (
+                    {simulationData?.validation?.errors?.map((e: string, i: number) => (
                       <li key={i}>{e}</li>
                     ))}
                   </ul>

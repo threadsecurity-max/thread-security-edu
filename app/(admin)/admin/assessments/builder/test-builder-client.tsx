@@ -38,15 +38,15 @@ export interface TestBuilderClientProps {
   categories: CategoryOption[];
 }
 
-export function TestBuilderClient({ initialTest, courses, categories }: TestBuilderClientProps) {
+export function TestBuilderClient({ initialTest, courses = [], categories = [] }: TestBuilderClientProps) {
   const router = useRouter();
   const isEditing = !!initialTest;
 
   // Section 1: Basic Information
   const [title, setTitle] = useState(initialTest?.title || '');
   const [slug, setSlug] = useState(initialTest?.slug || '');
-  const [courseId, setCourseId] = useState(initialTest?.courseId || courses[0]?.id || '');
-  const [categoryId, setCategoryId] = useState(initialTest?.categoryId || categories[0]?.id || '');
+  const [courseId, setCourseId] = useState(initialTest?.courseId || (courses && courses[0]?.id) || '');
+  const [categoryId, setCategoryId] = useState(initialTest?.categoryId || (categories && categories[0]?.id) || '');
   const [description, setDescription] = useState(initialTest?.description || '');
   const [instructions, setInstructions] = useState(initialTest?.instructions || '');
   const [durationMinutes, setDurationMinutes] = useState(initialTest?.durationMinutes || 30);
@@ -107,7 +107,7 @@ export function TestBuilderClient({ initialTest, courses, categories }: TestBuil
         // fallback
       }
     }
-    return categories.slice(0, 3).map((c, i) => ({
+    return (categories || []).slice(0, 3).map((c, i) => ({
       categoryId: c.id,
       percentage: i === 0 ? 40 : 30,
     }));
@@ -603,7 +603,7 @@ export function TestBuilderClient({ initialTest, courses, categories }: TestBuil
             </div>
           ))}
 
-          {categoryDistributions.length < categories.length && (
+          {categoryDistributions.length < (categories?.length || 0) && (
             <button
               type="button"
               onClick={handleAddCategoryRow}

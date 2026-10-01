@@ -10,15 +10,20 @@ export async function getStudentAssessmentsList(studentId: string) {
 
   const enrolledCourseIds = enrollments.map((e: any) => e.courseId);
 
-  // 2. Fetch published assessments for enrolled courses (or all published if demo)
+  // 2. Fetch published assessments for enrolled courses (or all published if student has no specific enrollments)
+  const whereClause: any = {
+    status: AssessmentStatus.PUBLISHED,
+  };
+
+  if (enrolledCourseIds.length > 0) {
+    whereClause.OR = [
+      { courseId: { in: enrolledCourseIds } },
+      { course: { enrollments: { some: { userId: studentId } } } },
+    ];
+  }
+
   const assessments = await (prisma as any).assessment.findMany({
-    where: {
-      status: AssessmentStatus.PUBLISHED,
-      OR: [
-        { courseId: { in: enrolledCourseIds } },
-        { course: { enrollments: { some: { userId: studentId } } } },
-      ],
-    },
+    where: whereClause,
     include: {
       course: { select: { id: true, title: true, slug: true } },
       category: { select: { id: true, name: true, slug: true } },
@@ -115,14 +120,14 @@ export async function getStudentAssessmentsList(studentId: string) {
   });
 
   // Calculate Student Summary Metrics
-  const totalCompleted = transformed.reduce((acc: number, t: any) => acc + t.history.length, 0);
+  const totalCompleted = transformed.reduce((acc: number, t: any) => acc + (t.history?.length || 0), 0);
   const testsPassed = transformed.filter((t: any) => t.status === 'Passed').length;
   const inProgressCount = transformed.filter((t: any) => t.status === 'In Progress').length;
   const availableCount = transformed.filter(
     (t: any) => t.status === 'Available' || t.status === 'Not Started'
   ).length;
 
-  const allPercentages = transformed.flatMap((t: any) => t.history.map((h: any) => h.percentage));
+  const allPercentages = transformed.flatMap((t: any) => (t.history || []).map((h: any) => h.percentage));
   const averageScore =
     allPercentages.length > 0
       ? Math.round(allPercentages.reduce((a: number, b: number) => a + b, 0) / allPercentages.length)

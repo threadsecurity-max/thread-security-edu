@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       name: res.name || '',
       tsId: res.tsId || '',
       warning: res.warning,
+      debugOtp: (res as any).debugOtp,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Mentor security verification failed.';

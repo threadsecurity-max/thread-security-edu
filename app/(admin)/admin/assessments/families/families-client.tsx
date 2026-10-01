@@ -40,7 +40,7 @@ interface FamiliesClientProps {
 }
 
 export function FamiliesClient({ initialFamilies }: FamiliesClientProps) {
-  const [families, setFamilies] = useState<QuestionFamilyItem[]>(initialFamilies);
+  const [families, setFamilies] = useState<QuestionFamilyItem[]>(initialFamilies || []);
   const [showModal, setShowModal] = useState(false);
 
   const [code, setCode] = useState('');
@@ -166,7 +166,7 @@ export function FamiliesClient({ initialFamilies }: FamiliesClientProps) {
                   variant="outline"
                   className="border-slate-700 text-slate-300 bg-slate-800 text-xs"
                 >
-                  {fam.questions.length} Variants Linked
+                  {fam.questions?.length || 0} Variants Linked
                 </Badge>
                 <Link href={`/admin/assessments/question-bank?familyId=${fam.id}`}>
                   <Button
@@ -189,13 +189,13 @@ export function FamiliesClient({ initialFamilies }: FamiliesClientProps) {
               <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 Concept Variants (Randomized 1 per student)
               </h4>
-              {fam.questions.length === 0 ? (
+              {(!fam.questions || fam.questions.length === 0) ? (
                 <p className="text-xs text-slate-500 italic py-2">
                   No question variants attached to this family yet. Assign this family code when editing or adding questions in the Question Bank.
                 </p>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {fam.questions.map((q, idx) => (
+                  {fam.questions?.map((q, idx) => (
                     <div
                       key={q.id}
                       className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 text-xs space-y-1.5"

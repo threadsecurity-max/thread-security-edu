@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       name: res.name || '',
       tsId: res.tsId || '',
       warning: res.warning,
+      debugOtp: res.debugOtp,
     });
   } catch (err: unknown) {
     let errorMessage = 'Admin security verification failed.';

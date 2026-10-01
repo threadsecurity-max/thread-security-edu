@@ -38,7 +38,7 @@ export default async function StudentCoursesPage() {
     },
   });
 
-  const enrolledCourseIds = student?.enrollments.map((e) => e.courseId) || [];
+  const enrolledCourseIds = student?.enrollments?.map((e) => e.courseId) || [];
 
   // Also query other available published courses
   const otherCourses = await prisma.course.findMany({
@@ -88,8 +88,8 @@ export default async function StudentCoursesPage() {
           <div className="grid grid-cols-1 gap-6">
             {enrollments.map((enrollment) => {
               const { course, progressPercent } = enrollment;
-              const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
-              const firstLessonId = course.modules[0]?.lessons[0]?.id;
+              const totalLessons = (course.modules || []).reduce((acc, m) => acc + (m.lessons?.length || 0), 0);
+              const firstLessonId = course.modules?.[0]?.lessons?.[0]?.id;
               const learnUrl = firstLessonId
                 ? `/student/courses/${course.id}/learn/${firstLessonId}`
                 : `/courses/${course.slug}`;
@@ -114,11 +114,11 @@ export default async function StudentCoursesPage() {
                       <div className="flex items-center gap-4 text-xs font-mono text-slate-500 pt-1">
                         <span className="flex items-center gap-1">
                           <FileText className="w-3.5 h-3.5 text-security-blue" />
-                          {course.modules.length} Modules ({totalLessons} Lessons)
+                          {course.modules?.length || 0} Modules ({totalLessons} Lessons)
                         </span>
                         <span className="flex items-center gap-1">
                           <Terminal className="w-3.5 h-3.5 text-security-green" />
-                          {course.labs.length} Hands-On Labs
+                          {course.labs?.length || 0} Hands-On Labs
                         </span>
                       </div>
 
@@ -160,18 +160,18 @@ export default async function StudentCoursesPage() {
       </div>
 
       {/* Other Available Courses */}
-      {otherCourses.length > 0 && (
+      {(otherCourses?.length || 0) > 0 && (
         <div className="space-y-6 pt-6 border-t border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-primary flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-security-blue" />
-              Available Cybersecurity Programs ({otherCourses.length})
+              Available Cybersecurity Programs ({otherCourses?.length || 0})
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {otherCourses.map((course) => {
-              const totalLessons = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
+              const totalLessons = (course.modules || []).reduce((acc, m) => acc + (m.lessons?.length || 0), 0);
 
               return (
                 <Card key={course.id} className="p-6 flex flex-col justify-between space-y-4">
@@ -188,11 +188,11 @@ export default async function StudentCoursesPage() {
                     <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">{course.description}</p>
 
                     <div className="flex items-center gap-4 text-xs font-mono text-slate-500 pt-2 border-t border-border/60">
-                      <span>{course.modules.length} Modules</span>
+                      <span>{course.modules?.length || 0} Modules</span>
                       <span>•</span>
                       <span>{totalLessons} Lessons</span>
                       <span>•</span>
-                      <span>{course.labs.length} Labs</span>
+                      <span>{course.labs?.length || 0} Labs</span>
                     </div>
                   </div>
 
