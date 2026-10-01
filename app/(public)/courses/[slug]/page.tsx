@@ -26,7 +26,10 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'https://www.threadsecurity.in';
 
 // ── DYNAMIC SEO METADATA ──
 export async function generateMetadata({

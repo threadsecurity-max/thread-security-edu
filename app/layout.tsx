@@ -38,8 +38,7 @@ export const viewport: Viewport = {
 const APP_URL =
   process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.NEXTAUTH_URL ||
-  'https://threadsecurity.in';
+  'https://www.threadsecurity.in';
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),

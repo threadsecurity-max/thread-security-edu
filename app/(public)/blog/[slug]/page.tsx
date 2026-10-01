@@ -6,7 +6,10 @@ import { ChevronRight } from 'lucide-react';
 import { PublicBlogArticleClient } from '@/components/blog/public-blog-article-client';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'https://www.threadsecurity.in';
 
 export async function generateMetadata({
   params,

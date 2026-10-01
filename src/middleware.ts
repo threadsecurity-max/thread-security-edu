@@ -30,15 +30,16 @@ function getSessionFromRequest(request: NextRequest): UserSession | null {
 export async function middleware(request: NextRequest) {
   const host = request.headers.get('host') || '';
 
+  const { pathname } = request.nextUrl;
+
   // Canonical Domain Enforcement: Redirect apex threadsecurity.in to www.threadsecurity.in
-  if (host === 'threadsecurity.in') {
+  // Exempt crawler discovery endpoints (/sitemap.xml, /robots.txt) so Google Search Console can fetch directly without redirect failures
+  if (host === 'threadsecurity.in' && pathname !== '/sitemap.xml' && pathname !== '/robots.txt') {
     return NextResponse.redirect(
       `https://www.threadsecurity.in${request.nextUrl.pathname}${request.nextUrl.search}`,
       301
     );
   }
-
-  const { pathname } = request.nextUrl;
 
   // 1. IP Rate Limiting for Authentication & Verification Endpoints
   if (pathname.startsWith('/api/auth') || pathname === '/login') {

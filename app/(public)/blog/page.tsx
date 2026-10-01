@@ -3,7 +3,10 @@ import { PublicBlogLandingClient } from '@/components/blog/public-blog-landing-c
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { Metadata } from 'next';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'https://www.threadsecurity.in';
 
 export const metadata: Metadata = {
   title: 'Cybersecurity & AI Research Blog | Technical Perspectives & Tutorials',

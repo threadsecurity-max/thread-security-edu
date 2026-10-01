@@ -6,8 +6,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl =
     process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXTAUTH_URL ||
-    'https://threadsecurity.in';
+    'https://www.threadsecurity.in';
 
   const now = new Date();
 

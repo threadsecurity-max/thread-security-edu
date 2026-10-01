@@ -4,7 +4,10 @@ import { MASTER_COURSES } from '@/lib/courses/courseRegistry';
 import { CourseListJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { CoursesSplitClient } from './CoursesSplitClient';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:8080';
+const APP_URL =
+  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'https://www.threadsecurity.in';
 
 export const metadata: Metadata = {
   title: 'Cyber Security Courses & Training Programs | Ethical Hacking, VAPT & AI Security',
