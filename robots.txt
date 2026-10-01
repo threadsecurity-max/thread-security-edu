@@ -1,0 +1,127 @@
+# ==============================================================================
+# Thread Security Education (threadsecurity.in) - Robots.txt
+# Optimized for Googlebot, Bingbot, SEO performance, and security
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Googlebot (Primary Search Engine Crawler)
+# ------------------------------------------------------------------------------
+User-agent: Googlebot
+Allow: /
+# Critical: Ensure Googlebot can render JavaScript and CSS bundles
+Allow: /*.css$
+Allow: /*.js$
+Allow: /_next/static/
+Allow: /images/
+Allow: /logos/
+
+# Protect authenticated and private administrative routes
+Disallow: /admin/
+Disallow: /mentor/
+Disallow: /student/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /account/
+Disallow: /staging/
+Disallow: /test/
+Disallow: /search?
+
+# ------------------------------------------------------------------------------
+# 2. Bingbot (Microsoft Bing Search Crawler)
+# ------------------------------------------------------------------------------
+User-agent: Bingbot
+Allow: /
+Allow: /*.css$
+Allow: /*.js$
+Allow: /_next/static/
+Allow: /images/
+Allow: /logos/
+
+Disallow: /admin/
+Disallow: /mentor/
+Disallow: /student/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /account/
+Disallow: /staging/
+Disallow: /test/
+Disallow: /search?
+
+# ------------------------------------------------------------------------------
+# 3. Googlebot-Image
+# ------------------------------------------------------------------------------
+User-agent: Googlebot-Image
+Allow: /
+Allow: /images/
+Allow: /logos/
+Allow: /uploads/
+Disallow: /admin/
+Disallow: /mentor/
+Disallow: /student/
+
+# ------------------------------------------------------------------------------
+# 4. Default Rule for All Other Respectful Search Engines & Crawlers
+# ------------------------------------------------------------------------------
+User-agent: *
+Allow: /
+# Critical: Never block CSS & JS assets needed for client-side rendering
+Allow: /*.css$
+Allow: /*.js$
+Allow: /_next/static/
+Allow: /images/
+Allow: /logos/
+Allow: /favicon.ico
+Allow: /icon.png
+Allow: /apple-touch-icon.png
+Allow: /site.webmanifest
+
+# Private, internal, authenticated, and sensitive portal areas
+Disallow: /admin/
+Disallow: /mentor/
+Disallow: /student/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /checkout/
+Disallow: /cart/
+Disallow: /account/
+Disallow: /staging/
+Disallow: /test/
+Disallow: /search?
+
+# ------------------------------------------------------------------------------
+# 5. Restrict Aggressive Bandwidth-Draining AI Scrapers & Commercial SEO Spiders
+# ------------------------------------------------------------------------------
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: RogstatBot
+Disallow: /
+
+# ------------------------------------------------------------------------------
+# 6. XML Sitemaps & Host Directive
+# ------------------------------------------------------------------------------
+Sitemap: https://threadsecurity.in/sitemap.xml
+Sitemap: https://www.threadsecurity.in/sitemap.xml
+Host: https://threadsecurity.in
