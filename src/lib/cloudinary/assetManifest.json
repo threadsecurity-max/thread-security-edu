@@ -286,5 +286,23 @@
     "relativePath": "uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf",
     "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/raw/upload/v1790057086/threads-lms/uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf",
     "publicId": "threads-lms/uploads/assignments/mentor-1788935059022-ThreatSuite___Autonomous_VAPT_Platform.pdf"
+  },
+  "/images/soc-analyst.jpg": {
+    "localPath": "/images/soc-analyst.jpg",
+    "relativePath": "images/soc-analyst.jpg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1791198750/threads-lms/images/soc-analyst.jpg",
+    "publicId": "threads-lms/images/soc-analyst"
+  },
+  "/images/deep-learning-engineer.jpg": {
+    "localPath": "/images/deep-learning-engineer.jpg",
+    "relativePath": "images/deep-learning-engineer.jpg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1791198752/threads-lms/images/deep-learning-engineer.jpg",
+    "publicId": "threads-lms/images/deep-learning-engineer"
+  },
+  "/images/thread security footer.svg": {
+    "localPath": "/images/thread security footer.svg",
+    "relativePath": "images/thread security footer.svg",
+    "cloudinaryUrl": "https://res.cloudinary.com/qliovzms/image/upload/v1791198753/threads-lms/images/thread_security_footer.svg",
+    "publicId": "threads-lms/images/thread_security_footer"
   }
 }
