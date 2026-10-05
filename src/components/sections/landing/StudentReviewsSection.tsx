@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Linkedin, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 
 interface ReviewItem {
   id: string;
@@ -185,10 +186,11 @@ function TextReviewCard({ review }: { review: ReviewItem }) {
           {/* Avatar Image */}
           <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 border-slate-200 z-10 shadow-md bg-white">
             <Image 
-              src={review.avatar} 
+              src={getCloudinaryAssetUrl(review.avatar)} 
               alt={review.name}
               fill
               unoptimized
+              loading="lazy"
               className="object-cover"
             />
           </div>

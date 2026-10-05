@@ -27,6 +27,7 @@ import {
   Cloud, 
   ChevronRight
 } from 'lucide-react';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 
 interface CareerCard {
   title: string;
@@ -41,7 +42,7 @@ const CAREERS: CareerCard[] = [
   {
     title: 'SOC Analyst',
     category: 'Cyber Security',
-    image: '/images/soc-analyst.jpg',
+    image: getCloudinaryAssetUrl('/images/soc-analyst.jpg'),
     icon: <Shield className="w-4 h-4" />,
     color: '#C6FF34'
   },
@@ -148,7 +149,7 @@ const CAREERS: CareerCard[] = [
   {
     title: 'Deep Learning Engineer',
     category: 'AI & Data',
-    image: '/images/deep-learning-engineer.jpg',
+    image: getCloudinaryAssetUrl('/images/deep-learning-engineer.jpg'),
     icon: <Network className="w-4 h-4" />,
     color: '#A78BFA'
   },
@@ -440,12 +441,12 @@ export function CareersSection() {
               <foreignObject x="-220" y="-110" width="440" height="220">
                 <div className="relative w-full h-full flex items-center justify-center">
                   <Image 
-                    src="/logos/herofill.svg" 
+                    src={getCloudinaryAssetUrl('/logos/herofill.svg')} 
                     alt="TSE Logo" 
                     fill
                     unoptimized
+                    loading="lazy"
                     className="object-contain hover:scale-105 transition-transform duration-300"
-                    priority
                   />
                 </div>
               </foreignObject>

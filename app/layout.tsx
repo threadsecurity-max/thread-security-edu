@@ -127,9 +127,6 @@ export default function RootLayout({
         <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
         <link rel="manifest" href="/site.webmanifest" />
-
-        {/* Preload critical LCP hero image asset */}
-        <link rel="preload" as="image" href="/images/TSE Design.svg" fetchPriority="high" />
       </head>
       <body className="min-h-screen flex flex-col font-sans bg-white text-black antialiased">
         <OrganizationJsonLd />

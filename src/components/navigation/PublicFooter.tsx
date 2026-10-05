@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 import {
   Mail,
   ArrowRight,
@@ -70,13 +71,13 @@ export function PublicFooter() {
       {/* ── GIANT GRAY WATERMARK AT BACKGROUND (More Width, Less Height) ── */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[1720px] pointer-events-none select-none z-0 overflow-hidden flex items-end justify-center opacity-[0.1] grayscale">
         <Image
-          src="/images/thread security footer.svg"
+          src={getCloudinaryAssetUrl('/images/thread security footer.svg')}
           alt="Thread Security Background Watermark"
           width={1720}
           height={380}
           unoptimized
+          loading="lazy"
           className="w-full h-auto max-h-[170px] sm:max-h-[220px] md:max-h-[270px] lg:max-h-[310px] object-cover sm:object-contain object-bottom"
-          priority
         />
       </div>
 

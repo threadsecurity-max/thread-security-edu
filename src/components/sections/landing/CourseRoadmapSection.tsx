@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 import {
   Shield,
   Brain,
@@ -3865,9 +3866,11 @@ export function CourseRoadmapSection() {
       {/* ── TSE BORDER SVG BACKGROUND OVERLAY ── */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center justify-center">
         <Image
-          src="/images/TSE Border.svg"
+          src={getCloudinaryAssetUrl('/images/TSE Border.svg')}
           alt="TSE Grid Border"
           fill
+          unoptimized
+          loading="lazy"
           className={`object-cover transition-opacity duration-700 ${
             isCyber ? 'opacity-[0.08] invert' : 'opacity-[0.45]'
           }`}

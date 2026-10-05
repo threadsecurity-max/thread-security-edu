@@ -115,7 +115,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
           {/* Clean Laptop Mockup Presentation */}
           <div className="relative w-full mx-auto transition-transform duration-700 ease-out hover:scale-[1.015]">
             <Image
-              src="/images/TSE Design.svg"
+              src={getCloudinaryAssetUrl('/images/TSE Design.svg')}
               alt="Thread Security Education AI and Cybersecurity LMS Platform Interface on Laptop"
               width={1724}
               height={1372}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, ChevronRight, Mail, Phone, User, Sparkles, ArrowRight } from 'lucide-react';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -323,12 +324,13 @@ export function CareerCounsellingSection() {
               <div className="absolute inset-0 bg-gradient-to-r from-[#0f0b2a] via-[#0f0b2a]/30 to-transparent z-10" />
               
               <Image
-                src="/images/student-counselling.jpg"
+                src={getCloudinaryAssetUrl('/images/student-counselling.jpg')}
                 alt="Student analyzing tech career path options"
                 fill
+                unoptimized
+                loading="lazy"
                 className="object-cover grayscale brightness-75 contrast-[1.1]"
                 sizes="(max-width: 1024px) 100vw, 40vw"
-                priority
               />
             </div>
 

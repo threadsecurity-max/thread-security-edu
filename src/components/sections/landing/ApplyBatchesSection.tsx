@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 import {
   PhoneCall,
   PhoneForwarded,
@@ -433,9 +434,11 @@ export function ApplyBatchesSection() {
             {/* Live Training Session Container */}
             <div className="relative w-full h-[230px] sm:h-[260px] rounded-2xl overflow-hidden border border-slate-200 shadow-md group">
               <Image
-                src="/images/student-counselling.jpg"
+                src={getCloudinaryAssetUrl('/images/student-counselling.jpg')}
                 alt="Live Interactive Training Session"
                 fill
+                unoptimized
+                loading="lazy"
                 sizes="(max-width: 1024px) 100vw, 400px"
                 className="object-cover group-hover:scale-105 transition-transform duration-700"
               />

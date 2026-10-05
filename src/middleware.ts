@@ -110,7 +110,7 @@ export async function middleware(request: NextRequest) {
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://upload-widget.cloudinary.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://res.cloudinary.com https://lh3.googleusercontent.com;
+    img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com https://lh3.googleusercontent.com;
     font-src 'self' https://fonts.gstatic.com;
     connect-src 'self' https://*.onrender.com https://api.cloudinary.com https://api.resend.com https://oauth2.googleapis.com https://www.googleapis.com;
     frame-src 'self' https://widget.cloudinary.com;
