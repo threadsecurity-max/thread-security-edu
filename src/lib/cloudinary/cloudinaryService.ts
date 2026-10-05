@@ -107,16 +107,7 @@ export async function uploadMediaToCloudinary(
   }
 }
 
-import assetManifest from './assetManifest.json';
-
-/**
- * Resolves a local path (e.g. '/logos/TSE Logo Light.svg') to its live Cloudinary CDN URL from assetManifest.json.
- */
-export function getCloudinaryAssetUrl(localPath: string): string {
-  const cleanPath = localPath.startsWith('/') ? localPath : `/${localPath}`;
-  const mapped = (assetManifest as Record<string, { cloudinaryUrl: string }>)[cleanPath];
-  return mapped?.cloudinaryUrl || localPath;
-}
+export { getCloudinaryAssetUrl } from './assetHelper';
 
 /**
  * Deletes a media asset from Cloudinary by its public ID.

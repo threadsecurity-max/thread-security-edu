@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, ShieldCheck, Award, Users, CheckCircle2, Star, Layers, Play } from 'lucide-react';
 import { FlipWords } from '@/components/ui/flip-words';
-import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/assetHelper';
 
 interface HeroSectionProps {
   totalCourses: number;

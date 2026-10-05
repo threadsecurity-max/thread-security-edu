@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import { Linkedin, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
-import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/assetHelper';
 
 interface ReviewItem {
   id: string;

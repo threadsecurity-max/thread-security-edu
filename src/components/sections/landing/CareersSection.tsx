@@ -27,7 +27,7 @@ import {
   Cloud, 
   ChevronRight
 } from 'lucide-react';
-import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/assetHelper';
 
 interface CareerCard {
   title: string;

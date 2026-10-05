@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, ChevronRight, Mail, Phone, User, Sparkles, ArrowRight } from 'lucide-react';
-import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/assetHelper';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

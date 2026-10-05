@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles, Users, UserCheck, BookOpen, Trophy, Briefcase, Code, CheckCircle2 } from 'lucide-react';
-import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/assetHelper';
 
 export function MethodologySection() {
   return (
