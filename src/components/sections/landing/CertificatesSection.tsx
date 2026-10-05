@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 import { 
   CheckCircle2, 
   ShieldCheck, 
@@ -186,12 +187,13 @@ export function CertificatesSection() {
                 className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-white/20 bg-[#120c24] shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer group-hover:scale-[1.015] transition-transform duration-500 flex items-center justify-center p-1"
               >
                 <Image 
-                  src={activeStudentCert === 'cyber' ? '/images/CertCyber.png' : '/images/CertAI.png'} 
+                  src={activeStudentCert === 'cyber' ? getCloudinaryAssetUrl('/images/CertCyber.png') : getCloudinaryAssetUrl('/images/CertAI.png')} 
                   alt={activeStudentCert === 'cyber' ? 'TSE Cybersecurity Student Certificate' : 'TSE AI Student Certificate'} 
                   fill 
+                  unoptimized
+                  loading="lazy"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-contain filter brightness-[0.98] contrast-[1.02]"
-                  priority
                 />
               </div>
 
@@ -268,12 +270,13 @@ export function CertificatesSection() {
                 className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-white/15 bg-[#120c24] shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer group-hover:scale-[1.015] transition-transform duration-500"
               >
                 <Image 
-                  src={activeGovtCert === 'dpiit' ? '/images/DPIIT.jpg' : '/images/ISO.jpg'} 
+                  src={activeGovtCert === 'dpiit' ? getCloudinaryAssetUrl('/images/DPIIT.jpg') : getCloudinaryAssetUrl('/images/ISO.jpg')} 
                   alt={activeGovtCert === 'dpiit' ? 'DPIIT Government Certificate' : 'ISO Institutional Certificate'} 
                   fill 
+                  unoptimized
+                  loading="lazy"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover object-top filter brightness-[0.92] contrast-[1.05]"
-                  priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
@@ -609,8 +612,8 @@ export function CertificatesSection() {
                   src={selectedImage.src} 
                   alt={selectedImage.title} 
                   fill 
+                  unoptimized
                   className="object-contain"
-                  priority
                 />
               </div>
             </div>

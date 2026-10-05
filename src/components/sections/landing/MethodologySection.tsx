@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Sparkles, Users, UserCheck, BookOpen, Trophy, Briefcase, Code, CheckCircle2 } from 'lucide-react';
+import { getCloudinaryAssetUrl } from '@/lib/cloudinary/cloudinaryService';
 
 export function MethodologySection() {
   return (
@@ -13,8 +14,9 @@ export function MethodologySection() {
           src="/images/TSE Border.svg"
           alt="Grid background border pattern"
           fill
+          unoptimized
+          loading="lazy"
           className="object-cover object-center"
-          priority
         />
       </div>
 
@@ -62,12 +64,13 @@ export function MethodologySection() {
             {/* Visual: Authentic Live & Interactive Classroom Session Photo */}
             <div className="mt-6 relative w-full h-[220px] sm:h-[240px] rounded-2xl overflow-hidden border border-slate-200/90 shadow-sm bg-slate-900 group/live">
               <Image
-                src="/images/Live Interactive.jpeg"
+                src={getCloudinaryAssetUrl('/images/Live Interactive.jpeg')}
                 alt="TSE Authentic Live & Interactive Classroom Training Session"
                 fill
+                unoptimized
+                loading="lazy"
                 sizes="(max-width: 768px) 100vw, 800px"
                 className="object-cover object-center group-hover/live:scale-105 transition-transform duration-700 filter brightness-[0.95] contrast-[1.03]"
-                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               
@@ -121,9 +124,11 @@ export function MethodologySection() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="relative group/photo overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm aspect-[4/5] bg-slate-100">
                   <Image
-                    src="/images/Mentorship.jpeg"
+                    src={getCloudinaryAssetUrl('/images/Mentorship.jpeg')}
                     alt="1:1 In-Person Technical Mentorship with Mentor at TSE Desk"
                     fill
+                    unoptimized
+                    loading="lazy"
                     sizes="(max-width: 768px) 50vw, 200px"
                     className="object-cover object-center group-hover/photo:scale-105 transition-transform duration-500"
                   />
@@ -140,9 +145,11 @@ export function MethodologySection() {
 
                 <div className="relative group/photo overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm aspect-[4/5] bg-slate-100">
                   <Image
-                    src="/images/Mentorship Photo.jpeg"
+                    src={getCloudinaryAssetUrl('/images/Mentorship Photo.jpeg')}
                     alt="1:1 Resume and Interview Guidance Session with Student"
                     fill
+                    unoptimized
+                    loading="lazy"
                     sizes="(max-width: 768px) 50vw, 200px"
                     className="object-cover object-center group-hover/photo:scale-105 transition-transform duration-500"
                   />
