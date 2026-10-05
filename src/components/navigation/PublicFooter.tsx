@@ -74,6 +74,7 @@ export function PublicFooter() {
           alt="Thread Security Background Watermark"
           width={1720}
           height={380}
+          unoptimized
           className="w-full h-auto max-h-[170px] sm:max-h-[220px] md:max-h-[270px] lg:max-h-[310px] object-cover sm:object-contain object-bottom"
           priority
         />

@@ -188,6 +188,7 @@ function TextReviewCard({ review }: { review: ReviewItem }) {
               src={review.avatar} 
               alt={review.name}
               fill
+              unoptimized
               className="object-cover"
             />
           </div>

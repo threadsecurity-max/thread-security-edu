@@ -88,6 +88,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
               alt="Thread Security Education Logo"
               width={36}
               height={36}
+              unoptimized
               className="h-9 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </Link>
@@ -190,6 +191,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
               alt="Thread Security Education"
               width={28}
               height={28}
+              unoptimized
               className="h-7 w-auto object-contain"
             />
           </Link>

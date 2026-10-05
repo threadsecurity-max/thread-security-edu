@@ -443,6 +443,7 @@ export function CareersSection() {
                     src="/logos/herofill.svg" 
                     alt="TSE Logo" 
                     fill
+                    unoptimized
                     className="object-contain hover:scale-105 transition-transform duration-300"
                     priority
                   />

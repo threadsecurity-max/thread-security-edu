@@ -77,6 +77,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                       alt="Thread Security Education"
                       width={32}
                       height={32}
+                      unoptimized
                       className="h-8 w-auto object-contain"
                     />
                   </Link>

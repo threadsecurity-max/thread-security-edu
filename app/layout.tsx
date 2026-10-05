@@ -130,7 +130,6 @@ export default function RootLayout({
 
         {/* Preload critical LCP hero image asset */}
         <link rel="preload" as="image" href="/images/TSE Design.svg" fetchPriority="high" />
-        <link rel="preload" as="image" href="/images/TSE Hero Grid Base.svg" fetchPriority="high" />
       </head>
       <body className="min-h-screen flex flex-col font-sans bg-white text-black antialiased">
         <OrganizationJsonLd />

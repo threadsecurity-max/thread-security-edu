@@ -109,6 +109,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
               alt="TSE Logo"
               width={28}
               height={28}
+              unoptimized
               className="h-7 w-auto"
             />
             <span className="text-xs font-mono font-bold tracking-wider text-white">MENTOR PORTAL</span>
@@ -141,6 +142,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
                     alt="TSE Logo"
                     width={28}
                     height={28}
+                    unoptimized
                     className="h-7 w-auto"
                   />
                   <span className="text-xs font-mono font-bold text-white">TSE MENTOR</span>
@@ -221,6 +223,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
               alt="Thread Security Education Logo"
               width={40}
               height={40}
+              unoptimized
               className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
             />
           </Link>

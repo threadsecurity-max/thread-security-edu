@@ -74,6 +74,7 @@ export function MentorCredibilitySection({ mentors }: MentorCredibilitySectionPr
                   src={`/University Logos/${logo.file}`}
                   alt={logo.name}
                   fill
+                  unoptimized
                   sizes="(max-width: 640px) 240px, 260px"
                   className="object-contain opacity-75 group-hover:opacity-100 transition-all duration-300 filter grayscale group-hover:grayscale-0 group-hover:scale-105"
                 />

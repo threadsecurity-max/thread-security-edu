@@ -93,6 +93,7 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                     alt="Thread Security Education"
                     width={28}
                     height={28}
+                    unoptimized
                     className="h-7 w-auto object-contain"
                   />
                   <span className="font-black text-sm tracking-tight text-black">

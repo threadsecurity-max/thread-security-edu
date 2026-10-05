@@ -38,9 +38,6 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
       aria-label="Cybersecurity and AI Training and Education Overview"
       className="relative pt-8 sm:pt-14 pb-16 md:pb-28 overflow-hidden bg-white text-slate-900 text-center"
     >
-      {/* ── WHOLE-SCREEN HERO BACKGROUND: TSE Design Hero Student ── */}
-      
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* ── TOP BADGE BAR ── */}
@@ -124,6 +121,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
               priority
               fetchPriority="high"
               loading="eager"
+              unoptimized
               className="w-full h-auto object-contain mx-auto drop-shadow-[0_25px_50px_rgba(15,23,42,0.18)] filter brightness-[1.01]"
             />
           </div>
