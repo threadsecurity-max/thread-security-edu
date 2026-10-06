@@ -14,23 +14,7 @@ interface HeroSectionProps {
 const heroFlipWords = [
   { text: 'Cybersecurity', className: 'text-[#65a30d]' },
   { text: 'Artificial Intelligence', className: 'text-[#7E3BED]' },
-  { text: 'Cloud DevSecOps', className: 'text-[#0284c7]' },
-  { text: 'SOC Operations', className: 'text-[#d97706]' },
-  { text: 'Data Engineer', className: 'text-[#14b8a6]' },
-  { text: 'RAG Engineer', className: 'text-[#8b5cf6]' },
-  { text: 'Data Science', className: 'text-[#ef4444]' },
-  { text: 'Ethical Hacking', className: 'text-[#3b82f6]' },
-  { text: 'Offensive Security', className: 'text-[#94a3b8]' },
-  { text: 'Red Team', className: 'text-[#f97316]' },
-  { text: 'Blue Team', className: 'text-[#14b8a6]' },
-  { text: 'Purple Team', className: 'text-[#8b5cf6]' },
-  { text: 'AI Engineer', className: 'text-[#ef4444]' },
-  { text: 'ML Engineer', className: 'text-[#3b82f6]' },
-  { text: 'AI Security', className: 'text-[#94a3b8]' },
-  { text: 'RAG Engineer', className: 'text-[#8b5cf6]' },
-  { text: 'Prompt Engineer', className: 'text-[#ef4444]' },
-  { text: 'LLM Engineer', className: 'text-[#3b82f6]' },
-
+  
 ];
 
 export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
