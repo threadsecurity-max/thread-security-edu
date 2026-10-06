@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Sparkles, ShieldCheck, Award, Users, CheckCircle2, Star, Layers, Play } from 'lucide-react';
 import { FlipWords } from '@/components/ui/flip-words';
-import { getCloudinaryAssetUrl } from '@/lib/cloudinary/assetHelper';
+
 
 interface HeroSectionProps {
   totalCourses: number;
@@ -115,7 +115,7 @@ export function HeroSection({ totalCourses, totalLabs }: HeroSectionProps) {
           {/* Clean Laptop Mockup Presentation */}
           <div className="relative w-full mx-auto transition-transform duration-700 ease-out hover:scale-[1.015]">
             <Image
-              src={getCloudinaryAssetUrl('/images/TSE Design.svg')}
+              src="/TSE Design.svg"
               alt="Thread Security Education AI and Cybersecurity LMS Platform Interface on Laptop"
               width={1724}
               height={1372}
