@@ -5,18 +5,27 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Award, Lock, ExternalLink, ShieldCheck } from 'lucide-react';
 
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth/session';
+
 export const revalidate = 0;
 
 export default async function StudentCertificatesPage() {
-  const student = await prisma.user.findFirst({
-    where: { role: 'STUDENT' },
+  const session = await getSession();
+  if (!session || !session.userId) {
+    redirect('/login');
+  }
+
+  const student = await prisma.user.findUnique({
+    where: { id: session.userId },
     include: {
       tsIdentity: true,
       certificates: { include: { course: true } },
     },
   });
 
-  const tsId = student?.tsIdentity?.tsId || 'TSE-2026-8F4K29';
+  const tsId =
+    student?.tsIdentity?.tsId || session.tsId || `TSE-2026-${session.userId.slice(-6).toUpperCase()}`;
 
   return (
     <div className="space-y-8">

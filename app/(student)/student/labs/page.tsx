@@ -5,18 +5,22 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Terminal, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
 
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth/session';
+
 export const revalidate = 0;
 
 export default async function StudentLabsListPage() {
-  const student = await prisma.user.findFirst({
-    where: { role: 'STUDENT' },
-  });
+  const session = await getSession();
+  if (!session || !session.userId) {
+    redirect('/login');
+  }
 
   const labs = await prisma.lab.findMany({
     include: {
       course: true,
       attempts: {
-        where: { userId: student?.id },
+        where: { userId: session.userId },
       },
     },
   });

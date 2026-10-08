@@ -8,6 +8,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Terminal, ShieldCheck, CheckCircle2, AlertCircle, ArrowLeft, Play, Lock } from 'lucide-react';
 import { logAuditEvent } from '@/server/security/audit';
 
+import { getSession } from '@/lib/auth/session';
+
 export default async function StudentLabTargetPage({
   params,
   searchParams,
@@ -18,8 +20,13 @@ export default async function StudentLabTargetPage({
   const { labId } = await params;
   const { flagResult } = await searchParams;
 
-  const student = await prisma.user.findFirst({
-    where: { role: 'STUDENT' },
+  const session = await getSession();
+  if (!session || !session.userId) {
+    redirect('/login');
+  }
+
+  const student = await prisma.user.findUnique({
+    where: { id: session.userId },
   });
 
   if (!student) {

@@ -15,11 +15,19 @@ import {
   Cpu,
 } from 'lucide-react';
 
-export const revalidate = 60;
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth/session';
+
+export const revalidate = 0;
 
 export default async function StudentCoursesPage() {
-  const student = await prisma.user.findFirst({
-    where: { role: 'STUDENT' },
+  const session = await getSession();
+  if (!session || !session.userId) {
+    redirect('/login');
+  }
+
+  const student = await prisma.user.findUnique({
+    where: { id: session.userId },
     include: {
       enrollments: {
         include: {

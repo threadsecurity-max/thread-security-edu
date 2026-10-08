@@ -46,9 +46,9 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
       <button
         onClick={() => setDrawerOpen(true)}
         aria-label="Open student menu"
-        className="md:hidden touch-target p-2 rounded-xl text-neutral-800 hover:bg-neutral-100 transition-colors"
+        className="md:hidden touch-target p-2 rounded-xl text-white hover:bg-white/10 transition-colors cursor-pointer"
       >
-        <Menu className="w-5 h-5" />
+        <Menu className="w-5 h-5 text-white" />
       </button>
 
       {/* Drawer Menu */}
@@ -60,14 +60,14 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setDrawerOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 md:hidden"
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 md:hidden"
             />
             <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-              className="fixed top-0 left-0 bottom-0 w-[min(82vw,300px)] bg-[#04111C] text-white z-50 shadow-2xl flex flex-col justify-between p-5 md:hidden safe-top safe-bottom safe-left"
+              className="fixed top-0 left-0 bottom-0 w-[min(82vw,300px)] bg-[#050706] text-white z-50 border-r border-white/10 shadow-2xl flex flex-col justify-between p-5 md:hidden safe-top safe-bottom safe-left"
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -240,7 +240,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
       {/* Persistent Mobile Bottom Navigation (< md) */}
       <nav
         aria-label="Student mobile navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-border/80 safe-bottom shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#050706]/95 backdrop-blur-xl border-t border-white/[0.08] safe-bottom shadow-[0_-4px_24px_rgba(0,0,0,0.6)]"
       >
         <div className="grid grid-cols-5 h-14 items-center px-1 max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
@@ -256,15 +256,15 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                 href={item.href}
                 className={cn(
                   'touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors py-1 text-center',
-                  isActive ? 'text-black font-extrabold' : 'text-neutral-500 hover:text-black'
+                  isActive ? 'text-[#C6FF34] font-extrabold' : 'text-zinc-500 hover:text-white'
                 )}
               >
                 <div className="relative">
-                  <Icon className={cn('w-5 h-5', isActive && 'text-black stroke-[2.5]')} />
+                  <Icon className={cn('w-5 h-5', isActive && 'text-[#C6FF34] stroke-[2.5]')} />
                   {isActive && (
                     <motion.div
                       layoutId="student-tab-dot"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-black rounded-full"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#C6FF34] rounded-full shadow-[0_0_6px_#C6FF34]"
                     />
                   )}
                 </div>
