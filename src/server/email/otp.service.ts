@@ -17,6 +17,7 @@ export function generate6DigitOtp(): string {
 
 /**
  * Sends a 6-digit MFA OTP verification code using Resend API or SMTP Transport.
+ * Renders a premium, minimal White and Green email template.
  */
 export async function sendOtpEmail({
   toEmail,
@@ -28,55 +29,201 @@ export async function sendOtpEmail({
   code: string;
 }): Promise<SendOtpResult> {
   const cleanTarget = toEmail.trim().toLowerCase();
-  const ownerEmail = 'threadsecurity@gmail.com';
   const apiKey = process.env.RESEND_API_KEY;
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'Thread Security Education <onboarding@resend.dev>';
 
+  // Use verified domain sender (threadsecurity.in is verified in Resend)
+  const verifiedSender = 'Thread Security Education <edu@threadsecurity.in>';
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL && !process.env.RESEND_FROM_EMAIL.includes('onboarding@resend.dev')
+      ? process.env.RESEND_FROM_EMAIL
+      : verifiedSender;
+
+  // Premium, Minimal White & Green HTML Email Template
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
       <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Your Verification Code — Thread Security</title>
         <style>
-          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7f9fa; color: #0b1720; margin: 0; padding: 20px; }
-          .container { max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #dce4e8; padding: 32px; box-shadow: 0 4px 20px rgba(7, 26, 43, 0.08); }
-          .header { text-align: center; padding-bottom: 24px; border-bottom: 1px solid #dce4e8; }
-          .logo { font-size: 20px; font-weight: bold; color: #071a2b; letter-spacing: -0.5px; }
-          .logo span { color: #31d17c; background: #04111c; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px; }
-          .title { font-size: 22px; font-weight: 700; color: #071a2b; margin-top: 24px; text-align: center; }
-          .code-box { background: #04111c; border: 2px solid #31d17c; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0; }
-          .code { font-family: 'Courier New', monospace; font-size: 38px; font-weight: 800; color: #31d17c; letter-spacing: 12px; }
-          .body-text { font-size: 15px; color: #66737d; line-height: 1.6; text-align: center; }
-          .footer { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 32px; border-top: 1px solid #e2e8f0; padding-top: 16px; }
+          body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+          }
+          .wrapper {
+            width: 100%;
+            background-color: #f8fafc;
+            padding: 40px 16px;
+          }
+          .card {
+            max-width: 520px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 40px 36px;
+            box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+          }
+          .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #f1f5f9;
+          }
+          .brand-pill {
+            display: inline-block;
+            background-color: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+          }
+          .brand-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.2px;
+            margin-top: 4px;
+          }
+          .content-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 28px 0 12px 0;
+            line-height: 1.3;
+          }
+          .content-body {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+            margin: 0 0 24px 0;
+          }
+          .code-container {
+            background-color: #f0fdf4;
+            border: 1.5px solid #86efac;
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            margin: 24px 0;
+          }
+          .code-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #16a34a;
+            margin-bottom: 8px;
+          }
+          .code-digits {
+            font-family: 'SF Mono', 'Roboto Mono', Menlo, Consolas, Monaco, monospace;
+            font-size: 38px;
+            font-weight: 800;
+            color: #15803d;
+            letter-spacing: 12px;
+            margin-left: 12px;
+          }
+          .expiry-note {
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+            margin-top: 8px;
+          }
+          .meta-box {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: #64748b;
+            margin: 24px 0 0 0;
+          }
+          .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+          }
+          .meta-target {
+            font-weight: 600;
+            color: #0f172a;
+          }
+          .footer {
+            margin-top: 36px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.6;
+          }
+          .footer-brand {
+            font-weight: 600;
+            color: #64748b;
+          }
+          .footer a {
+            color: #16a34a;
+            text-decoration: none;
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <div class="logo">THREAD SECURITY <span>EDUCATION</span></div>
-          </div>
-          
-          <h2 class="title">Student Portal Verification Code</h2>
-          <p class="body-text">Hello <strong>${studentName}</strong>,</p>
-          <p class="body-text">Use the 6-digit MFA verification code below to access your Thread Security Student Dashboard:</p>
-          
-          <div class="code-box">
-            <div class="code">${code}</div>
-          </div>
-          
-          <p class="body-text">Target Recipient: <strong>${cleanTarget}</strong></p>
-          <p class="body-text">This code will expire in <strong>30 minutes</strong>. If you did not request access, please ignore this email.</p>
-          
-          <div class="footer">
-            Thread Security Education — Cybersecurity LMS<br>
-            Official Academic Identity Portal
+        <div class="wrapper">
+          <div class="card">
+            <!-- Header -->
+            <div class="brand-header">
+              <div>
+                <span class="brand-pill">AUTHENTICATION GATEWAY</span>
+                <div class="brand-title">THREAD SECURITY EDUCATION</div>
+              </div>
+            </div>
+
+            <!-- Title & Greeting -->
+            <h1 class="content-title">Verification Passcode</h1>
+            <p class="content-body">
+              Hello <strong>${studentName || 'Student'}</strong>,<br>
+              Please enter the 6-digit one-time passcode below to verify your identity and access your dashboard.
+            </p>
+
+            <!-- Minimal White & Green Code Box -->
+            <div class="code-container">
+              <div class="code-label">SINGLE-USE ACCESS CODE</div>
+              <div class="code-digits">${code}</div>
+              <div class="expiry-note">Expires in <strong>30 minutes</strong> • One-time use only</div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="meta-box">
+              <div class="meta-row">
+                <span>Account Recipient:</span>
+                <span class="meta-target">${cleanTarget}</span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; margin-top: 6px;">
+                Never share this code with anyone. Thread Security staff will never ask for your verification code.
+              </div>
+            </div>
+
+            <!-- Minimal Footer -->
+            <div class="footer">
+              <span class="footer-brand">Thread Security Education</span><br>
+              Cybersecurity Academy • Official Identity Services<br>
+              <a href="https://www.threadsecurity.in" target="_blank">www.threadsecurity.in</a>
+            </div>
           </div>
         </div>
       </body>
     </html>
   `;
 
-  // 1. OPTION A: Use Custom SMTP Server if SMTP_HOST is defined in .env
+  // 1. OPTION A: Use Custom SMTP Server if configured in environment
   if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
     try {
       const port = parseInt(process.env.SMTP_PORT || '587', 10);
@@ -93,20 +240,20 @@ export async function sendOtpEmail({
       const info = await transporter.sendMail({
         from: process.env.SMTP_FROM || fromEmail,
         to: cleanTarget,
-        subject: `[MFA Code: ${code}] Thread Security Access Code for ${cleanTarget}`,
+        subject: `[${code}] Thread Security Access Code`,
         html: htmlContent,
       });
 
-      console.log(`[SMTP_EMAIL_SUCCESS] Real MFA email sent via SMTP to ${cleanTarget} (MessageId: ${info.messageId})`);
+      console.log(`[SMTP_EMAIL_SUCCESS] OTP sent via SMTP directly to ${cleanTarget} (MessageId: ${info.messageId})`);
       return { success: true, deliveredTo: cleanTarget };
     } catch (smtpErr) {
       const msg = smtpErr instanceof Error ? smtpErr.message : String(smtpErr);
       console.error('[SMTP_EMAIL_ERROR] Failed to send via custom SMTP:', msg);
-      // Fall through to try Resend API as backup
+      // Fall through to Resend API
     }
   }
 
-  // 2. OPTION B: Use Resend REST API
+  // 2. OPTION B: Use Resend REST API (strictly to cleanTarget)
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -117,54 +264,23 @@ export async function sendOtpEmail({
       body: JSON.stringify({
         from: fromEmail,
         to: [cleanTarget],
-        subject: `[MFA Code: ${code}] Thread Security Access Code for ${cleanTarget}`,
+        subject: `[${code}] Thread Security Access Code`,
         html: htmlContent,
       }),
     });
 
     if (response.ok) {
       const resData = await response.json();
-      console.log(`[RESEND_EMAIL_SUCCESS] Real MFA email dispatched via Resend to ${cleanTarget} (ID: ${resData.id}, Code: ${code})`);
+      console.log(`[RESEND_EMAIL_SUCCESS] OTP dispatched directly to ${cleanTarget} (ID: ${resData.id})`);
       return { success: true, deliveredTo: cleanTarget };
     }
 
     const errText = await response.text();
-    console.warn(`[RESEND_EMAIL_WARNING] Resend API error sending to ${cleanTarget}:`, errText);
-
-    // If error is sandbox domain restriction (can only send to account owner email in free tier)
-    if (errText.includes('validation_error') || errText.includes('only send testing emails')) {
-      console.warn(`[RESEND_SANDBOX_RESTRICTION] Attempting sandbox fallback send to account owner (${ownerEmail})...`);
-
-      const fallbackRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [ownerEmail],
-          subject: `[MFA Code: ${code}] Thread Security Access Code for ${cleanTarget} (Sandbox Fallback)`,
-          html: htmlContent,
-        }),
-      });
-
-      if (fallbackRes.ok) {
-        const fallbackData = await fallbackRes.json();
-        console.log(`[RESEND_FALLBACK_SUCCESS] MFA email dispatched to owner email (${ownerEmail}) for target ${cleanTarget} (ID: ${fallbackData.id}, Code: ${code})`);
-        return {
-          success: true,
-          deliveredTo: ownerEmail,
-          warning: `Resend sandbox active: email delivered to ${ownerEmail} for testing target ${cleanTarget}.`,
-        };
-      }
-    }
-
+    console.error(`[RESEND_EMAIL_ERROR] Resend API error sending to ${cleanTarget}:`, errText);
     return { success: false, error: errText };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('[RESEND_EMAIL_ERROR]', errorMessage);
+    console.error('[RESEND_EMAIL_EXCEPTION]', errorMessage);
     return { success: false, error: errorMessage };
   }
 }
-
