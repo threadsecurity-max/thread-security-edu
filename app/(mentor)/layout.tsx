@@ -60,7 +60,7 @@ export default async function MentorLayout({ children }: { children: React.React
   const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ACADEMIC_ADMIN';
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-black text-white font-sans selection:bg-[#C6FF34] selection:text-black">
+    <div className="min-h-screen md:h-screen md:overflow-hidden flex flex-col md:flex-row bg-[#050706] text-white font-sans selection:bg-[#C6FF34] selection:text-black">
       {/* Mentor Navigation (Responsive Sidebar & Mobile Drawer) */}
       <MentorNavigation
         user={{
@@ -73,9 +73,9 @@ export default async function MentorLayout({ children }: { children: React.React
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#080808]">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#080808] md:h-screen md:overflow-hidden">
         {/* Top Header Bar */}
-        <header className="h-16 border-b border-white/10 bg-black/95 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-30">
+        <header className="h-16 shrink-0 border-b border-white/10 bg-black/95 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-30">
           <div className="flex items-center gap-3">
             <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px] tracking-wider font-bold">
               MENTOR COMMAND CONSOLE
@@ -119,7 +119,7 @@ export default async function MentorLayout({ children }: { children: React.React
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto space-y-6">
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto space-y-6 sidebar-scroll">
           <BroadcastNotificationBanner userId={session.userId} />
           {children}
         </main>
