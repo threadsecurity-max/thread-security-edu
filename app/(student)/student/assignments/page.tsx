@@ -25,17 +25,7 @@ export default async function StudentAssignmentsPage() {
   });
 
   if (!student) {
-    student = await prisma.user.findFirst({
-      where: { role: 'STUDENT' },
-      include: {
-        tsIdentity: true,
-        studentProfile: {
-          include: {
-            batch: true,
-          },
-        },
-      },
-    });
+    redirect('/login?error=SessionNotFound');
   }
 
   // Determine assigned batch

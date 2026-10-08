@@ -43,7 +43,7 @@ export function RecentActivityTimeline({
   return (
     <GlassCard level={2} className="p-6 space-y-5">
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-white tracking-tight">Recent Activity</h3>
+        <h3 className="text-base font-serif font-bold text-white tracking-tight">Recent Activity</h3>
         <span className="text-[11px] font-mono text-zinc-500">Live Ledger</span>
       </div>
 

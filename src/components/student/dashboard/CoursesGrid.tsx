@@ -41,7 +41,7 @@ export function CoursesGrid({ courses }: { courses: CourseItem[] }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-tight">My Courses</h2>
+          <h2 className="text-lg font-bold text-white tracking-tight font-serif">My Courses</h2>
           <p className="text-xs text-zinc-400 font-mono mt-0.5">
             Active curriculum and syllabus completion status
           </p>
@@ -85,7 +85,7 @@ export function CoursesGrid({ courses }: { courses: CourseItem[] }) {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-base font-bold text-white tracking-tight group-hover:text-[#C6FF34] transition-colors line-clamp-1">
+                  <h3 className="text-base font-bold text-white tracking-tight group-hover:text-[#C6FF34] transition-colors line-clamp-1 font-serif">
                     {course.title}
                   </h3>
                   <div className="flex items-center gap-3 text-xs text-zinc-400 font-mono">

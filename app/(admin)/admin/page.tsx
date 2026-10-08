@@ -52,7 +52,7 @@ export default async function AdminDashboardOverviewPage() {
       {/* Action Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-200/80 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-slate-950 tracking-tight leading-tight">
             Academic &amp; Security Overview
           </h1>
           <p className="text-xs text-slate-600 font-mono mt-1">
@@ -115,7 +115,7 @@ export default async function AdminDashboardOverviewPage() {
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-slate-950 tracking-tight">Recent Registered Students ({totalStudents})</h2>
+              <h2 className="text-lg font-serif font-bold text-slate-950 tracking-tight">Recent Registered Students ({totalStudents})</h2>
               <span className="text-[11px] text-slate-500 font-mono block">Latest registered TS-ID student accounts</span>
             </div>
             <Link href="/admin/students" className="text-xs font-mono text-red-600 hover:text-red-700 hover:underline font-bold">
@@ -156,7 +156,7 @@ export default async function AdminDashboardOverviewPage() {
         {/* Security Audit Feed */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-950 tracking-tight">Live Audit Feed ({totalAuditLogs})</h2>
+            <h2 className="text-lg font-serif font-bold text-slate-950 tracking-tight">Live Audit Feed ({totalAuditLogs})</h2>
             <Link href="/admin/audit" className="text-xs font-mono text-red-600 hover:text-red-700 hover:underline font-bold">
               Full Audit Logs
             </Link>

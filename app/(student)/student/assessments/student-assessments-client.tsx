@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   ShieldCheck,
   Cpu,
@@ -113,64 +111,80 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
   const categories = Array.from(new Set(assessments.map((a) => a.categoryName).filter(Boolean)));
 
   return (
-    <div className="space-y-8">
-      {/* ── HEADER ── */}
-      <div className="border-b border-slate-200/80 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <Badge variant="outline" className="font-mono text-xs text-slate-700 bg-white shadow-xs">
+    <div className="space-y-8 text-white">
+      {/* ── HEADER BANNER ── */}
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent border border-white/[0.08] backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#C6FF34]/[0.03] rounded-full blur-3xl pointer-events-none" />
+
+        <div className="space-y-2 relative z-10">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
+            <Badge className="bg-[#C6FF34]/10 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px] tracking-wider font-bold">
               ACADEMIC EVALUATION ENGINE v2.0
             </Badge>
+            <span className="text-xs font-mono text-zinc-400">
+              FACULTY-CONDUCTED EXAMINATIONS
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Assessments & Examination Center
+
+          <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white tracking-tight leading-tight">
+            Assessments &amp; Examination Center
           </h1>
-          <p className="text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Standardized, server-evaluated qualification exams with dynamic question variant balancing, server-authoritative timers, and instant performance analytics.
+
+          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+            Standardized, server-evaluated qualification exams with dynamic question variants, server-authoritative timers, and instant analytical gradebooks.
           </p>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 relative z-10">
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-center font-mono min-w-[110px]">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-widest block">PASS RATE</span>
+            <span className="text-2xl font-extrabold text-[#C6FF34] block mt-0.5">
+              {summary.averageScore}%
+            </span>
+          </div>
         </div>
       </div>
 
       {/* ── METRIC TILES ── */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-        <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
-          <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider block">AVAILABLE</span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900">{summary.availableCount}</div>
-          <span className="text-[10px] sm:text-[11px] text-slate-500">Ready to attempt</span>
+        <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] space-y-1">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">AVAILABLE</span>
+          <div className="text-xl sm:text-2xl font-extrabold font-mono text-white">{summary.availableCount}</div>
+          <span className="text-[11px] text-zinc-400">Ready to attempt</span>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-xl bg-white border border-amber-200/80 shadow-xs space-y-1">
-          <span className="text-[10px] sm:text-[11px] font-mono text-amber-600 uppercase tracking-wider block">IN PROGRESS</span>
-          <div className="text-xl sm:text-2xl font-black text-amber-600">{summary.inProgressCount}</div>
-          <span className="text-[10px] sm:text-[11px] text-amber-700/80">Pending completion</span>
+        <div className="p-4 rounded-2xl bg-white/[0.025] border border-amber-500/20 space-y-1">
+          <span className="text-[10px] font-mono text-amber-400 uppercase tracking-wider block">IN PROGRESS</span>
+          <div className="text-xl sm:text-2xl font-extrabold font-mono text-amber-400">{summary.inProgressCount}</div>
+          <span className="text-[11px] text-zinc-400">Pending completion</span>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1">
-          <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider block">COMPLETED</span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900">{summary.totalCompleted}</div>
-          <span className="text-[10px] sm:text-[11px] text-slate-500">Total attempts logged</span>
+        <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] space-y-1">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">COMPLETED</span>
+          <div className="text-xl sm:text-2xl font-extrabold font-mono text-white">{summary.totalCompleted}</div>
+          <span className="text-[11px] text-zinc-400">Attempts logged</span>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-xl bg-white border border-emerald-200/80 shadow-xs space-y-1">
-          <span className="text-[10px] sm:text-[11px] font-mono text-emerald-600 uppercase tracking-wider block">TESTS PASSED</span>
-          <div className="text-xl sm:text-2xl font-black text-emerald-600">{summary.testsPassed}</div>
-          <span className="text-[10px] sm:text-[11px] text-emerald-700/80">Benchmark met</span>
+        <div className="p-4 rounded-2xl bg-white/[0.025] border border-emerald-500/20 space-y-1">
+          <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider block">TESTS PASSED</span>
+          <div className="text-xl sm:text-2xl font-extrabold font-mono text-emerald-400">{summary.testsPassed}</div>
+          <span className="text-[11px] text-zinc-400">Benchmark met</span>
         </div>
 
-        <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200/80 shadow-xs space-y-1 col-span-2 lg:col-span-1">
-          <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 uppercase tracking-wider block">AVERAGE SCORE</span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900">{summary.averageScore}%</div>
-          <span className="text-[10px] sm:text-[11px] text-slate-500">Historical performance</span>
+        <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] space-y-1 col-span-2 lg:col-span-1">
+          <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">AVG SCORE</span>
+          <div className="text-xl sm:text-2xl font-extrabold font-mono text-[#C6FF34]">{summary.averageScore}%</div>
+          <span className="text-[11px] text-zinc-400">Overall index</span>
         </div>
       </div>
 
       {/* ── FILTER & SEARCH BAR ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-xl border border-slate-200/80 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white/[0.025] p-3 sm:p-3.5 rounded-2xl border border-white/[0.08] backdrop-blur-xl">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           {[
-            { id: 'all', label: 'All Assessments' },
+            { id: 'all', label: 'All Evaluations' },
             { id: 'available', label: 'Available' },
             { id: 'in-progress', label: 'In Progress' },
             { id: 'completed', label: 'Completed' },
@@ -178,10 +192,10 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  ? 'bg-white/10 text-white border border-white/20 shadow-sm'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
               }`}
             >
               {tab.label}
@@ -195,7 +209,7 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-xs border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 font-medium focus:outline-none focus:ring-1 focus:ring-slate-400 cursor-pointer w-full sm:w-auto"
+              className="text-xs border border-white/[0.08] rounded-xl px-2.5 py-1.5 bg-black/60 text-zinc-300 font-mono focus:outline-none focus:border-[#C6FF34] cursor-pointer w-full sm:w-auto"
             >
               <option value="all">All Domains</option>
               {categories.map((cat) => (
@@ -207,13 +221,13 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
           )}
 
           <div className="relative flex-1 sm:w-56">
-            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input
               type="text"
-              placeholder="Search assessments..."
+              placeholder="Search exams..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-slate-400 transition-colors"
+              className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-white/[0.08] bg-black/60 text-white placeholder-zinc-500 focus:outline-none focus:border-[#C6FF34] transition-colors font-mono"
             />
           </div>
         </div>
@@ -221,19 +235,19 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
 
       {/* ── ASSESSMENTS GRID ── */}
       {filtered.length === 0 ? (
-        <div className="p-8 sm:p-12 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
-          <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+        <div className="p-8 sm:p-12 text-center rounded-3xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-white/[0.04] text-zinc-500 flex items-center justify-center mx-auto">
             <Cpu className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-slate-900">No assessments found</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
+          <h3 className="text-base font-serif font-bold text-white">No assessments found</h3>
+          <p className="text-xs text-zinc-400 max-w-md mx-auto">
             {searchQuery
-              ? 'No assessments match your search criteria. Try clearing filters.'
-              : 'There are currently no assessments available matching this filter.'}
+              ? 'No evaluations match your search criteria. Try clearing filters.'
+              : 'There are currently no active assessments matching this category filter.'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filtered.map((item) => {
             const isPassed = item.status === 'Passed';
             const isFailed = item.status === 'Failed';
@@ -241,153 +255,139 @@ export function StudentAssessmentsClient({ initialData }: StudentAssessmentsClie
             const isLimitReached = item.status === 'Attempt Limit Reached';
 
             return (
-              <Card
+              <div
                 key={item.id}
-                className="p-4 sm:p-6 bg-white border border-slate-200/80 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 sm:space-y-5 relative overflow-hidden group"
+                className="p-5 sm:p-6 rounded-3xl bg-white/[0.025] hover:bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] transition-all flex flex-col justify-between space-y-5 relative overflow-hidden group shadow-lg backdrop-blur-xl"
               >
-                {/* Status indicator bar */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-1 ${
-                    isPassed
-                      ? 'bg-emerald-500'
-                      : isFailed
-                      ? 'bg-rose-500'
-                      : isInProgress
-                      ? 'bg-amber-500'
-                      : 'bg-slate-200 group-hover:bg-slate-400'
-                  } transition-colors`}
-                />
-
                 <div className="space-y-4">
                   {/* Top Badges */}
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <Badge variant="secondary" className="font-mono text-[11px] bg-slate-100 text-slate-700">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase bg-white/[0.05] text-zinc-300 border border-white/[0.08]">
                         {item.courseTitle}
-                      </Badge>
-                      <Badge variant="outline" className="font-mono text-[11px] border-slate-200 text-slate-600">
+                      </span>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono text-zinc-400 bg-black/40 border border-white/[0.06]">
                         {item.categoryName}
-                      </Badge>
+                      </span>
                     </div>
 
                     {/* Status Badge */}
                     <div>
                       {isInProgress && (
-                        <Badge className="bg-amber-50 text-amber-700 border border-amber-200 font-mono text-[11px] flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
                           IN PROGRESS
-                        </Badge>
+                        </span>
                       )}
                       {isPassed && (
-                        <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[11px] flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
                           PASSED ({item.highestScore}%)
-                        </Badge>
+                        </span>
                       )}
                       {isFailed && (
-                        <Badge className="bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[11px]">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
                           FAILED ({item.lastAttempt?.percentage}%)
-                        </Badge>
+                        </span>
                       )}
                       {isLimitReached && (
-                        <Badge className="bg-slate-100 text-slate-600 border border-slate-200 font-mono text-[11px]">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono text-zinc-400 bg-white/[0.05] border border-white/[0.08]">
                           ATTEMPTS EXHAUSTED
-                        </Badge>
+                        </span>
                       )}
                       {(item.status === 'Available' || item.status === 'Not Started') && (
-                        <Badge className="bg-blue-50 text-blue-700 border border-blue-200 font-mono text-[11px]">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30">
                           AVAILABLE
-                        </Badge>
+                        </span>
                       )}
                     </div>
                   </div>
 
                   {/* Title & Description */}
                   <div>
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                    <h3 className="text-base sm:text-lg font-serif font-bold text-white group-hover:text-[#C6FF34] transition-colors line-clamp-1">
                       {item.title}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed line-clamp-2">
                       {item.description}
                     </p>
                   </div>
 
                   {/* Quick specs pill */}
-                  <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-center font-mono text-[11px]">
+                  <div className="grid grid-cols-3 gap-2 p-3 rounded-2xl bg-black/40 border border-white/[0.06] text-center font-mono text-[11px]">
                     <div>
-                      <span className="text-slate-400 block text-[9px] uppercase">Questions</span>
-                      <span className="font-bold text-slate-800">{item.questionsPerAttempt}</span>
+                      <span className="text-zinc-500 block text-[9px] uppercase">Questions</span>
+                      <span className="font-bold text-white">{item.questionsPerAttempt}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[9px] uppercase">Duration</span>
-                      <span className="font-bold text-slate-800">{item.durationMinutes}m</span>
+                      <span className="text-zinc-500 block text-[9px] uppercase">Duration</span>
+                      <span className="font-bold text-white">{item.durationMinutes}m</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[9px] uppercase">Passing</span>
-                      <span className="font-bold text-slate-800">{item.passingScore}%</span>
+                      <span className="text-zinc-500 block text-[9px] uppercase">Pass Score</span>
+                      <span className="font-bold text-[#C6FF34]">{item.passingScore}%</span>
                     </div>
                   </div>
 
                   {/* Attempt Info */}
-                  <div className="flex items-center justify-between text-xs text-slate-500 font-mono pt-1">
+                  <div className="flex items-center justify-between text-xs text-zinc-400 font-mono pt-0.5">
                     <span>
-                      Attempts used: <strong className="text-slate-800">{item.attemptsUsed}</strong>
+                      Attempts used: <strong className="text-white">{item.attemptsUsed}</strong>
                       {item.maxAttempts > 0 ? ` / ${item.maxAttempts}` : ' (Unlimited)'}
                     </span>
                     {item.lastAttempt && (
-                      <span className="text-[11px] text-slate-400">
-                        Last score: {item.lastAttempt.percentage}%
+                      <span className="text-[11px] text-zinc-400">
+                        Last score: <strong className="text-[#C6FF34]">{item.lastAttempt.percentage}%</strong>
                       </span>
                     )}
                   </div>
                 </div>
 
                 {/* ── ACTION FOOTER ── */}
-                <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+                <div className="pt-2 border-t border-white/[0.06] flex items-center gap-2">
                   {isInProgress && item.activeAttemptId ? (
                     <Link href={`/student/assessments/take/${item.activeAttemptId}`} className="w-full">
-                      <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-center gap-2 py-2 cursor-pointer shadow-sm">
+                      <button className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md">
                         <Play className="w-3.5 h-3.5 fill-current" />
                         <span>Resume Ongoing Attempt</span>
-                      </Button>
+                      </button>
                     </Link>
                   ) : isLimitReached ? (
                     item.lastAttempt ? (
                       <Link href={`/student/assessments/results/${item.lastAttempt.id}`} className="w-full">
-                        <Button variant="outline" className="w-full font-bold text-xs flex items-center justify-center gap-2 py-2 cursor-pointer border-slate-300">
+                        <button className="w-full py-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/[0.08] font-mono font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
                           <Eye className="w-3.5 h-3.5" />
                           <span>View Best Result</span>
-                        </Button>
+                        </button>
                       </Link>
                     ) : (
-                      <Button disabled className="w-full text-xs font-medium">
+                      <button disabled className="w-full py-2.5 rounded-xl bg-white/[0.02] text-zinc-600 font-mono text-xs cursor-not-allowed">
                         Attempt Limit Reached
-                      </Button>
+                      </button>
                     )
                   ) : (
                     <div className="flex items-center gap-2 w-full">
                       <Link href={`/student/assessments/${item.id}`} className="flex-1">
-                        <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 py-2 cursor-pointer shadow-sm">
+                        <button className="w-full py-2.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(198,255,52,0.18)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer">
                           <Cpu className="w-3.5 h-3.5" />
                           <span>{item.attemptsUsed > 0 ? 'Retake Assessment' : 'Start Assessment'}</span>
-                        </Button>
+                        </button>
                       </Link>
 
                       {item.lastAttempt && (
                         <Link href={`/student/assessments/results/${item.lastAttempt.id}`}>
-                          <Button
-                            variant="outline"
-                            className="px-3 text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+                          <button
+                            className="p-2.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-zinc-300 hover:text-white transition-colors cursor-pointer"
                             title="View Previous Result"
                           >
                             <Eye className="w-3.5 h-3.5" />
-                          </Button>
+                          </button>
                         </Link>
                       )}
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>

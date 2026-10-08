@@ -1,9 +1,7 @@
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { getStudentBatchAndAttendanceService } from '@/server/services/batch.service';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Layers,
   Calendar,
@@ -20,6 +18,7 @@ import {
   Radio,
   FileText,
   ExternalLink,
+  ChevronRight,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -41,32 +40,37 @@ export default async function StudentBatchAttendancePage() {
   const records = data.records;
 
   return (
-    <div className="space-y-8">
-      {/* Header Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-[#04111C] via-[#071A2B] to-[#04111C] text-white border border-white/10 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Badge variant="security" className="bg-security-green text-primary-dark font-mono text-[10px]">
+    <div className="space-y-8 text-white">
+      {/* ── HEADER BANNER ── */}
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent border border-white/[0.08] backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#C6FF34]/[0.03] rounded-full blur-3xl pointer-events-none" />
+
+        <div className="space-y-2 relative z-10">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
+            <Badge className="bg-[#C6FF34]/10 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px] tracking-wider font-bold">
               ACADEMIC COHORT TRACKING
             </Badge>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-zinc-400">
               TS-ID: {session.tsId || 'TSE-2026-STUDENT'}
             </span>
           </div>
-          <h1 className="tse-h1 text-white">
-            My Academic Batch & Attendance Ledger
+
+          <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white tracking-tight leading-tight">
+            Batch Schedule &amp; Attendance Ledger
           </h1>
-          <p className="tse-body-sm text-slate-300 max-w-2xl">
-            Track your assigned cohort schedule, live session attendance records, and explicit faculty mentor feedback remarks on your hands-on laboratory performance.
+
+          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
+            Faculty mentor conducted cohort sessions, real-time check-in ledger, assigned curriculum homework, and individual instructor performance remarks.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center font-mono">
-            <span className="text-[10px] text-slate-400 block uppercase">Attendance Rate</span>
+        <div className="flex items-center gap-3 shrink-0 relative z-10">
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-center font-mono min-w-[120px]">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-widest block">ATTENDANCE FIDELITY</span>
             <span
-              className={`text-2xl font-bold block mt-0.5 ${
-                attendanceRate >= 80 ? 'text-security-green' : 'text-amber-400'
+              className={`text-2xl font-extrabold block mt-0.5 ${
+                attendanceRate >= 80 ? 'text-[#C6FF34]' : 'text-amber-400'
               }`}
             >
               {attendanceRate}%
@@ -76,151 +80,168 @@ export default async function StudentBatchAttendancePage() {
       </div>
 
       {!batch ? (
-        <Card className="p-12 text-center bg-white border border-border space-y-4">
-          <Layers className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-lg font-bold font-sans text-primary">
-            No Cohort Batch Assigned Yet
-          </h3>
-          <p className="text-xs text-muted max-w-md mx-auto">
-            Your TS-ID is currently active in the general registry. An Academic Administrator will assign you to your respective cohort batch shortly.
-          </p>
-          <Link href="/courses">
-            <Button variant="security" size="sm" className="font-mono text-xs">
-              Explore Course Catalog
-            </Button>
+        <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl space-y-4">
+          <Layers className="w-12 h-12 text-zinc-600 mx-auto" />
+          <div className="space-y-1">
+            <h3 className="text-lg font-serif font-bold text-white">No Cohort Batch Assigned Yet</h3>
+            <p className="text-xs text-zinc-400 max-w-md mx-auto">
+              Your student ID is registered in the central academic directory. An administrator will allocate your cohort schedule shortly.
+            </p>
+          </div>
+          <Link href="/student/courses" className="inline-block pt-2">
+            <button className="px-5 py-2.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold text-xs transition-all cursor-pointer">
+              Explore Active Pathways
+            </button>
           </Link>
-        </Card>
+        </div>
       ) : (
         <>
-          {/* Assigned Batch Details Card */}
+          {/* ── BATCH & PARTICIPATION OVERVIEW ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Batch Info Card */}
-            <Card className="lg:col-span-2 bg-white border border-border shadow-sm rounded-2xl">
-              <CardHeader className="border-b border-border/80 pb-4">
-                <div className="flex items-center justify-between">
-                  <Badge
-                    variant="outline"
-                    className="text-security-green-dark border-security-green font-mono text-[10px]"
-                  >
+            <div className="lg:col-span-2 p-6 rounded-3xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl space-y-5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30">
                     {batch.batchCode}
-                  </Badge>
-                  <Badge className="bg-emerald-100 text-emerald-800 text-[10px] font-mono">
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 uppercase font-bold">
                     {batch.status}
-                  </Badge>
+                  </span>
                 </div>
-                <CardTitle className="text-lg font-bold font-sans text-primary mt-2">
+                <span className="text-xs font-mono text-zinc-400">ASSIGNED WORKSPACE</span>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-serif font-bold text-white tracking-tight">
                   {batch.title}
-                </CardTitle>
-                <p className="text-xs text-slate-500 mt-1">
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
                   {batch.description || 'Structured academic cohort with live lab mentorship.'}
                 </p>
-              </CardHeader>
+              </div>
 
-              <CardContent className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono">
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-                  <span className="text-[10px] text-slate-500 block uppercase">Faculty Lead / Mentor</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono pt-1">
+                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest block">
+                    Lead Faculty Mentor
+                  </span>
                   <div className="flex items-center gap-2 mt-1">
-                    <ShieldCheck className="w-4 h-4 text-security-green-dark" />
-                    <span className="font-bold text-primary text-sm">
+                    <ShieldCheck className="w-4 h-4 text-[#C6FF34]" />
+                    <span className="font-bold text-white text-sm">
                       {batch.mentor?.user?.name || 'Lead Security Mentor'}
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-500 block font-sans mt-0.5">
+                  <span className="text-[11px] text-zinc-400 block pt-0.5 font-sans">
                     {batch.mentor?.title || 'Senior Cyber Security Instructor'}
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1">
-                  <span className="text-[10px] text-slate-500 block uppercase">Schedule & Timings</span>
+                <div className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] space-y-1">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest block">
+                    Conduction Schedule
+                  </span>
                   <div className="flex items-center gap-2 mt-1">
-                    <Clock className="w-4 h-4 text-slate-600" />
-                    <span className="font-bold text-primary text-xs">
-                      {batch.schedule || 'Regular Schedule'}
+                    <Clock className="w-4 h-4 text-zinc-400" />
+                    <span className="font-bold text-white text-xs">
+                      {batch.schedule || 'Scheduled Classes'}
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-500 block font-sans mt-0.5">
+                  <span className="text-[11px] text-zinc-400 block pt-0.5 font-sans">
                     Live interactive terminal sessions
                   </span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Attendance Performance Metrics */}
-            <Card className="bg-white border border-border shadow-sm rounded-2xl flex flex-col justify-between">
-              <CardHeader className="border-b border-border/80 pb-4">
-                <CardTitle className="text-base font-bold font-sans text-primary flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-security-green-dark" />
+            <div className="p-6 rounded-3xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between space-y-5">
+              <div className="pb-3 border-b border-white/[0.06] flex items-center justify-between">
+                <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-[#C6FF34]" />
                   Participation Fidelity
-                </CardTitle>
-              </CardHeader>
+                </h3>
+                <span className="text-[10px] font-mono text-zinc-500">LIVE METER</span>
+              </div>
 
-              <CardContent className="p-6 space-y-4 font-mono text-xs">
-                <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Conducted Classes:</span>
-                  <strong className="text-primary font-bold">{totalSessions} Sessions</strong>
+              <div className="space-y-3 font-mono text-xs">
+                <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-400">Conducted Classes:</span>
+                  <strong className="text-white font-bold">{totalSessions} Sessions</strong>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Attended Classes:</span>
-                  <strong className="text-emerald-700 font-bold">{attendedSessions} Sessions</strong>
+                <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-400">Attended Classes:</span>
+                  <strong className="text-[#C6FF34] font-bold">{attendedSessions} Sessions</strong>
                 </div>
-                <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                  <span className="text-slate-500">Compliance Status:</span>
-                  <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">
-                    {attendanceRate >= 80 ? 'ELGIBLE FOR EXAM' : 'ATTENDANCE WARNING'}
-                  </Badge>
+                <div className="flex justify-between items-center py-1.5 border-b border-white/[0.04]">
+                  <span className="text-zinc-400">Compliance Status:</span>
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      attendanceRate >= 80
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                    }`}
+                  >
+                    {attendanceRate >= 80 ? 'ELIGIBLE FOR EXAMS' : 'ATTENDANCE WARNING'}
+                  </span>
                 </div>
 
-                <div className="space-y-1 pt-2">
-                  <div className="flex justify-between text-[10px]">
-                    <span>Attendance Rate:</span>
-                    <strong>{attendanceRate}%</strong>
+                <div className="space-y-1.5 pt-2">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-zinc-400">Overall Ratio:</span>
+                    <strong className="text-white">{attendanceRate}%</strong>
                   </div>
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                  <div className="w-full bg-white/[0.06] h-2 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${
-                        attendanceRate >= 80 ? 'bg-security-green' : 'bg-amber-500'
+                      className={`h-full rounded-full transition-all duration-500 ${
+                        attendanceRate >= 80
+                          ? 'bg-gradient-to-r from-emerald-500 to-[#C6FF34]'
+                          : 'bg-amber-500'
                       }`}
                       style={{ width: `${Math.min(100, attendanceRate)}%` }}
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="pt-2 text-[11px] font-mono text-zinc-500 text-center">
+                Maintained by Faculty Registrar
+              </div>
+            </div>
           </div>
 
-          {/* Cohort Broadcasts & Resources Grid */}
+          {/* ── BROADCASTS & RESOURCES ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Announcements Card */}
-            <Card className="bg-white border border-border shadow-sm rounded-2xl">
-              <CardHeader className="border-b border-border/80 pb-3">
-                <CardTitle className="text-sm font-bold font-sans text-primary flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Radio className="w-4 h-4 text-security-green-dark" />
-                    Cohort Announcements & Broadcasts
-                  </span>
-                  <Badge variant="outline" className="font-mono text-[10px]">
-                    {batch.broadcasts?.length || 0} Announcements
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-3">
+            <div className="p-6 rounded-3xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-[#C6FF34]" />
+                  Cohort Announcements &amp; Broadcasts
+                </h3>
+                <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono text-zinc-400">
+                  {batch.broadcasts?.length || 0} Posts
+                </span>
+              </div>
+
+              <div className="space-y-3">
                 {!batch.broadcasts || batch.broadcasts.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic font-sans py-2">
+                  <p className="text-xs text-zinc-500 font-mono py-4 text-center">
                     No broadcasts published yet for this cohort.
                   </p>
                 ) : (
                   batch.broadcasts.map((b: any) => (
                     <div
                       key={b.id}
-                      className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs"
+                      className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] space-y-1.5 text-xs"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-primary font-sans">{b.title}</span>
-                        <span className="text-[10px] text-slate-400 font-mono">
+                        <span className="font-bold text-white font-sans text-sm">{b.title}</span>
+                        <span className="text-[10px] text-zinc-500 font-mono">
                           {new Date(b.createdAt).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-slate-600 font-sans leading-relaxed whitespace-pre-line">
+                      <p className="text-zinc-400 font-sans leading-relaxed whitespace-pre-line text-xs">
                         {b.message}
                       </p>
                       {b.attachmentUrl && (
@@ -228,47 +249,46 @@ export default async function StudentBatchAttendancePage() {
                           href={b.attachmentUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[11px] font-mono text-security-green-dark hover:underline font-bold mt-1"
+                          className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#C6FF34] hover:underline font-bold mt-1"
                         >
                           <ExternalLink className="w-3 h-3" />
-                          View Attachment / Resource Link
+                          View Attachment Resource
                         </a>
                       )}
                     </div>
                   ))
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Resources Card */}
-            <Card className="bg-white border border-border shadow-sm rounded-2xl">
-              <CardHeader className="border-b border-border/80 pb-3">
-                <CardTitle className="text-sm font-bold font-sans text-primary flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-security-green-dark" />
-                    Cohort Study Materials & Resources
-                  </span>
-                  <Badge variant="outline" className="font-mono text-[10px]">
-                    {batch.resources?.length || 0} Files
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-3">
+            <div className="p-6 rounded-3xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-emerald-400" />
+                  Cohort Study Materials &amp; Resources
+                </h3>
+                <span className="px-2 py-0.5 rounded bg-white/[0.05] text-[10px] font-mono text-zinc-400">
+                  {batch.resources?.length || 0} Files
+                </span>
+              </div>
+
+              <div className="space-y-3">
                 {!batch.resources || batch.resources.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic font-sans py-2">
-                    No reference materials shared yet. Mentors will attach slides and labs here.
+                  <p className="text-xs text-zinc-500 font-mono py-4 text-center">
+                    No reference materials shared yet. Faculty will attach lab notes and slides here.
                   </p>
                 ) : (
                   batch.resources.map((r: any) => (
                     <div
                       key={r.id}
-                      className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3 text-xs"
+                      className="p-3.5 rounded-2xl bg-black/40 border border-white/[0.06] flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="space-y-0.5 truncate">
-                        <span className="font-bold text-primary block truncate font-sans">
+                        <span className="font-bold text-white block truncate font-sans text-xs">
                           {r.title}
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono block uppercase">
+                        <span className="text-[10px] text-zinc-500 font-mono block uppercase">
                           {r.fileType} • {new Date(r.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -276,7 +296,7 @@ export default async function StudentBatchAttendancePage() {
                         href={r.fileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-security-green text-primary font-mono font-bold text-[11px] hover:bg-security-green-dark transition-colors flex items-center gap-1 shrink-0"
+                        className="px-3 py-1.5 rounded-xl bg-[#C6FF34] text-black font-mono font-bold text-[11px] hover:bg-[#b5f425] transition-colors flex items-center gap-1 shrink-0"
                       >
                         <ExternalLink className="w-3 h-3" />
                         Access
@@ -284,152 +304,149 @@ export default async function StudentBatchAttendancePage() {
                     </div>
                   ))
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
-          {/* Session Attendance & Mentor Remarks Ledger */}
-          <Card className="bg-white border border-border shadow-sm rounded-2xl overflow-hidden">
-            <CardHeader className="bg-slate-50/80 border-b border-border p-5 flex items-center justify-between">
+          {/* ── DETAILED SESSION LOG & MENTOR OBSERVATIONS ── */}
+          <div className="p-6 rounded-3xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/[0.06]">
               <div>
-                <CardTitle className="text-base font-bold font-sans text-primary flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-security-green-dark" />
-                  Detailed Session Log & Mentor Observations ("What You Are Up To")
-                </CardTitle>
-                <p className="text-xs text-muted mt-0.5">
-                  Explicit check-in timestamps and faculty feedback remarks for each conducted cohort session.
+                <h3 className="text-base sm:text-lg font-serif font-bold text-white flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#C6FF34]" />
+                  Conducted Sessions Ledger &amp; Mentor Remarks
+                </h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Check-in timestamps, delivered modules, homework, and faculty observations on your performance.
                 </p>
               </div>
 
-              <Badge variant="outline" className="font-mono text-xs">
+              <span className="text-xs font-mono text-zinc-400 shrink-0">
                 {batch.sessions?.length || 0} Total Sessions Logged
-              </Badge>
-            </CardHeader>
+              </span>
+            </div>
 
-            <CardContent className="p-0">
-              <div className="divide-y divide-border">
-                {batch.sessions?.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-400 font-sans">
-                    No sessions conducted yet. Check back after your next live lab class.
-                  </div>
-                ) : (
-                  batch.sessions?.map((session: any) => {
-                    const record = records.find((r: any) => r.sessionId === session.id);
-                    const status = record?.status || 'NOT_MARKED_YET';
-                    const isPresent = status === 'PRESENT' || status === 'LATE';
+            <div className="divide-y divide-white/[0.06]">
+              {batch.sessions?.length === 0 ? (
+                <div className="p-8 text-center text-xs text-zinc-500 font-mono">
+                  No sessions conducted yet. Check back after your next live lab class.
+                </div>
+              ) : (
+                batch.sessions?.map((sessionItem: any) => {
+                  const record = records.find((r: any) => r.sessionId === sessionItem.id);
+                  const status = record?.status || 'NOT_MARKED_YET';
 
-                    return (
-                      <div
-                        key={session.id}
-                        className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/60 transition-colors"
-                      >
-                        <div className="space-y-1.5 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-xs text-security-green-dark">
-                              Session #{session.sessionNumber}
+                  return (
+                    <div
+                      key={sessionItem.id}
+                      className="py-5 flex flex-col md:flex-row md:items-start justify-between gap-4 transition-colors"
+                    >
+                      <div className="space-y-2 flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-[#C6FF34]">
+                            Session #{sessionItem.sessionNumber}
+                          </span>
+                          <span className="text-[11px] text-zinc-500 font-mono">
+                            • {new Date(sessionItem.sessionDate).toLocaleDateString()} ({sessionItem.durationMins || 120} mins)
+                          </span>
+                        </div>
+
+                        <h4 className="text-base font-serif font-bold text-white">
+                          {sessionItem.title}
+                        </h4>
+
+                        {sessionItem.agenda && (
+                          <p className="text-xs text-zinc-400 leading-relaxed">
+                            {sessionItem.agenda}
+                          </p>
+                        )}
+
+                        {sessionItem.topicsCovered && (
+                          <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06] text-xs font-mono text-zinc-300">
+                            <span className="text-[10px] text-zinc-500 uppercase tracking-widest block mb-0.5">
+                              Topics Delivered:
                             </span>
-                            <span className="text-[11px] text-slate-400 font-mono">
-                              • {new Date(session.sessionDate).toLocaleDateString()} ({session.durationMins || 120} mins)
-                            </span>
+                            {sessionItem.topicsCovered}
                           </div>
+                        )}
 
-                          <h4 className="text-sm font-bold text-primary font-sans">
-                            {session.title}
-                          </h4>
-
-                          {session.agenda && (
-                            <p className="text-xs text-slate-500 font-sans">
-                              {session.agenda}
-                            </p>
-                          )}
-
-                          {session.topicsCovered && (
-                            <div className="mt-2 text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-2 font-sans">
-                              <span className="font-bold text-[10px] uppercase font-mono text-slate-500 block mb-0.5">
-                                Topics Delivered:
-                              </span>
-                              {session.topicsCovered}
-                            </div>
-                          )}
-
-                          {session.homework && (
-                            <div className="mt-2 text-xs text-amber-900 bg-amber-50/70 border border-amber-200 rounded-lg p-2 font-sans">
-                              <span className="font-bold text-[10px] uppercase font-mono text-amber-700 block mb-0.5">
-                                Assigned Homework / Practice:
-                              </span>
-                              {session.homework}
-                            </div>
-                          )}
-
-                          {session.importantNotes && (
-                            <div className="mt-2 text-xs text-indigo-900 bg-indigo-50/70 border border-indigo-200 rounded-lg p-2 font-sans">
-                              <span className="font-bold text-[10px] uppercase font-mono text-indigo-700 block mb-0.5">
-                                Faculty Notes:
-                              </span>
-                              {session.importantNotes}
-                            </div>
-                          )}
-
-                          {/* Mentor Remarks Block ("What they are up to") */}
-                          {record?.remarks ? (
-                            <div className="p-2.5 rounded-lg bg-cyan-50/70 border border-cyan-200/60 text-xs text-cyan-950 flex items-start gap-2 mt-2">
-                              <MessageSquare className="w-4 h-4 text-cyan-700 shrink-0 mt-0.5" />
-                              <div>
-                                <span className="font-bold text-[10px] uppercase font-mono text-cyan-800 block">
-                                  Faculty Mentor Observation:
-                                </span>
-                                <p className="font-sans text-xs text-cyan-900 mt-0.5">
-                                  "{record.remarks}"
-                                </p>
-                              </div>
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-slate-400 font-mono italic block pt-1">
-                              No written mentor remark for this session.
+                        {sessionItem.homework && (
+                          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200 font-sans">
+                            <span className="text-[10px] text-amber-400 uppercase tracking-widest font-mono block mb-0.5">
+                              Assigned Homework / Practice:
                             </span>
-                          )}
-                        </div>
+                            {sessionItem.homework}
+                          </div>
+                        )}
 
-                        {/* Status Badge & Timestamp */}
-                        <div className="text-right shrink-0 space-y-1 font-mono text-xs">
-                          <Badge
-                            className={`font-mono text-xs ${
-                              status === 'PRESENT'
-                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                                : status === 'LATE'
-                                ? 'bg-amber-100 text-amber-800 border-amber-300'
-                                : status === 'ABSENT'
-                                ? 'bg-red-100 text-red-800 border-red-300'
-                                : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            {status === 'PRESENT'
-                              ? '✅ PRESENT'
-                              : status === 'LATE'
-                              ? '⏰ LATE'
-                              : status === 'ABSENT'
-                              ? '❌ ABSENT'
-                              : '⏳ SCHEDULED'}
-                          </Badge>
+                        {sessionItem.importantNotes && (
+                          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-200 font-sans">
+                            <span className="text-[10px] text-blue-400 uppercase tracking-widest font-mono block mb-0.5">
+                              Faculty Notes:
+                            </span>
+                            {sessionItem.importantNotes}
+                          </div>
+                        )}
 
-                          {record?.checkInTime && (
-                            <span className="text-[10px] text-slate-400 block">
-                              Logged: {new Date(record.checkInTime).toLocaleTimeString()}
-                            </span>
-                          )}
-                          {record?.markedBy && (
-                            <span className="text-[10px] text-slate-500 block">
-                              By: {record.markedBy}
-                            </span>
-                          )}
-                        </div>
+                        {/* Mentor Remarks Block ("What you are up to") */}
+                        {record?.remarks ? (
+                          <div className="p-3.5 rounded-2xl bg-[#C6FF34]/[0.06] border border-[#C6FF34]/20 text-xs text-white flex items-start gap-2.5 mt-2">
+                            <MessageSquare className="w-4 h-4 text-[#C6FF34] shrink-0 mt-0.5" />
+                            <div className="space-y-0.5">
+                              <span className="text-[10px] uppercase font-mono text-[#C6FF34] font-bold block">
+                                Faculty Mentor Observation:
+                              </span>
+                              <p className="text-xs text-zinc-200 italic leading-relaxed">
+                                &ldquo;{record.remarks}&rdquo;
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-zinc-500 font-mono italic block pt-1">
+                            No individual mentor remark recorded for this session.
+                          </span>
+                        )}
                       </div>
-                    );
-                  })
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
+                      {/* Status Badge & Timestamp */}
+                      <div className="text-right shrink-0 space-y-1 font-mono text-xs">
+                        <span
+                          className={`px-3 py-1 rounded-full font-mono text-xs font-bold inline-block ${
+                            status === 'PRESENT'
+                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                              : status === 'LATE'
+                              ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                              : status === 'ABSENT'
+                              ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                              : 'bg-white/[0.05] text-zinc-400 border border-white/[0.08]'
+                          }`}
+                        >
+                          {status === 'PRESENT'
+                            ? '✅ PRESENT'
+                            : status === 'LATE'
+                            ? '⏰ LATE'
+                            : status === 'ABSENT'
+                            ? '❌ ABSENT'
+                            : '⏳ SCHEDULED'}
+                        </span>
+
+                        {record?.checkInTime && (
+                          <span className="text-[10px] text-zinc-500 block">
+                            Logged: {new Date(record.checkInTime).toLocaleTimeString()}
+                          </span>
+                        )}
+                        {record?.markedBy && (
+                          <span className="text-[10px] text-zinc-400 block">
+                            By: {record.markedBy}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
         </>
       )}
     </div>

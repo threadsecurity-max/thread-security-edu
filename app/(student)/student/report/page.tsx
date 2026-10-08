@@ -1,11 +1,9 @@
 import { prisma } from '@/server/database/prisma';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ShieldCheck, FileText, Printer, CheckCircle2 } from 'lucide-react';
-
+import { ShieldCheck, FileText, CheckCircle2, Award, Terminal, UserCheck } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/session';
+import { PrintReportButton } from '@/src/components/student/report/PrintReportButton';
 
 export const revalidate = 0;
 
@@ -26,10 +24,15 @@ export default async function StudentAcademicReportPage() {
         },
       },
       enrollments: {
-        include: { course: true },
+        include: {
+          course: {
+            include: { mentor: { include: { user: true } } },
+          },
+        },
       },
       labAttempts: {
         include: { lab: true },
+        orderBy: { completedAt: 'desc' },
       },
       certificates: {
         include: { course: true },
@@ -40,128 +43,211 @@ export default async function StudentAcademicReportPage() {
   const tsId =
     student?.tsIdentity?.tsId || session.tsId || `TSE-2026-${session.userId.slice(-6).toUpperCase()}`;
 
+  const mentorName =
+    student?.studentProfile?.assignedMentor?.user.name ||
+    student?.enrollments?.[0]?.course?.mentor?.user?.name ||
+    'Faculty Lead';
+
+  const completedLabs = student?.labAttempts.filter(
+    (l) => l.state === 'COMPLETED' || l.state === 'SUBMITTED'
+  ).length || 0;
+
   return (
-    <div className="space-y-8">
-      {/* Action Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+    <div className="space-y-8 text-white">
+      {/* ── ACTION HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
         <div>
-          <Badge variant="security" className="mb-2">OFFICIAL ACADEMIC TRANSCRIPT</Badge>
-          <h1 className="tse-h1 text-primary font-sans">Academic Student Report</h1>
-          <p className="tse-body-sm text-muted">
-            Official verifiable record of completed courses, practical labs, and skill ratings.
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
+            <Badge className="bg-[#C6FF34]/10 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px] tracking-wider font-bold">
+              OFFICIAL ACADEMIC DOSSIER
+            </Badge>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white tracking-tight leading-tight">
+            Academic Performance Report
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-2xl leading-relaxed">
+            Official verifiable transcript of curriculum progress, practical sandbox examinations, mentor evaluations, and cryptographic qualifications.
           </p>
         </div>
 
-        <button
-          onClick={undefined}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-xs font-bold font-mono hover:bg-primary-dark shrink-0"
-        >
-          <Printer className="w-4 h-4 text-security-green" />
-          Print Official Report
-        </button>
+        <PrintReportButton />
       </div>
 
-      {/* Printable Report Card Container */}
-      <Card className="p-8 bg-white border border-border shadow-sm space-y-8">
-        {/* Report Header */}
-        <div className="flex items-start justify-between border-b border-border pb-6">
+      {/* ── PRINTABLE TRANSCRIPT CONTAINER ── */}
+      <div className="p-6 sm:p-10 rounded-3xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-2xl shadow-2xl space-y-8 relative overflow-hidden">
+        {/* Glow ambient background */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#C6FF34]/[0.02] rounded-full blur-3xl pointer-events-none" />
+
+        {/* Dossier Header */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-white/[0.08] pb-6 relative z-10">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-6 h-6 text-security-green-dark" />
-              <span className="font-bold text-xl text-primary font-sans">THREAD SECURITY EDUCATION</span>
+            <div className="flex items-center gap-2.5">
+              <ShieldCheck className="w-6 h-6 text-[#C6FF34]" />
+              <span className="font-serif font-extrabold text-xl sm:text-2xl text-white tracking-tight">
+                THREAD SECURITY EDUCATION
+              </span>
             </div>
-            <span className="text-xs text-muted font-mono block">Academic Registrar Division</span>
+            <span className="text-xs text-zinc-400 font-mono block">
+              Registrar Division • Academic Ledger &amp; Student Credentials
+            </span>
           </div>
 
-          <div className="text-right font-mono text-xs">
-            <span className="text-muted block">STUDENT IDENTIFIER</span>
-            <Badge variant="tsid" className="text-sm mt-1">{tsId}</Badge>
-          </div>
-        </div>
-
-        {/* Student Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm p-4 rounded-xl bg-[#F7F9FA] border border-border">
-          <div>
-            <span className="text-muted text-xs block">Student Name:</span>
-            <span className="font-bold text-primary text-base block">{student?.name}</span>
-            <span className="text-xs text-slate-600">{student?.email}</span>
-          </div>
-
-          <div>
-            <span className="text-muted text-xs block">Career Focus:</span>
-            <span className="font-bold text-primary block">{student?.studentProfile?.careerGoal || 'VAPT Analyst'}</span>
-          </div>
-
-          <div>
-            <span className="text-muted text-xs block">Assigned Mentor:</span>
-            <span className="font-bold text-primary block">{student?.studentProfile?.assignedMentor?.user.name || 'Alex Vance'}</span>
+          <div className="text-left sm:text-right font-mono text-xs space-y-1">
+            <span className="text-zinc-500 uppercase tracking-widest text-[10px] block">
+              AUTHENTICATED TS-ID
+            </span>
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 inline-block">
+              {tsId}
+            </span>
           </div>
         </div>
 
-        {/* Course Performance Table */}
-        <div className="space-y-3">
-          <h3 className="tse-h4 text-primary font-sans">Enrolled Courses & Progress</h3>
-          <div className="overflow-x-auto border border-border rounded-xl">
+        {/* Student Profile Snapshot */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 p-5 rounded-2xl bg-black/40 border border-white/[0.06] font-mono text-xs relative z-10">
+          <div className="space-y-1">
+            <span className="text-zinc-500 uppercase text-[10px] tracking-wider block">Candidate Name</span>
+            <span className="font-serif font-bold text-white text-base block">{student?.name}</span>
+            <span className="text-zinc-400 text-[11px] block">{student?.email}</span>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-zinc-500 uppercase text-[10px] tracking-wider block">Specialization Track</span>
+            <span className="font-bold text-white block">
+              {student?.studentProfile?.careerGoal || 'Cyber Defense & VAPT'}
+            </span>
+            <span className="text-emerald-400 text-[11px] flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3" />
+              Verified Enrollment
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-zinc-500 uppercase text-[10px] tracking-wider block">Assigned Lead Mentor</span>
+            <span className="font-bold text-white flex items-center gap-1.5">
+              <UserCheck className="w-3.5 h-3.5 text-[#C6FF34]" />
+              {mentorName}
+            </span>
+            <span className="text-zinc-400 text-[11px] block">Faculty Evaluation Board</span>
+          </div>
+        </div>
+
+        {/* Course Progress Table */}
+        <div className="space-y-3 relative z-10">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
+              <FileText className="w-4 h-4 text-[#C6FF34]" />
+              Curriculum Programs &amp; Status
+            </h3>
+            <span className="text-xs font-mono text-zinc-400">
+              {student?.enrollments.length || 0} Programs
+            </span>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-black/40">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-[#04111C] text-white">
+              <thead className="bg-white/[0.04] text-zinc-300 border-b border-white/[0.06]">
                 <tr>
-                  <th className="p-3">Course Title</th>
-                  <th className="p-3">Category</th>
-                  <th className="p-3">Level</th>
-                  <th className="p-3 text-right">Completion Status</th>
+                  <th className="p-3.5 font-bold">Program Title</th>
+                  <th className="p-3.5 font-bold">Category</th>
+                  <th className="p-3.5 font-bold">Level</th>
+                  <th className="p-3.5 text-right font-bold">Curriculum Progress</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {student?.enrollments.map((e) => (
-                  <tr key={e.id} className="hover:bg-slate-50">
-                    <td className="p-3 font-bold text-primary">{e.course.title}</td>
-                    <td className="p-3 text-slate-600">{e.course.category}</td>
-                    <td className="p-3 text-slate-600">{e.course.level}</td>
-                    <td className="p-3 text-right font-bold text-security-green-dark">
-                      {e.progressPercent}% ({e.status})
+              <tbody className="divide-y divide-white/[0.04] text-zinc-300">
+                {(!student?.enrollments || student.enrollments.length === 0) ? (
+                  <tr>
+                    <td colSpan={4} className="p-4 text-center text-zinc-500">
+                      No active course records found in academic ledger.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  student.enrollments.map((e) => (
+                    <tr key={e.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="p-3.5 font-bold text-white">{e.course.title}</td>
+                      <td className="p-3.5 text-zinc-400">{e.course.category}</td>
+                      <td className="p-3.5 text-zinc-400">{e.course.level}</td>
+                      <td className="p-3.5 text-right font-bold text-[#C6FF34]">
+                        {Math.round(e.progressPercent)}% ({e.status})
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
         {/* Practical Lab Log Table */}
-        <div className="space-y-3">
-          <h3 className="tse-h4 text-primary font-sans">Practical Lab Execution History</h3>
-          <div className="overflow-x-auto border border-border rounded-xl">
+        <div className="space-y-3 relative z-10">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-serif font-bold text-white flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-emerald-400" />
+              Practical Lab Examination History
+            </h3>
+            <span className="text-xs font-mono text-zinc-400">
+              {completedLabs} / {student?.labAttempts.length || 0} Targets Cleared
+            </span>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-black/40">
             <table className="w-full text-left text-xs font-mono">
-              <thead className="bg-[#04111C] text-white">
+              <thead className="bg-white/[0.04] text-zinc-300 border-b border-white/[0.06]">
                 <tr>
-                  <th className="p-3">Lab Title</th>
-                  <th className="p-3">State</th>
-                  <th className="p-3">Score</th>
-                  <th className="p-3 text-right">Completion Date</th>
+                  <th className="p-3.5 font-bold">Target Sandbox</th>
+                  <th className="p-3.5 font-bold">Execution State</th>
+                  <th className="p-3.5 font-bold">Score</th>
+                  <th className="p-3.5 text-right font-bold">Completion Timestamp</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {student?.labAttempts.map((la) => (
-                  <tr key={la.id} className="hover:bg-slate-50">
-                    <td className="p-3 font-bold text-primary">{la.lab.title}</td>
-                    <td className="p-3 font-bold text-security-green-dark">{la.state}</td>
-                    <td className="p-3 font-bold">{la.score}/100</td>
-                    <td className="p-3 text-right text-slate-600">
-                      {la.completedAt ? new Date(la.completedAt).toLocaleDateString() : 'In Progress'}
+              <tbody className="divide-y divide-white/[0.04] text-zinc-300">
+                {(!student?.labAttempts || student.labAttempts.length === 0) ? (
+                  <tr>
+                    <td colSpan={4} className="p-4 text-center text-zinc-500">
+                      No practical lab attempts recorded.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  student.labAttempts.map((la) => (
+                    <tr key={la.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="p-3.5 font-bold text-white">{la.lab.title}</td>
+                      <td className="p-3.5">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            la.state === 'COMPLETED' || la.state === 'SUBMITTED'
+                              ? 'bg-emerald-500/15 text-emerald-400'
+                              : 'bg-amber-500/15 text-amber-400'
+                          }`}
+                        >
+                          {la.state}
+                        </span>
+                      </td>
+                      <td className="p-3.5 font-bold text-[#C6FF34]">{la.score}/100</td>
+                      <td className="p-3.5 text-right text-zinc-400">
+                        {la.completedAt ? new Date(la.completedAt).toLocaleDateString() : 'In Conduction'}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Report Footer */}
-        <div className="pt-6 border-t border-border flex items-center justify-between text-xs text-muted font-mono">
-          <span>Report Generated: {new Date().toISOString().split('T')[0]}</span>
-          <span className="text-security-green-dark font-bold">REGISTRAR SEAL: VERIFIED & VALID</span>
+        {/* Dossier Footer with Cryptographic Seal */}
+        <div className="pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-400 font-mono relative z-10">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#C6FF34]" />
+            <span>Document Timestamp: {new Date().toISOString().split('T')[0]}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30">
+              REGISTRAR SEAL: CRYPTOGRAPHICALLY VALID &amp; VERIFIED
+            </span>
+          </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

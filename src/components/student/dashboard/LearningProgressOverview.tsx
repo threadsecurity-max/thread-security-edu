@@ -32,7 +32,7 @@ export function LearningProgressOverview({
     <GlassCard level={2} className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-tight">Your Learning Journey</h2>
+          <h2 className="text-lg font-bold text-white tracking-tight font-serif">Your Learning Journey</h2>
           <p className="text-xs text-zinc-400 font-mono mt-0.5">
             Holistic completion metrics & hands-on laboratory time
           </p>

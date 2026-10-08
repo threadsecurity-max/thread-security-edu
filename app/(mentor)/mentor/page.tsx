@@ -151,7 +151,7 @@ export default async function MentorDashboardPage() {
             </span>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white font-mono tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-serif font-extrabold text-white tracking-tight">
             {greeting}, {mentorName}
           </h1>
 
@@ -263,7 +263,7 @@ export default async function MentorDashboardPage() {
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h2 className="text-base font-bold text-white font-sans flex items-center gap-2">
+            <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
               <Clock className="w-5 h-5 text-[#C6FF34]" />
               Today's Conduction & Teaching Queue
             </h2>
@@ -289,7 +289,7 @@ export default async function MentorDashboardPage() {
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
           <div>
-            <h2 className="text-base font-bold text-white font-sans flex items-center gap-2">
+            <h2 className="text-base font-serif font-bold text-white flex items-center gap-2">
               <Layers className="w-5 h-5 text-[#C6FF34]" />
               Assigned Academic Batches ({batches.length})
             </h2>
@@ -329,7 +329,7 @@ export default async function MentorDashboardPage() {
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-[#C6FF34]" />
-              <h3 className="text-sm font-bold text-white font-mono">
+              <h3 className="text-sm font-serif font-bold text-white">
                 Recent Cohort Assignments ({recentAssignments.length})
               </h3>
             </div>
@@ -376,7 +376,7 @@ export default async function MentorDashboardPage() {
           <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2">
               <Send className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-bold text-white font-mono">
+              <h3 className="text-sm font-serif font-bold text-white">
                 Attendance Correction Requests ({pendingCorrections.length})
               </h3>
             </div>

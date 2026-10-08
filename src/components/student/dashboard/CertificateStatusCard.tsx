@@ -35,7 +35,7 @@ export function CertificateStatusCard({
         </div>
 
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-white tracking-tight line-clamp-1">
+          <h4 className="text-sm font-serif font-bold text-white tracking-tight line-clamp-1">
             {certificate.courseTitle || 'Cybersecurity Qualification'}
           </h4>
           <p className="text-xs font-mono text-zinc-400">

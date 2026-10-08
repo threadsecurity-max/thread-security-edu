@@ -37,7 +37,7 @@ export function UpcomingAssessments({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-white tracking-tight">Upcoming Assessments</h2>
+          <h2 className="text-lg font-bold text-white tracking-tight font-serif">Upcoming Assessments</h2>
           <p className="text-xs text-zinc-400 font-mono mt-0.5">
             Knowledge benchmarks & qualification exams
           </p>
@@ -85,7 +85,7 @@ export function UpcomingAssessments({
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-white tracking-tight line-clamp-1">
+                  <h3 className="text-sm font-bold text-white tracking-tight line-clamp-1 font-serif">
                     {item.title}
                   </h3>
                   <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">

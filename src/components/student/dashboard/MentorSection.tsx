@@ -46,7 +46,7 @@ export function MentorSection({ mentor }: MentorSectionProps) {
         </div>
 
         <div className="space-y-0.5 min-w-0 flex-1">
-          <h4 className="text-sm font-bold text-white tracking-tight truncate">
+          <h4 className="text-sm font-serif font-bold text-white tracking-tight truncate">
             {mentor.name}
           </h4>
           <p className="text-xs text-zinc-400 truncate">

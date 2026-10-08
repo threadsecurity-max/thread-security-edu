@@ -64,7 +64,7 @@ export function DashboardHero({
           </div>
 
           <div className="space-y-1.5">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight font-sans">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight font-serif">
               {getGreeting()},{' '}
               <span className="bg-gradient-to-r from-white via-zinc-200 to-[#C6FF34] bg-clip-text text-transparent">
                 {firstName}
@@ -92,7 +92,7 @@ export function DashboardHero({
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-white tracking-tight line-clamp-1">
+              <h3 className="text-base font-bold text-white tracking-tight line-clamp-1 font-serif">
                 {currentCourse.title}
               </h3>
               <p className="text-xs text-zinc-400 line-clamp-1 font-mono">
