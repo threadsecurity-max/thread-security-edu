@@ -3,8 +3,9 @@ import { redirect } from 'next/navigation';
 import { prisma } from '@/server/database/prisma';
 import { getAllBatchesService } from '@/server/services/batch.service';
 import { BatchManagementClient } from './batch-management-client';
+import { AdminAttendanceCorrectionQueue } from '@/components/admin/attendance/AdminAttendanceCorrectionQueue';
 import { Badge } from '@/components/ui/badge';
-import { Layers, ShieldCheck, Sparkles } from 'lucide-react';
+import { Layers } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -17,7 +18,7 @@ export default async function AdminBatchesPage() {
 
   const batches = await getAllBatchesService();
 
-  const [courses, mentors, allStudents] = await Promise.all([
+  const [courses, mentors, allStudents, correctionRequests] = await Promise.all([
     prisma.course.findMany({ select: { id: true, title: true } }),
     prisma.mentorProfile.findMany({ include: { user: true } }),
     prisma.studentProfile.findMany({
@@ -25,6 +26,24 @@ export default async function AdminBatchesPage() {
         user: { include: { tsIdentity: true } },
       },
       orderBy: { user: { name: 'asc' } },
+    }),
+    (prisma as any).attendanceCorrectionRequest.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        batch: { select: { batchCode: true, title: true } },
+        session: { select: { title: true, sessionNumber: true, sessionDate: true } },
+        student: {
+          include: {
+            user: { select: { name: true, email: true, tsIdentity: { select: { tsId: true } } } },
+          },
+        },
+        mentor: {
+          include: {
+            user: { select: { name: true, email: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
     }),
   ]);
 
@@ -43,13 +62,16 @@ export default async function AdminBatchesPage() {
             </Badge>
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 font-mono">
-            Batch Conduction & Student Segregation
+            Batch Conduction &amp; Student Segregation
           </h1>
           <p className="text-xs md:text-sm text-slate-300 max-w-3xl mt-1">
             Manage academic batches, map course curriculum, assign faculty leads, fast-enroll students by TS-ID, and record lecture attendance.
           </p>
         </div>
       </div>
+
+      {/* Admin Attendance Correction Queue */}
+      <AdminAttendanceCorrectionQueue initialRequests={correctionRequests as any} />
 
       {/* Interactive Batch Management Client Component */}
       <BatchManagementClient

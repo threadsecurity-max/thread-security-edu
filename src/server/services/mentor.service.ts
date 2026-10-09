@@ -1,5 +1,6 @@
 import { prisma } from '../database/prisma';
 import { logAuditEvent } from '../security/audit';
+import { sendLabGradedEmail } from '../email/labGraded.service';
 
 export async function getMentorDashboardData(userId: string) {
   // Find mentor profile
@@ -102,15 +103,49 @@ export async function gradeLabSubmission(
     throw new Error('Lab submission record not found.');
   }
 
+  const mentorUser = await prisma.user.findUnique({
+    where: { id: mentorUserId },
+    select: { name: true, email: true },
+  });
+
   const updated = await prisma.labAttempt.update({
     where: { id: attemptId },
     data: {
       score,
-      feedback,
+      feedback: feedback?.trim() || null,
       state: score >= 70 ? 'COMPLETED' : 'SUBMITTED',
       completedAt: new Date(),
     },
+    include: { lab: true, user: true },
   });
+
+  // 1. Create in-app notification for the student
+  if (attempt.userId) {
+    await prisma.notification.create({
+      data: {
+        userId: attempt.userId,
+        title: `Lab Evaluated: ${attempt.lab?.title || 'Security Lab'}`,
+        message: `Your instructor ${mentorUser?.name || 'Mentor'} has graded your lab attempt with score ${score}/100 (${score >= 70 ? 'PASSED ✓' : 'REVIEWED'}). ${feedback ? `Feedback: "${feedback}"` : ''}`,
+        type: 'ACADEMIC',
+        linkUrl: `/student/labs/${attempt.labId}`,
+      },
+    }).catch((err) => console.error('[Lab Notification Error]:', err));
+  }
+
+  // 2. Dispatch official score result email to the student's respective inbox
+  if (attempt.user?.email) {
+    sendLabGradedEmail({
+      studentName: attempt.user.name || 'Student',
+      studentEmail: attempt.user.email,
+      labTitle: attempt.lab?.title || 'Cybersecurity Sandbox Lab',
+      difficulty: attempt.lab?.difficulty,
+      score,
+      feedback,
+      mentorName: mentorUser?.name || 'Lead Security Instructor',
+      labId: attempt.labId,
+      completedAt: new Date(),
+    }).catch((emailErr) => console.error('[Lab Result Email Dispatch Error]:', emailErr));
+  }
 
   await logAuditEvent({
     actorId: mentorUserId,
@@ -122,3 +157,4 @@ export async function gradeLabSubmission(
 
   return updated;
 }
+

@@ -56,6 +56,8 @@ export function MentorLabsClient({
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 6;
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   // Filter courses to only cybersecurity-related for the selector (Rule #23)
@@ -272,86 +274,143 @@ export function MentorLabsClient({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredLabs.map((lab) => {
-            const externalUrl = extractLabUrl(lab.flagHash);
-            const totalAttempts = lab.attempts?.length || 0;
-            const completedAttempts =
-              lab.attempts?.filter((a) => a.completedAt || a.status === 'COMPLETED').length || 0;
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredLabs
+              .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+              .map((lab) => {
+                const externalUrl = extractLabUrl(lab.flagHash);
+                const totalAttempts = lab.attempts?.length || 0;
+                const completedAttempts =
+                  lab.attempts?.filter((a) => a.completedAt || a.status === 'COMPLETED').length || 0;
 
-            return (
-              <div
-                key={lab.id}
-                className="p-6 rounded-3xl bg-white/[0.025] hover:bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] transition-all backdrop-blur-xl flex flex-col justify-between space-y-4 group"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getDifficultyBadge(
-                        lab.difficulty
-                      )}`}
-                    >
-                      {lab.difficulty}
-                    </span>
+                return (
+                  <div
+                    key={lab.id}
+                    className="p-6 rounded-3xl bg-white/[0.025] hover:bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] transition-all backdrop-blur-xl flex flex-col justify-between space-y-4 group"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getDifficultyBadge(
+                            lab.difficulty
+                          )}`}
+                        >
+                          {lab.difficulty}
+                        </span>
 
-                    <span className="text-xs text-zinc-400 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                      {lab.estimatedMinutes}m
-                    </span>
+                        <span className="text-xs text-zinc-400 flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                          {lab.estimatedMinutes}m
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-serif font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug">
+                          {lab.title}
+                        </h3>
+                        <span className="text-[11px] text-zinc-400 block pt-1 font-sans">
+                          {lab.course?.title}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-zinc-300 font-sans leading-relaxed line-clamp-2">
+                        {lab.objective}
+                      </p>
+
+                      <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] text-[11px] text-zinc-400 space-y-1">
+                        <span className="text-zinc-500 block text-[10px] uppercase font-bold">Target Competencies:</span>
+                        <p className="text-zinc-300 truncate">{lab.skills}</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                      <div className="text-[11px] text-zinc-400 flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5 text-zinc-500" />
+                        <span>Attempts: <strong className="text-white">{completedAttempts}/{totalAttempts}</strong></span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {externalUrl ? (
+                          <a
+                            href={externalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-xl bg-[#C6FF34]/15 hover:bg-[#C6FF34] text-[#C6FF34] hover:text-black border border-[#C6FF34]/30 text-xs font-bold transition-all flex items-center gap-1.5"
+                          >
+                            <Play className="w-3 h-3 fill-current" />
+                            <span>Launch</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => showToast('Built-in VM terminal sandbox linked.', 'success')}
+                            className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-bold transition-all flex items-center gap-1.5"
+                          >
+                            <Terminal className="w-3 h-3 text-[#C6FF34]" />
+                            <span>Inspect</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                );
+              })}
+          </div>
 
-                  <div>
-                    <h3 className="text-base font-serif font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug">
-                      {lab.title}
-                    </h3>
-                    <span className="text-[11px] text-zinc-400 block pt-1 font-sans">
-                      {lab.course?.title}
-                    </span>
-                  </div>
+          {/* ── PAGINATION CONTROLS ── */}
+          {filteredLabs.length > pageSize && (
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <span className="text-xs text-zinc-400 font-mono">
+                Showing{' '}
+                <strong className="text-white">
+                  {(currentPage - 1) * pageSize + 1} -{' '}
+                  {Math.min(currentPage * pageSize, filteredLabs.length)}
+                </strong>{' '}
+                of <strong className="text-[#C6FF34]">{filteredLabs.length}</strong> Labs
+              </span>
 
-                  <p className="text-xs text-zinc-300 font-sans leading-relaxed line-clamp-2">
-                    {lab.objective}
-                  </p>
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition-colors cursor-pointer border border-white/10"
+                >
+                  &larr; Previous
+                </button>
 
-                  <div className="p-2.5 rounded-xl bg-black/40 border border-white/[0.06] text-[11px] text-zinc-400 space-y-1">
-                    <span className="text-zinc-500 block text-[10px] uppercase font-bold">Target Competencies:</span>
-                    <p className="text-zinc-300 truncate">{lab.skills}</p>
-                  </div>
-                </div>
+                {Array.from(
+                  { length: Math.ceil(filteredLabs.length / pageSize) },
+                  (_, i) => i + 1
+                ).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`w-8 h-8 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                      currentPage === pageNum
+                        ? 'bg-[#C6FF34] text-black shadow-[0_0_15px_rgba(198,255,52,0.3)]'
+                        : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/10'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
 
-                <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
-                  <div className="text-[11px] text-zinc-400 flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>Attempts: <strong className="text-white">{completedAttempts}/{totalAttempts}</strong></span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {externalUrl ? (
-                      <a
-                        href={externalUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-[#C6FF34]/15 hover:bg-[#C6FF34] text-[#C6FF34] hover:text-black border border-[#C6FF34]/30 text-xs font-bold transition-all flex items-center gap-1.5"
-                      >
-                        <Play className="w-3 h-3 fill-current" />
-                        <span>Launch</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ) : (
-                      <button
-                        onClick={() => showToast('Built-in VM terminal sandbox linked.', 'success')}
-                        className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-bold transition-all flex items-center gap-1.5"
-                      >
-                        <Terminal className="w-3 h-3 text-[#C6FF34]" />
-                        <span>Inspect</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <button
+                  disabled={currentPage >= Math.ceil(filteredLabs.length / pageSize)}
+                  onClick={() =>
+                    setCurrentPage((p) =>
+                      Math.min(Math.ceil(filteredLabs.length / pageSize), p + 1)
+                    )
+                  }
+                  className="px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:cursor-not-allowed text-xs font-bold transition-colors cursor-pointer border border-white/10"
+                >
+                  Next &rarr;
+                </button>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── CREATE CYBERSECURITY LAB MODAL ── */}

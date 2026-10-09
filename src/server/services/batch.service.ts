@@ -638,7 +638,7 @@ export async function getBatchWorkspaceService(batchId: string, userId: string) 
               tsIdentity: true,
               progress: true,
               enrollments: true,
-              labAttempts: true,
+              labAttempts: { include: { lab: true } },
               assessments: true,
               certificates: true,
             },

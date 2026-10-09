@@ -91,10 +91,29 @@ export default async function StudentLabsListPage() {
             const state = attempt?.state || 'AVAILABLE';
             const isCompleted = state === 'COMPLETED' || state === 'SUBMITTED';
 
+            // Extract external lab URL if present
+            let targetUrl: string | null = null;
+            if (lab.flagHash) {
+              if (lab.flagHash.startsWith('URL:')) {
+                targetUrl = lab.flagHash.replace('URL:', '').trim();
+              } else if (lab.flagHash.startsWith('http://') || lab.flagHash.startsWith('https://')) {
+                targetUrl = lab.flagHash.trim();
+              }
+            }
+            if (!targetUrl) {
+              const urlRegex = /(https?:\/\/[^\s]+)/g;
+              const matchInst = lab.instructions?.match(urlRegex);
+              if (matchInst && matchInst[0]) targetUrl = matchInst[0].replace(/[.,;\)]+$/, '');
+              else {
+                const matchObj = lab.objective?.match(urlRegex);
+                if (matchObj && matchObj[0]) targetUrl = matchObj[0].replace(/[.,;\)]+$/, '');
+              }
+            }
+
             return (
               <div
                 key={lab.id}
-                className="p-6 rounded-3xl bg-white/[0.025] hover:bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-200 backdrop-blur-xl flex flex-col justify-between space-y-5 group relative overflow-hidden shadow-lg"
+                className="p-6 rounded-3xl bg-[#0d0f14] hover:bg-[#11141b] border border-white/[0.08] hover:border-[#C6FF34]/30 transition-all duration-200 backdrop-blur-xl flex flex-col justify-between space-y-5 group relative overflow-hidden shadow-2xl"
               >
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
@@ -125,7 +144,7 @@ export default async function StudentLabsListPage() {
                     </h3>
                   </div>
 
-                  <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">
+                  <p className="text-xs text-zinc-300 leading-relaxed line-clamp-2">
                     {lab.objective}
                   </p>
 
@@ -139,20 +158,44 @@ export default async function StudentLabsListPage() {
                   </div>
                 </div>
 
-                <Link href={`/student/labs/${lab.id}`} className="block pt-1">
-                  <button
-                    className={`w-full py-2.5 px-4 rounded-xl font-mono font-bold text-xs flex items-center justify-between transition-all cursor-pointer ${
-                      isCompleted
-                        ? 'bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 border border-white/[0.08]'
-                        : 'bg-[#C6FF34] hover:bg-[#b5f425] text-black shadow-[0_4px_16px_rgba(198,255,52,0.18)] hover:scale-[1.01] active:scale-[0.99]'
-                    }`}
-                  >
-                    <span>{isCompleted ? 'Review Lab Execution Proof' : 'Launch Target Sandbox'}</span>
-                    <Terminal
-                      className={`w-4 h-4 ${isCompleted ? 'text-[#C6FF34]' : 'text-black'}`}
-                    />
-                  </button>
-                </Link>
+                <div className="pt-2 space-y-2">
+                  {targetUrl ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <a
+                        href={targetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-2.5 px-3 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold text-xs flex items-center justify-center gap-1.5 shadow-[0_2px_12px_rgba(198,255,52,0.2)] hover:scale-[1.01] transition-all cursor-pointer text-center"
+                      >
+                        <span>Launch Lab ↗</span>
+                      </a>
+
+                      <Link href={`/student/labs/${lab.id}`} className="block">
+                        <button
+                          className="w-full py-2.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 border border-white/10 font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <span>{isCompleted ? 'Review Submission' : 'Submit Flag'}</span>
+                          <Terminal className="w-3.5 h-3.5 text-[#C6FF34]" />
+                        </button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link href={`/student/labs/${lab.id}`} className="block">
+                      <button
+                        className={`w-full py-2.5 px-4 rounded-xl font-mono font-bold text-xs flex items-center justify-between transition-all cursor-pointer ${
+                          isCompleted
+                            ? 'bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 border border-white/[0.08]'
+                            : 'bg-[#C6FF34] hover:bg-[#b5f425] text-black shadow-[0_4px_16px_rgba(198,255,52,0.18)] hover:scale-[1.01] active:scale-[0.99]'
+                        }`}
+                      >
+                        <span>{isCompleted ? 'Review Lab Execution Proof' : 'Launch Sandbox & Submit'}</span>
+                        <Terminal
+                          className={`w-4 h-4 ${isCompleted ? 'text-[#C6FF34]' : 'text-black'}`}
+                        />
+                      </button>
+                    </Link>
+                  )}
+                </div>
               </div>
             );
           })

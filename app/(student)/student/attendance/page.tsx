@@ -388,6 +388,37 @@ export default async function StudentBatchAttendancePage() {
                           </div>
                         )}
 
+                        {/* Live Classroom Meeting Link */}
+                        {(() => {
+                          let meetingUrl: string | null = null;
+                          if (sessionItem.resourcesJson) {
+                            try {
+                              const parsed = JSON.parse(sessionItem.resourcesJson);
+                              if (parsed.meetingUrl) meetingUrl = parsed.meetingUrl;
+                            } catch {}
+                          }
+                          if (!meetingUrl) {
+                            const match = `${sessionItem.importantNotes || ''} ${sessionItem.agenda || ''}`.match(/https?:\/\/[^\s]+/);
+                            if (match) meetingUrl = match[0];
+                          }
+                          if (!meetingUrl) return null;
+
+                          return (
+                            <div className="pt-2">
+                              <a
+                                href={meetingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold text-xs shadow-[0_0_15px_rgba(198,255,52,0.3)] transition-all cursor-pointer"
+                              >
+                                <Radio className="w-3.5 h-3.5 animate-pulse text-red-600" />
+                                <span>Join Live Classroom Session</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          );
+                        })()}
+
                         {/* Mentor Remarks Block ("What you are up to") */}
                         {record?.remarks ? (
                           <div className="p-3.5 rounded-2xl bg-[#C6FF34]/[0.06] border border-[#C6FF34]/20 text-xs text-white flex items-start gap-2.5 mt-2">
