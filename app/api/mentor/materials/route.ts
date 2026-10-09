@@ -59,3 +59,75 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id, batchId, title, description, resourceType, url } = body;
+
+    if (!id || !title || !url) {
+      return NextResponse.json({ error: 'Material ID, title, and URL are required.' }, { status: 400 });
+    }
+
+    const existing = await prisma.batchResource.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Material record not found.' }, { status: 404 });
+    }
+
+    const updated = await prisma.batchResource.update({
+      where: { id },
+      data: {
+        ...(batchId ? { batchId } : {}),
+        title: title.trim(),
+        description: description?.trim() || null,
+        resourceType: resourceType || 'PDF',
+        url: url.trim(),
+      },
+      include: { batch: true },
+    });
+
+    return NextResponse.json({ success: true, resource: updated });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await getSession();
+    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Material ID is required.' }, { status: 400 });
+    }
+
+    const existing = await prisma.batchResource.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Material not found.' }, { status: 404 });
+    }
+
+    await prisma.batchResource.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true, message: 'Material deleted successfully.' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
+}

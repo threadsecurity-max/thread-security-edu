@@ -133,17 +133,17 @@ export function LearningProgressOverview({
             </div>
           </div>
 
-          {/* Certificates Earned */}
+          {/* Active Courses */}
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1 hover:border-white/[0.12] transition-colors">
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[10px] font-mono uppercase tracking-wider">CREDENTIALS</span>
-              <Award className="w-3.5 h-3.5 text-[#C6FF34]" />
+              <span className="text-[10px] font-mono uppercase tracking-wider">ACTIVE COURSES</span>
+              <BookOpen className="w-3.5 h-3.5 text-[#C6FF34]" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold font-mono text-white">
-                {journey.certificatesEarnedCount}
+                {journey.coursesEnrolledCount}
               </span>
-              <span className="text-xs font-mono text-zinc-500">Verified</span>
+              <span className="text-xs font-mono text-zinc-500">Enrolled</span>
             </div>
           </div>
         </div>

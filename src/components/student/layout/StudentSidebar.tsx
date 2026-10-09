@@ -62,8 +62,7 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
       title: 'FACULTY & COHORT',
       items: [
         { label: 'Batch & Attendance', href: '/student/attendance', icon: Calendar, badge: 'LIVE' },
-        { label: 'Certificates', href: '/student/certificates', icon: Award },
-        { label: 'Academic Report', href: '/student/report', icon: Layers },
+        { label: 'Study Materials', href: '/student/materials', icon: BookOpen, badge: 'DOCS' },
       ],
     },
   ];

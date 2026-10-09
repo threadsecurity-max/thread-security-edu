@@ -37,7 +37,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
     { label: 'Learn', href: '/student/courses', icon: BookOpen },
     { label: 'Labs', href: '/student/labs', icon: Terminal },
     { label: 'Quiz', href: '/student/assessments', icon: Cpu },
-    { label: 'Certificates', href: '/student/certificates', icon: Award },
+    { label: 'Materials', href: '/student/materials', icon: FileText },
   ];
 
   return (
@@ -171,17 +171,17 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                   </Link>
 
                   <Link
-                    href="/student/certificates"
+                    href="/student/materials"
                     onClick={() => setDrawerOpen(false)}
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                      pathname.startsWith('/student/certificates')
+                      pathname.startsWith('/student/materials')
                         ? 'bg-white/15 text-white font-bold'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
-                    <Award className="w-4 h-4 text-slate-400" />
-                    <span>Certificates</span>
+                    <BookOpen className="w-4 h-4 text-slate-400" />
+                    <span>Study Materials</span>
                   </Link>
 
                   <Link
@@ -196,20 +196,6 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                   >
                     <Calendar className="w-4 h-4 text-security-green" />
                     <span>Batch & Attendance</span>
-                  </Link>
-
-                  <Link
-                    href="/student/report"
-                    onClick={() => setDrawerOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
-                      pathname.startsWith('/student/report')
-                        ? 'bg-white/15 text-white font-bold'
-                        : 'hover:bg-white/5 hover:text-white'
-                    )}
-                  >
-                    <FileText className="w-4 h-4 text-slate-400" />
-                    <span>Academic Report</span>
                   </Link>
                 </nav>
               </div>

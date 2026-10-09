@@ -15,6 +15,8 @@ import {
   Filter,
   FileCode,
   FileSpreadsheet,
+  Edit3,
+  Trash2,
 } from 'lucide-react';
 
 export interface ResourceItem {
@@ -107,6 +109,85 @@ export function MentorMaterialsClient({
       showToast(err.message || 'Error creating resource', 'error');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const [editingResource, setEditingResource] = useState<ResourceItem | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    batchId: '',
+    title: '',
+    description: '',
+    resourceType: 'PDF',
+    url: '',
+  });
+
+  const handleStartEdit = (res: ResourceItem) => {
+    setEditingResource(res);
+    setEditFormData({
+      batchId: res.batchId,
+      title: res.title,
+      description: res.description || '',
+      resourceType: res.resourceType,
+      url: res.url,
+    });
+  };
+
+  const handleUpdateResource = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingResource) return;
+    if (!editFormData.title || !editFormData.url) {
+      showToast('Title and URL are required.', 'error');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/mentor/materials', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingResource.id,
+          ...editFormData,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update study material.');
+      }
+
+      showToast(`Material "${data.resource.title}" updated successfully!`, 'success');
+      setEditingResource(null);
+
+      // Refresh list
+      const refreshed = await fetch('/api/mentor/materials');
+      const refreshedData = await refreshed.json();
+      if (refreshedData.resources) {
+        setResources(refreshedData.resources);
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error updating resource', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteResource = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"?`)) return;
+
+    try {
+      const res = await fetch(`/api/mentor/materials?id=${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete resource.');
+      }
+
+      showToast(`Material "${title}" removed.`, 'success');
+      setResources((prev) => prev.filter((r) => r.id !== id));
+    } catch (err: any) {
+      showToast(err.message || 'Error deleting material', 'error');
     }
   };
 
@@ -263,20 +344,38 @@ export function MentorMaterialsClient({
                 )}
               </div>
 
-              <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-                <span className="text-[11px] text-zinc-500 truncate max-w-[150px]">
+              <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                <span className="text-[11px] text-zinc-500 truncate max-w-[130px]">
                   {res.batch.title}
                 </span>
 
-                <a
-                  href={res.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-[#C6FF34] hover:text-black text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-white/[0.1]"
-                >
-                  <span>Open Resource</span>
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleStartEdit(res)}
+                    className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.1] text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                    title="Edit Material"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteResource(res.id, res.title)}
+                    className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-rose-500/20 text-zinc-400 hover:text-rose-400 transition-colors cursor-pointer"
+                    title="Delete Material"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+
+                  <a
+                    href={res.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-[#C6FF34] hover:text-black text-white text-xs font-bold transition-all flex items-center gap-1.5 border border-white/[0.1]"
+                  >
+                    <span>Open ↗</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
               </div>
             </div>
           ))}
@@ -386,6 +485,113 @@ export function MentorMaterialsClient({
                   className="px-6 py-2.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-bold text-xs disabled:opacity-50 cursor-pointer shadow-lg"
                 >
                   {submitting ? 'Publishing...' : 'Publish to Cohort'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ── EDIT RESOURCE MODAL ── */}
+      {editingResource && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/85 backdrop-blur-md"
+            onClick={() => setEditingResource(null)}
+          />
+
+          <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/[0.12] rounded-3xl p-6 sm:p-8 shadow-2xl z-10 space-y-5 text-xs font-mono">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+              <div className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-[#C6FF34]" />
+                <h3 className="text-xl font-serif font-bold text-white">Edit Study Material</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingResource(null)}
+                className="p-1 rounded-lg text-zinc-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateResource} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-zinc-400 block text-[11px]">Target Cohort Batch</label>
+                <select
+                  value={editFormData.batchId}
+                  onChange={(e) => setEditFormData({ ...editFormData, batchId: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/[0.08] text-white focus:outline-none focus:border-[#C6FF34]"
+                >
+                  {batches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.batchCode} — {b.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-zinc-400 block text-[11px]">Material Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.title}
+                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/[0.08] text-white focus:outline-none focus:border-[#C6FF34]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-zinc-400 block text-[11px]">Resource Classification</label>
+                <select
+                  value={editFormData.resourceType}
+                  onChange={(e) => setEditFormData({ ...editFormData, resourceType: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/[0.08] text-white focus:outline-none focus:border-[#C6FF34]"
+                >
+                  <option value="PDF">PDF Document / Cheatsheet</option>
+                  <option value="SLIDES">Lecture Presentation Slides</option>
+                  <option value="CODE">Script / Source Code Repo</option>
+                  <option value="CHEATSHEET">Tactical Exploit Cheatsheet</option>
+                  <option value="SPREADSHEET">Matrix / Vulnerability Checklist</option>
+                  <option value="LINK">External Documentation Link</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-zinc-400 block text-[11px]">Direct File URL or Resource Link *</label>
+                <input
+                  type="url"
+                  required
+                  value={editFormData.url}
+                  onChange={(e) => setEditFormData({ ...editFormData, url: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/[0.08] text-white focus:outline-none focus:border-[#C6FF34]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-zinc-400 block text-[11px]">Material Brief / Notes</label>
+                <textarea
+                  rows={2}
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-black/60 border border-white/[0.08] text-white focus:outline-none focus:border-[#C6FF34]"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingResource(null)}
+                  className="px-4 py-2.5 rounded-xl bg-white/[0.05] text-zinc-300 text-xs cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-bold text-xs disabled:opacity-50 cursor-pointer shadow-lg"
+                >
+                  {submitting ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>

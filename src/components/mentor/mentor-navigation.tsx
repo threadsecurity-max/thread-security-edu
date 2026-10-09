@@ -77,6 +77,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
         { name: 'Lectures', href: '/mentor/lectures', icon: Calendar },
         { name: 'Attendance Center', href: '/mentor/attendance', icon: ShieldCheck },
         { name: 'Cybersecurity Labs', href: '/mentor/labs', icon: Terminal, badge: 'CYBER' },
+        { name: 'Lab Submissions', href: '/mentor/submissions', icon: FileText, badge: 'GRADE' },
         { name: 'Assessments', href: '/mentor/assessments', icon: Cpu },
         { name: 'Assignments Hub', href: '/mentor/assignments', icon: FileText },
       ],

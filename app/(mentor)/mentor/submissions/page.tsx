@@ -28,8 +28,15 @@ export default async function MentorSubmissionsPage() {
   }
 
   const attempts = await prisma.labAttempt.findMany({
-    where: studentIds && studentIds.length > 0 ? { userId: { in: studentIds } } : {},
-    take: 50,
+    where: studentIds && studentIds.length > 0
+      ? {
+          OR: [
+            { userId: { in: studentIds } },
+            { lab: { course: { mentorId: session.userId } } },
+          ],
+        }
+      : {},
+    take: 60,
     orderBy: { startedAt: 'desc' },
     include: {
       lab: {
