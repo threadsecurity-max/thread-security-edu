@@ -17,6 +17,7 @@ import { ApplyBatchesSection } from '@/components/sections/landing/ApplyBatchesS
 import { CourseRoadmapSection } from '@/components/sections/landing/CourseRoadmapSection';
 import { StudentReviewsSection } from '@/components/sections/landing/StudentReviewsSection';
 import { CyberTrainingDirectorySection } from '@/components/sections/landing/CyberTrainingDirectorySection';
+import { TechnologiesExposureSection } from '@/components/sections/landing/TechnologiesExposureSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -156,6 +157,9 @@ export default async function PublicHomePage({
       {/* Features Bento Grid Section */}
       <MethodologySection />
 
+      {/* Dual 90° Rotated Moving Semi-Circle Technologies Exposure Section */}
+      <TechnologiesExposureSection />
+
       {/* Careers Forged Section */}
       <CareersSection />
       
@@ -175,7 +179,7 @@ export default async function PublicHomePage({
       <StudentReviewsSection />
 
       {/* Challenges Section */}
-      <ChallengesSection />
+      {/* <ChallengesSection /> */}
 
       {/* Comprehensive Cybersecurity & AI Training Programs Directory */}
       {/* <CyberTrainingDirectorySection /> */}
