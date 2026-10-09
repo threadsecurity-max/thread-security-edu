@@ -16,7 +16,35 @@ import {
   Users,
   Search,
   Filter,
+  Send,
+  Copy,
+  Check,
+  Mail,
+  User,
+  Award,
+  Sparkles,
 } from 'lucide-react';
+import { gradeLabAttemptAction } from '@/features/mentor/actions/mentor.actions';
+
+export interface LabAttemptDetail {
+  id: string;
+  labId: string;
+  userId: string;
+  state: string;
+  score: number;
+  submittedFlag: string | null;
+  feedback: string | null;
+  startedAt: string | Date;
+  completedAt: string | Date | null;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    tsIdentity?: {
+      tsId: string;
+    } | null;
+  };
+}
 
 export interface LabItem {
   id: string;
@@ -32,7 +60,7 @@ export interface LabItem {
     title: string;
     category?: string | null;
   };
-  attempts?: Array<{ id: string; state?: string; status?: string; completedAt: string | null }>;
+  attempts?: LabAttemptDetail[];
   createdAt: string | Date;
 }
 
@@ -82,6 +110,12 @@ export function MentorLabsClient({
 
   const availableCourses = cyberCourses.length > 0 ? cyberCourses : courses;
 
+  const [selectedLabForSubmissions, setSelectedLabForSubmissions] = useState<LabItem | null>(null);
+  const [gradingAttemptId, setGradingAttemptId] = useState<string | null>(null);
+  const [gradingScores, setGradingScores] = useState<Record<string, number>>({});
+  const [gradingFeedback, setGradingFeedback] = useState<Record<string, string>>({});
+  const [copiedFlagId, setCopiedFlagId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     title: '',
     objective: '',
@@ -96,6 +130,70 @@ export function MentorLabsClient({
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleOpenSubmissionsModal = (lab: LabItem) => {
+    setSelectedLabForSubmissions(lab);
+    const scores: Record<string, number> = {};
+    const feedbacks: Record<string, string> = {};
+    lab.attempts?.forEach((att) => {
+      scores[att.id] = typeof att.score === 'number' && att.score > 0 ? att.score : (att.state === 'COMPLETED' ? 100 : 80);
+      feedbacks[att.id] = att.feedback || 'Exploit execution verified and offensive payload analysis evaluated.';
+    });
+    setGradingScores(scores);
+    setGradingFeedback(feedbacks);
+  };
+
+  const handleGradeAttempt = async (attemptId: string) => {
+    const score = Number(gradingScores[attemptId] ?? 100);
+    const feedback = gradingFeedback[attemptId] || 'Exploit verified successfully.';
+
+    if (isNaN(score) || score < 0 || score > 100) {
+      showToast('Score must be a number between 0 and 100.', 'error');
+      return;
+    }
+
+    setGradingAttemptId(attemptId);
+    try {
+      const res = await gradeLabAttemptAction(attemptId, score, feedback);
+      if (res.success) {
+        showToast('Evaluation & acknowledgement email dispatched to student!', 'success');
+
+        // Update local labs state
+        setLabs((prev) =>
+          prev.map((l) => {
+            if (l.id !== selectedLabForSubmissions?.id) return l;
+            return {
+              ...l,
+              attempts: l.attempts?.map((a) =>
+                a.id === attemptId
+                  ? { ...a, score, feedback, state: 'COMPLETED', completedAt: new Date().toISOString() }
+                  : a
+              ),
+            };
+          })
+        );
+
+        // Also update modal selectedLab
+        setSelectedLabForSubmissions((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            attempts: prev.attempts?.map((a) =>
+              a.id === attemptId
+                ? { ...a, score, feedback, state: 'COMPLETED', completedAt: new Date().toISOString() }
+                : a
+            ),
+          };
+        });
+      } else {
+        showToast(res.error || 'Failed to grade submission.', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error saving grade.', 'error');
+    } finally {
+      setGradingAttemptId(null);
+    }
   };
 
   const handleCreateLab = async (e: React.FormEvent) => {
@@ -282,12 +380,14 @@ export function MentorLabsClient({
                 const externalUrl = extractLabUrl(lab.flagHash);
                 const totalAttempts = lab.attempts?.length || 0;
                 const completedAttempts =
-                  lab.attempts?.filter((a) => a.completedAt || a.status === 'COMPLETED').length || 0;
+                  lab.attempts?.filter((a) => a.completedAt || a.state === 'COMPLETED').length || 0;
 
                 return (
                   <div
                     key={lab.id}
-                    className="p-6 rounded-3xl bg-white/[0.025] hover:bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] transition-all backdrop-blur-xl flex flex-col justify-between space-y-4 group"
+                    onClick={() => handleOpenSubmissionsModal(lab)}
+                    className="p-6 rounded-3xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.08] hover:border-[#C6FF34]/40 transition-all backdrop-blur-xl flex flex-col justify-between space-y-4 group cursor-pointer shadow-lg hover:shadow-2xl hover:scale-[1.01]"
+                    title="Click to view student submissions and grade attempts"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2">
@@ -325,10 +425,18 @@ export function MentorLabsClient({
                     </div>
 
                     <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
-                      <div className="text-[11px] text-zinc-400 flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-zinc-500" />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenSubmissionsModal(lab);
+                        }}
+                        className="text-[11px] text-zinc-300 hover:text-[#C6FF34] flex items-center gap-1.5 transition-all cursor-pointer py-1 px-2.5 rounded-xl bg-white/[0.04] hover:bg-[#C6FF34]/10 border border-white/10 hover:border-[#C6FF34]/30"
+                      >
+                        <Users className="w-3.5 h-3.5 text-[#C6FF34]" />
                         <span>Attempts: <strong className="text-white">{completedAttempts}/{totalAttempts}</strong></span>
-                      </div>
+                        <span className="text-[10px] text-[#C6FF34] font-bold ml-1">Grade ↗</span>
+                      </button>
 
                       <div className="flex items-center gap-2">
                         {externalUrl ? (
@@ -336,6 +444,7 @@ export function MentorLabsClient({
                             href={externalUrl}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             className="px-3 py-1.5 rounded-xl bg-[#C6FF34]/15 hover:bg-[#C6FF34] text-[#C6FF34] hover:text-black border border-[#C6FF34]/30 text-xs font-bold transition-all flex items-center gap-1.5"
                           >
                             <Play className="w-3 h-3 fill-current" />
@@ -344,7 +453,10 @@ export function MentorLabsClient({
                           </a>
                         ) : (
                           <button
-                            onClick={() => showToast('Built-in VM terminal sandbox linked.', 'success')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              showToast('Built-in VM terminal sandbox linked.', 'success');
+                            }}
                             className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-bold transition-all flex items-center gap-1.5"
                           >
                             <Terminal className="w-3 h-3 text-[#C6FF34]" />
@@ -563,6 +675,273 @@ export function MentorLabsClient({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ── STUDENT SUBMISSIONS & GRADING MODAL ── */}
+      {selectedLabForSubmissions && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#0b0d12] border border-white/15 max-w-4xl w-full rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-white/10 pb-4 shrink-0">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#C6FF34] bg-[#C6FF34]/10 border border-[#C6FF34]/30 px-2 py-0.5 rounded-full font-mono">
+                    Student Submission Console
+                  </span>
+                  <span className={`text-[10px] font-bold border px-2 py-0.5 rounded-full ${getDifficultyBadge(selectedLabForSubmissions.difficulty)}`}>
+                    {selectedLabForSubmissions.difficulty}
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-serif font-extrabold text-white">
+                  {selectedLabForSubmissions.title}
+                </h2>
+                <p className="text-xs text-zinc-400 font-sans">
+                  Course: <strong className="text-zinc-200">{selectedLabForSubmissions.course?.title}</strong> • Total Attempts: <strong className="text-[#C6FF34] font-mono">{selectedLabForSubmissions.attempts?.length || 0}</strong>
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedLabForSubmissions(null)}
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Submissions List */}
+            <div className="overflow-y-auto space-y-6 pr-1 flex-1">
+              {(!selectedLabForSubmissions.attempts || selectedLabForSubmissions.attempts.length === 0) ? (
+                <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-3">
+                  <Users className="w-10 h-10 text-zinc-600 mx-auto" />
+                  <h4 className="text-sm font-bold text-white font-serif">No Student Attempts Yet</h4>
+                  <p className="text-xs text-zinc-400 font-sans max-w-sm mx-auto">
+                    Students enrolled in this course track have not started or submitted their flags for this lab yet.
+                  </p>
+                </div>
+              ) : (
+                selectedLabForSubmissions.attempts.map((attempt) => {
+                  const studentName = attempt.user?.name || 'Enrolled Student';
+                  const studentEmail = attempt.user?.email || 'N/A';
+                  const tsId = attempt.user?.tsIdentity?.tsId || `TSE-${attempt.userId.slice(-6).toUpperCase()}`;
+                  const isGradingThis = gradingAttemptId === attempt.id;
+
+                  return (
+                    <div
+                      key={attempt.id}
+                      className="p-5 sm:p-6 rounded-2xl bg-[#10131a] border border-white/10 hover:border-white/20 transition-all space-y-5"
+                    >
+                      {/* Student Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#C6FF34]/15 border border-[#C6FF34]/30 text-[#C6FF34] font-extrabold flex items-center justify-center text-sm font-mono shrink-0">
+                            {studentName.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-bold text-white">{studentName}</h4>
+                              <span className="text-[10px] font-mono text-[#C6FF34] bg-[#C6FF34]/10 border border-[#C6FF34]/20 px-2 py-0.5 rounded-md font-bold">
+                                {tsId}
+                              </span>
+                            </div>
+                            <span className="text-xs text-zinc-400 font-sans block">{studentEmail}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase ${
+                              attempt.state === 'COMPLETED'
+                                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                                : attempt.state === 'SUBMITTED'
+                                ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
+                                : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                            }`}
+                          >
+                            {attempt.state}
+                          </span>
+
+                          <div className="text-right">
+                            <span className="text-[10px] text-zinc-500 uppercase block font-mono">Current Score</span>
+                            <span className="text-sm font-extrabold text-[#C6FF34] font-mono">
+                              {attempt.score || 0} / 100
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Flag and Writeup Proof */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                        {/* Submitted Flag */}
+                        <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">
+                              Submitted CTF Flag:
+                            </span>
+                            {attempt.submittedFlag && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(attempt.submittedFlag || '');
+                                  setCopiedFlagId(attempt.id);
+                                  setTimeout(() => setCopiedFlagId(null), 2000);
+                                }}
+                                className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 cursor-pointer"
+                              >
+                                {copiedFlagId === attempt.id ? (
+                                  <>
+                                    <Check className="w-3 h-3 text-[#C6FF34]" />
+                                    <span className="text-[#C6FF34]">Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3 h-3" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[#C6FF34] font-bold break-all">
+                            {attempt.submittedFlag || <span className="text-zinc-500 italic">No flag captured yet</span>}
+                          </p>
+                        </div>
+
+                        {/* Submission Timing */}
+                        <div className="p-3.5 rounded-xl bg-black/60 border border-white/10 space-y-1 text-zinc-300">
+                          <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider block">
+                            Submission Timeline:
+                          </span>
+                          <p className="text-[11px] text-zinc-400">
+                            Started: {attempt.startedAt ? new Date(attempt.startedAt).toLocaleString() : 'N/A'}
+                          </p>
+                          <p className="text-[11px] text-zinc-400">
+                            Completed: {attempt.completedAt ? new Date(attempt.completedAt).toLocaleString() : 'In Progress'}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Student Writeup / Exploit Proof */}
+                      {attempt.feedback && (
+                        <div className="space-y-1.5">
+                          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
+                            Student Exploit Methodology / Proof Notes:
+                          </span>
+                          <div className="p-3.5 rounded-xl bg-black/80 border border-white/10 text-xs text-zinc-200 whitespace-pre-wrap font-mono max-h-36 overflow-y-auto">
+                            {attempt.feedback}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mentor Grading & Acknowledgement Console */}
+                      <div className="p-4 rounded-xl bg-black/40 border border-[#C6FF34]/20 space-y-4">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                          <span className="text-xs font-bold text-[#C6FF34] uppercase tracking-wider flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-[#C6FF34]" />
+                            Mentor Acknowledgement &amp; Evaluation Console
+                          </span>
+                          <span className="text-[10px] text-zinc-500 font-mono">EMAIL DISPATCH ENABLED</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+                          {/* Score Input */}
+                          <div className="sm:col-span-4 space-y-2">
+                            <label className="text-[11px] text-zinc-300 block font-bold">
+                              Grade Score (0 - 100):
+                            </label>
+                            <input
+                              type="number"
+                              min={0}
+                              max={100}
+                              value={gradingScores[attempt.id] ?? (attempt.score || 100)}
+                              onChange={(e) =>
+                                setGradingScores({
+                                  ...gradingScores,
+                                  [attempt.id]: Math.min(100, Math.max(0, Number(e.target.value))),
+                                })
+                              }
+                              className="w-full px-3 py-2 rounded-xl bg-black border border-white/20 text-[#C6FF34] font-bold text-base font-mono focus:outline-none focus:border-[#C6FF34]"
+                            />
+                            {/* Score Presets */}
+                            <div className="flex items-center gap-1.5">
+                              {[100, 85, 70, 50].map((preset) => (
+                                <button
+                                  key={preset}
+                                  type="button"
+                                  onClick={() =>
+                                    setGradingScores({
+                                      ...gradingScores,
+                                      [attempt.id]: preset,
+                                    })
+                                  }
+                                  className="px-2 py-1 rounded-md bg-white/[0.05] hover:bg-white/[0.1] text-[10px] font-mono text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                                >
+                                  {preset}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Message / Acknowledgement */}
+                          <div className="sm:col-span-8 space-y-2">
+                            <label className="text-[11px] text-zinc-300 block font-bold">
+                              Faculty Acknowledgement &amp; Feedback Message:
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={gradingFeedback[attempt.id] ?? ''}
+                              onChange={(e) =>
+                                setGradingFeedback({
+                                  ...gradingFeedback,
+                                  [attempt.id]: e.target.value,
+                                })
+                              }
+                              placeholder="Type acknowledgement note and feedback to be dispatched to student via email..."
+                              className="w-full px-3 py-2 rounded-xl bg-black border border-white/20 text-zinc-200 text-xs font-mono placeholder:text-zinc-600 focus:outline-none focus:border-[#C6FF34]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Dispatch Button */}
+                        <div className="pt-2 flex justify-end">
+                          <button
+                            type="button"
+                            disabled={isGradingThis}
+                            onClick={() => handleGradeAttempt(attempt.id)}
+                            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-bold text-xs flex items-center justify-center gap-2 shadow-[0_2px_14px_rgba(198,255,52,0.25)] transition-all cursor-pointer disabled:opacity-50 hover:scale-[1.01] active:scale-[0.99]"
+                          >
+                            {isGradingThis ? (
+                              <span>Dispatching Evaluation...</span>
+                            ) : (
+                              <>
+                                <Send className="w-3.5 h-3.5" />
+                                <span>Send Acknowledgement &amp; Dispatch Result (Email)</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="border-t border-white/10 pt-4 flex justify-between items-center shrink-0">
+              <span className="text-[11px] text-zinc-500 font-mono">
+                Evaluations automatically trigger instant email result dispatches to student inboxes.
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedLabForSubmissions(null)}
+                className="px-5 py-2 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                Close Console
+              </button>
+            </div>
           </div>
         </div>
       )}

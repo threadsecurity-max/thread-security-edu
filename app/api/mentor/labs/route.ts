@@ -13,7 +13,19 @@ export async function GET(req: NextRequest) {
     const labs = await prisma.lab.findMany({
       include: {
         course: true,
-        attempts: true,
+        attempts: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                tsIdentity: { select: { tsId: true } },
+              },
+            },
+          },
+          orderBy: { startedAt: 'desc' },
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: 50,

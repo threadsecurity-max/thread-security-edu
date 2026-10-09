@@ -25,7 +25,17 @@ export default async function MentorLabsPage({
           select: { id: true, title: true, category: true },
         },
         attempts: {
-          select: { id: true, state: true, completedAt: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                tsIdentity: { select: { tsId: true } },
+              },
+            },
+          },
+          orderBy: { startedAt: 'desc' },
         },
       },
       orderBy: { createdAt: 'desc' },
