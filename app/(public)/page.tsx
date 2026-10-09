@@ -157,9 +157,7 @@ export default async function PublicHomePage({
       {/* Features Bento Grid Section */}
       <MethodologySection />
 
-      {/* Dual 90° Rotated Moving Semi-Circle Technologies Exposure Section */}
-      <TechnologiesExposureSection />
-
+      
       {/* Careers Forged Section */}
       <CareersSection />
       
@@ -183,6 +181,9 @@ export default async function PublicHomePage({
 
       {/* Comprehensive Cybersecurity & AI Training Programs Directory */}
       {/* <CyberTrainingDirectorySection /> */}
+      {/* Dual 90° Rotated Moving Semi-Circle Technologies Exposure Section */}
+      <TechnologiesExposureSection />
+
 
       {/* FAQ Section */}
       <FaqSection />
