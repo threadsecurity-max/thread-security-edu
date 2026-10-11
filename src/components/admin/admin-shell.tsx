@@ -29,6 +29,7 @@ import {
   UserCheck,
   PanelLeftClose,
   PanelLeftOpen,
+  UsersRound,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -39,6 +40,7 @@ export interface AdminShellProps {
     email?: string | null;
     role: string;
   };
+  mentorsCount?: number;
   headerActions?: React.ReactNode;
   children: React.ReactNode;
 }
@@ -54,7 +56,7 @@ interface NavGroup {
   }[];
 }
 
-export function AdminShell({ user, headerActions, children }: AdminShellProps) {
+export function AdminShell({ user, mentorsCount, headerActions, children }: AdminShellProps) {
   const pathname = usePathname();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -89,7 +91,13 @@ export function AdminShell({ user, headerActions, children }: AdminShellProps) {
     {
       title: 'People',
       items: [
-        { name: 'Faculty & Mentors', href: '/admin/mentors', icon: ShieldCheck },
+        { name: 'Users Directory', href: '/admin/users', icon: UsersRound },
+        {
+          name: 'Faculty & Mentors',
+          href: '/admin/mentors',
+          icon: ShieldCheck,
+          badge: mentorsCount !== undefined && mentorsCount > 0 ? String(mentorsCount) : undefined,
+        },
         { name: 'Student Directory', href: '/admin/students', icon: Users },
         { name: 'Access & Invites', href: '/admin/access', icon: UserCheck },
       ],
@@ -157,8 +165,15 @@ export function AdminShell({ user, headerActions, children }: AdminShellProps) {
                     <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-violet-400' : 'text-neutral-400'}`} />
                     {!compact && <span className="truncate">{item.name}</span>}
                   </div>
-                  {!compact && active && (
-                    <ChevronRight className="w-3.5 h-3.5 text-violet-400 shrink-0" />
+                  {!compact && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {item.badge && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-500/25 text-violet-300 border border-violet-500/30">
+                          {item.badge}
+                        </span>
+                      )}
+                      {active && <ChevronRight className="w-3.5 h-3.5 text-violet-400 shrink-0" />}
+                    </div>
                   )}
                 </Link>
               );

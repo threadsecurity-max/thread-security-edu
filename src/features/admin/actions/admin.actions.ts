@@ -260,5 +260,26 @@ export async function reassignStudentBatchAction(userId: string, newBatchId: str
   }
 }
 
+export async function updateUserRoleAction(userId: string, role: string) {
+  try {
+    const session = await getSession();
+    if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+      return { success: false, error: 'Unauthorized to change user roles' };
+    }
+    const { prisma } = await import('@/server/database/prisma');
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: role as any },
+    });
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/students');
+    revalidatePath('/admin/mentors');
+    return { success: true };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update user role';
+    return { success: false, error: msg };
+  }
+}
+
 
 

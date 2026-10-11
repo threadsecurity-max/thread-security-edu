@@ -63,9 +63,7 @@ export function ServerHealthClient({ initialData }: ServerHealthClientProps) {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      const start = Date.now();
       const res = await fetch('/api/health', { cache: 'no-store' });
-      const latency = Date.now() - start;
       if (res.ok) {
         setLastRefreshed(new Date());
       }
@@ -77,22 +75,28 @@ export function ServerHealthClient({ initialData }: ServerHealthClientProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/20 text-emerald-400">
-            <Activity className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-200 text-violet-600 flex items-center justify-center font-bold">
+            <Activity className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2 font-mono">
-              SYSTEM TELEMETRY & SERVER HEALTH
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-400 font-sans">
-                LIVE
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] font-semibold tracking-wider text-emerald-600 uppercase">
+                System Telemetry &amp; Server Health
               </span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold">
+                Operational
+              </span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              Live Infrastructure Telemetry
             </h1>
-            <p className="text-sm text-slate-400">
-              Real-time PostgreSQL engine telemetry, Node memory allocations, and critical service monitors.
+            <p className="text-xs text-slate-500 mt-0.5">
+              Real-time PostgreSQL engine telemetry, Node.js memory allocations, and critical service status.
             </p>
           </div>
         </div>
@@ -100,173 +104,153 @@ export function ServerHealthClient({ initialData }: ServerHealthClientProps) {
         <button
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-mono transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium shadow-xs transition-colors cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refreshed: {lastRefreshed.toLocaleTimeString()}
+          <RefreshCw className={`w-3.5 h-3.5 text-violet-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+          <span>Last Checked: {lastRefreshed.toLocaleTimeString()}</span>
         </button>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* DB Ping */}
-        <div className="p-4 rounded-xl bg-[#0B0F19] border border-slate-800">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>DATABASE LATENCY</span>
-            <Database className="w-4 h-4 text-emerald-400" />
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+            <span className="font-medium text-[11px] uppercase tracking-wider">Database Latency</span>
+            <Database className="w-4 h-4 text-violet-600" />
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold font-mono text-emerald-400">
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-2xl font-bold font-mono text-slate-900">
               {data.database.latencyMs}ms
             </span>
-            <span className="text-xs text-slate-500">
+            <span
+              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                data.database.status === 'CONNECTED'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                  : 'bg-rose-50 text-rose-700 border border-rose-200'
+              }`}
+            >
               {data.database.status === 'CONNECTED' ? 'Optimal' : 'Offline'}
             </span>
           </div>
-          <div className="text-xs text-slate-500 mt-1 font-mono">{data.database.engine}</div>
+          <div className="text-[11px] text-slate-400 mt-2 font-mono">{data.database.engine}</div>
         </div>
 
         {/* Uptime */}
-        <div className="p-4 rounded-xl bg-[#0B0F19] border border-slate-800">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>UPTIME</span>
-            <Clock className="w-4 h-4 text-cyan-400" />
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+            <span className="font-medium text-[11px] uppercase tracking-wider">System Uptime</span>
+            <Clock className="w-4 h-4 text-indigo-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-white">
+          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">
             {formatUptime(data.runtime.uptimeSeconds)}
           </div>
-          <div className="text-xs text-slate-500 mt-1 font-mono">
+          <div className="text-[11px] text-slate-400 mt-2 font-mono">
             Node {data.runtime.nodeVersion} • {data.runtime.platform}
           </div>
         </div>
 
-        {/* Heap Memory */}
-        <div className="p-4 rounded-xl bg-[#0B0F19] border border-slate-800">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>HEAP MEMORY</span>
-            <Cpu className="w-4 h-4 text-amber-400" />
+        {/* Memory RSS */}
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+            <span className="font-medium text-[11px] uppercase tracking-wider">Memory Allocation</span>
+            <Cpu className="w-4 h-4 text-violet-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-amber-400">
-            {data.runtime.heapUsedMb} MB
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-2xl font-bold font-mono text-slate-900">{data.runtime.heapUsedMb} MB</span>
+            <span className="text-xs text-slate-500 font-mono">/ {data.runtime.heapTotalMb} MB</span>
           </div>
-          <div className="text-xs text-slate-500 mt-1 font-mono">
-            Allocated: {data.runtime.heapTotalMb} MB
+          <div className="text-[11px] text-slate-400 mt-2 font-mono">
+            Resident Set Size (RSS): {data.runtime.rssMb} MB
           </div>
         </div>
 
-        {/* RSS Footprint */}
-        <div className="p-4 rounded-xl bg-[#0B0F19] border border-slate-800">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>RESIDENT SET (RSS)</span>
-            <HardDrive className="w-4 h-4 text-purple-400" />
+        {/* Database Records */}
+        <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs">
+          <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+            <span className="font-medium text-[11px] uppercase tracking-wider">Indexed Entities</span>
+            <HardDrive className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl font-bold font-mono text-purple-400">
-            {data.runtime.rssMb} MB
+          <div className="text-2xl font-bold font-mono text-slate-900 mt-2">
+            {data.database.userCount} Users
           </div>
-          <div className="text-xs text-slate-500 mt-1 font-mono">Process memory boundary</div>
+          <div className="text-[11px] text-slate-400 mt-2 font-mono">
+            {data.database.auditCount} Security Audit Logs
+          </div>
         </div>
       </div>
 
-      {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Core Subsystem Matrix */}
-        <div className="bg-[#0B0F19] rounded-2xl border border-slate-800 p-6 space-y-4">
-          <h2 className="text-sm font-bold text-white font-mono flex items-center gap-2">
-            <Server className="w-4 h-4 text-emerald-400" />
-            CORE SUBSYSTEM STATUS
-          </h2>
-
-          <div className="divide-y divide-slate-800/60">
-            <div className="py-3 flex items-center justify-between">
-              <div>
-                <div className="text-xs font-semibold text-white">PostgreSQL Data Store</div>
-                <div className="text-[11px] text-slate-400">
-                  {data.database.userCount} Users, {data.database.auditCount} Audit records
-                </div>
-              </div>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> ONLINE
+      {/* Health Details Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Database Telemetry */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+              <Database className="w-4 h-4 text-violet-600" />
+              PostgreSQL Telemetry &amp; Connection Status
+            </h3>
+            {data.database.status === 'CONNECTED' ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Healthy
               </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" /> Connection Error
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2.5 text-xs">
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-500 font-medium">Prisma Client Driver:</span>
+              <span className="font-mono text-slate-900 font-semibold">{data.database.engine}</span>
             </div>
-
-            <div className="py-3 flex items-center justify-between">
-              <div>
-                <div className="text-xs font-semibold text-white">Security Session Validator</div>
-                <div className="text-[11px] text-slate-400">HMAC-SHA256 Token Protection</div>
-              </div>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> ACTIVE
-              </span>
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-500 font-medium">Round-Trip Query Latency:</span>
+              <span className="font-mono text-emerald-600 font-semibold">{data.database.latencyMs} ms</span>
             </div>
-
-            <div className="py-3 flex items-center justify-between">
-              <div>
-                <div className="text-xs font-semibold text-white">Email Dispatch Service</div>
-                <div className="text-[11px] text-slate-400">{data.services.emailDispatch}</div>
-              </div>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-mono bg-slate-800 text-slate-300 border border-slate-700">
-                {data.services.emailDispatch}
-              </span>
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-500 font-medium">Connection Pool Status:</span>
+              <span className="font-mono text-slate-800">Active Pool (Direct SSL)</span>
             </div>
-
-            <div className="py-3 flex items-center justify-between">
-              <div>
-                <div className="text-xs font-semibold text-white">In-Memory Resilience Engine</div>
-                <div className="text-[11px] text-slate-400">
-                  Auto-fallback for transient connection drops
-                </div>
-              </div>
-              <span className="text-[11px] px-2.5 py-0.5 rounded-full font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                <Zap className="w-3 h-3" /> STANDBY READY
-              </span>
+            <div className="flex justify-between py-1.5">
+              <span className="text-slate-500 font-medium">Total Registered Users:</span>
+              <span className="font-mono text-slate-900 font-semibold">{data.database.userCount}</span>
             </div>
           </div>
         </div>
 
-        {/* Environment & Node Runtime Details */}
-        <div className="bg-[#0B0F19] rounded-2xl border border-slate-800 p-6 space-y-4">
-          <h2 className="text-sm font-bold text-white font-mono flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            OPERATIONAL ENVIRONMENT TELEMETRY
-          </h2>
-
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[10px] text-slate-500 font-mono uppercase block mb-1">
-                Node Environment
-              </span>
-              <span className="font-mono text-emerald-400">{data.runtime.env}</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[10px] text-slate-500 font-mono uppercase block mb-1">
-                Platform / Arch
-              </span>
-              <span className="font-mono text-white">
-                {data.runtime.platform} ({data.runtime.arch})
-              </span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[10px] text-slate-500 font-mono uppercase block mb-1">
-                Auth Secret
-              </span>
-              <span className="font-mono text-emerald-400">{data.services.authSecret}</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-              <span className="text-[10px] text-slate-500 font-mono uppercase block mb-1">
-                Database TLS
-              </span>
-              <span className="font-mono text-emerald-400">{data.services.databaseUrl}</span>
-            </div>
+        {/* Services & Runtime Status */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-indigo-600" />
+              Service Configuration &amp; Runtime Security
+            </h3>
+            <span className="text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full">
+              Production Verified
+            </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-400">
-            <div className="font-mono text-[11px] text-emerald-400 mb-1 flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5" /> TELEMETRY HEARTBEAT NOMINAL
+          <div className="space-y-2.5 text-xs">
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-500 font-medium">Email Dispatch Engine:</span>
+              <span className="font-mono text-slate-800 font-semibold">{data.services.emailDispatch}</span>
             </div>
-            All administrative command services, student lifecycle controllers, and academic timetable workers are functioning within designated latency parameters.
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-500 font-medium">Auth Secret Integrity:</span>
+              <span className="font-mono text-slate-800 font-semibold">{data.services.authSecret}</span>
+            </div>
+            <div className="flex justify-between py-1.5 border-b border-slate-100">
+              <span className="text-slate-500 font-medium">Database TLS Encryption:</span>
+              <span className="font-mono text-emerald-600 font-semibold">{data.services.databaseUrl}</span>
+            </div>
+            <div className="flex justify-between py-1.5">
+              <span className="text-slate-500 font-medium">Execution Architecture:</span>
+              <span className="font-mono text-slate-800">
+                {data.runtime.platform} ({data.runtime.arch}) • {data.runtime.env}
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,14 @@
 import { prisma } from '@/server/database/prisma';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, Plus, ExternalLink, Calendar, Users, ShieldCheck, Terminal } from 'lucide-react';
+import { Sparkles, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { WorkshopsManagementClient } from '@/app/(admin)/admin/workshops/workshops-management-client';
+
+export const metadata = {
+  title: 'Workshops Command & Conduction | Thread Security Admin',
+  description: 'Conduct live cybersecurity masterclasses, publish practical red teaming workshops, and track registrations.',
+};
 
 export const revalidate = 0;
 
@@ -46,24 +50,24 @@ export default async function AdminWorkshopsPage() {
   });
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono text-xs flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              HANDS-ON WORKSHOP CONDUCTION
-            </Badge>
-            <Badge className="bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs">
-              LIVE SESSIONS ({workshops.length})
-            </Badge>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-violet-600" />
+            <span className="text-[11px] font-semibold tracking-wider text-violet-600 uppercase">
+              Hands-On Workshops &amp; Masterclasses
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 font-semibold">
+              {workshops.length} Live
+            </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 font-mono">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Workshops Command &amp; Conduction
           </h1>
-          <p className="text-xs md:text-sm text-slate-400 max-w-3xl mt-1 font-mono">
-            Conduct live cybersecurity masterclasses, publish practical red teaming workshops, assign faculty leads, manage Google Drive resources, and track participant registrations.
+          <p className="text-xs text-slate-500 mt-0.5 max-w-3xl">
+            Conduct live cybersecurity masterclasses, publish practical workshops, assign faculty leads, manage Google Drive resources, and track registrations.
           </p>
         </div>
 
@@ -71,10 +75,10 @@ export default async function AdminWorkshopsPage() {
           <Link
             href="/workshops"
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 text-xs font-mono font-bold transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 text-xs font-medium transition-colors"
           >
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-            <span>Public Workshops Page</span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+            <span>Public Workshop Portal</span>
           </Link>
         </div>
       </div>

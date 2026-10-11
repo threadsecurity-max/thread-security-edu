@@ -22,8 +22,7 @@ export default async function AdminMentorDirectoryPage() {
           user: {
             include: {
               tsIdentity: true,
-              mentorIdentity: true,
-            } as any,
+            },
           },
           courses: true,
           batches: {

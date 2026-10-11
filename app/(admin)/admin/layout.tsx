@@ -19,9 +19,12 @@ export default async function AdminLayout({
     redirect('/login?error=UnauthorizedAccess');
   }
 
-  const admin = await prisma.user.findFirst({
-    where: { id: session.userId },
-  });
+  const [admin, mentorsCount] = await Promise.all([
+    prisma.user.findFirst({
+      where: { id: session.userId },
+    }),
+    prisma.mentorProfile.count(),
+  ]);
 
   const headerActions = (
     <>
@@ -58,6 +61,7 @@ export default async function AdminLayout({
         email: admin?.email || session.email,
         role: session.role,
       }}
+      mentorsCount={mentorsCount}
       headerActions={headerActions}
     >
       <BroadcastNotificationBanner userId={session.userId} />

@@ -1,25 +1,22 @@
-import Link from 'next/link';
 import { prisma } from '@/server/database/prisma';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   RefreshCw,
   Database,
   CheckCircle2,
   Server,
   Layers,
-  Users,
   Award,
-  ShieldCheck,
-  FileSpreadsheet,
-  Download,
-  ExternalLink,
-  Sparkles,
 } from 'lucide-react';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { DBSyncClient } from './db-sync-client';
+
+export const metadata = {
+  title: 'Database Control & Live Sync Sheet | Thread Security Admin',
+  description: 'Real-time synchronization sheet for relational Prisma models and entities.',
+};
 
 export const revalidate = 0;
 
@@ -29,7 +26,7 @@ export default async function SuperAdminDbSyncPage() {
     redirect('/admin/security-analyst?notice=unauthorized-academic-module');
   }
 
-  // Fetch real-time metrics across Prisma Postgres models
+  // Fetch real-time metrics across Prisma models
   const [usersCount, tsIdCount, coursesCount, certsCount, attemptsCount, auditLogsCount] =
     await Promise.all([
       prisma.user.count(),
@@ -53,24 +50,24 @@ export default async function SuperAdminDbSyncPage() {
   });
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-xs flex items-center gap-1.5">
-              <Database className="w-3.5 h-3.5 text-red-400" />
-              PRISMA POSTGRES SYNC SHEET
-            </Badge>
-            <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-xs">
-              SUPER ADMIN EXCLUSIVE
-            </Badge>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-violet-600" />
+            <span className="text-[11px] font-semibold tracking-wider text-violet-600 uppercase">
+              Relational Database &amp; Entity State
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 font-semibold">
+              Live Synchronized
+            </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 font-mono">
-            Database Control & Live Sync Sheet
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Database Control &amp; Live Sync Sheet
           </h1>
-          <p className="text-xs md:text-sm text-slate-300 max-w-3xl mt-1">
-            Real-time inspection sheet for all relational Prisma models, TS-ID student credentials, certificates, and CSV synchronization status.
+          <p className="text-xs text-slate-500 mt-0.5 max-w-3xl">
+            Real-time inspection sheet for relational Prisma models, student credentials, courses, certificates, and CSV export.
           </p>
         </div>
 
@@ -79,100 +76,101 @@ export default async function SuperAdminDbSyncPage() {
             'use server';
             revalidatePath('/admin/db-sync');
             revalidatePath('/admin/students');
+            revalidatePath('/admin/users');
           }}
         >
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_20px_rgba(220,38,38,0.4)] border border-white/20 active:scale-95 transition-all cursor-pointer backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-xs active:scale-95 transition-all cursor-pointer"
           >
-            <RefreshCw className="w-4 h-4 text-white" />
-            <span>Re-Sync Live Database</span>
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Re-Sync Database Cache</span>
           </button>
         </form>
       </div>
 
       {/* Engine Status Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-red-950/20 backdrop-blur-xl border border-red-500/20 text-white shadow-[0_4px_25px_rgba(220,38,38,0.05)] rounded-2xl">
-          <CardContent className="p-5 flex items-center justify-between">
+        <Card className="bg-white border border-slate-200 text-slate-900 shadow-xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
                 Database Engine
               </span>
-              <div className="text-xl font-bold font-mono text-emerald-400 flex items-center gap-2 mt-1">
-                <Server className="w-5 h-5 text-emerald-400" />
-                Prisma Postgres
+              <div className="text-xl font-bold text-slate-900 flex items-center gap-2 mt-1">
+                <Server className="w-4 h-4 text-violet-600" />
+                PostgreSQL
               </div>
-              <span className="text-[10px] font-mono text-emerald-300 mt-1 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> ONLINE (pooled.db)
+              <span className="text-[11px] font-medium text-emerald-600 mt-1 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Online (Pooled SSL)
               </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            <div className="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
+              <Database className="w-4 h-4" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-red-950/20 backdrop-blur-xl border border-red-500/20 text-white shadow-[0_4px_25px_rgba(220,38,38,0.05)] rounded-2xl">
-          <CardContent className="p-5 flex items-center justify-between">
+        <Card className="bg-white border border-slate-200 text-slate-900 shadow-xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
                 Student TS-IDs
               </span>
-              <div className="text-2xl font-bold font-mono text-red-400 mt-1">
-                {tsIdCount}
+              <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+                {tsIdCount} Identities
               </div>
-              <span className="text-[10px] font-mono text-slate-400 mt-1 block">
-                Synced Accounts ({studentsSyncData.length} active)
+              <span className="text-[11px] text-slate-500 mt-1 block">
+                {usersCount} total users
               </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center">
-              <Users className="w-5 h-5 text-red-400" />
+            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+              <Layers className="w-4 h-4" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-red-950/20 backdrop-blur-xl border border-red-500/20 text-white shadow-[0_4px_25px_rgba(220,38,38,0.05)] rounded-2xl">
-          <CardContent className="p-5 flex items-center justify-between">
+        <Card className="bg-white border border-slate-200 text-slate-900 shadow-xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
             <div>
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
+                Courses &amp; Modules
+              </span>
+              <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+                {coursesCount} Active
+              </div>
+              <span className="text-[11px] text-slate-500 mt-1 block">
+                {attemptsCount} lab attempts
+              </span>
+            </div>
+            <div className="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
+              <Layers className="w-4 h-4" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border border-slate-200 text-slate-900 shadow-xs rounded-xl">
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-medium text-slate-500 uppercase tracking-wider block">
                 Issued Certificates
               </span>
-              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
-                {certsCount}
+              <div className="text-xl font-bold font-mono text-slate-900 mt-1">
+                {certsCount} Verified
               </div>
-              <span className="text-[10px] font-mono text-emerald-300 mt-1 block">
-                SHA-256 Verified Ledgers
+              <span className="text-[11px] text-slate-500 mt-1 block">
+                {auditLogsCount} audit events
               </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-              <Award className="w-5 h-5 text-emerald-400" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-red-950/20 backdrop-blur-xl border border-red-500/20 text-white shadow-[0_4px_25px_rgba(220,38,38,0.05)] rounded-2xl">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
-                Audit Log Entries
-              </span>
-              <div className="text-2xl font-bold font-mono text-rose-400 mt-1">
-                {auditLogsCount}
-              </div>
-              <span className="text-[10px] font-mono text-slate-400 mt-1 block">
-                Append-Only Records
-              </span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-rose-400" />
+            <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <Award className="w-4 h-4" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Interactive DBSyncClient Sheet */}
-      <DBSyncClient studentsSyncData={studentsSyncData} />
+      {/* Sync Table Client */}
+      <DBSyncClient students={studentsSyncData} />
     </div>
   );
 }

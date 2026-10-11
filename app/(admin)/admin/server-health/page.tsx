@@ -14,11 +14,11 @@ export default async function AdminServerHealthPage() {
   const session = await getSession();
   if (
     !session ||
-    (session.role !== 'ADMIN' &&
-      session.role !== 'SUPER_ADMIN' &&
+    (session.role !== 'SUPER_ADMIN' &&
+      session.role !== 'ACADEMIC_ADMIN' &&
       session.role !== 'SECURITY_ADMIN')
   ) {
-    redirect('/auth/login');
+    redirect('/login?error=UnauthorizedAccess');
   }
 
   // 1. Measure PostgreSQL DB ping
