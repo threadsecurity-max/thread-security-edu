@@ -13,6 +13,13 @@ export interface CreateBatchInput {
   endDate?: Date;
   schedule?: string;
   maxCapacity?: number;
+  durationPreset?: '45_DAYS' | '3_MONTHS' | '6_MONTHS' | 'CUSTOM';
+  facultyRole?: 'TEACHER_LECTURER' | 'FACULTY_NON_TEACHING';
+  autoGenerateTimetable?: boolean;
+  daysOfWeek?: string[];
+  startTime?: string;
+  endTime?: string;
+  attendanceLockHours?: number;
 }
 
 export interface MarkAttendanceInput {
@@ -173,7 +180,7 @@ export async function getAllBatchesService() {
 }
 
 /**
- * Super Admin creates a new batch
+ * Super Admin creates a new batch with duration presets and automated timetable generation
  */
 export async function createBatchService(data: CreateBatchInput, adminUserId: string) {
   const cleanCode = data.batchCode.trim().toUpperCase();
@@ -186,17 +193,53 @@ export async function createBatchService(data: CreateBatchInput, adminUserId: st
     throw new Error(`Batch with code '${cleanCode}' already exists.`);
   }
 
+  // Calculate duration-based end date if preset specified
+  let computedEndDate = data.endDate || null;
+  if (data.durationPreset) {
+    const sDate = new Date(data.startDate);
+    if (data.durationPreset === '45_DAYS') {
+      computedEndDate = new Date(sDate.getTime() + 45 * 24 * 60 * 60 * 1000);
+    } else if (data.durationPreset === '3_MONTHS') {
+      const ed = new Date(sDate);
+      ed.setMonth(ed.getMonth() + 3);
+      computedEndDate = ed;
+    } else if (data.durationPreset === '6_MONTHS') {
+      const ed = new Date(sDate);
+      ed.setMonth(ed.getMonth() + 6);
+      computedEndDate = ed;
+    }
+  }
+
+  // Construct schedule string
+  let scheduleStr = data.schedule?.trim();
+  if (!scheduleStr && data.daysOfWeek && data.daysOfWeek.length > 0) {
+    const timeFormatted = data.startTime && data.endTime ? `${data.startTime} - ${data.endTime} IST` : '7:00 PM - 9:00 PM IST';
+    scheduleStr = `${data.daysOfWeek.join(' / ')} • ${timeFormatted}`;
+  }
+  if (!scheduleStr) {
+    scheduleStr = 'Mon / Wed / Fri • 7:00 PM - 9:00 PM IST';
+  }
+
+  // Add note in description if non-teaching faculty
+  let finalDescription = data.description?.trim() || '';
+  if (data.facultyRole === 'FACULTY_NON_TEACHING') {
+    finalDescription = finalDescription
+      ? `[Faculty: Non-Teaching Academic Advisor / Coordinator] ${finalDescription}`
+      : '[Faculty: Non-Teaching Academic Advisor / Coordinator]';
+  }
+
   const batch = await db.batch.create({
     data: {
       batchCode: cleanCode,
       title: data.title.trim(),
-      description: data.description?.trim(),
+      description: finalDescription || null,
       courseId: data.courseId || null,
       mentorId: data.mentorId || null,
       startDate: data.startDate,
-      endDate: data.endDate || null,
-      schedule: data.schedule || 'Mon / Wed / Fri • 7:00 PM - 9:00 PM IST',
+      endDate: computedEndDate,
+      schedule: scheduleStr,
       maxCapacity: data.maxCapacity || 30,
+      attendanceLockHours: data.attendanceLockHours || 120, // 5 days window
     },
     include: {
       course: true,
@@ -204,19 +247,105 @@ export async function createBatchService(data: CreateBatchInput, adminUserId: st
     },
   });
 
+  // Automated Timetable Generation for Teaching Lecturers
+  if (
+    data.facultyRole !== 'FACULTY_NON_TEACHING' &&
+    data.autoGenerateTimetable &&
+    computedEndDate &&
+    data.daysOfWeek &&
+    data.daysOfWeek.length > 0
+  ) {
+    try {
+      const dayMap: Record<string, number> = {
+        sunday: 0, sun: 0,
+        monday: 1, mon: 1,
+        tuesday: 2, tue: 2,
+        wednesday: 3, wed: 3,
+        thursday: 4, thu: 4,
+        friday: 5, fri: 5,
+        saturday: 6, sat: 6,
+      };
+
+      const selectedDayNumbers = new Set(
+        data.daysOfWeek.map((d) => dayMap[d.toLowerCase()]).filter((n) => n !== undefined)
+      );
+
+      // Parse start and end hours for session calculation
+      let startHour = 19;
+      let startMinute = 0;
+      let durationMins = 120;
+
+      if (data.startTime) {
+        const parts = data.startTime.split(':');
+        if (parts.length >= 2) {
+          startHour = parseInt(parts[0], 10);
+          startMinute = parseInt(parts[1], 10);
+        }
+      }
+
+      if (data.startTime && data.endTime) {
+        const endParts = data.endTime.split(':');
+        if (endParts.length >= 2) {
+          const endHour = parseInt(endParts[0], 10);
+          const endMinute = parseInt(endParts[1], 10);
+          const diff = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+          if (diff > 0) durationMins = diff;
+        }
+      }
+
+      // Generate sessions for every matched day from startDate to computedEndDate
+      const sessionsToCreate = [];
+      const cur = new Date(data.startDate);
+      let sessionNumber = 1;
+
+      while (cur <= computedEndDate) {
+        if (selectedDayNumbers.has(cur.getDay())) {
+          const sessionDateTime = new Date(cur);
+          sessionDateTime.setHours(startHour, startMinute, 0, 0);
+
+          sessionsToCreate.push({
+            batchId: batch.id,
+            sessionNumber,
+            title: `Session ${sessionNumber}: Live Lecture & Hands-On Lab`,
+            sessionDate: sessionDateTime,
+            durationMins,
+            agenda: `Core curriculum lecture and practical lab exercises for ${batch.batchCode}`,
+            status: 'SCHEDULED',
+          });
+
+          sessionNumber++;
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+
+      if (sessionsToCreate.length > 0) {
+        await db.batchSession.createMany({
+          data: sessionsToCreate,
+        });
+      }
+    } catch (genErr) {
+      console.warn('[createBatchService] Timetable generation warning:', genErr);
+    }
+  }
+
   await logAuditEvent({
     actorId: adminUserId,
     action: 'BATCH_CREATED_BY_SUPER_ADMIN',
     entity: 'BATCH',
     entityId: batch.id,
-    details: JSON.stringify({ batchCode: batch.batchCode, title: batch.title }),
+    details: JSON.stringify({
+      batchCode: batch.batchCode,
+      title: batch.title,
+      attendanceLockHours: batch.attendanceLockHours,
+      facultyRole: data.facultyRole || 'TEACHER_LECTURER',
+    }),
   });
 
   return batch;
 }
 
 /**
- * Assigns or reassigns a student to a batch
+ * Assigns or reassigns a student to a batch with automatic Course Enrollment sync
  */
 export async function assignStudentToBatchService(
   studentProfileId: string,
@@ -231,6 +360,28 @@ export async function assignStudentToBatchService(
       batch: true,
     },
   });
+
+  // Connectivity fix: Auto-enroll student into batch's course
+  if (batchId && profile.batch?.courseId) {
+    try {
+      await db.enrollment.upsert({
+        where: {
+          userId_courseId: {
+            userId: profile.userId,
+            courseId: profile.batch.courseId,
+          },
+        },
+        update: { status: 'ACTIVE' },
+        create: {
+          userId: profile.userId,
+          courseId: profile.batch.courseId,
+          status: 'ACTIVE',
+        },
+      });
+    } catch (enrErr) {
+      console.warn('[assignStudentToBatchService] Auto-enrollment sync warning:', enrErr);
+    }
+  }
 
   await logAuditEvent({
     actorId: adminUserId,
@@ -833,9 +984,9 @@ export async function updateLectureRecordService(
 }
 
 /**
- * Checks if attendance is locked for a session based on batch.attendanceLockHours (default 24h)
+ * Checks if attendance is locked for a session based on batch.attendanceLockHours (default 120h = 5 days)
  */
-export function isSessionAttendanceLocked(sessionDate: Date, lockHours: number = 24): boolean {
+export function isSessionAttendanceLocked(sessionDate: Date, lockHours: number = 120): boolean {
   const sessionTime = new Date(sessionDate).getTime();
   const currentTime = new Date().getTime();
   const elapsedHours = (currentTime - sessionTime) / (1000 * 60 * 60);

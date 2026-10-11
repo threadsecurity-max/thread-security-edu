@@ -613,6 +613,30 @@ export async function reassignStudentBatchService(
     data: { batchId: newBatchId },
   });
 
+  // Connectivity fix: Auto-enroll student into the batch's associated course
+  if (newBatchId) {
+    const targetBatch = await prisma.batch.findUnique({
+      where: { id: newBatchId },
+      select: { courseId: true },
+    });
+    if (targetBatch?.courseId) {
+      await (prisma as any).enrollment.upsert({
+        where: {
+          userId_courseId: {
+            userId: user.id,
+            courseId: targetBatch.courseId,
+          },
+        },
+        update: { status: 'ACTIVE' },
+        create: {
+          userId: user.id,
+          courseId: targetBatch.courseId,
+          status: 'ACTIVE',
+        },
+      });
+    }
+  }
+
   await logAuditEvent({
     actorId,
     action: 'STUDENT_BATCH_REASSIGNED',

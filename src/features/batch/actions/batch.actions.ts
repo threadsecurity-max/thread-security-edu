@@ -32,6 +32,22 @@ export async function createBatchAction(formData: FormData) {
     return { success: false, error: 'Batch Code, Title, and Start Date are required.' };
   }
 
+  const durationPreset = formData.get('durationPreset') as any;
+  const facultyRole = formData.get('facultyRole') as any;
+  const autoGenerateTimetable =
+    formData.get('autoGenerateTimetable') === 'true' ||
+    formData.get('autoGenerateTimetable') === 'on';
+  const rawDays = formData.getAll('daysOfWeek');
+  const daysOfWeek =
+    rawDays.length > 0
+      ? (rawDays as string[])
+      : formData.get('daysOfWeek')
+      ? (formData.get('daysOfWeek') as string).split(',').map((s) => s.trim())
+      : undefined;
+  const startTime = formData.get('startTime') as string;
+  const endTime = formData.get('endTime') as string;
+  const attendanceLockHoursStr = formData.get('attendanceLockHours') as string;
+
   try {
     const batch = await createBatchService(
       {
@@ -42,8 +58,15 @@ export async function createBatchAction(formData: FormData) {
         mentorId: mentorId || undefined,
         startDate: new Date(startDateStr),
         endDate: endDateStr ? new Date(endDateStr) : undefined,
-        schedule: schedule || 'Mon / Wed / Fri • 7:00 PM - 9:00 PM IST',
+        schedule: schedule || undefined,
         maxCapacity: maxCapacityStr ? parseInt(maxCapacityStr, 10) : 30,
+        durationPreset: durationPreset || undefined,
+        facultyRole: facultyRole || undefined,
+        autoGenerateTimetable,
+        daysOfWeek,
+        startTime: startTime || undefined,
+        endTime: endTime || undefined,
+        attendanceLockHours: attendanceLockHoursStr ? parseInt(attendanceLockHoursStr, 10) : 120,
       },
       session.userId
     );

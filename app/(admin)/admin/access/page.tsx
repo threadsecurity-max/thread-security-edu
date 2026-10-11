@@ -1,9 +1,13 @@
 import { prisma } from '@/server/database/prisma';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
-import { UserCheck, ShieldCheck, Mail, Key, Clock, Copy, Plus, CheckCircle2, Lock } from 'lucide-react';
+import { UserCheck } from 'lucide-react';
 import { AccessInvitationsClient } from '@/app/(admin)/admin/access/access-invitations-client';
+
+export const metadata = {
+  title: 'Access Control & Invitations | Thread Security Admin',
+  description: 'Generate single-use activation tokens, dispatch faculty and student setup links, and monitor token expiration.',
+};
 
 export const revalidate = 0;
 
@@ -19,8 +23,7 @@ export default async function AdminAccessInvitationsPage() {
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
-  } catch (e) {
-    // Graceful fallback
+  } catch {
     invitations = [];
   }
 
@@ -37,21 +40,21 @@ export default async function AdminAccessInvitationsPage() {
   });
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono text-xs flex items-center gap-1.5">
-              <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-              CREDENTIAL &amp; INVITATION DISPATCH
-            </Badge>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-violet-600" />
+            <span className="text-[11px] font-semibold tracking-wider text-violet-600 uppercase">
+              Credential &amp; Invitation Dispatch
+            </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 font-mono">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Access Control &amp; Account Invitations
           </h1>
-          <p className="text-xs md:text-sm text-slate-400 max-w-3xl mt-1 font-mono">
-            Generate single-use activation tokens, dispatch faculty and student setup links, monitor token expiration, and audit credential provisioning.
+          <p className="text-xs text-slate-500 mt-0.5 max-w-3xl">
+            Generate single-use activation tokens, dispatch faculty and student onboarding links, monitor expiration, and audit credential provisioning.
           </p>
         </div>
       </div>

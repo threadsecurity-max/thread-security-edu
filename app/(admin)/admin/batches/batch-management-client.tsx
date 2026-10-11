@@ -292,6 +292,42 @@ export function BatchManagementClient({
   });
   const [editBatchDate, setEditBatchDate] = useState('');
 
+  // Duration Presets & Timetable States
+  const [durationPreset, setDurationPreset] = useState<'45_DAYS' | '3_MONTHS' | '6_MONTHS' | 'CUSTOM'>('3_MONTHS');
+  const [facultyRole, setFacultyRole] = useState<'TEACHER_LECTURER' | 'FACULTY_NON_TEACHING'>('TEACHER_LECTURER');
+  const [selectedDays, setSelectedDays] = useState<string[]>(['Mon', 'Wed', 'Fri']);
+  const [batchStartTime, setBatchStartTime] = useState('19:00');
+  const [batchEndTime, setBatchEndTime] = useState('21:00');
+  const [autoGenerateTimetable, setAutoGenerateTimetable] = useState(true);
+  const [attendanceLockHours, setAttendanceLockHours] = useState(120);
+
+  const calculateEndDate = (startDateStr: string, preset: '45_DAYS' | '3_MONTHS' | '6_MONTHS' | 'CUSTOM') => {
+    if (!startDateStr || preset === 'CUSTOM') return '';
+    const d = new Date(startDateStr);
+    if (preset === '45_DAYS') {
+      d.setDate(d.getDate() + 45);
+    } else if (preset === '3_MONTHS') {
+      d.setMonth(d.getMonth() + 3);
+    } else if (preset === '6_MONTHS') {
+      d.setMonth(d.getMonth() + 6);
+    }
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const computedEndDate = calculateEndDate(createBatchDate, durationPreset);
+
+  const toggleDaySelection = (day: string) => {
+    if (selectedDays.includes(day)) {
+      if (selectedDays.length > 1) {
+        setSelectedDays(selectedDays.filter((d) => d !== day));
+      }
+    } else {
+      setSelectedDays([...selectedDays, day]);
+    }
+  };
+
+  const daysList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
   const handleCreateBatch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -469,28 +505,29 @@ export function BatchManagementClient({
   return (
     <div className="space-y-6 text-slate-900 font-sans">
       {/* Top Header & DB Persistence Status Banner */}
-      <div className="p-5 rounded-3xl bg-white border border-red-200/80 text-slate-950 shadow-[0_4px_20px_rgba(220,38,38,0.04)] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-white border border-slate-200 text-slate-900 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] flex items-center gap-1 font-bold">
-              <Database className="w-3 h-3 text-red-600" />
+            <span className="w-2 h-2 rounded-full bg-violet-600" />
+            <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-mono text-[10px] flex items-center gap-1 font-semibold">
+              <Database className="w-3 h-3 text-violet-600" />
               PostgreSQL DB Persisted
             </Badge>
             <span className="text-xs text-slate-500 font-mono">
-              Real-Time Batch & Attendance Synchronization
+              Duration-Based Cohorts • 5-Day Attendance Policy
             </span>
           </div>
-          <h1 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
-            Academic Batches, Timetable Calendar & Attendance Audit
+          <h1 className="text-xl font-bold font-mono text-slate-900 flex items-center gap-2">
+            Academic Batches, Timetable Calendar &amp; Attendance Audit
           </h1>
-          <p className="text-xs text-slate-600 mt-1 max-w-3xl">
-            Schedule lecture sessions via the interactive calendar, track mentor delivery on specific dates, and manage student attendance logs with full database storage.
+          <p className="text-xs text-slate-500 mt-1 max-w-3xl">
+            Configure 45-day, 3-month, or 6-month cohorts, classify teaching lecturers vs non-teaching faculty, build published student timetables, and monitor the 5-day attendance window.
           </p>
         </div>
 
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600 via-rose-600 to-red-700 hover:from-red-500 hover:to-rose-500 text-white font-mono font-bold text-xs shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500 active:scale-95 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
+          className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-mono font-semibold text-xs shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap self-start md:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Conduct New Batch</span>
@@ -565,14 +602,14 @@ export function BatchManagementClient({
             return (
               <Card
                 key={batch.id}
-                className="bg-white border border-red-200/80 text-slate-950 hover:border-red-400 hover:shadow-md transition-all rounded-3xl flex flex-col justify-between shadow-[0_4px_20px_rgba(220,38,38,0.03)]"
+                className="bg-white border border-slate-200 text-slate-900 hover:border-violet-300 hover:shadow-md transition-all rounded-2xl flex flex-col justify-between shadow-xs"
               >
                 <div>
                   <CardHeader className="p-5 pb-3">
                     <div className="flex items-center justify-between gap-2 mb-1.5">
                       <Badge
                         variant="outline"
-                        className="font-mono text-[10px] text-red-700 border-red-200 bg-red-50 font-bold"
+                        className="font-mono text-[10px] text-violet-700 border-violet-200 bg-violet-50 font-bold"
                       >
                         {batch.batchCode}
                       </Badge>
@@ -586,19 +623,19 @@ export function BatchManagementClient({
                         {batch.status}
                       </Badge>
                     </div>
-                    <CardTitle className="text-base font-bold font-sans text-slate-950">
+                    <CardTitle className="text-base font-bold font-sans text-slate-900">
                       {batch.title}
                     </CardTitle>
                   </CardHeader>
 
                   <CardContent className="p-5 pt-0 space-y-3.5 text-xs text-slate-700">
-                    <div className="p-3 rounded-2xl bg-red-50/40 border border-red-200/80 space-y-1.5 font-mono text-[11px]">
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 font-mono text-[11px]">
                       <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-slate-500">
-                          <ShieldCheck className="w-3.5 h-3.5 text-red-600" />
+                          <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
                           Faculty Lead:
                         </span>
-                        <strong className="text-slate-950 font-bold truncate max-w-[150px]">
+                        <strong className="text-slate-900 font-bold truncate max-w-[150px]">
                           {batch.mentor?.user?.name || 'Unassigned'}
                         </strong>
                       </div>
@@ -608,7 +645,7 @@ export function BatchManagementClient({
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           Schedule:
                         </span>
-                        <span className="text-[10px] text-red-700 font-bold truncate max-w-[150px]">
+                        <span className="text-[10px] text-violet-700 font-bold truncate max-w-[150px]">
                           {batch.schedule || 'Mon/Wed/Fri 7-9 PM'}
                         </span>
                       </div>
@@ -618,7 +655,7 @@ export function BatchManagementClient({
                           <BookOpen className="w-3.5 h-3.5 text-slate-400" />
                           Lectures Conducted:
                         </span>
-                        <strong className="text-slate-950">{sessionCount} Live Classes</strong>
+                        <strong className="text-slate-900">{sessionCount} Live Classes</strong>
                       </div>
                     </div>
 
@@ -626,13 +663,13 @@ export function BatchManagementClient({
                     <div className="space-y-1">
                       <div className="flex justify-between text-[11px] font-mono">
                         <span className="text-slate-600">Enrolled Students:</span>
-                        <strong className="text-red-700 font-bold">
+                        <strong className="text-violet-700 font-bold">
                           {studentCount} / {batch.maxCapacity} Max
                         </strong>
                       </div>
-                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-red-100">
+                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
                         <div
-                          className="bg-gradient-to-r from-red-600 to-rose-600 h-full rounded-full transition-all"
+                          className="bg-gradient-to-r from-violet-600 to-indigo-600 h-full rounded-full transition-all"
                           style={{
                             width: `${Math.min(100, (studentCount / batch.maxCapacity) * 100)}%`,
                           }}
@@ -691,32 +728,32 @@ export function BatchManagementClient({
       {/* 📅 TAB 2: INTERACTIVE LECTURE CALENDAR & CONDUCT SESSION */}
       {/* ========================================================================= */}
       {activeTab === 'calendar' && (
-        <div className="p-6 rounded-3xl bg-white border border-red-200/80 space-y-6 shadow-[0_4px_20px_rgba(220,38,38,0.04)]">
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 space-y-6 shadow-xs font-sans">
           {/* Calendar Header Controls */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-200 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
-              <h2 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-red-600" />
-                {monthName} Lecture Schedule
+              <h2 className="text-xl font-bold font-mono text-slate-900 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-violet-600" />
+                {monthName} Lecture Schedule &amp; Timetable
               </h2>
-              <p className="text-xs text-slate-600 mt-0.5">
-                Click any calendar date cell to schedule a lecture, or click existing session badges to review/mark attendance.
+              <p className="text-xs text-slate-500 mt-0.5">
+                Displays live class timings, ongoing status, and active 5-day attendance windows for faculty mentors and students.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setCalendarMonth(new Date(year, month - 1, 1))}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 border border-slate-200 cursor-pointer transition-all"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 cursor-pointer transition-all"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="font-mono text-sm font-bold text-red-700 min-w-[120px] text-center">
+              <span className="font-mono text-sm font-bold text-violet-700 min-w-[140px] text-center">
                 {monthName}
               </span>
               <button
                 onClick={() => setCalendarMonth(new Date(year, month + 1, 1))}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 border border-slate-200 cursor-pointer transition-all"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 border border-slate-200 cursor-pointer transition-all"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -724,9 +761,9 @@ export function BatchManagementClient({
           </div>
 
           {/* Monthly Calendar Grid */}
-          <div className="border border-red-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+          <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
             {/* Days of Week Header */}
-            <div className="grid grid-cols-7 border-b border-red-200 bg-red-50/70 text-center font-mono text-xs font-bold text-red-950 py-2.5">
+            <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 text-center font-mono text-xs font-semibold text-slate-700 py-2.5">
               <span>SUN</span>
               <span>MON</span>
               <span>TUE</span>
@@ -737,10 +774,10 @@ export function BatchManagementClient({
             </div>
 
             {/* Calendar Cells */}
-            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-red-100 text-xs">
+            <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-slate-100 text-xs">
               {/* Padding Days Before First Day of Month */}
               {Array.from({ length: firstDayIndex }).map((_, idx) => (
-                <div key={`pad-${idx}`} className="h-28 bg-slate-50/40 p-2 text-slate-300 pointer-events-none" />
+                <div key={`pad-${idx}`} className="h-32 bg-slate-50/40 p-2 text-slate-300 pointer-events-none" />
               ))}
 
               {/* Days of the Month */}
@@ -765,33 +802,52 @@ export function BatchManagementClient({
                   new Date().getMonth() === month &&
                   new Date().getDate() === dayNum;
 
+                const now = new Date();
+
                 return (
                   <div
                     key={`day-${dayNum}`}
                     onClick={() => handleCalendarDayClick(dayNum)}
-                    className={`h-32 p-2 border-red-100 hover:bg-red-50/40 transition-colors cursor-pointer flex flex-col justify-between group ${
-                      isToday ? 'bg-red-50/70 border border-red-300' : 'bg-white'
+                    className={`min-h-[140px] p-2 hover:bg-violet-50/30 transition-colors cursor-pointer flex flex-col justify-between group ${
+                      isToday ? 'bg-violet-50/40 border border-violet-300' : 'bg-white'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
                         className={`font-mono text-xs font-bold px-2 py-0.5 rounded-full ${
                           isToday
-                            ? 'bg-red-600 text-white shadow-[0_2px_8px_rgba(220,38,38,0.4)]'
-                            : 'text-slate-700 group-hover:text-red-700'
+                            ? 'bg-violet-600 text-white shadow-xs'
+                            : 'text-slate-700 group-hover:text-violet-700'
                         }`}
                       >
                         {dayNum}
                       </span>
-                      <span className="text-[9px] text-slate-400 group-hover:text-red-600 font-mono opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                      <span className="text-[9px] text-slate-400 group-hover:text-violet-600 font-mono opacity-0 group-hover:opacity-100 transition-opacity font-semibold">
                         + Schedule
                       </span>
                     </div>
 
                     {/* Session Pills on this Date */}
-                    <div className="space-y-1 overflow-y-auto max-h-20 my-1">
+                    <div className="space-y-1.5 overflow-y-auto max-h-24 my-1">
                       {daySessions.map((sess: any) => {
-                        const sessTime = new Date(sess.sessionDate).toLocaleTimeString('en-US', {
+                        const sessStart = new Date(sess.sessionDate);
+                        const duration = sess.durationMins || 120;
+                        const sessEnd = new Date(sessStart.getTime() + duration * 60 * 1000);
+
+                        let ongoingStatus: 'LIVE' | 'UPCOMING' | 'COMPLETED' = 'UPCOMING';
+                        if (now >= sessStart && now <= sessEnd) {
+                          ongoingStatus = 'LIVE';
+                        } else if (now > sessEnd) {
+                          ongoingStatus = 'COMPLETED';
+                        }
+
+                        // 5-Day Attendance Window Calculation
+                        const elapsedHours = (now.getTime() - sessStart.getTime()) / (1000 * 60 * 60);
+                        const lockHours = sess.batch?.attendanceLockHours || 120; // 5 days default
+                        const isWindowOpen = elapsedHours <= lockHours;
+                        const daysRemaining = Math.max(0, Math.ceil((lockHours - elapsedHours) / 24));
+
+                        const sessTimeFormatted = sessStart.toLocaleTimeString('en-US', {
                           hour: '2-digit',
                           minute: '2-digit',
                         });
@@ -803,14 +859,52 @@ export function BatchManagementClient({
                               e.stopPropagation();
                               openAttendanceModal(sess, sess.batch);
                             }}
-                            className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-[10px] font-mono space-y-0.5 shadow-xs transition-all"
+                            className={`p-1.5 rounded-lg border text-[10px] font-mono space-y-1 shadow-xs transition-all cursor-pointer ${
+                              ongoingStatus === 'LIVE'
+                                ? 'bg-violet-100 border-violet-400 text-violet-950 ring-1 ring-violet-400'
+                                : ongoingStatus === 'UPCOMING'
+                                ? 'bg-slate-50 border-slate-200 text-slate-900 hover:bg-slate-100'
+                                : 'bg-slate-100/80 border-slate-200 text-slate-700'
+                            }`}
                             title="Click to Review & Mark Attendance"
                           >
-                            <div className="flex items-center justify-between text-red-900 font-bold">
-                              <span className="truncate max-w-[80px]">{sess.batchCode}</span>
-                              <span className="text-[9px] text-red-700">{sessTime}</span>
+                            <div className="flex items-center justify-between font-bold">
+                              <span className="truncate max-w-[85px]">{sess.batchCode}</span>
+                              <span className="text-[9px] text-slate-600">{sessTimeFormatted}</span>
                             </div>
-                            <span className="text-slate-900 block truncate text-[10px]">{sess.title}</span>
+
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              {ongoingStatus === 'LIVE' ? (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full bg-violet-600 text-white text-[8px] font-bold uppercase tracking-wider animate-pulse">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                                  Live Now
+                                </span>
+                              ) : ongoingStatus === 'UPCOMING' ? (
+                                <span className="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700 text-[8px] font-semibold uppercase">
+                                  Upcoming
+                                </span>
+                              ) : (
+                                <span className="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-600 text-[8px] font-semibold uppercase">
+                                  Completed
+                                </span>
+                              )}
+
+                              {ongoingStatus === 'COMPLETED' && (
+                                <span
+                                  className={`px-1.5 py-0.2 rounded-full text-[8px] font-semibold ${
+                                    isWindowOpen
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                      : 'bg-slate-200 text-slate-500'
+                                  }`}
+                                >
+                                  {isWindowOpen ? `5-Day Attd: ${daysRemaining}d Left` : 'Attd Locked'}
+                                </span>
+                              )}
+                            </div>
+
+                            <span className="text-slate-900 block truncate text-[10px] font-sans font-medium">
+                              {sess.title}
+                            </span>
                           </div>
                         );
                       })}
@@ -827,25 +921,25 @@ export function BatchManagementClient({
       {/* 🔍 TAB 3: DEDICATED LECTURE DELIVERY & ATTENDANCE AUDIT LEDGER */}
       {/* ========================================================================= */}
       {activeTab === 'audit' && (
-        <div className="p-6 rounded-3xl bg-white border border-red-200/80 space-y-6 shadow-[0_4px_20px_rgba(220,38,38,0.04)] font-sans">
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 space-y-6 shadow-xs font-sans">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-red-200 pb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
             <div>
-              <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] mb-1 font-bold">
+              <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-mono text-[10px] mb-1 font-semibold">
                 ATTENDANCE AUDIT LEDGER
               </Badge>
-              <h2 className="text-xl font-bold font-mono text-slate-950 flex items-center gap-2">
+              <h2 className="text-xl font-bold font-mono text-slate-900 flex items-center gap-2">
                 <CheckSquare className="w-5 h-5 text-emerald-600" />
-                Date & Lecture Inspection Ledger
+                Date &amp; Lecture Inspection Ledger
               </h2>
-              <p className="text-xs text-slate-600 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Audit every lecture delivered on any specific date, verify faculty agenda logs, and inspect student check-in records.
               </p>
             </div>
 
             <button
               onClick={loadDeliveredLectures}
-              className="px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-mono font-bold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 font-mono font-semibold text-xs shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
             >
               <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
               <span>Refresh Ledger</span>
@@ -853,33 +947,33 @@ export function BatchManagementClient({
           </div>
 
           {/* Filter Bar */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-red-200 space-y-3 font-mono text-xs">
-            <span className="font-bold text-slate-950 uppercase text-[11px] flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-red-600" />
-              Filter Delivered Lectures by Date, Cohort & Faculty
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 font-mono text-xs">
+            <span className="font-semibold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-violet-600" />
+              Filter Delivered Lectures by Date, Cohort &amp; Faculty
             </span>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-bold">
+                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-semibold">
                   Select Specific Date
                 </label>
                 <input
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-bold">
+                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-semibold">
                   Filter by Cohort / Batch
                 </label>
                 <select
                   value={batchFilter}
                   onChange={(e) => setBatchFilter(e.target.value)}
-                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600"
                 >
                   <option value="ALL">-- All Batches --</option>
                   {batches.map((b) => (
@@ -891,13 +985,13 @@ export function BatchManagementClient({
               </div>
 
               <div>
-                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-bold">
+                <label className="block text-[10px] text-slate-600 uppercase mb-1 font-semibold">
                   Filter by Faculty Lead
                 </label>
                 <select
                   value={mentorFilter}
                   onChange={(e) => setMentorFilter(e.target.value)}
-                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600"
                 >
                   <option value="ALL">-- All Mentors --</option>
                   {mentors.map((m) => (
@@ -913,7 +1007,7 @@ export function BatchManagementClient({
               <div className="flex justify-between items-center pt-1">
                 <span className="text-[11px] text-slate-700">
                   Showing filtered delivered lectures for:{' '}
-                  <strong className="text-red-700">
+                  <strong className="text-violet-700">
                     {dateFilter ? new Date(dateFilter).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }) : 'All Dates'}
                   </strong>
                 </span>
@@ -1422,25 +1516,244 @@ export function BatchManagementClient({
               label="START DATE (CALENDAR SELECTOR) *"
             />
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">MAX CAPACITY</label>
-                <input
-                  type="number"
-                  name="maxCapacity"
-                  defaultValue="30"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
-                />
+            {/* DURATION-BASED FORMAT (45 DAYS, 3 MONTHS, 6 MONTHS) */}
+            <div className="space-y-1.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="flex items-center justify-between">
+                <label className="text-slate-800 font-semibold text-xs flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-violet-600" />
+                  BATCH DURATION FORMAT *
+                </label>
+                {computedEndDate && (
+                  <span className="text-[11px] font-mono font-semibold text-violet-700">
+                    Concludes: {new Date(computedEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </span>
+                )}
               </div>
+              <input type="hidden" name="durationPreset" value={durationPreset} />
+              <input type="hidden" name="endDate" value={computedEndDate} />
 
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">SCHEDULE &amp; TIMINGS</label>
-                <input
-                  name="schedule"
-                  defaultValue="Mon / Wed / Fri • 7:00 PM - 9:00 PM IST"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
-                />
+              <div className="grid grid-cols-4 gap-2 pt-1">
+                {(['45_DAYS', '3_MONTHS', '6_MONTHS', 'CUSTOM'] as const).map((preset) => {
+                  const label =
+                    preset === '45_DAYS'
+                      ? '45 Days'
+                      : preset === '3_MONTHS'
+                      ? '3 Months'
+                      : preset === '6_MONTHS'
+                      ? '6 Months'
+                      : 'Custom';
+                  const isSelected = durationPreset === preset;
+                  return (
+                    <button
+                      type="button"
+                      key={preset}
+                      onClick={() => setDurationPreset(preset)}
+                      className={`py-2 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer text-center ${
+                        isSelected
+                          ? 'bg-violet-600 text-white border-violet-600 shadow-xs'
+                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
+            </div>
+
+            {/* FACULTY CLASSIFICATION: TEACHING LECTURER vs NON-TEACHING FACULTY */}
+            <div className="space-y-2 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <label className="text-slate-800 font-semibold text-xs flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
+                FACULTY ROLE CLASSIFICATION *
+              </label>
+              <input type="hidden" name="facultyRole" value={facultyRole} />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
+                <div
+                  onClick={() => setFacultyRole('TEACHER_LECTURER')}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    facultyRole === 'TEACHER_LECTURER'
+                      ? 'bg-violet-50/80 border-violet-400 ring-1 ring-violet-400 shadow-xs'
+                      : 'bg-white border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-slate-900 text-xs">Teaching Lecturer</span>
+                    <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                      facultyRole === 'TEACHER_LECTURER' ? 'border-violet-600 bg-violet-600' : 'border-slate-300'
+                    }`}>
+                      {facultyRole === 'TEACHER_LECTURER' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-tight">
+                    Conducts live lectures &amp; practical labs. Builds student timetable.
+                  </p>
+                </div>
+
+                <div
+                  onClick={() => setFacultyRole('FACULTY_NON_TEACHING')}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    facultyRole === 'FACULTY_NON_TEACHING'
+                      ? 'bg-violet-50/80 border-violet-400 ring-1 ring-violet-400 shadow-xs'
+                      : 'bg-white border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-slate-900 text-xs">Faculty Member Only</span>
+                    <span className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                      facultyRole === 'FACULTY_NON_TEACHING' ? 'border-violet-600 bg-violet-600' : 'border-slate-300'
+                    }`}>
+                      {facultyRole === 'FACULTY_NON_TEACHING' && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 leading-tight">
+                    Academic Advisor / Student Coordinator. Not involved in lecturing (No timetable scheduled).
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* SCHEDULE & TIMINGS SECTION */}
+            {facultyRole === 'TEACHER_LECTURER' ? (
+              <div className="space-y-3 p-3.5 rounded-xl bg-violet-50/40 border border-violet-200/80">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-violet-900 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-violet-600" />
+                    SCHEDULE &amp; TIMINGS — BUILD MENTOR TIMETABLE
+                  </span>
+                  <Badge className="bg-violet-100 text-violet-800 border border-violet-200 text-[10px] font-mono">
+                    IST (UTC+05:30)
+                  </Badge>
+                </div>
+
+                {/* Days of Week Multi-Select */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-700 mb-1.5">
+                    SELECT LECTURE DAYS (WEEKLY)
+                  </label>
+                  <input type="hidden" name="daysOfWeek" value={selectedDays.join(',')} />
+                  <div className="flex flex-wrap gap-1.5">
+                    {daysList.map((day) => {
+                      const isDaySelected = selectedDays.includes(day);
+                      return (
+                        <button
+                          type="button"
+                          key={day}
+                          onClick={() => toggleDaySelection(day)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+                            isDaySelected
+                              ? 'bg-violet-600 text-white border-violet-600 shadow-xs'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Batch Class Timing */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      CLASS START TIME *
+                    </label>
+                    <input
+                      type="time"
+                      name="startTime"
+                      value={batchStartTime}
+                      onChange={(e) => setBatchStartTime(e.target.value)}
+                      required
+                      className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                      CLASS END TIME *
+                    </label>
+                    <input
+                      type="time"
+                      name="endTime"
+                      value={batchEndTime}
+                      onChange={(e) => setBatchEndTime(e.target.value)}
+                      required
+                      className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
+                    />
+                  </div>
+                </div>
+
+                {/* Generated Schedule Preview */}
+                <div className="p-2.5 rounded-lg bg-white border border-violet-200 text-[11px] font-mono text-slate-800 flex items-center justify-between">
+                  <span className="text-slate-500 font-sans">Schedule String:</span>
+                  <strong className="text-violet-700">
+                    {selectedDays.join(' / ')} • {batchStartTime} - {batchEndTime} IST
+                  </strong>
+                  <input
+                    type="hidden"
+                    name="schedule"
+                    value={`${selectedDays.join(' / ')} • ${batchStartTime} - ${batchEndTime} IST`}
+                  />
+                </div>
+
+                {/* Auto-generate Timetable Checkbox */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="checkbox"
+                    id="autoGenTimetable"
+                    name="autoGenerateTimetable"
+                    checked={autoGenerateTimetable}
+                    onChange={(e) => setAutoGenerateTimetable(e.target.checked)}
+                    className="w-4 h-4 rounded text-violet-600 accent-violet-600 cursor-pointer"
+                  />
+                  <label htmlFor="autoGenTimetable" className="text-xs font-semibold text-slate-800 cursor-pointer">
+                    Automatically build &amp; publish mentor timetable for enrolled students
+                  </label>
+                </div>
+
+                {/* 5-Day Attendance Policy Activation */}
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <div>
+                      <span className="text-xs font-bold text-emerald-900 block">
+                        5-Day Attendance Window Active (120 Hours)
+                      </span>
+                      <span className="text-[11px] text-emerald-700">
+                        Mentor can mark and update student attendance for up to 5 days post-session.
+                      </span>
+                    </div>
+                  </div>
+                  <input type="hidden" name="attendanceLockHours" value={attendanceLockHours} />
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 text-[10px] font-mono font-bold">
+                    5 DAYS
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                <div className="flex items-center gap-2 text-amber-900 font-semibold text-xs">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Academic Advisor Aligned (Non-Teaching)</span>
+                </div>
+                <p className="text-[11px] text-amber-700 leading-normal">
+                  Mentor is aligned with the batch for mentorship and guidance only. No classroom lecture sessions will be generated in their timetable.
+                </p>
+                <input type="hidden" name="schedule" value="Academic Advisory & Mentorship Cohort" />
+                <input type="hidden" name="autoGenerateTimetable" value="false" />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-slate-700 font-semibold mb-1">MAX CAPACITY</label>
+              <input
+                type="number"
+                name="maxCapacity"
+                defaultValue="30"
+                className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -1456,7 +1769,7 @@ export function BatchManagementClient({
                 disabled={loading}
                 className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs cursor-pointer shadow-sm disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Launch Batch'}
+                {loading ? 'Creating...' : 'Launch Batch & Publish Timetable'}
               </button>
             </div>
           </form>
@@ -1599,33 +1912,33 @@ export function BatchManagementClient({
           open={!!selectedBatchForStudents}
           onOpenChange={(open) => !open && setSelectedBatchForStudents(null)}
         >
-          <DialogContent className="max-w-2xl bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
-            <DialogHeader className="border-b border-red-100 pb-3">
+          <DialogContent className="max-w-2xl bg-white border border-slate-200 text-slate-900 shadow-2xl rounded-2xl p-6 max-h-[88vh] flex flex-col font-sans">
+            <DialogHeader className="border-b border-slate-100 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] mb-1 font-bold">
+                  <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-mono text-[10px] mb-1 font-semibold">
                     {selectedBatchForStudents.batchCode}
                   </Badge>
-                  <DialogTitle className="text-lg font-bold font-mono text-slate-950">
-                    Batch Student Roster & TS-ID Enrollment
+                  <DialogTitle className="text-lg font-bold font-mono text-slate-900">
+                    Batch Student Roster &amp; TS-ID Enrollment
                   </DialogTitle>
                 </div>
-                <Badge variant="outline" className="font-mono text-xs text-red-700 border-red-200 bg-red-50">
+                <Badge variant="outline" className="font-mono text-xs text-violet-700 border-violet-200 bg-violet-50">
                   {selectedBatchForStudents.students?.length || 0} Students Enrolled
                 </Badge>
               </div>
             </DialogHeader>
 
             {feedbackMsg && (
-              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-xs font-mono">
                 {feedbackMsg}
               </div>
             )}
 
             <div className="py-3 space-y-4 flex-1 overflow-hidden flex flex-col text-xs font-mono">
-              <form onSubmit={handleFastEnrollByTsId} className="p-4 rounded-2xl bg-red-50/50 border border-red-200/80 space-y-2">
-                <span className="font-bold text-slate-950 uppercase text-[11px] flex items-center gap-1.5">
-                  <UserPlus className="w-3.5 h-3.5 text-red-600" />
+              <form onSubmit={handleFastEnrollByTsId} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="font-semibold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+                  <UserPlus className="w-3.5 h-3.5 text-violet-600" />
                   Fast Enroll Student by Student ID (TS-ID / Email)
                 </span>
                 <div className="flex gap-2">
@@ -1634,12 +1947,12 @@ export function BatchManagementClient({
                     placeholder="Enter Student TS-ID (e.g. TS-C126, TS-A103) or Email..."
                     value={tsIdInput}
                     onChange={(e) => setTsIdInput(e.target.value)}
-                    className="flex-1 bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs placeholder:text-slate-400 focus:outline-none focus:border-red-500"
+                    className="flex-1 bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs placeholder:text-slate-400 focus:outline-none focus:border-violet-600"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(220,38,38,0.25)] whitespace-nowrap border border-red-500"
+                    className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs cursor-pointer shadow-xs whitespace-nowrap"
                   >
                     Enroll Student
                   </button>
@@ -1652,11 +1965,11 @@ export function BatchManagementClient({
                   placeholder="Filter student directory by Name, Email, or TS-ID..."
                   value={searchStudent}
                   onChange={(e) => setSearchStudent(e.target.value)}
-                  className="w-full bg-slate-50 border border-red-200 text-slate-950 pl-9 pr-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500 focus:bg-white"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 pl-9 pr-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600 focus:bg-white"
                 />
               </div>
 
-              <div className="flex-1 overflow-y-auto border border-red-200 rounded-2xl divide-y divide-red-100 bg-white">
+              <div className="flex-1 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
                 {filteredStudents.map((student) => {
                   const isAssigned = student.batchId === selectedBatchForStudents.id;
                   const tsId = student.user?.tsIdentity?.tsId || 'TS-STUDENT';
@@ -1664,18 +1977,18 @@ export function BatchManagementClient({
                   return (
                     <div
                       key={student.id}
-                      className="p-3 flex items-center justify-between gap-3 hover:bg-red-50/40 transition-colors"
+                      className="p-3 flex items-center justify-between gap-3 hover:bg-violet-50/40 transition-colors"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-slate-950">
+                          <span className="font-semibold text-xs text-slate-900">
                             {student.user?.name || 'Student'}
                           </span>
-                          <span className="font-mono text-[10px] text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200 font-bold">
+                          <span className="font-mono text-[10px] text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200 font-semibold">
                             {tsId}
                           </span>
                         </div>
-                        <span className="text-[11px] text-slate-600 block font-sans">
+                        <span className="text-[11px] text-slate-500 block font-sans">
                           {student.user?.email} • Goal: {student.careerGoal || 'Cyber Security'}
                         </span>
                       </div>
@@ -1684,7 +1997,7 @@ export function BatchManagementClient({
                         <button
                           disabled={loading}
                           onClick={() => handleAssignStudent(student.id, null)}
-                          className="px-3 py-1.5 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95"
+                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-mono font-semibold cursor-pointer transition-all active:scale-95"
                         >
                           Remove from Batch
                         </button>
@@ -1694,9 +2007,9 @@ export function BatchManagementClient({
                           onClick={() =>
                             handleAssignStudent(student.id, selectedBatchForStudents.id)
                           }
-                          className="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-mono font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
                         >
-                          <Plus className="w-3 h-3 text-red-600" />
+                          <Plus className="w-3 h-3 text-violet-600" />
                           <span>Assign</span>
                         </button>
                       )}
@@ -1706,10 +2019,10 @@ export function BatchManagementClient({
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-red-100">
+            <div className="flex justify-end pt-3 border-t border-slate-100">
               <button
                 onClick={() => setSelectedBatchForStudents(null)}
-                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs cursor-pointer font-bold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs cursor-pointer font-semibold"
               >
                 Done
               </button>
@@ -1724,33 +2037,33 @@ export function BatchManagementClient({
           open={!!selectedBatchForSessions}
           onOpenChange={(open) => !open && setSelectedBatchForSessions(null)}
         >
-          <DialogContent className="max-w-2xl bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
-            <DialogHeader className="border-b border-red-100 pb-3">
+          <DialogContent className="max-w-2xl bg-white border border-slate-200 text-slate-900 shadow-2xl rounded-2xl p-6 max-h-[88vh] flex flex-col font-sans">
+            <DialogHeader className="border-b border-slate-100 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Badge className="bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] mb-1 font-bold">
+                  <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-mono text-[10px] mb-1 font-semibold">
                     {selectedBatchForSessions.batchCode}
                   </Badge>
-                  <DialogTitle className="text-lg font-bold font-mono text-slate-950">
-                    Conducted Lectures & Attendance Ledger
+                  <DialogTitle className="text-lg font-bold font-mono text-slate-900">
+                    Conducted Lectures &amp; Attendance Ledger
                   </DialogTitle>
                 </div>
-                <Badge variant="outline" className="font-mono text-xs text-red-700 border-red-200 bg-red-50">
+                <Badge variant="outline" className="font-mono text-xs text-violet-700 border-violet-200 bg-violet-50">
                   {selectedBatchForSessions.sessions?.length || 0} Lectures Conducted
                 </Badge>
               </div>
             </DialogHeader>
 
             {feedbackMsg && (
-              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-xs font-mono">
                 {feedbackMsg}
               </div>
             )}
 
             <div className="py-3 space-y-4 flex-1 overflow-y-auto text-xs font-mono">
-              <form onSubmit={handleCreateSession} className="p-4 rounded-2xl bg-red-50/50 border border-red-200/80 space-y-3">
-                <span className="font-bold text-slate-950 uppercase text-[11px] flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-red-600" />
+              <form onSubmit={handleCreateSession} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <span className="font-semibold text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-violet-600" />
                   Schedule / Conduct Lecture Session
                 </span>
 
@@ -1761,14 +2074,14 @@ export function BatchManagementClient({
                     value={newSessionTitle}
                     onChange={(e) => setNewSessionTitle(e.target.value)}
                     required
-                    className="bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
+                    className="bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600"
                   />
                   <input
                     type="datetime-local"
                     value={newSessionDate}
                     onChange={(e) => setNewSessionDate(e.target.value)}
                     required
-                    className="bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
+                    className="bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600"
                   />
                 </div>
 
@@ -1777,45 +2090,45 @@ export function BatchManagementClient({
                   placeholder="Session Agenda / Target Labs..."
                   value={newSessionAgenda}
                   onChange={(e) => setNewSessionAgenda(e.target.value)}
-                  className="w-full bg-white border border-red-200 text-slate-950 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-red-500"
+                  className="w-full bg-white border border-slate-200 text-slate-900 px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600"
                 />
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500"
+                  className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs cursor-pointer shadow-xs"
                 >
                   Schedule Session
                 </button>
               </form>
 
               <div className="space-y-2">
-                <span className="font-bold text-slate-800 block uppercase text-[11px]">
+                <span className="font-semibold text-slate-800 block uppercase text-[11px]">
                   Conducted Lecture Sessions ({selectedBatchForSessions.sessions?.length || 0})
                 </span>
 
                 {(!selectedBatchForSessions.sessions || selectedBatchForSessions.sessions.length === 0) ? (
-                  <div className="p-6 text-center text-slate-500 font-sans border border-red-100 rounded-2xl bg-slate-50">
+                  <div className="p-6 text-center text-slate-500 font-sans border border-slate-200 rounded-xl bg-slate-50">
                     No lecture sessions recorded for this batch yet.
                   </div>
                 ) : (
                   selectedBatchForSessions.sessions.map((sess: any) => (
                     <div
                       key={sess.id}
-                      className="p-3.5 rounded-2xl bg-white border border-red-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                      className="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
                     >
                       <div>
                         <div className="flex items-center gap-2">
-                          <Badge className="bg-red-50 text-red-700 border-red-200 text-[9px] font-bold">
+                          <Badge className="bg-violet-50 text-violet-700 border border-violet-200 text-[9px] font-semibold">
                             Session {sess.sessionNumber}
                           </Badge>
-                          <span className="font-bold text-slate-950 text-xs">{sess.title}</span>
+                          <span className="font-semibold text-slate-900 text-xs">{sess.title}</span>
                         </div>
-                        <span className="text-[11px] text-slate-600 block mt-1">
+                        <span className="text-[11px] text-slate-500 block mt-1">
                           Date: {new Date(sess.sessionDate).toLocaleString()} • Duration: {sess.durationMins}m
                         </span>
                         {sess.agenda && (
-                          <span className="text-[10px] text-red-700 block font-sans mt-0.5">
+                          <span className="text-[10px] text-violet-700 block font-sans mt-0.5">
                             Agenda: {sess.agenda}
                           </span>
                         )}
@@ -1823,7 +2136,7 @@ export function BatchManagementClient({
 
                       <button
                         onClick={() => openAttendanceModal(sess, selectedBatchForSessions)}
-                        className="px-4 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-mono text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap"
+                        className="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-mono text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all active:scale-95 whitespace-nowrap"
                       >
                         <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
                         <span>Mark / Review Attendance ({sess.attendanceRecords?.length || 0})</span>
@@ -1834,10 +2147,10 @@ export function BatchManagementClient({
               </div>
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-red-100">
+            <div className="flex justify-end pt-3 border-t border-slate-100">
               <button
                 onClick={() => setSelectedBatchForSessions(null)}
-                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs cursor-pointer font-bold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono text-xs cursor-pointer font-semibold"
               >
                 Close
               </button>
@@ -1852,35 +2165,40 @@ export function BatchManagementClient({
           open={!!selectedSessionForAttendance}
           onOpenChange={(open) => !open && setSelectedSessionForAttendance(null)}
         >
-          <DialogContent className="max-w-2xl bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 max-h-[88vh] flex flex-col font-sans">
-            <DialogHeader className="border-b border-red-100 pb-3">
+          <DialogContent className="max-w-2xl bg-white border border-slate-200 text-slate-900 shadow-2xl rounded-2xl p-6 max-h-[88vh] flex flex-col font-sans">
+            <DialogHeader className="border-b border-slate-100 pb-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[10px] mb-1 font-bold">
-                    ATTENDANCE LEDGER
+                  <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-mono text-[10px] mb-1 font-semibold">
+                    5-DAY ATTENDANCE WINDOW
                   </Badge>
-                  <DialogTitle className="text-base font-bold font-mono text-slate-950">
+                  <DialogTitle className="text-base font-bold font-mono text-slate-900">
                     {selectedSessionForAttendance.session.title}
                   </DialogTitle>
                 </div>
-                <span className="text-xs text-slate-500 font-mono">
+                <span className="text-xs text-slate-500 font-mono font-semibold">
                   {selectedSessionForAttendance.batch.batchCode}
                 </span>
               </div>
             </DialogHeader>
 
             {feedbackMsg && (
-              <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
+              <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 text-violet-700 text-xs font-mono">
                 {feedbackMsg}
               </div>
             )}
 
             <div className="py-3 space-y-3 flex-1 overflow-y-auto text-xs font-mono">
-              <div className="p-3 rounded-2xl bg-red-50/50 border border-red-200 text-slate-700 text-[11px]">
-                Toggle attendance status for each enrolled student in this cohort and click <strong>Save Attendance Ledger</strong>.
+              <div className="p-3 rounded-xl bg-violet-50/50 border border-violet-200 text-slate-700 text-[11px] flex items-center justify-between gap-2">
+                <span>
+                  Toggle attendance status for each enrolled student. Mentors have <strong>5 days (120 hours)</strong> to mark and update records.
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold shrink-0">
+                  5-Day Policy Active
+                </span>
               </div>
 
-              <div className="border border-red-200 rounded-2xl divide-y divide-red-100 bg-white">
+              <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
                 {selectedSessionForAttendance.batch.students?.length === 0 ? (
                   <div className="p-6 text-center text-slate-500">
                     No students currently enrolled in this batch. Fast-enroll students via Student Roster.
@@ -1891,13 +2209,13 @@ export function BatchManagementClient({
                     const tsId = student.user?.tsIdentity?.tsId || 'TS-STUDENT';
 
                     return (
-                      <div key={student.id} className="p-3 space-y-2 hover:bg-red-50/30 transition-colors">
+                      <div key={student.id} className="p-3 space-y-2 hover:bg-violet-50/30 transition-colors">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
-                            <span className="font-bold text-slate-950 text-xs block">
+                            <span className="font-semibold text-slate-900 text-xs block">
                               {student.user?.name}
                             </span>
-                            <span className="text-[10px] text-red-700 block font-bold">
+                            <span className="text-[10px] text-violet-700 block font-semibold">
                               {tsId} • {student.user?.email}
                             </span>
                           </div>
@@ -1910,16 +2228,16 @@ export function BatchManagementClient({
                                 onClick={() =>
                                   setAttendanceDraft((prev) => ({ ...prev, [student.id]: st }))
                                 }
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer ${
+                                className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all cursor-pointer ${
                                   status === st
                                     ? st === 'PRESENT'
-                                      ? 'bg-emerald-600 text-white border border-emerald-600 shadow-[0_2px_8px_rgba(16,185,129,0.3)]'
+                                      ? 'bg-emerald-600 text-white border border-emerald-600 shadow-xs'
                                       : st === 'ABSENT'
-                                      ? 'bg-red-600 text-white border border-red-600 shadow-[0_2px_8px_rgba(239,68,68,0.3)]'
+                                      ? 'bg-rose-600 text-white border border-rose-600 shadow-xs'
                                       : st === 'LATE'
-                                      ? 'bg-amber-500 text-black border border-amber-500'
-                                      : 'bg-purple-600 text-white border border-purple-600'
-                                    : 'bg-slate-100 text-slate-600 border border-slate-200 hover:text-slate-950'
+                                      ? 'bg-amber-500 text-white border border-amber-500'
+                                      : 'bg-violet-600 text-white border border-violet-600'
+                                    : 'bg-slate-100 text-slate-600 border border-slate-200 hover:text-slate-900'
                                 }`}
                               >
                                 {st}
@@ -1935,7 +2253,7 @@ export function BatchManagementClient({
                           onChange={(e) =>
                             setAttendanceRemarks((prev) => ({ ...prev, [student.id]: e.target.value }))
                           }
-                          className="w-full bg-slate-50 border border-red-200 text-slate-950 px-3 py-1.5 rounded-xl text-[11px] placeholder:text-slate-400 focus:outline-none focus:border-red-500 focus:bg-white"
+                          className="w-full bg-slate-50 border border-slate-200 text-slate-900 px-3 py-1.5 rounded-xl text-[11px] placeholder:text-slate-400 focus:outline-none focus:border-violet-600 focus:bg-white"
                         />
                       </div>
                     );
@@ -1944,11 +2262,11 @@ export function BatchManagementClient({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-red-100">
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setSelectedSessionForAttendance(null)}
-                className="px-4 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono cursor-pointer font-bold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono cursor-pointer font-semibold"
               >
                 Cancel
               </button>
@@ -1956,7 +2274,7 @@ export function BatchManagementClient({
                 type="button"
                 disabled={loading}
                 onClick={handleSaveAttendance}
-                className="px-5 py-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-mono font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(16,185,129,0.25)] border border-emerald-500"
+                className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-mono font-semibold text-xs cursor-pointer shadow-xs"
               >
                 {loading ? 'Saving...' : 'Save Attendance Ledger'}
               </button>

@@ -2,13 +2,22 @@ import { prisma } from '@/server/database/prisma';
 import { AssessmentStatus, AttemptStatus } from '@/types/assessment';
 
 export async function getStudentAssessmentsList(studentId: string) {
-  // 1. Get student enrolled courses
-  const enrollments = await (prisma as any).enrollment.findMany({
-    where: { userId: studentId, status: 'ACTIVE' },
-    select: { courseId: true },
-  });
+  // 1. Get student enrolled courses and batch associated course
+  const [enrollments, studentProfile] = await Promise.all([
+    (prisma as any).enrollment.findMany({
+      where: { userId: studentId, status: 'ACTIVE' },
+      select: { courseId: true },
+    }),
+    (prisma as any).studentProfile.findUnique({
+      where: { userId: studentId },
+      include: { batch: { select: { courseId: true } } },
+    }),
+  ]);
 
-  const enrolledCourseIds = enrollments.map((e: any) => e.courseId);
+  const enrolledCourseIds: string[] = enrollments.map((e: any) => e.courseId);
+  if (studentProfile?.batch?.courseId && !enrolledCourseIds.includes(studentProfile.batch.courseId)) {
+    enrolledCourseIds.push(studentProfile.batch.courseId);
+  }
 
   // 2. Fetch published assessments for enrolled courses (or all published if student has no specific enrollments)
   const whereClause: any = {
