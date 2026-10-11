@@ -31,9 +31,19 @@ export function generateDomainTSID(track: StudentTrack = 'CYBER', numberOverride
   return generateTSID();
 }
 
+/**
+ * Generates an immutable, unique Mentor ID.
+ * Format: TS-MNT-XXXX (e.g. TS-MNT-4029)
+ */
+export function generateMentorTSID(numberOverride?: number): string {
+  const num = numberOverride !== undefined ? numberOverride : randomInt(1001, 9999);
+  return `TS-MNT-${num}`;
+}
+
 export function isValidTSID(tsId: string): boolean {
   if (!tsId) return false;
-  const regex = /^(TSE-\d{4}-[2-9A-HJ-NP-Z]{6}|TS-A\d{3,4}|TS-C\d{3,4}|TSE-AI-\d{3,4}|TSE-C-\d{3,4})$/;
+  const regex = /^(TSE-\d{4}-[2-9A-HJ-NP-Z]{6}|TS-A\d{3,4}|TS-C\d{3,4}|TSE-AI-\d{3,4}|TSE-C-\d{3,4}|TS-MNT-\d{3,6})$/;
   return regex.test(tsId);
 }
+
 

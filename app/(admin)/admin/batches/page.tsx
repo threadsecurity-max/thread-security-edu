@@ -12,7 +12,7 @@ export const revalidate = 0;
 export default async function AdminBatchesPage() {
   const session = await getSession();
 
-  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+  if (!session || (session.role !== 'ADMIN' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
     redirect('/admin/security-analyst?notice=unauthorized-academic-module');
   }
 
@@ -50,22 +50,22 @@ export default async function AdminBatchesPage() {
   return (
     <div className="space-y-8 text-slate-100 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-red-500/20 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-red-500/20 text-red-300 border border-red-500/40 font-mono text-xs flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-red-400" />
+            <Badge className="bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 font-mono text-xs flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-emerald-400" />
               ACADEMIC COHORT ARCHITECTURE
             </Badge>
-            <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-xs">
+            <Badge className="bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs">
               ACTIVE COHORTS ({batches.length})
             </Badge>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 font-mono">
-            Batch Conduction &amp; Student Segregation
+          <h1 className="text-2xl font-bold tracking-tight text-white font-mono">
+            ACADEMIC BATCHES & TIMETABLE CONDUCTION
           </h1>
-          <p className="text-xs md:text-sm text-slate-300 max-w-3xl mt-1">
-            Manage academic batches, map course curriculum, assign faculty leads, fast-enroll students by TS-ID, and record lecture attendance.
+          <p className="text-sm text-slate-400 mt-1">
+            Manage cohort enrollment, lecture scheduling, session registers, and attendance auditing.
           </p>
         </div>
       </div>

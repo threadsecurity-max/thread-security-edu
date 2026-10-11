@@ -1407,3 +1407,142 @@ export async function getStudentDossierInBatchService(
   };
 }
 
+/**
+ * Validates timetable conflict for a cohort session or mentor
+ */
+export async function checkScheduleConflictService({
+  targetSessionId,
+  batchId,
+  sessionDate,
+  durationMins = 120,
+}: {
+  targetSessionId?: string;
+  batchId: string;
+  sessionDate: Date;
+  durationMins?: number;
+}) {
+  const targetStart = new Date(sessionDate).getTime();
+  const targetEnd = targetStart + durationMins * 60 * 1000;
+
+  const batch = await db.batch.findUnique({
+    where: { id: batchId },
+    select: { mentorId: true, batchCode: true, title: true },
+  });
+
+  const queryConditions: any[] = [{ batchId }];
+  if (batch?.mentorId) {
+    queryConditions.push({ batch: { mentorId: batch.mentorId } });
+  }
+
+  const existingSessions = await db.batchSession.findMany({
+    where: {
+      id: targetSessionId ? { not: targetSessionId } : undefined,
+      OR: queryConditions,
+    },
+    include: {
+      batch: { select: { batchCode: true, title: true, mentorId: true } },
+    },
+  });
+
+  const conflicts = existingSessions.filter((s: any) => {
+    const sStart = new Date(s.sessionDate).getTime();
+    const sEnd = sStart + (s.durationMins || 120) * 60 * 1000;
+    return targetStart < sEnd && targetEnd > sStart;
+  });
+
+  return {
+    hasConflict: conflicts.length > 0,
+    conflicts: conflicts.map((c: any) => ({
+      sessionId: c.id,
+      title: c.title,
+      sessionNumber: c.sessionNumber,
+      sessionDate: c.sessionDate,
+      durationMins: c.durationMins,
+      batchCode: c.batch.batchCode,
+      conflictType: c.batchId === batchId ? 'BATCH_DOUBLE_BOOKING' : 'MENTOR_OVERLAP',
+    })),
+  };
+}
+
+/**
+ * Reschedule an existing lecture with conflict safety and audit tracking
+ */
+export async function rescheduleBatchSessionService({
+  sessionId,
+  newSessionDate,
+  newDurationMins,
+  reason,
+  actorUserId,
+  forceOverride = false,
+}: {
+  sessionId: string;
+  newSessionDate: Date;
+  newDurationMins?: number;
+  reason?: string;
+  actorUserId?: string;
+  forceOverride?: boolean;
+}) {
+  const session = await db.batchSession.findUnique({
+    where: { id: sessionId },
+    include: { batch: true },
+  });
+
+  if (!session) {
+    throw new Error('Batch session not found.');
+  }
+
+  const duration = newDurationMins ?? session.durationMins;
+
+  if (!forceOverride) {
+    const conflictCheck = await checkScheduleConflictService({
+      targetSessionId: sessionId,
+      batchId: session.batchId,
+      sessionDate: newSessionDate,
+      durationMins: duration,
+    });
+
+    if (conflictCheck.hasConflict) {
+      return {
+        success: false,
+        conflict: true,
+        conflicts: conflictCheck.conflicts,
+        error: 'Timetable conflict detected with an existing lecture.',
+      };
+    }
+  }
+
+  const oldDate = session.sessionDate;
+
+  const updatedSession = await db.batchSession.update({
+    where: { id: sessionId },
+    data: {
+      sessionDate: newSessionDate,
+      durationMins: duration,
+    },
+    include: { batch: true },
+  });
+
+  if (actorUserId) {
+    await logAuditEvent({
+      actorId: actorUserId,
+      action: 'BATCH_SESSION_RESCHEDULED',
+      entity: 'BATCH_SESSION',
+      entityId: session.id,
+      details: JSON.stringify({
+        batchCode: session.batch.batchCode,
+        sessionNumber: session.sessionNumber,
+        oldDate: oldDate.toISOString(),
+        newDate: newSessionDate.toISOString(),
+        reason: reason || 'Academic rescheduling directive',
+      }),
+    });
+  }
+
+  return {
+    success: true,
+    conflict: false,
+    session: updatedSession,
+  };
+}
+
+

@@ -298,6 +298,9 @@ export async function toggleStudentCourseEnrollmentService(
 }
 
 
+import { generateMentorTSID } from '@/lib/auth/ts-id';
+import { randomBytes } from 'crypto';
+
 export async function createMentorService({
   name,
   email,
@@ -313,42 +316,80 @@ export async function createMentorService({
   expertise: string;
   bio: string;
 }) {
+  const cleanEmail = email.toLowerCase().trim();
   const existing = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
+    where: { email: cleanEmail },
   });
 
   if (existing) {
     throw new Error('An account with this email address already exists.');
   }
 
+  const mentorId = generateMentorTSID();
+  const inviteToken = `tse-inv-${randomBytes(16).toString('hex')}`;
+
   const result = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
-        email: email.toLowerCase(),
-        name,
+        email: cleanEmail,
+        name: name.trim(),
         passwordHash: 'MFA_OTP_ONLY',
         role: 'MENTOR',
+        isActive: true,
+        isDashboardAccessGranted: true,
+        dashboardAccessGrantedAt: new Date(),
       },
     });
 
     const mentor = await tx.mentorProfile.create({
       data: {
         userId: user.id,
-        title,
-        company,
-        expertise,
-        bio,
+        title: title.trim(),
+        company: company.trim(),
+        expertise: expertise.trim(),
+        bio: bio.trim(),
       },
     });
 
-    return { user, mentor };
+    // Save Mentor Identity
+    try {
+      await (tx as any).mentorIdentity.create({
+        data: {
+          mentorId,
+          userId: user.id,
+        },
+      });
+    } catch {
+      // Fallback to TSIdentity if mentorIdentity not yet migrated
+      await tx.tSIdentity.create({
+        data: {
+          tsId: mentorId,
+          userId: user.id,
+        },
+      });
+    }
+
+    // Create an Invitation Token record
+    try {
+      await (tx as any).invitationToken.create({
+        data: {
+          token: inviteToken,
+          email: cleanEmail,
+          role: 'MENTOR',
+          targetId: user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        },
+      });
+    } catch {}
+
+    return { user, mentor, mentorId, inviteToken };
   });
 
   await logAuditEvent({
     action: 'MENTOR_CREATED',
     entity: 'MENTOR_PROFILE',
     entityId: result.mentor.id,
-    details: JSON.stringify({ name, email, title, company }),
+    details: `Created mentor ${name} (${cleanEmail}, Mentor ID: ${mentorId}).`,
   });
 
   return result;
@@ -362,6 +403,7 @@ export async function updateMentorService(
     company?: string;
     expertise?: string;
     bio?: string;
+    officeHours?: string;
   }
 ) {
   const mentor = await prisma.mentorProfile.findUnique({
@@ -376,17 +418,18 @@ export async function updateMentorService(
   if (data.name) {
     await prisma.user.update({
       where: { id: mentor.userId },
-      data: { name: data.name },
+      data: { name: data.name.trim() },
     });
   }
 
   const updatedMentor = await prisma.mentorProfile.update({
     where: { id: mentorId },
     data: {
-      ...(data.title ? { title: data.title } : {}),
-      ...(data.company ? { company: data.company } : {}),
-      ...(data.expertise ? { expertise: data.expertise } : {}),
-      ...(data.bio ? { bio: data.bio } : {}),
+      ...(data.title ? { title: data.title.trim() } : {}),
+      ...(data.company ? { company: data.company.trim() } : {}),
+      ...(data.expertise ? { expertise: data.expertise.trim() } : {}),
+      ...(data.bio ? { bio: data.bio.trim() } : {}),
+      ...(data.officeHours !== undefined ? { officeHours: data.officeHours.trim() } : {}),
     },
   });
 
@@ -394,37 +437,123 @@ export async function updateMentorService(
     action: 'MENTOR_UPDATED',
     entity: 'MENTOR_PROFILE',
     entityId: mentorId,
-    details: JSON.stringify({ mentorId, ...data }),
+    details: `Updated mentor details for ${data.name || mentor.user.name}.`,
   });
 
   return updatedMentor;
 }
 
+/**
+ * Safe Deactivation / Archival of Mentor (Preserves historical course, batch, and attendance attribution)
+ */
 export async function deleteMentorService(mentorId: string) {
   const mentor = await prisma.mentorProfile.findUnique({
     where: { id: mentorId },
+    include: { user: true },
   });
 
   if (!mentor) {
     throw new Error('Mentor profile not found.');
   }
 
-  // Deactivate user and delete mentor profile
-  await prisma.$transaction([
-    prisma.mentorProfile.delete({ where: { id: mentorId } }),
-    prisma.user.update({
-      where: { id: mentor.userId },
-      data: { isActive: false },
-    }),
-  ]);
+  // Deactivate the user and revoke dashboard access rather than hard-deleting the profile
+  await prisma.user.update({
+    where: { id: mentor.userId },
+    data: {
+      isActive: false,
+      isDashboardAccessGranted: false,
+    },
+  });
 
   await logAuditEvent({
-    action: 'MENTOR_DELETED',
+    action: 'MENTOR_ACCESS_REVOKED_AND_ARCHIVED',
     entity: 'MENTOR_PROFILE',
     entityId: mentorId,
-    details: JSON.stringify({ mentorId }),
+    details: `Revoked access and archived mentor account for ${mentor.user.name} (${mentor.user.email}). Historical records preserved.`,
   });
 
   return true;
 }
+
+/**
+ * Granular Lifecycle Status Toggle for Mentors (Active, Suspended, Revoked)
+ */
+export async function toggleMentorAccessService(
+  mentorId: string,
+  status: 'ACTIVE' | 'SUSPENDED' | 'REVOKED',
+  actorId?: string
+) {
+  const mentor = await prisma.mentorProfile.findUnique({
+    where: { id: mentorId },
+    include: { user: true },
+  });
+
+  if (!mentor) {
+    throw new Error('Mentor profile not found.');
+  }
+
+  const isActive = status === 'ACTIVE';
+  const isGranted = status === 'ACTIVE';
+
+  await prisma.user.update({
+    where: { id: mentor.userId },
+    data: {
+      isActive,
+      isDashboardAccessGranted: isGranted,
+    },
+  });
+
+  await logAuditEvent({
+    actorId,
+    action: `MENTOR_STATUS_${status}`,
+    entity: 'MENTOR_PROFILE',
+    entityId: mentorId,
+    details: `Set mentor ${mentor.user.name} access status to ${status}.`,
+  });
+
+  return true;
+}
+
+/**
+ * Direct Batch Assignment / Transfer for Students
+ */
+export async function reassignStudentBatchService(
+  userId: string,
+  newBatchId: string | null,
+  actorId?: string
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { studentProfile: { include: { batch: true } }, tsIdentity: true },
+  });
+
+  if (!user || !user.studentProfile) {
+    throw new Error('Student profile record not found.');
+  }
+
+  const oldBatchCode = user.studentProfile.batch?.batchCode || 'None';
+
+  let newBatchCode = 'None';
+  if (newBatchId) {
+    const newBatch = await prisma.batch.findUnique({ where: { id: newBatchId } });
+    if (!newBatch) throw new Error('Target batch does not exist.');
+    newBatchCode = newBatch.batchCode;
+  }
+
+  await prisma.studentProfile.update({
+    where: { id: user.studentProfile.id },
+    data: { batchId: newBatchId },
+  });
+
+  await logAuditEvent({
+    actorId,
+    action: 'STUDENT_BATCH_REASSIGNED',
+    entity: 'STUDENT_PROFILE',
+    entityId: user.studentProfile.id,
+    details: `Transferred student ${user.name} (${user.tsIdentity?.tsId || 'N/A'}) from batch ${oldBatchCode} to ${newBatchCode}.`,
+  });
+
+  return { success: true, oldBatchCode, newBatchCode };
+}
+
 

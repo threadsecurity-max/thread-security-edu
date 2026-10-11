@@ -11,6 +11,8 @@ import {
   reassignStudentTrackService,
   toggleStudentDashboardAccessService,
   toggleStudentCourseEnrollmentService,
+  toggleMentorAccessService,
+  reassignStudentBatchService,
 } from '../../../server/services/admin.service';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
@@ -196,5 +198,35 @@ export async function toggleStudentCourseEnrollmentAction(userId: string, course
     return { success: false, error: msg };
   }
 }
+
+export async function toggleMentorAccessAction(mentorId: string, status: 'ACTIVE' | 'SUSPENDED' | 'REVOKED') {
+  try {
+    const session = await getSession();
+    await toggleMentorAccessService(mentorId, status, session?.userId);
+    revalidatePath('/admin');
+    revalidatePath('/admin/mentors');
+    revalidatePath('/admin/audit');
+    return { success: true, status };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update mentor access status.';
+    return { success: false, error: msg };
+  }
+}
+
+export async function reassignStudentBatchAction(userId: string, newBatchId: string | null) {
+  try {
+    const session = await getSession();
+    const res = await reassignStudentBatchService(userId, newBatchId, session?.userId);
+    revalidatePath('/admin');
+    revalidatePath('/admin/students');
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin/audit');
+    return res;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to transfer student batch.';
+    return { success: false, error: msg };
+  }
+}
+
 
 
