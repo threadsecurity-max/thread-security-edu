@@ -1,25 +1,18 @@
 import Link from 'next/link';
 import { prisma } from '@/server/database/prisma';
-import { Badge } from '@/components/ui/badge';
 import {
   Users,
   BookOpen,
-  Terminal,
-  Award,
-  ShieldAlert,
   ArrowRight,
-  Plus,
-  Clock,
   Sparkles,
   ShieldCheck,
   Layers,
   Calendar,
   CheckSquare,
-  Activity,
   AlertCircle,
-  TrendingUp,
+  Clock,
+  ShieldAlert,
 } from 'lucide-react';
-
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 
@@ -31,7 +24,6 @@ export default async function AdminDashboardOverviewPage() {
     redirect('/admin/security-analyst');
   }
 
-  // Live database metric queries with resilient fallbacks
   let totalStudents = 0;
   let activeStudents = 0;
   let pendingStudents = 0;
@@ -104,145 +96,137 @@ export default async function AdminDashboardOverviewPage() {
 
   const kpis = [
     {
-      title: 'TOTAL STUDENTS',
+      title: 'Total Students',
       value: totalStudents,
-      subtext: `${activeStudents} Active TS-IDs • ${pendingStudents} Pending`,
+      subtext: `${activeStudents} Active • ${pendingStudents} Pending`,
       icon: Users,
       href: '/admin/students',
-      color: 'text-emerald-400',
+      color: 'text-violet-600',
       badge: `${activeStudents} Active`,
-      badgeColor: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      badgeColor: 'bg-violet-50 text-violet-700 border-violet-200',
     },
     {
-      title: 'FACULTY & MENTORS',
+      title: 'Faculty & Mentors',
       value: totalMentors,
-      subtext: 'Instructors & Security Leads',
+      subtext: 'Instructors & Leads',
       icon: ShieldCheck,
       href: '/admin/mentors',
-      color: 'text-teal-400',
+      color: 'text-indigo-600',
       badge: 'Roster',
-      badgeColor: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
+      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     },
     {
-      title: 'ACTIVE BATCHES',
+      title: 'Active Batches',
       value: totalBatches,
-      subtext: 'Concurrent Cohorts in Session',
+      subtext: 'Ongoing Cohorts',
       icon: Layers,
       href: '/admin/batches',
-      color: 'text-cyan-400',
+      color: 'text-purple-600',
       badge: 'Cohorts',
-      badgeColor: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+      badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
     },
     {
-      title: 'COURSES & MODULES',
+      title: 'Courses & Tracks',
       value: totalCourses,
-      subtext: 'Academic Curriculum Tracks',
+      subtext: 'Curriculum Catalog',
       icon: BookOpen,
       href: '/admin/courses',
-      color: 'text-indigo-400',
+      color: 'text-violet-600',
       badge: 'Published',
-      badgeColor: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+      badgeColor: 'bg-violet-50 text-violet-700 border-violet-200',
     },
     {
-      title: 'WORKSHOPS CONDUCTED',
+      title: 'Workshops',
       value: totalWorkshops,
-      subtext: 'Hands-on Masterclasses & Labs',
+      subtext: 'Live Masterclasses',
       icon: Sparkles,
       href: '/admin/workshops',
-      color: 'text-amber-400',
-      badge: 'Public & Live',
-      badgeColor: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+      color: 'text-amber-600',
+      badge: 'Sessions',
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
     },
     {
-      title: 'ATTENDANCE REQUESTS',
+      title: 'Correction Requests',
       value: pendingCorrectionRequests,
-      subtext: 'Pending Review by Admin',
+      subtext: 'Attendance Approvals',
       icon: AlertCircle,
       href: '/admin/batches',
-      color: pendingCorrectionRequests > 0 ? 'text-rose-400' : 'text-emerald-400',
-      badge: pendingCorrectionRequests > 0 ? 'Action Needed' : 'All Clear',
-      badgeColor: pendingCorrectionRequests > 0 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      color: pendingCorrectionRequests > 0 ? 'text-rose-600' : 'text-slate-600',
+      badge: pendingCorrectionRequests > 0 ? 'Action Needed' : 'Clear',
+      badgeColor: pendingCorrectionRequests > 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-700 border-slate-200',
     },
   ];
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans relative z-10">
-      {/* ── ACTION COMMAND HEADER ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+    <div className="space-y-6 text-slate-900 font-sans">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" />
-            <span className="text-[11px] font-mono font-bold tracking-widest text-emerald-400 uppercase">
-              OPERATIONAL COMMAND CONSOLE
-            </span>
-            <span className="text-slate-600 font-mono">•</span>
-            <span className="text-xs text-slate-400 font-mono">Live PostgreSQL Synchronization</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight font-mono">
-            Thread Security Command Center
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            Overview Dashboard
           </h1>
-          <p className="text-xs text-slate-400 font-mono mt-1 max-w-2xl">
-            Centralized administration of faculty rosters, student TS-IDs, batch timetables, live workshops, attendance registers, and system security.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Real-time operations summary across students, faculty roster, batches, and course schedules.
           </p>
         </div>
 
         {/* Quick Action Dock */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href="/admin/workshops">
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-extrabold text-xs shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 cursor-pointer">
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-sm transition-all active:scale-95 cursor-pointer">
               <Sparkles className="w-4 h-4" />
               <span>Conduct Workshop</span>
             </button>
           </Link>
 
           <Link href="/admin/batches">
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-mono font-bold text-xs transition-all active:scale-95 cursor-pointer">
-              <Layers className="w-4 h-4 text-cyan-400" />
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-medium text-xs transition-all active:scale-95 cursor-pointer shadow-xs">
+              <Layers className="w-4 h-4 text-violet-600" />
               <span>New Batch</span>
             </button>
           </Link>
 
           <Link href="/admin/mentors">
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-mono font-bold text-xs transition-all active:scale-95 cursor-pointer">
-              <ShieldCheck className="w-4 h-4 text-teal-400" />
-              <span>Provision Mentor</span>
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-medium text-xs transition-all active:scale-95 cursor-pointer shadow-xs">
+              <ShieldCheck className="w-4 h-4 text-violet-600" />
+              <span>Faculty Roster</span>
             </button>
           </Link>
 
           <Link href="/admin/tasks">
-            <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-mono font-bold text-xs transition-all active:scale-95 cursor-pointer">
-              <CheckSquare className="w-4 h-4 text-amber-400" />
-              <span>Tasks (CSM/SEO)</span>
+            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-medium text-xs transition-all active:scale-95 cursor-pointer shadow-xs">
+              <CheckSquare className="w-4 h-4 text-slate-600" />
+              <span>Tasks</span>
             </button>
           </Link>
         </div>
       </div>
 
-      {/* ── KPI METRICS CARDS (LIVE DATABASE RECORDS) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* ── KPI METRICS CARDS ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
             <Link
               key={kpi.title}
               href={kpi.href}
-              className="p-5 rounded-2xl bg-[#0B0F19]/90 border border-slate-850 hover:border-emerald-500/40 hover:bg-slate-900/80 transition-all shadow-[0_4px_20px_rgba(0,0,0,0.4)] group flex flex-col justify-between"
+              className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-violet-300 hover:shadow-md transition-all group flex flex-col justify-between shadow-xs"
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold">
+                  <span className="text-xs text-slate-500 font-medium">
                     {kpi.title}
                   </span>
                   <Icon className={`w-4 h-4 ${kpi.color} group-hover:scale-110 transition-transform`} />
                 </div>
-                <div className="text-2xl sm:text-3xl font-extrabold font-mono text-white block">
+                <div className="text-2xl font-bold text-slate-900 block">
                   {kpi.value}
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono">
-                <span className="text-slate-400 truncate max-w-[120px]">{kpi.subtext}</span>
-                <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${kpi.badgeColor}`}>
+              <div className="pt-3 mt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                <span className="text-slate-400 text-[11px] truncate">{kpi.subtext}</span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${kpi.badgeColor}`}>
                   {kpi.badge}
                 </span>
               </div>
@@ -251,69 +235,69 @@ export default async function AdminDashboardOverviewPage() {
         })}
       </div>
 
-      {/* ── MAIN SPLIT: UPCOMING OPERATIONS & ACTIVE STUDENTS DIRECTORY ── */}
+      {/* ── MAIN SPLIT: RECENT STUDENTS & UPCOMING SESSIONS ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Column: Recent Registered Students Table */}
-        <div className="lg:col-span-7 space-y-4">
+        <div className="lg:col-span-7 space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base sm:text-lg font-mono font-bold text-white tracking-tight flex items-center gap-2">
-                <Users className="w-4 h-4 text-emerald-400" />
+              <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <Users className="w-4 h-4 text-violet-600" />
                 Student Roster Preview ({totalStudents})
               </h2>
-              <span className="text-[11px] text-slate-400 font-mono block">
-                Recently enrolled students, track identities, and dashboard permissions
+              <span className="text-xs text-slate-500">
+                Enrolled students and clearance permissions
               </span>
             </div>
             <Link
               href="/admin/students"
-              className="text-xs font-mono text-emerald-400 hover:text-emerald-300 hover:underline font-bold flex items-center gap-1"
+              className="text-xs text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-1"
             >
               <span>Full Directory</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <div className="overflow-hidden rounded-2xl bg-[#0B0F19]/90 border border-slate-850 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-            <div className="max-h-[380px] overflow-y-auto custom-scrollbar">
-              <table className="w-full text-left text-xs font-mono">
-                <thead className="bg-slate-900/90 text-slate-300 border-b border-slate-800 sticky top-0 z-10 uppercase text-[10px] tracking-wider">
+          <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-xs">
+            <div className="max-h-[380px] overflow-y-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 sticky top-0 z-10 text-[11px] font-semibold uppercase">
                   <tr>
-                    <th className="p-3.5 font-bold">TS-ID</th>
-                    <th className="p-3.5 font-bold">Student Name</th>
-                    <th className="p-3.5 font-bold">Email</th>
-                    <th className="p-3.5 font-bold">Batch</th>
-                    <th className="p-3.5 text-right font-bold">Access</th>
+                    <th className="p-3.5">TS-ID</th>
+                    <th className="p-3.5">Student Name</th>
+                    <th className="p-3.5">Email</th>
+                    <th className="p-3.5">Batch</th>
+                    <th className="p-3.5 text-right">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/80 text-slate-300">
+                <tbody className="divide-y divide-slate-100 text-slate-700">
                   {studentsList.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-6 text-center text-slate-500 font-mono">
+                      <td colSpan={5} className="p-6 text-center text-slate-400">
                         No student accounts found.
                       </td>
                     </tr>
                   ) : (
                     studentsList.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-850/60 transition-colors">
+                      <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
                         <td className="p-3.5">
-                          <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded bg-violet-50 border border-violet-200 text-violet-700 font-mono text-[11px] font-semibold">
                             {s.tsIdentity?.tsId || 'PENDING'}
                           </span>
                         </td>
-                        <td className="p-3.5 font-bold text-white">{s.name}</td>
-                        <td className="p-3.5 text-slate-400 text-[11px] truncate max-w-[140px]">{s.email}</td>
-                        <td className="p-3.5 text-slate-300 text-[11px]">
+                        <td className="p-3.5 font-semibold text-slate-900">{s.name}</td>
+                        <td className="p-3.5 text-slate-500 truncate max-w-[140px]">{s.email}</td>
+                        <td className="p-3.5 text-slate-600">
                           {s.studentProfile?.batch?.batchCode || 'Unassigned'}
                         </td>
                         <td className="p-3.5 text-right">
                           {s.isDashboardAccessGranted ? (
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold">
                               ACTIVE
                             </span>
                           ) : (
-                            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-bold">
+                            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-semibold">
                               PENDING
                             </span>
                           )}
@@ -327,24 +311,24 @@ export default async function AdminDashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Right Column: Upcoming Lectures & Today's Schedule */}
-        <div className="lg:col-span-5 space-y-4">
+        {/* Right Column: Upcoming Scheduled Sessions */}
+        <div className="lg:col-span-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-lg font-mono font-bold text-white tracking-tight flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-cyan-400" />
+            <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-violet-600" />
               Upcoming Scheduled Sessions
             </h2>
             <Link
               href="/admin/batches"
-              className="text-xs font-mono text-cyan-400 hover:text-cyan-300 hover:underline font-bold"
+              className="text-xs text-violet-600 hover:text-violet-700 font-semibold"
             >
-              Timetable Calendar →
+              Batch Calendar →
             </Link>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#0B0F19]/90 border border-slate-850 space-y-3 font-mono text-xs shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 space-y-2.5 text-xs shadow-xs">
             {upcomingSessions.length === 0 ? (
-              <div className="p-6 text-center text-slate-500 font-mono">
+              <div className="p-8 text-center text-slate-400">
                 No upcoming lecture sessions scheduled.
               </div>
             ) : (
@@ -361,16 +345,19 @@ export default async function AdminDashboardOverviewPage() {
                 return (
                   <div
                     key={sess.id}
-                    className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 space-y-1.5 transition-all"
+                    className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-violet-300 space-y-1 transition-all"
                   >
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-cyan-400 font-bold">{sess.batch?.batchCode}</span>
-                      <span className="text-slate-400 text-[10px]">📅 {dateStr} • {timeStr}</span>
+                      <span className="text-violet-700 font-semibold">{sess.batch?.batchCode}</span>
+                      <span className="text-slate-500 text-[11px] flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        {dateStr} • {timeStr}
+                      </span>
                     </div>
-                    <p className="text-white font-bold text-xs truncate">{sess.title}</p>
-                    <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <p className="text-slate-900 font-semibold text-xs truncate">{sess.title}</p>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
                       <span>Faculty: {sess.batch?.mentor?.user?.name || 'Assigned Lead'}</span>
-                      <span className="text-emerald-400 font-semibold">{sess.status || 'SCHEDULED'}</span>
+                      <span className="text-emerald-600 font-medium">{sess.status || 'SCHEDULED'}</span>
                     </div>
                   </div>
                 );
@@ -380,37 +367,37 @@ export default async function AdminDashboardOverviewPage() {
         </div>
       </div>
 
-      {/* ── SECURITY AUDIT TRAIL FEED ── */}
-      <div className="space-y-4">
+      {/* ── AUDIT LOGS FEED ── */}
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
-            <h2 className="text-base sm:text-lg font-mono font-bold text-white tracking-tight">
-              Live Audit & Security Events
+            <ShieldAlert className="w-4 h-4 text-violet-600" />
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">
+              System Audit &amp; Event Trail
             </h2>
           </div>
           <Link
             href="/admin/audit"
-            className="text-xs font-mono text-amber-400 hover:text-amber-300 hover:underline font-bold"
+            className="text-xs text-violet-600 hover:text-violet-700 font-semibold"
           >
             All Audit Records →
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
           {recentAuditLogs.map((log) => (
             <div
               key={log.id}
-              className="p-3.5 rounded-xl bg-[#0B0F19]/90 border border-slate-850 space-y-1.5"
+              className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1 shadow-xs"
             >
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-emerald-400 font-bold">{log.action}</span>
-                <span className="text-slate-500 text-[10px]">
+                <span className="text-violet-700 font-semibold">{log.action}</span>
+                <span className="text-slate-400 text-[10px]">
                   {new Date(log.createdAt).toLocaleTimeString()}
                 </span>
               </div>
-              <p className="text-slate-300 text-[11px] truncate">{log.details || `Entity: ${log.entity}`}</p>
-              <div className="text-[10px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-800/60">
+              <p className="text-slate-600 text-xs truncate">{log.details || `Entity: ${log.entity}`}</p>
+              <div className="text-[10px] text-slate-400 flex items-center justify-between pt-1 border-t border-slate-100">
                 <span>Entity: {log.entity}</span>
                 <span>ID: {log.entityId ? log.entityId.slice(0, 8) : 'SYSTEM'}</span>
               </div>

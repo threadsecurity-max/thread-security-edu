@@ -30,9 +30,13 @@ import {
   CheckCircle2,
   XCircle,
   MessageSquare,
+  Edit3,
+  Trash2,
 } from 'lucide-react';
 import {
   createBatchAction,
+  updateBatchAction,
+  deleteBatchAction,
   assignStudentToBatchAction,
   assignStudentToBatchByTsIdAction,
   createBatchSessionAction,
@@ -41,6 +45,125 @@ import {
   fetchPendingCorrectionRequestsAction,
   adminApproveOrRejectCorrectionAction,
 } from '@/features/batch/actions/batch.actions';
+
+function BatchCalendarDatePicker({
+  value,
+  onChange,
+  name = 'startDate',
+  label = 'START DATE *',
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  name?: string;
+  label?: string;
+}) {
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    return value ? new Date(value) : new Date();
+  });
+
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentMonth(new Date(year, month - 1, 1));
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setCurrentMonth(new Date(year, month + 1, 1));
+  };
+
+  const handleSelectDay = (day: number) => {
+    const mStr = String(month + 1).padStart(2, '0');
+    const dStr = String(day).padStart(2, '0');
+    onChange(`${year}-${mStr}-${dStr}`);
+  };
+
+  const selectedDateObj = value ? new Date(value) : null;
+
+  return (
+    <div className="space-y-1.5 font-sans">
+      <label className="block text-slate-700 font-semibold text-xs">{label}</label>
+      <input type="hidden" name={name} value={value} required />
+
+      <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <button
+            type="button"
+            onClick={handlePrev}
+            className="p-1 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="font-semibold text-slate-800">
+            {monthNames[month]} {year}
+          </span>
+          <button
+            type="button"
+            onClick={handleNext}
+            className="p-1 rounded-lg text-slate-600 hover:bg-slate-200 transition-colors"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-7 text-center text-[10px] font-semibold text-slate-500 py-1 border-b border-slate-200">
+          <span>Su</span>
+          <span>Mo</span>
+          <span>Tu</span>
+          <span>We</span>
+          <span>Th</span>
+          <span>Fr</span>
+          <span>Sa</span>
+        </div>
+
+        <div className="grid grid-cols-7 gap-1 text-xs">
+          {Array.from({ length: firstDay }).map((_, i) => (
+            <div key={`pad-${i}`} className="h-7" />
+          ))}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const dayNum = i + 1;
+            const isSelected =
+              selectedDateObj &&
+              selectedDateObj.getFullYear() === year &&
+              selectedDateObj.getMonth() === month &&
+              selectedDateObj.getDate() === dayNum;
+
+            return (
+              <button
+                type="button"
+                key={`day-${dayNum}`}
+                onClick={() => handleSelectDay(dayNum)}
+                className={`h-7 w-7 mx-auto rounded-lg text-xs font-medium flex items-center justify-center transition-all ${
+                  isSelected
+                    ? 'bg-violet-600 text-white font-bold shadow-xs'
+                    : 'text-slate-700 hover:bg-violet-100 hover:text-violet-700'
+                }`}
+              >
+                {dayNum}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-200 flex items-center justify-between">
+          <span>Selected Date:</span>
+          <strong className="text-violet-700 font-semibold">
+            {value ? new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Please select a day'}
+          </strong>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function BatchManagementClient({
   batches,
@@ -162,6 +285,13 @@ export function BatchManagementClient({
     }))
   );
 
+  const [editingBatch, setEditingBatch] = useState<any | null>(null);
+  const [createBatchDate, setCreateBatchDate] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+  const [editBatchDate, setEditBatchDate] = useState('');
+
   const handleCreateBatch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -174,11 +304,48 @@ export function BatchManagementClient({
     if (!res.success) {
       setFeedbackMsg(res.error || 'Failed to create batch');
     } else {
-      setFeedbackMsg('✓ Academic Cohort created and launched successfully in Database!');
+      setFeedbackMsg('Academic Cohort created and launched successfully.');
       setTimeout(() => {
         setFeedbackMsg(null);
         setIsCreateOpen(false);
       }, 1500);
+    }
+  };
+
+  const handleUpdateBatch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingBatch) return;
+    setLoading(true);
+    setFeedbackMsg(null);
+
+    const formData = new FormData(e.currentTarget);
+    const res = await updateBatchAction(editingBatch.id, formData);
+    setLoading(false);
+
+    if (!res.success) {
+      setFeedbackMsg(res.error || 'Failed to update batch');
+    } else {
+      setFeedbackMsg('Academic Cohort updated successfully.');
+      setTimeout(() => {
+        setFeedbackMsg(null);
+        setEditingBatch(null);
+      }, 1500);
+    }
+  };
+
+  const handleDeleteBatch = async (batchId: string, title: string) => {
+    if (!confirm(`Are you sure you want to remove cohort "${title}"?`)) return;
+    setLoading(true);
+    setFeedbackMsg(null);
+
+    const res = await deleteBatchAction(batchId);
+    setLoading(false);
+
+    if (!res.success) {
+      setFeedbackMsg(res.error || 'Failed to delete batch.');
+    } else {
+      setFeedbackMsg(`Cohort "${title}" removed successfully.`);
+      setTimeout(() => setFeedbackMsg(null), 2500);
     }
   };
 
@@ -331,55 +498,55 @@ export function BatchManagementClient({
       </div>
 
       {/* Main Tab Navigation Bar */}
-      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-red-200/80 shadow-[0_2px_12px_rgba(220,38,38,0.03)]">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
         <button
           onClick={() => setActiveTab('cohorts')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'cohorts'
-              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
-              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
+              ? 'bg-violet-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Layers className="w-4 h-4" />
-          <span>Academic Cohorts & Batches ({batches.length})</span>
+          <span>Academic Cohorts &amp; Batches ({batches.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('calendar')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'calendar'
-              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
-              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
+              ? 'bg-violet-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>Interactive Lecture Calendar</span>
+          <span>Lecture Calendar</span>
         </button>
 
         <button
           onClick={() => setActiveTab('audit')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'audit'
-              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
-              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
+              ? 'bg-violet-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <CheckSquare className="w-4 h-4" />
-          <span>Lecture Delivery & Attendance Audit</span>
+          <span>Lecture Delivery Audit</span>
         </button>
 
         <button
           onClick={() => setActiveTab('corrections')}
-          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-2 ${
+          className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
             activeTab === 'corrections'
-              ? 'bg-red-600 text-white shadow-[0_2px_10px_rgba(220,38,38,0.3)] border border-red-500'
-              : 'text-slate-600 hover:text-slate-950 hover:bg-red-50/50'
+              ? 'bg-violet-600 text-white shadow-sm'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
-          <AlertCircle className="w-4 h-4 text-amber-500" />
+          <AlertCircle className="w-4 h-4" />
           <span>Attendance Corrections</span>
           {pendingCorrectionsCount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-black bg-amber-500 text-black shadow-xs">
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white shadow-xs">
               {pendingCorrectionsCount}
             </span>
           )}
@@ -476,22 +643,42 @@ export function BatchManagementClient({
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="p-4 border-t border-red-100 flex items-center justify-between gap-2">
+                <div className="p-3.5 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap">
                   <button
                     onClick={() => setSelectedBatchForStudents(batch)}
-                    className="flex-1 px-3 py-2 rounded-full bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-mono font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="flex-1 px-3 py-2 rounded-xl bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
                   >
-                    <Users className="w-3.5 h-3.5 text-red-600" />
-                    <span>Student Roster ({studentCount})</span>
+                    <Users className="w-3.5 h-3.5 text-violet-600" />
+                    <span>Students ({studentCount})</span>
                   </button>
 
                   <button
                     onClick={() => setSelectedBatchForSessions(batch)}
-                    className="px-3 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-mono font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
                     title="View Live Lectures & Attendance"
                   >
                     <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Attendance</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setEditingBatch(batch);
+                      const d = batch.startDate ? new Date(batch.startDate) : new Date();
+                      setEditBatchDate(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+                    }}
+                    className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs transition-all cursor-pointer"
+                    title="Update Batch"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteBatch(batch.id, batch.title)}
+                    className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-xs transition-all cursor-pointer"
+                    title="Remove Batch"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </Card>
@@ -1156,51 +1343,52 @@ export function BatchManagementClient({
         </div>
       )}
 
-      {/* 🚀 CONDUCT NEW BATCH DIALOG */}
+      {/* CONDUCT NEW BATCH DIALOG (Task 2 & Task 3) */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="max-w-md bg-white border border-red-200 text-slate-950 shadow-2xl rounded-3xl p-6 font-sans">
-          <DialogHeader className="border-b border-red-100 pb-3">
-            <DialogTitle className="text-lg font-bold font-mono text-slate-950 flex items-center gap-2">
-              <Plus className="w-5 h-5 text-red-600" />
+        <DialogContent className="max-w-lg bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 text-xs max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="border-b border-slate-100 pb-3">
+            <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Plus className="w-4 h-4 text-violet-600" />
               Conduct New Academic Batch / Cohort
             </DialogTitle>
           </DialogHeader>
 
           {feedbackMsg && (
-            <div className="p-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs font-mono">
+            <div className="p-3 rounded-xl bg-violet-50 border border-violet-200 text-violet-800 text-xs">
               {feedbackMsg}
             </div>
           )}
 
-          <form onSubmit={handleCreateBatch} className="space-y-3.5 text-xs font-mono">
+          <form onSubmit={handleCreateBatch} className="space-y-3.5 pt-2">
             <div>
-              <label className="block text-slate-700 font-bold mb-1">BATCH CODE / ID *</label>
+              <label className="block text-slate-700 font-semibold mb-1">BATCH CODE / ID *</label>
               <input
                 name="batchCode"
                 placeholder="e.g. TSE-COHORT-2026-GAMMA"
                 required
-                className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs uppercase focus:outline-none focus:border-red-500 focus:bg-white"
+                className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs uppercase focus:outline-none focus:border-violet-600 font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-slate-700 font-bold mb-1">COHORT TITLE *</label>
+              <label className="block text-slate-700 font-semibold mb-1">COHORT TITLE *</label>
               <input
                 name="title"
                 placeholder="e.g. Advanced Bug Bounty & Web Application Security"
                 required
-                className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white"
+                className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">COURSE CURRICULUM</label>
+                <label className="block text-slate-700 font-semibold mb-1">COURSE CURRICULUM *</label>
                 <select
                   name="courseId"
-                  className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white"
+                  required
+                  defaultValue={courses[0]?.id || ''}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
                 >
-                  <option value="">-- General Track --</option>
                   {courses.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.title}
@@ -1210,12 +1398,13 @@ export function BatchManagementClient({
               </div>
 
               <div>
-                <label className="block text-slate-700 font-bold mb-1">FACULTY MENTOR</label>
+                <label className="block text-slate-700 font-semibold mb-1">FACULTY MENTOR</label>
                 <select
                   name="mentorId"
-                  className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white"
+                  defaultValue=""
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
                 >
-                  <option value="">-- Assign Mentor --</option>
+                  <option value="">-- Assign Later --</option>
                   {mentors.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.user?.name || m.title}
@@ -1225,38 +1414,47 @@ export function BatchManagementClient({
               </div>
             </div>
 
+            {/* Interactive Calendar instead of raw date input (Task 2) */}
+            <BatchCalendarDatePicker
+              value={createBatchDate}
+              onChange={setCreateBatchDate}
+              name="startDate"
+              label="START DATE (CALENDAR SELECTOR) *"
+            />
+
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-700 font-bold mb-1">START DATE *</label>
-                <input type="date" name="startDate" required className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white" />
+                <label className="block text-slate-700 font-semibold mb-1">MAX CAPACITY</label>
+                <input
+                  type="number"
+                  name="maxCapacity"
+                  defaultValue="30"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                />
               </div>
+
               <div>
-                <label className="block text-slate-700 font-bold mb-1">MAX CAPACITY</label>
-                <input type="number" name="maxCapacity" defaultValue="30" className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:border-red-500 focus:bg-white" />
+                <label className="block text-slate-700 font-semibold mb-1">SCHEDULE &amp; TIMINGS</label>
+                <input
+                  name="schedule"
+                  defaultValue="Mon / Wed / Fri • 7:00 PM - 9:00 PM IST"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                />
               </div>
             </div>
 
-            <div>
-              <label className="block text-slate-700 font-bold mb-1">SCHEDULE & TIMINGS</label>
-              <input
-                name="schedule"
-                defaultValue="Mon / Wed / Fri • 7:00 PM - 9:00 PM IST"
-                className="w-full bg-slate-50 border border-red-200 text-slate-950 rounded-2xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:border-red-500 focus:bg-white"
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-3 border-t border-red-100">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(false)}
-                className="px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-mono cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-2 rounded-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-mono font-bold text-xs cursor-pointer shadow-[0_4px_15px_rgba(220,38,38,0.25)] border border-red-500"
+                className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs cursor-pointer shadow-sm disabled:opacity-50"
               >
                 {loading ? 'Creating...' : 'Launch Batch'}
               </button>
@@ -1264,6 +1462,136 @@ export function BatchManagementClient({
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* ✏️ UPDATE BATCH DIALOG (Task 2) */}
+      {editingBatch && (
+        <Dialog open={!!editingBatch} onOpenChange={(open) => !open && setEditingBatch(null)}>
+          <DialogContent className="max-w-lg bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 text-xs max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="border-b border-slate-100 pb-3">
+              <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-violet-600" />
+                Update Academic Batch: {editingBatch.batchCode}
+              </DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleUpdateBatch} className="space-y-3.5 pt-2">
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">BATCH CODE / ID *</label>
+                <input
+                  name="batchCode"
+                  defaultValue={editingBatch.batchCode}
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs uppercase focus:outline-none focus:border-violet-600 font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">COHORT TITLE *</label>
+                <input
+                  name="title"
+                  defaultValue={editingBatch.title}
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">COURSE CURRICULUM *</label>
+                  <select
+                    name="courseId"
+                    required
+                    defaultValue={editingBatch.courseId || courses[0]?.id || ''}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
+                  >
+                    {courses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">FACULTY MENTOR</label>
+                  <select
+                    name="mentorId"
+                    defaultValue={editingBatch.mentorId || ''}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
+                  >
+                    <option value="">-- Unassigned --</option>
+                    {mentors.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.user?.name || m.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Interactive Calendar for Edit Start Date */}
+              <BatchCalendarDatePicker
+                value={editBatchDate}
+                onChange={setEditBatchDate}
+                name="startDate"
+                label="START DATE (CALENDAR SELECTOR) *"
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">MAX CAPACITY</label>
+                  <input
+                    type="number"
+                    name="maxCapacity"
+                    defaultValue={editingBatch.maxCapacity || 30}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">STATUS</label>
+                  <select
+                    name="status"
+                    defaultValue={editingBatch.status || 'ACTIVE'}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600"
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="UPCOMING">Upcoming</option>
+                    <option value="PAUSED">Paused</option>
+                    <option value="COMPLETED">Completed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">SCHEDULE &amp; TIMINGS</label>
+                <input
+                  name="schedule"
+                  defaultValue={editingBatch.schedule || 'Mon / Wed / Fri • 7:00 PM - 9:00 PM IST'}
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingBatch(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  {loading ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* 👥 BATCH STUDENT ROSTER & FAST ENROLLMENT BY TS-ID */}
       {selectedBatchForStudents && (

@@ -4,7 +4,6 @@ import { prisma } from '@/server/database/prisma';
 import { getAllBatchesService } from '@/server/services/batch.service';
 import { BatchManagementClient } from './batch-management-client';
 import { AdminAttendanceCorrectionQueue } from '@/components/admin/attendance/AdminAttendanceCorrectionQueue';
-import { Badge } from '@/components/ui/badge';
 import { Layers } from 'lucide-react';
 
 export const revalidate = 0;
@@ -48,24 +47,24 @@ export default async function AdminBatchesPage() {
   ]);
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-emerald-950/40 text-emerald-300 border border-emerald-500/30 font-mono text-xs flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-emerald-400" />
-              ACADEMIC COHORT ARCHITECTURE
-            </Badge>
-            <Badge className="bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs">
-              ACTIVE COHORTS ({batches.length})
-            </Badge>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 text-xs font-semibold flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-violet-600" />
+              Cohorts &amp; Conduction
+            </span>
+            <span className="text-xs text-slate-500 font-medium">
+              Active Batches ({batches.length})
+            </span>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white font-mono">
-            ACADEMIC BATCHES & TIMETABLE CONDUCTION
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            Academic Batches &amp; Timetable Conduction
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Manage cohort enrollment, lecture scheduling, session registers, and attendance auditing.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Manage cohort schedules, calendar dates, student roster enrollments, and batch CRUD operations.
           </p>
         </div>
       </div>

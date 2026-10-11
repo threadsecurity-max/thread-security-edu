@@ -2,18 +2,47 @@ import { prisma } from '../database/prisma';
 import { logAuditEvent } from '../security/audit';
 import { generateTSID, generateDomainTSID, StudentTrack } from '@/lib/auth/ts-id';
 
+/**
+ * Calculates the next available TS-ID for a student based on existing IDs + 1.
+ * For track 'CYBER': prefix is TS-C (e.g. TS-C147)
+ * For track 'AI': prefix is TS-A (e.g. TS-A147)
+ */
+export async function getNextSuggestedTSID(track: StudentTrack = 'CYBER'): Promise<string> {
+  const prefix = track === 'AI' ? 'TS-A' : 'TS-C';
+  
+  const allIdentities = await prisma.tSIdentity.findMany({
+    select: { tsId: true },
+  });
+
+  let maxNum = 100; // baseline, first is 101
+  for (const record of allIdentities) {
+    // Match either TS-C###, TS-A###, or any trailing digits
+    const match = record.tsId.match(/^TS-[A-Za-z](\d+)$/i) || record.tsId.match(/(\d{3,4})$/);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1], 10);
+      if (!isNaN(parsed) && parsed > maxNum && parsed < 10000) {
+        maxNum = parsed;
+      }
+    }
+  }
+
+  return `${prefix}${maxNum + 1}`;
+}
+
 export async function createStudentService({
   name,
   email,
   phone,
   careerGoal,
   track = 'CYBER',
+  customTsId,
 }: {
   name: string;
   email: string;
   phone?: string;
   careerGoal?: string;
   track?: StudentTrack;
+  customTsId?: string;
 }) {
   const cleanEmail = email.trim().toLowerCase();
   const existing = await prisma.user.findUnique({
@@ -24,7 +53,17 @@ export async function createStudentService({
     throw new Error('An account with this email address already exists.');
   }
 
-  const tsId = generateDomainTSID(track);
+  let tsId = customTsId?.trim();
+  if (!tsId) {
+    tsId = await getNextSuggestedTSID(track);
+  } else {
+    const existingId = await prisma.tSIdentity.findUnique({
+      where: { tsId },
+    });
+    if (existingId) {
+      throw new Error(`Student ID ${tsId} is already in use by another student.`);
+    }
+  }
 
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
@@ -308,6 +347,7 @@ export async function createMentorService({
   company,
   expertise,
   bio,
+  batchId,
 }: {
   name: string;
   email: string;
@@ -315,6 +355,7 @@ export async function createMentorService({
   company: string;
   expertise: string;
   bio: string;
+  batchId?: string;
 }) {
   const cleanEmail = email.toLowerCase().trim();
   const existing = await prisma.user.findUnique({
@@ -385,6 +426,17 @@ export async function createMentorService({
     return { user, mentor, mentorId, inviteToken };
   });
 
+  if (batchId) {
+    try {
+      await prisma.batch.update({
+        where: { id: batchId },
+        data: { mentorId: result.mentor.id },
+      });
+    } catch (e) {
+      console.warn('Failed to assign batch during mentor provision:', e);
+    }
+  }
+
   await logAuditEvent({
     action: 'MENTOR_CREATED',
     entity: 'MENTOR_PROFILE',
@@ -393,6 +445,22 @@ export async function createMentorService({
   });
 
   return result;
+}
+
+export async function assignBatchToMentorService(mentorProfileId: string, batchId: string) {
+  const updated = await prisma.batch.update({
+    where: { id: batchId },
+    data: { mentorId: mentorProfileId },
+  });
+
+  await logAuditEvent({
+    action: 'BATCH_ASSIGNED_TO_MENTOR',
+    entity: 'BATCH',
+    entityId: batchId,
+    details: `Assigned batch ${updated.batchCode} to mentor ${mentorProfileId}`,
+  });
+
+  return updated;
 }
 
 export async function updateMentorService(

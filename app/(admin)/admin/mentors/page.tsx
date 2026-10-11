@@ -1,8 +1,7 @@
 import { prisma } from '@/server/database/prisma';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, UserPlus, Sparkles, Shield } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { MentorDirectoryClient } from './mentor-directory-client';
 
 export const revalidate = 0;
@@ -14,58 +13,78 @@ export default async function AdminMentorDirectoryPage() {
   }
 
   let mentors: any[] = [];
+  let allBatches: any[] = [];
+
   try {
-    mentors = await prisma.mentorProfile.findMany({
-      include: {
-        user: {
-          include: {
-            tsIdentity: true,
-            mentorIdentity: true,
-          } as any,
-        },
-        courses: true,
-        batches: {
-          include: {
-            sessions: true,
+    const [fetchedMentors, fetchedBatches] = await Promise.all([
+      prisma.mentorProfile.findMany({
+        include: {
+          user: {
+            include: {
+              tsIdentity: true,
+              mentorIdentity: true,
+            } as any,
+          },
+          courses: true,
+          batches: {
+            include: {
+              sessions: {
+                orderBy: { sessionDate: 'asc' },
+              },
+            },
+          },
+          students: {
+            include: {
+              user: true,
+            },
           },
         },
-        students: {
-          include: {
-            user: true,
-          },
+        orderBy: { user: { name: 'asc' } },
+      }),
+      prisma.batch.findMany({
+        select: {
+          id: true,
+          batchCode: true,
+          title: true,
+          mentorId: true,
+          courseId: true,
+          course: { select: { title: true } },
         },
-      },
-      orderBy: { user: { name: 'asc' } },
-    });
+        orderBy: { batchCode: 'asc' },
+      }),
+    ]);
+
+    mentors = fetchedMentors;
+    allBatches = fetchedBatches;
   } catch (e) {
     console.error('Failed to query mentors roster:', e);
   }
 
   return (
-    <div className="space-y-8 text-slate-100 font-sans">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono text-xs flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              FACULTY &amp; INSTRUCTOR OPERATIONS
-            </Badge>
-            <Badge className="bg-slate-800 text-slate-300 border border-slate-700 font-mono text-xs">
-              ACTIVE ROSTER ({mentors.length})
-            </Badge>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-full bg-violet-50 text-violet-700 border border-violet-200 text-xs font-semibold flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
+              Faculty &amp; Instructors
+            </span>
+            <span className="text-xs text-slate-500 font-medium">
+              Active Roster ({mentors.length})
+            </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3 font-mono">
-            Faculty Roster &amp; Mentor Lifecycle
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            Faculty Roster &amp; Mentors
           </h1>
-          <p className="text-xs md:text-sm text-slate-400 max-w-3xl mt-1 font-mono">
-            Provision atomic Mentor IDs, manage account activations, suspend or revoke dashboard permissions, and inspect faculty workload across batches and courses.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">
+            Provision faculty accounts, assign batches from provision, manage lecture schedules, and inspect workload across cohorts.
           </p>
         </div>
       </div>
 
       {/* Interactive Mentor Directory Client Component */}
-      <MentorDirectoryClient mentors={mentors} />
+      <MentorDirectoryClient mentors={mentors} allBatches={allBatches} />
     </div>
   );
 }

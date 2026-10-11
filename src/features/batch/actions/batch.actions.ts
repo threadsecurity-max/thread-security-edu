@@ -285,3 +285,76 @@ export async function adminApproveOrRejectCorrectionAction(
   }
 }
 
+/**
+ * Super Admin or Academic Admin updates batch
+ */
+export async function updateBatchAction(batchId: string, formData: FormData) {
+  const session = await getSession();
+  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    return { success: false, error: 'Unauthorized.' };
+  }
+
+  const batchCode = formData.get('batchCode') as string;
+  const title = formData.get('title') as string;
+  const description = formData.get('description') as string;
+  const courseId = formData.get('courseId') as string;
+  const mentorId = formData.get('mentorId') as string;
+  const startDateStr = formData.get('startDate') as string;
+  const endDateStr = formData.get('endDate') as string;
+  const schedule = formData.get('schedule') as string;
+  const maxCapacityStr = formData.get('maxCapacity') as string;
+  const status = formData.get('status') as string;
+
+  try {
+    const { updateBatchService } = await import('@/server/services/batch.service');
+    const updated = await updateBatchService(
+      batchId,
+      {
+        batchCode: batchCode || undefined,
+        title: title || undefined,
+        description: description !== undefined ? description : undefined,
+        courseId: courseId || null,
+        mentorId: mentorId || null,
+        startDate: startDateStr ? new Date(startDateStr) : undefined,
+        endDate: endDateStr ? new Date(endDateStr) : null,
+        schedule: schedule || undefined,
+        maxCapacity: maxCapacityStr ? parseInt(maxCapacityStr, 10) : undefined,
+        status: status || undefined,
+      },
+      session.userId
+    );
+
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/admin/mentors');
+    revalidatePath('/mentor');
+    return { success: true, batch: updated };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to update batch.' };
+  }
+}
+
+/**
+ * Super Admin deletes a batch
+ */
+export async function deleteBatchAction(batchId: string) {
+  const session = await getSession();
+  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    return { success: false, error: 'Unauthorized.' };
+  }
+
+  try {
+    const { deleteBatchService } = await import('@/server/services/batch.service');
+    await deleteBatchService(batchId, session.userId);
+
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/admin/mentors');
+    revalidatePath('/mentor');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to delete batch.' };
+  }
+}
+
+

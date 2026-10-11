@@ -1545,4 +1545,79 @@ export async function rescheduleBatchSessionService({
   };
 }
 
+export async function updateBatchService(
+  batchId: string,
+  data: {
+    batchCode?: string;
+    title?: string;
+    description?: string;
+    courseId?: string | null;
+    mentorId?: string | null;
+    startDate?: Date;
+    endDate?: Date | null;
+    schedule?: string;
+    maxCapacity?: number;
+    status?: any;
+  },
+  actorUserId?: string
+) {
+  const updated = await db.batch.update({
+    where: { id: batchId },
+    data: {
+      ...(data.batchCode ? { batchCode: data.batchCode.trim() } : {}),
+      ...(data.title ? { title: data.title.trim() } : {}),
+      ...(data.description !== undefined ? { description: data.description } : {}),
+      ...(data.courseId !== undefined ? { courseId: data.courseId || null } : {}),
+      ...(data.mentorId !== undefined ? { mentorId: data.mentorId || null } : {}),
+      ...(data.startDate ? { startDate: data.startDate } : {}),
+      ...(data.endDate !== undefined ? { endDate: data.endDate } : {}),
+      ...(data.schedule ? { schedule: data.schedule.trim() } : {}),
+      ...(data.maxCapacity ? { maxCapacity: data.maxCapacity } : {}),
+      ...(data.status ? { status: data.status } : {}),
+    },
+  });
+
+  if (actorUserId) {
+    await logAuditEvent({
+      actorId: actorUserId,
+      action: 'BATCH_UPDATED',
+      entity: 'BATCH',
+      entityId: batchId,
+      details: `Updated batch ${updated.batchCode} (${updated.title})`,
+    });
+  }
+
+  return updated;
+}
+
+export async function deleteBatchService(batchId: string, actorUserId?: string) {
+  const batch = await db.batch.findUnique({
+    where: { id: batchId },
+    select: { batchCode: true, title: true },
+  });
+
+  // First unassign any students
+  await db.studentProfile.updateMany({
+    where: { batchId },
+    data: { batchId: null },
+  });
+
+  const deleted = await db.batch.delete({
+    where: { id: batchId },
+  });
+
+  if (actorUserId) {
+    await logAuditEvent({
+      actorId: actorUserId,
+      action: 'BATCH_DELETED',
+      entity: 'BATCH',
+      entityId: batchId,
+      details: `Deleted batch ${batch?.batchCode || batchId}`,
+    });
+  }
+
+  return deleted;
+}
+
+
 

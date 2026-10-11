@@ -13,16 +13,27 @@ import {
   toggleStudentCourseEnrollmentService,
   toggleMentorAccessService,
   reassignStudentBatchService,
+  getNextSuggestedTSID,
 } from '../../../server/services/admin.service';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
 import { StudentTrack } from '@/lib/auth/ts-id';
+
+export async function getSuggestedTSIDAction(track: StudentTrack = 'CYBER') {
+  try {
+    const tsId = await getNextSuggestedTSID(track);
+    return { success: true, tsId };
+  } catch {
+    return { success: false, error: 'Failed to generate suggested TS-ID' };
+  }
+}
 
 export async function createStudentAction(formData: FormData) {
   const name = (formData.get('name') as string)?.trim();
   const email = (formData.get('email') as string)?.trim();
   const phone = (formData.get('phone') as string)?.trim();
   const careerGoal = (formData.get('careerGoal') as string)?.trim();
+  const customTsId = (formData.get('customTsId') as string)?.trim();
   const rawTrack = (formData.get('track') as string)?.trim() as StudentTrack;
   const track: StudentTrack = rawTrack === 'AI' ? 'AI' : 'CYBER';
 
@@ -31,7 +42,7 @@ export async function createStudentAction(formData: FormData) {
   }
 
   try {
-    const result = await createStudentService({ name, email, phone, careerGoal, track });
+    const result = await createStudentService({ name, email, phone, careerGoal, track, customTsId: customTsId || undefined });
     revalidatePath('/admin');
     revalidatePath('/admin/students');
     revalidatePath('/admin/audit');
@@ -105,6 +116,7 @@ export async function createMentorAction(formData: FormData) {
   const company = (formData.get('company') as string)?.trim() || 'Thread Security Education';
   const expertise = (formData.get('expertise') as string)?.trim() || 'Cybersecurity, VAPT';
   const bio = (formData.get('bio') as string)?.trim() || 'Lead instructor in offensive security.';
+  const batchId = (formData.get('batchId') as string)?.trim() || undefined;
 
   if (!name || !email) {
     return { success: false, error: 'Name and Email are required fields.' };
@@ -118,15 +130,35 @@ export async function createMentorAction(formData: FormData) {
       company,
       expertise,
       bio,
+      batchId: batchId || undefined,
     });
 
     revalidatePath('/admin/mentors');
+    revalidatePath('/admin/batches');
     revalidatePath('/admin/students');
+    revalidatePath('/admin/timetable');
     revalidatePath('/admin/audit');
     return { success: true, mentor: result.mentor };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create mentor.';
     return { success: false, error: msg };
+  }
+}
+
+export async function assignBatchToMentorAction(mentorProfileId: string, batchId: string) {
+  try {
+    const prisma = (await import('@/server/database/prisma')).prisma;
+    await prisma.batch.update({
+      where: { id: batchId },
+      data: { mentorId: mentorProfileId },
+    });
+    revalidatePath('/admin/mentors');
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/mentor');
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to assign batch to mentor' };
   }
 }
 
