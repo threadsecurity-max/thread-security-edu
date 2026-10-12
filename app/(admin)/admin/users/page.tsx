@@ -21,23 +21,34 @@ export default async function AdminUsersDirectoryPage() {
     redirect('/login?error=UnauthorizedAccess');
   }
 
-  const [rawUsers, studentsCount, guestsCount, mentorsCount, adminsCount] = await Promise.all([
+  const [
+    rawUsers,
+    studentsCount,
+    mentorsCount,
+    staffCount,
+    secAdminsCount,
+    superAdminsCount,
+    batches,
+  ] = await Promise.all([
     prisma.user.findMany({
       include: {
         tsIdentity: true,
         studentProfile: {
-          select: { phone: true },
+          select: { phone: true, batchId: true },
         },
       },
       orderBy: { createdAt: 'desc' },
     }),
     prisma.user.count({ where: { role: 'STUDENT' } }),
-    prisma.user.count({ where: { role: 'GUEST' } }),
     prisma.user.count({ where: { role: 'MENTOR' } }),
     prisma.user.count({
-      where: {
-        role: { in: ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'SECURITY_ADMIN', 'CONTENT_MANAGER'] },
-      },
+      where: { role: { in: ['ACADEMIC_ADMIN', 'CONTENT_MANAGER'] } },
+    }),
+    prisma.user.count({ where: { role: 'SECURITY_ADMIN' } }),
+    prisma.user.count({ where: { role: 'SUPER_ADMIN' } }),
+    prisma.batch.findMany({
+      select: { id: true, batchCode: true, title: true },
+      orderBy: { batchCode: 'asc' },
     }),
   ]);
 
@@ -50,15 +61,17 @@ export default async function AdminUsersDirectoryPage() {
     isDashboardAccessGranted: u.isDashboardAccessGranted,
     tsId: u.tsIdentity?.tsId || null,
     phone: u.studentProfile?.phone || null,
+    batchId: u.studentProfile?.batchId || null,
     createdAt: u.createdAt.toISOString(),
   }));
 
   const metrics = {
     total: rawUsers.length,
     students: studentsCount,
-    guests: guestsCount,
     mentors: mentorsCount,
-    admins: adminsCount,
+    staff: staffCount,
+    securityAdmins: secAdminsCount,
+    superAdmins: superAdminsCount,
   };
 
   return (
@@ -79,7 +92,12 @@ export default async function AdminUsersDirectoryPage() {
         </p>
       </div>
 
-      <UsersDirectoryClient initialUsers={users} metrics={metrics} />
+      <UsersDirectoryClient
+        initialUsers={users}
+        metrics={metrics}
+        batches={batches}
+        currentUserId={session.userId}
+      />
     </div>
   );
 }

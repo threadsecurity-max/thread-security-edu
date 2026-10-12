@@ -532,3 +532,255 @@ export async function sendFacultyOnboardingEmail({
     warning: 'Faculty created. Email logged to console in local environment.',
   };
 }
+
+export interface SendStaffOrAdminOnboardingInput {
+  toEmail: string;
+  name: string;
+  role: 'SECURITY_ADMIN' | 'ACADEMIC_ADMIN' | 'CONTENT_MANAGER' | 'SUPER_ADMIN';
+  tsId: string;
+  secretKey?: string;
+  passkey: string;
+  department?: string;
+  loginUrl?: string;
+}
+
+export async function sendStaffOrAdminOnboardingEmail({
+  toEmail,
+  name,
+  role,
+  tsId,
+  secretKey,
+  passkey,
+  department,
+  loginUrl = process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/login` : 'https://www.threadsecurity.in/login',
+}: SendStaffOrAdminOnboardingInput): Promise<SendOnboardingResult> {
+  const cleanTarget = toEmail.trim().toLowerCase();
+  const apiKey = process.env.RESEND_API_KEY;
+
+  const verifiedSender = 'Thread Security Education <edu@threadsecurity.in>';
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL && !process.env.RESEND_FROM_EMAIL.includes('onboarding@resend.dev')
+      ? process.env.RESEND_FROM_EMAIL
+      : verifiedSender;
+
+  const roleTitle =
+    role === 'SECURITY_ADMIN'
+      ? 'Security Administrator'
+      : role === 'SUPER_ADMIN'
+      ? 'Super Administrator'
+      : role === 'CONTENT_MANAGER'
+      ? 'Content Manager'
+      : 'Academic Operations Staff';
+
+  const badgeText =
+    role === 'SECURITY_ADMIN'
+      ? 'Security Clearance'
+      : role === 'SUPER_ADMIN'
+      ? 'Master Admin Access'
+      : 'Staff Appointment';
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Thread Security — Account Provisioning & Security Keys</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+          }
+          .wrapper { width: 100%; background-color: #f8fafc; padding: 40px 16px; }
+          .container {
+            max-width: 580px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+          }
+          .header {
+            padding: 32px 32px 24px 32px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+          }
+          .content { padding: 32px; }
+          .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #7c3aed;
+            background-color: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+          }
+          .card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+          }
+          .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #edf2f7;
+            font-size: 13px;
+          }
+          .row:last-child { border-bottom: none; }
+          .label { color: #64748b; font-weight: 500; }
+          .value { color: #0f172a; font-weight: 700; font-family: monospace; }
+          .btn {
+            display: inline-block;
+            background-color: #7c3aed;
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 12px 28px;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 8px;
+          }
+          .footer {
+            padding: 24px 32px;
+            background-color: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="wrapper">
+          <div class="container">
+            <div class="header">
+              <span class="badge">${badgeText}</span>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a;">Welcome to Platform Administration, ${name}</h1>
+            </div>
+            <div class="content">
+              <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0 0 16px 0;">
+                Your account has been officially provisioned as <strong>${roleTitle}</strong> on the Thread Security Education platform. Please find your role-specific security credentials and access keys below.
+              </p>
+
+              <div class="card">
+                <div class="row">
+                  <span class="label">Assigned Identity</span>
+                  <span class="value" style="font-family: inherit;">${name}</span>
+                </div>
+                <div class="row">
+                  <span class="label">Platform Role</span>
+                  <span class="value" style="color: #7c3aed;">${roleTitle}</span>
+                </div>
+                <div class="row">
+                  <span class="label">Account TS-ID</span>
+                  <span class="value">${tsId}</span>
+                </div>
+                <div class="row">
+                  <span class="label">Login Email</span>
+                  <span class="value" style="font-family: inherit;">${cleanTarget}</span>
+                </div>
+                ${department ? `
+                <div class="row">
+                  <span class="label">Department / Unit</span>
+                  <span class="value" style="font-family: inherit;">${department}</span>
+                </div>` : ''}
+                ${secretKey ? `
+                <div class="row">
+                  <span class="label">Assigned Secret Key</span>
+                  <span class="value" style="color: #0f172a; background-color: #ede9fe; padding: 2px 6px; border-radius: 4px;">${secretKey}</span>
+                </div>` : ''}
+                <div class="row">
+                  <span class="label">Security Access Key / Passkey</span>
+                  <span class="value" style="color: #0f172a; background-color: #ede9fe; padding: 2px 6px; border-radius: 4px;">${passkey}</span>
+                </div>
+              </div>
+
+              <div style="background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin: 20px 0;">
+                <p style="margin: 0; font-size: 12px; color: #92400e; font-weight: 500;">
+                  🔒 <strong>Confidentiality Notice:</strong> Keep your Secret Key and Access Passkey strictly confidential. You will be prompted for your respective role keys upon logging in.
+                </p>
+              </div>
+
+              <div style="text-align: center; margin-top: 28px;">
+                <a href="${loginUrl}" class="btn">Proceed to Login Console &rarr;</a>
+              </div>
+            </div>
+            <div class="footer">
+              Thread Security Operations &bull; Automated Access &amp; Identity Provisioning
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  // 1. Resend API
+  if (apiKey) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [cleanTarget],
+          subject: `Thread Security — ${roleTitle} Clearance & Credentials for ${name} (${tsId})`,
+          html: htmlContent,
+        }),
+      });
+
+      if (res.ok) {
+        return { success: true, deliveredTo: cleanTarget };
+      }
+    } catch (apiErr: any) {
+      console.error('[Resend Admin Onboarding Error]:', apiErr?.message);
+    }
+  }
+
+  // 2. SMTP Transport Fallback
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: fromEmail,
+        to: cleanTarget,
+        subject: `Thread Security — ${roleTitle} Clearance & Credentials for ${name} (${tsId})`,
+        html: htmlContent,
+      });
+
+      return { success: true, deliveredTo: cleanTarget };
+    } catch (smtpErr: any) {
+      console.error('[SMTP Admin Onboarding Error]:', smtpErr?.message);
+    }
+  }
+
+  return {
+    success: true,
+    deliveredTo: cleanTarget,
+    warning: 'Account created. Email logged to console in local environment.',
+  };
+}

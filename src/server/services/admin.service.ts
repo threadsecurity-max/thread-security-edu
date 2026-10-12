@@ -1,7 +1,12 @@
 import { prisma } from '../database/prisma';
 import { logAuditEvent } from '../security/audit';
 import { generateTSID, generateDomainTSID, StudentTrack } from '@/lib/auth/ts-id';
-import { sendStudentOnboardingEmail, sendFacultyOnboardingEmail } from '../email/onboarding.service';
+import {
+  sendStudentOnboardingEmail,
+  sendFacultyOnboardingEmail,
+  sendStaffOrAdminOnboardingEmail,
+} from '../email/onboarding.service';
+import { RoleType } from '@prisma/client';
 
 /**
  * Calculates the next available TS-ID for a student based on existing IDs + 1.
@@ -500,6 +505,13 @@ export async function createMentorService({
   }
 
   const mentorId = customMentorId?.trim().toUpperCase() || generateMentorTSID();
+  const existingId = await prisma.tSIdentity.findUnique({
+    where: { tsId: mentorId },
+  });
+  if (existingId) {
+    throw new Error(`Faculty ID ${mentorId} is already assigned to another account.`);
+  }
+
   const inviteToken = `tse-inv-${randomBytes(16).toString('hex')}`;
   const facultyPasskey = passkey?.trim() || `TSE-MNT-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
 
@@ -527,34 +539,13 @@ export async function createMentorService({
       },
     });
 
-    // Save Mentor Identity
-    try {
-      await (tx as any).mentorIdentity.create({
-        data: {
-          mentorId,
-          userId: user.id,
-        },
-      });
-    } catch {
-      await tx.tSIdentity.create({
-        data: {
-          tsId: mentorId,
-          userId: user.id,
-        },
-      });
-    }
-
-    try {
-      await (tx as any).invitationToken.create({
-        data: {
-          token: inviteToken,
-          email: cleanEmail,
-          role: 'MENTOR',
-          targetId: user.id,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        },
-      });
-    } catch {}
+    // Save Mentor TSIdentity
+    await tx.tSIdentity.create({
+      data: {
+        tsId: mentorId,
+        userId: user.id,
+      },
+    });
 
     return { user, mentor, mentorId, inviteToken };
   });
@@ -880,6 +871,464 @@ export async function reassignStudentBatchService(
   });
 
   return { success: true, oldBatchCode, newBatchCode };
+}
+
+/**
+ * Calculates next available sequential TS-ID for Staff, Security Admin, or Super Admin
+ */
+export async function getNextSuggestedStaffOrAdminID(
+  role: 'SECURITY_ADMIN' | 'ACADEMIC_ADMIN' | 'SUPER_ADMIN' | 'CONTENT_MANAGER'
+): Promise<string> {
+  const prefix =
+    role === 'SECURITY_ADMIN'
+      ? 'TS-SEC'
+      : role === 'SUPER_ADMIN'
+      ? 'TS-ADM'
+      : 'TS-STF';
+
+  const allIdentities = await prisma.tSIdentity.findMany({
+    where: { tsId: { startsWith: prefix } },
+    select: { tsId: true },
+  });
+
+  let maxNum = 0;
+  for (const record of allIdentities) {
+    const match = record.tsId.match(/(\d+)$/);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1], 10);
+      if (!isNaN(parsed) && parsed > maxNum) maxNum = parsed;
+    }
+  }
+  const nextNum = maxNum + 1;
+  return `${prefix}-${nextNum < 10 ? '0' + nextNum : nextNum}`;
+}
+
+export interface CreateUserInput {
+  name: string;
+  email: string;
+  phone?: string;
+  role: RoleType;
+  customTsId?: string;
+  passkey?: string;
+  secretKey?: string;
+  department?: string;
+  batchId?: string;
+  track?: StudentTrack;
+  dispatchEmail?: boolean;
+  actorId?: string;
+}
+
+export async function createUserService({
+  name,
+  email,
+  phone,
+  role,
+  customTsId,
+  passkey,
+  secretKey,
+  department,
+  batchId,
+  track = 'CYBER',
+  dispatchEmail = true,
+  actorId,
+}: CreateUserInput) {
+  const cleanEmail = email.toLowerCase().trim();
+  const cleanName = name.trim();
+
+  // 1. Verify Email Uniqueness
+  const existingUser = await prisma.user.findUnique({
+    where: { email: cleanEmail },
+  });
+  if (existingUser) {
+    throw new Error(`An account with email ${cleanEmail} already exists.`);
+  }
+
+  // 2. Resolve TS-ID
+  let appointedTsId = customTsId?.trim().toUpperCase();
+  if (!appointedTsId) {
+    if (role === 'STUDENT') {
+      appointedTsId = await getNextSuggestedTSID(track);
+    } else if (role === 'MENTOR') {
+      appointedTsId = await getNextSuggestedMentorID();
+    } else if (role === 'SECURITY_ADMIN') {
+      appointedTsId = await getNextSuggestedStaffOrAdminID('SECURITY_ADMIN');
+    } else if (role === 'SUPER_ADMIN') {
+      appointedTsId = await getNextSuggestedStaffOrAdminID('SUPER_ADMIN');
+    } else {
+      appointedTsId = await getNextSuggestedStaffOrAdminID('ACADEMIC_ADMIN');
+    }
+  }
+
+  // 3. Verify TS-ID Uniqueness
+  const existingTsId = await prisma.tSIdentity.findUnique({
+    where: { tsId: appointedTsId },
+  });
+  if (existingTsId) {
+    throw new Error(`TS-ID ${appointedTsId} is already in use by another account.`);
+  }
+
+  // 4. Resolve Passkey & Secret Key
+  let resolvedPasskey = passkey?.trim();
+  let resolvedSecretKey = secretKey?.trim();
+
+  if (role === 'SECURITY_ADMIN') {
+    resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TS-SEC-VAULT-2026';
+    resolvedPasskey = resolvedPasskey || `SEC-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  } else if (role === 'ACADEMIC_ADMIN' || role === 'CONTENT_MANAGER') {
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-ADMIN-VAULT-2026';
+    resolvedPasskey = resolvedPasskey || `STF-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  } else if (role === 'SUPER_ADMIN') {
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-MASTER-ROOT-2026';
+    resolvedPasskey = resolvedPasskey || `ADM-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  } else if (role === 'MENTOR') {
+    resolvedSecretKey = resolvedSecretKey || process.env.MENTOR_SECRET_KEY || 'TS-MNT-2026-X9';
+    resolvedPasskey = resolvedPasskey || `MNT-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  } else {
+    // STUDENT or GUEST
+    resolvedPasskey = resolvedPasskey || `TSE-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  }
+
+  // 5. Atomic Creation
+  const newUser = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        name: cleanName,
+        email: cleanEmail,
+        passwordHash: resolvedPasskey,
+        role,
+        isActive: true,
+        isDashboardAccessGranted: true,
+        dashboardAccessGrantedAt: new Date(),
+        approvedBy: actorId || 'Admin',
+      },
+    });
+
+    await tx.tSIdentity.create({
+      data: {
+        tsId: appointedTsId,
+        userId: user.id,
+      },
+    });
+
+    if (role === 'STUDENT') {
+      await tx.studentProfile.create({
+        data: {
+          userId: user.id,
+          phone: phone?.trim() || null,
+          batchId: batchId || null,
+          careerGoal: department || (track === 'AI' ? 'Artificial Intelligence Track' : 'Cybersecurity Track'),
+        },
+      });
+    } else if (role === 'MENTOR') {
+      const mentorProfile = await tx.mentorProfile.create({
+        data: {
+          userId: user.id,
+          title: department || 'Faculty Mentor',
+          company: 'Thread Security',
+          expertise: department || 'Cybersecurity & Systems',
+          bio: 'Faculty mentor onboarded via Unified User Directory.',
+        },
+      });
+      if (batchId) {
+        await tx.batch.update({
+          where: { id: batchId },
+          data: { mentorId: mentorProfile.id },
+        });
+      }
+    }
+
+    return user;
+  });
+
+  // 6. Automatic Credentials Email Dispatch
+  if (dispatchEmail !== false) {
+    try {
+      if (role === 'STUDENT') {
+        let batchCode: string | undefined;
+        let courseTitle: string | undefined;
+        if (batchId) {
+          const b = await prisma.batch.findUnique({
+            where: { id: batchId },
+            include: { course: true },
+          });
+          batchCode = b?.batchCode;
+          courseTitle = b?.course?.title;
+        }
+        await sendStudentOnboardingEmail({
+          toEmail: cleanEmail,
+          studentName: cleanName,
+          tsId: appointedTsId,
+          tempPassword: resolvedPasskey,
+          batchCode,
+          courseTitle,
+        });
+      } else if (role === 'MENTOR') {
+        await sendFacultyOnboardingEmail({
+          toEmail: cleanEmail,
+          facultyName: cleanName,
+          mentorId: appointedTsId,
+          tempPassword: resolvedPasskey,
+        });
+      } else if (
+        role === 'SECURITY_ADMIN' ||
+        role === 'ACADEMIC_ADMIN' ||
+        role === 'SUPER_ADMIN' ||
+        role === 'CONTENT_MANAGER'
+      ) {
+        await sendStaffOrAdminOnboardingEmail({
+          toEmail: cleanEmail,
+          name: cleanName,
+          role,
+          tsId: appointedTsId,
+          secretKey: resolvedSecretKey,
+          passkey: resolvedPasskey,
+          department,
+        });
+      }
+    } catch (mailErr: any) {
+      console.error('[CreateUser Email Dispatch Error]:', mailErr?.message);
+    }
+  }
+
+  await logAuditEvent({
+    actorId,
+    action: 'USER_CREATED',
+    entity: 'USER',
+    entityId: newUser.id,
+    details: `Created new user ${cleanName} (${cleanEmail}, Role: ${role}, TS-ID: ${appointedTsId}).`,
+  });
+
+  return {
+    success: true,
+    user: newUser,
+    tsId: appointedTsId,
+    passkey: resolvedPasskey,
+    secretKey: resolvedSecretKey,
+  };
+}
+
+export interface UpdateUserInput {
+  name?: string;
+  email?: string;
+  phone?: string;
+  role?: RoleType;
+  isActive?: boolean;
+  isDashboardAccessGranted?: boolean;
+  newPasskey?: string;
+  newSecretKey?: string;
+  dispatchUpdatedCredentials?: boolean;
+  actorId?: string;
+}
+
+export async function updateUserService(userId: string, data: UpdateUserInput) {
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      tsIdentity: true,
+      studentProfile: true,
+      mentorProfile: true,
+    },
+  });
+
+  if (!existing) {
+    throw new Error('User not found.');
+  }
+
+  const updatePayload: any = {};
+  if (data.name) updatePayload.name = data.name.trim();
+  if (data.email) {
+    const cleanEmail = data.email.toLowerCase().trim();
+    if (cleanEmail !== existing.email) {
+      const emailConflict = await prisma.user.findUnique({ where: { email: cleanEmail } });
+      if (emailConflict) throw new Error(`Email ${cleanEmail} is already taken by another account.`);
+      updatePayload.email = cleanEmail;
+    }
+  }
+  if (data.role) updatePayload.role = data.role;
+  if (typeof data.isActive === 'boolean') updatePayload.isActive = data.isActive;
+  if (typeof data.isDashboardAccessGranted === 'boolean') {
+    updatePayload.isDashboardAccessGranted = data.isDashboardAccessGranted;
+    if (data.isDashboardAccessGranted && !existing.isDashboardAccessGranted) {
+      updatePayload.dashboardAccessGrantedAt = new Date();
+    }
+  }
+  if (data.newPasskey?.trim()) {
+    updatePayload.passwordHash = data.newPasskey.trim();
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: updatePayload,
+    include: {
+      tsIdentity: true,
+      studentProfile: true,
+      mentorProfile: true,
+    },
+  });
+
+  // Phone update on student profile if exists
+  if (data.phone !== undefined && existing.studentProfile) {
+    await prisma.studentProfile.update({
+      where: { userId },
+      data: { phone: data.phone.trim() || null },
+    });
+  }
+
+  // Ensure role profiles if role was updated
+  if (data.role === 'STUDENT' && !existing.studentProfile) {
+    await prisma.studentProfile.create({
+      data: {
+        userId,
+        careerGoal: 'Cybersecurity Specialist',
+      },
+    });
+  } else if (data.role === 'MENTOR' && !existing.mentorProfile) {
+    await prisma.mentorProfile.create({
+      data: {
+        userId,
+        title: 'Faculty Mentor',
+        company: 'Thread Security',
+        expertise: 'Cybersecurity & Systems',
+        bio: 'Faculty mentor profile.',
+      },
+    });
+  }
+
+  if (data.dispatchUpdatedCredentials) {
+    await dispatchUserCredentialsService(userId, data.newPasskey, data.newSecretKey);
+  }
+
+  await logAuditEvent({
+    actorId: data.actorId,
+    action: 'USER_UPDATED',
+    entity: 'USER',
+    entityId: userId,
+    details: `Updated user profile for ${updatedUser.name} (${updatedUser.email}, Role: ${updatedUser.role}).`,
+  });
+
+  return updatedUser;
+}
+
+export async function deleteUserService(userId: string, currentAdminUserId?: string) {
+  if (currentAdminUserId && userId === currentAdminUserId) {
+    throw new Error('Security Restriction: You cannot delete your own active administrator account.');
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { tsIdentity: true },
+  });
+
+  if (!user) {
+    throw new Error('User account not found.');
+  }
+
+  if (user.email === 'threadsecuritydeveloper@gmail.com') {
+    throw new Error('Protected system administrator account cannot be deleted.');
+  }
+
+  const userName = user.name;
+  const userEmail = user.email;
+  const tsId = user.tsIdentity?.tsId || 'N/A';
+
+  await prisma.user.delete({
+    where: { id: userId },
+  });
+
+  await logAuditEvent({
+    actorId: currentAdminUserId,
+    action: 'USER_DELETED',
+    entity: 'USER',
+    entityId: userId,
+    details: `Deleted user account for ${userName} (${userEmail}, TS-ID: ${tsId}).`,
+  });
+
+  return { success: true, deletedName: userName, deletedEmail: userEmail };
+}
+
+export async function dispatchUserCredentialsService(
+  userId: string,
+  customPasskey?: string,
+  customSecretKey?: string
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      tsIdentity: true,
+      studentProfile: {
+        include: {
+          batch: {
+            include: {
+              course: true,
+              mentor: { include: { user: true } },
+            },
+          },
+        },
+      },
+      mentorProfile: {
+        include: {
+          batches: true,
+          courses: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new Error('User account not found.');
+  }
+
+  const tsId = user.tsIdentity?.tsId || 'TS-USER';
+  let resolvedPasskey = customPasskey?.trim();
+
+  if (user.role === 'STUDENT') {
+    return dispatchStudentCredentialsService(userId, resolvedPasskey);
+  }
+
+  if (user.role === 'MENTOR' && user.mentorProfile) {
+    return dispatchMentorCredentialsService(user.mentorProfile.id, resolvedPasskey);
+  }
+
+  // Staff / Security Admin / Super Admin
+  let resolvedSecretKey = customSecretKey?.trim();
+  if (user.role === 'SECURITY_ADMIN') {
+    resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TS-SEC-VAULT-2026';
+    resolvedPasskey = resolvedPasskey || `SEC-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  } else if (user.role === 'SUPER_ADMIN') {
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-MASTER-ROOT-2026';
+    resolvedPasskey = resolvedPasskey || `ADM-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  } else {
+    // ACADEMIC_ADMIN or CONTENT_MANAGER
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-ADMIN-VAULT-2026';
+    resolvedPasskey = resolvedPasskey || `STF-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      passwordHash: resolvedPasskey,
+      isDashboardAccessGranted: true,
+      isActive: true,
+    },
+  });
+
+  const emailRes = await sendStaffOrAdminOnboardingEmail({
+    toEmail: user.email,
+    name: user.name,
+    role: user.role as any,
+    tsId,
+    secretKey: resolvedSecretKey,
+    passkey: resolvedPasskey,
+  });
+
+  await logAuditEvent({
+    action: 'ADMIN_CREDENTIALS_DISPATCHED',
+    entity: 'USER',
+    entityId: user.id,
+    details: `Dispatched ${user.role} clearance credentials and keys to ${user.name} (${user.email}, TS-ID: ${tsId}).`,
+  });
+
+  return { success: true, email: user.email, tsId, role: user.role, emailResult: emailRes };
 }
 
 

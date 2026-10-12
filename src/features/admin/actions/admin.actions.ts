@@ -15,12 +15,18 @@ import {
   reassignStudentBatchService,
   getNextSuggestedTSID,
   getNextSuggestedMentorID,
+  getNextSuggestedStaffOrAdminID,
   dispatchStudentCredentialsService,
   dispatchMentorCredentialsService,
+  createUserService,
+  updateUserService,
+  deleteUserService,
+  dispatchUserCredentialsService,
 } from '../../../server/services/admin.service';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
 import { StudentTrack } from '@/lib/auth/ts-id';
+import { RoleType } from '@prisma/client';
 
 export async function getSuggestedTSIDAction(track: StudentTrack = 'CYBER') {
   try {
@@ -359,6 +365,134 @@ export async function updateUserRoleAction(userId: string, role: string) {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update user role';
     return { success: false, error: msg };
+  }
+}
+
+export async function getSuggestedRoleIDAction(role: string) {
+  try {
+    if (role === 'STUDENT') {
+      const tsId = await getNextSuggestedTSID('CYBER');
+      return { success: true, tsId };
+    }
+    if (role === 'MENTOR') {
+      const tsId = await getNextSuggestedMentorID();
+      return { success: true, tsId };
+    }
+    const tsId = await getNextSuggestedStaffOrAdminID(role as any);
+    return { success: true, tsId };
+  } catch {
+    return { success: false, error: 'Failed to generate suggested ID' };
+  }
+}
+
+export async function createUserAction(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  role: RoleType;
+  customTsId?: string;
+  passkey?: string;
+  secretKey?: string;
+  department?: string;
+  batchId?: string;
+  track?: StudentTrack;
+  dispatchEmail?: boolean;
+}) {
+  try {
+    const session = await getSession();
+    if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+      return { success: false, error: 'Unauthorized to create platform users.' };
+    }
+
+    const res = await createUserService({
+      ...data,
+      actorId: session.userId,
+    });
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/students');
+    revalidatePath('/admin/mentors');
+    return { success: true, user: res.user, tsId: res.tsId };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to create user account.';
+    return { success: false, error: msg };
+  }
+}
+
+export async function updateUserAction(
+  userId: string,
+  data: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    role?: RoleType;
+    isActive?: boolean;
+    isDashboardAccessGranted?: boolean;
+    newPasskey?: string;
+    newSecretKey?: string;
+    dispatchUpdatedCredentials?: boolean;
+  }
+) {
+  try {
+    const session = await getSession();
+    if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+      return { success: false, error: 'Unauthorized to update users.' };
+    }
+
+    const updated = await updateUserService(userId, {
+      ...data,
+      actorId: session.userId,
+    });
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/students');
+    revalidatePath('/admin/mentors');
+    return { success: true, user: updated };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update user account.';
+    return { success: false, error: msg };
+  }
+}
+
+export async function deleteUserAction(userId: string) {
+  try {
+    const session = await getSession();
+    if (!session || session.role !== 'SUPER_ADMIN') {
+      return { success: false, error: 'Security restriction: Only Super Administrators can delete user accounts.' };
+    }
+
+    const res = await deleteUserService(userId, session.userId);
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/users');
+    revalidatePath('/admin/students');
+    revalidatePath('/admin/mentors');
+    return { success: true as const, deletedName: res.deletedName, deletedEmail: res.deletedEmail };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to delete user account.';
+    return { success: false as const, error: msg };
+  }
+}
+
+export async function dispatchUserCredentialsAction(
+  userId: string,
+  customPasskey?: string,
+  customSecretKey?: string
+) {
+  try {
+    const session = await getSession();
+    if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+      return { success: false as const, error: 'Unauthorized to dispatch credentials.' };
+    }
+
+    const res = await dispatchUserCredentialsService(userId, customPasskey, customSecretKey);
+    const identifier = ('tsId' in res ? res.tsId : (res as any).mentorId) || '';
+    return { success: true as const, email: res.email, identifier };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to dispatch credentials.';
+    return { success: false as const, error: msg };
   }
 }
 

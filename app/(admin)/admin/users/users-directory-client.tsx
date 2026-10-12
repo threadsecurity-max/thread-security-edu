@@ -3,18 +3,27 @@
 import React, { useState, useTransition } from 'react';
 import {
   Search,
-  Filter,
   ShieldCheck,
   Lock,
   Unlock,
   RefreshCw,
-  MoreVertical,
   CheckCircle2,
   AlertCircle,
   UserCog,
   Mail,
   Phone,
-  Calendar,
+  UserPlus,
+  Trash2,
+  Edit3,
+  Send,
+  X,
+  Sparkles,
+  GraduationCap,
+  Briefcase,
+  ShieldAlert,
+  Crown,
+  KeyRound,
+  Layers,
 } from 'lucide-react';
 import {
   Dialog,
@@ -25,7 +34,13 @@ import {
 import {
   toggleStudentDashboardAccessAction,
   updateUserRoleAction,
+  createUserAction,
+  updateUserAction,
+  deleteUserAction,
+  dispatchUserCredentialsAction,
+  getSuggestedRoleIDAction,
 } from '@/features/admin/actions/admin.actions';
+import { RoleType } from '@prisma/client';
 
 export interface UserRecord {
   id: string;
@@ -36,44 +51,94 @@ export interface UserRecord {
   isDashboardAccessGranted: boolean;
   tsId: string | null;
   phone: string | null;
+  batchId?: string | null;
   createdAt: string;
+}
+
+export interface UserMetrics {
+  total: number;
+  students: number;
+  mentors: number;
+  staff: number;
+  securityAdmins: number;
+  superAdmins: number;
+}
+
+interface BatchOption {
+  id: string;
+  batchCode: string;
+  title: string;
 }
 
 interface UsersDirectoryClientProps {
   initialUsers: UserRecord[];
-  metrics: {
-    total: number;
-    students: number;
-    guests: number;
-    mentors: number;
-    admins: number;
-  };
+  metrics: UserMetrics;
+  batches: BatchOption[];
+  currentUserId: string;
 }
+
+type TabType = 'ALL' | 'STUDENT' | 'MENTOR' | 'STAFF' | 'SECURITY_ADMIN' | 'SUPER_ADMIN';
 
 export function UsersDirectoryClient({
   initialUsers,
   metrics,
+  batches,
+  currentUserId,
 }: UsersDirectoryClientProps) {
   const [users, setUsers] = useState<UserRecord[]>(initialUsers);
-  const [activeTab, setActiveTab] = useState<'ALL' | 'STUDENT' | 'GUEST' | 'MENTOR' | 'ADMIN'>('ALL');
+  const [activeTab, setActiveTab] = useState<TabType>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleModalUser, setRoleModalUser] = useState<UserRecord | null>(null);
-  const [selectedNewRole, setSelectedNewRole] = useState<string>('');
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const filteredUsers = users.filter((u) => {
-    // Tab filter
-    if (activeTab === 'STUDENT' && u.role !== 'STUDENT') return false;
-    if (activeTab === 'GUEST' && u.role !== 'GUEST') return false;
-    if (activeTab === 'MENTOR' && u.role !== 'MENTOR') return false;
-    if (
-      activeTab === 'ADMIN' &&
-      !['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'SECURITY_ADMIN', 'CONTENT_MANAGER'].includes(u.role)
-    )
-      return false;
+  // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [deletingUser, setDeletingUser] = useState<UserRecord | null>(null);
+  const [dispatchingUser, setDispatchingUser] = useState<UserRecord | null>(null);
 
-    // Search query filter
+  // Create User Form State
+  const [createFormData, setCreateFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'STUDENT' as RoleType,
+    department: '',
+    batchId: batches[0]?.id || '',
+    track: 'CYBER' as 'CYBER' | 'AI',
+    customTsId: '',
+    passkey: '',
+    secretKey: '',
+    dispatchEmail: true,
+  });
+  const [suggestingId, setSuggestingId] = useState(false);
+
+  // Edit User Form State
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'STUDENT' as RoleType,
+    isActive: true,
+    isDashboardAccessGranted: true,
+    newPasskey: '',
+    newSecretKey: '',
+    dispatchUpdatedCredentials: false,
+  });
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 4000);
+  };
+
+  // Filtered Users
+  const filteredUsers = users.filter((u) => {
+    if (activeTab === 'STUDENT' && u.role !== 'STUDENT') return false;
+    if (activeTab === 'MENTOR' && u.role !== 'MENTOR') return false;
+    if (activeTab === 'STAFF' && !['ACADEMIC_ADMIN', 'CONTENT_MANAGER'].includes(u.role)) return false;
+    if (activeTab === 'SECURITY_ADMIN' && u.role !== 'SECURITY_ADMIN') return false;
+    if (activeTab === 'SUPER_ADMIN' && u.role !== 'SUPER_ADMIN') return false;
+
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = u.name?.toLowerCase().includes(q);
@@ -82,10 +147,166 @@ export function UsersDirectoryClient({
       const matchRole = u.role?.toLowerCase().includes(q);
       return matchName || matchEmail || matchTsId || matchRole;
     }
-
     return true;
   });
 
+  // Fetch suggested ID based on role
+  const refreshSuggestedId = async (targetRole: RoleType) => {
+    setSuggestingId(true);
+    try {
+      const res = await getSuggestedRoleIDAction(targetRole);
+      if (res.success && res.tsId) {
+        setCreateFormData((prev) => ({ ...prev, customTsId: res.tsId! }));
+      }
+    } finally {
+      setSuggestingId(false);
+    }
+  };
+
+  // Handle open create modal
+  const handleOpenCreateModal = async (defaultRole: RoleType = 'STUDENT') => {
+    setCreateFormData({
+      name: '',
+      email: '',
+      phone: '',
+      role: defaultRole,
+      department: '',
+      batchId: batches[0]?.id || '',
+      track: 'CYBER',
+      customTsId: '',
+      passkey: '',
+      secretKey: '',
+      dispatchEmail: true,
+    });
+    setIsCreateModalOpen(true);
+    await refreshSuggestedId(defaultRole);
+  };
+
+  // Submit Create User
+  const handleCreateUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createFormData.name || !createFormData.email) {
+      showToast('Name and email are required.', 'error');
+      return;
+    }
+
+    startTransition(async () => {
+      const res = await createUserAction({
+        name: createFormData.name,
+        email: createFormData.email,
+        phone: createFormData.phone || undefined,
+        role: createFormData.role,
+        department: createFormData.department || undefined,
+        batchId: createFormData.role === 'STUDENT' || createFormData.role === 'MENTOR' ? createFormData.batchId : undefined,
+        track: createFormData.track,
+        customTsId: createFormData.customTsId || undefined,
+        passkey: createFormData.passkey || undefined,
+        secretKey: createFormData.secretKey || undefined,
+        dispatchEmail: createFormData.dispatchEmail,
+      });
+
+      if (res.success && res.user) {
+        const newUserRecord: UserRecord = {
+          id: res.user.id,
+          name: res.user.name,
+          email: res.user.email,
+          role: res.user.role,
+          isActive: res.user.isActive,
+          isDashboardAccessGranted: res.user.isDashboardAccessGranted,
+          tsId: res.tsId || null,
+          phone: createFormData.phone || null,
+          batchId: createFormData.batchId || null,
+          createdAt: new Date().toISOString(),
+        };
+
+        setUsers((prev) => [newUserRecord, ...prev]);
+        setIsCreateModalOpen(false);
+        showToast(
+          `User ${res.user.name} created as ${res.user.role} with TS-ID ${res.tsId}.${
+            createFormData.dispatchEmail ? ' Credentials dispatched to email.' : ''
+          }`,
+          'success'
+        );
+      } else {
+        showToast(res.error || 'Failed to create user.', 'error');
+      }
+    });
+  };
+
+  // Open Edit User
+  const handleOpenEditModal = (user: UserRecord) => {
+    setEditingUser(user);
+    setEditFormData({
+      name: user.name || '',
+      email: user.email || '',
+      phone: user.phone || '',
+      role: user.role as RoleType,
+      isActive: user.isActive,
+      isDashboardAccessGranted: user.isDashboardAccessGranted,
+      newPasskey: '',
+      newSecretKey: '',
+      dispatchUpdatedCredentials: false,
+    });
+  };
+
+  // Submit Edit User
+  const handleEditUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    startTransition(async () => {
+      const res = await updateUserAction(editingUser.id, {
+        name: editFormData.name,
+        email: editFormData.email,
+        phone: editFormData.phone,
+        role: editFormData.role,
+        isActive: editFormData.isActive,
+        isDashboardAccessGranted: editFormData.isDashboardAccessGranted,
+        newPasskey: editFormData.newPasskey || undefined,
+        newSecretKey: editFormData.newSecretKey || undefined,
+        dispatchUpdatedCredentials: editFormData.dispatchUpdatedCredentials,
+      });
+
+      if (res.success && res.user) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editingUser.id
+              ? {
+                  ...u,
+                  name: res.user.name,
+                  email: res.user.email,
+                  role: res.user.role,
+                  isActive: res.user.isActive,
+                  isDashboardAccessGranted: res.user.isDashboardAccessGranted,
+                  phone: editFormData.phone || null,
+                }
+              : u
+          )
+        );
+        setEditingUser(null);
+        showToast(`User ${res.user.name} updated successfully.`, 'success');
+      } else {
+        showToast(res.error || 'Failed to update user.', 'error');
+      }
+    });
+  };
+
+  // Delete User
+  const handleDeleteUser = async () => {
+    if (!deletingUser) return;
+    startTransition(async () => {
+      const res = await deleteUserAction(deletingUser.id);
+      if (res.success) {
+        setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id));
+        setDeletingUser(null);
+        showToast(`User ${deletingUser.name} deleted successfully.`, 'success');
+      } else {
+        showToast((res as any).error || 'Failed to delete user.', 'error');
+      }
+    });
+  };
+
+  // Toggle Dashboard Access
   const handleToggleAccess = async (userId: string, currentStatus: boolean) => {
     startTransition(async () => {
       const nextStatus = !currentStatus;
@@ -94,134 +315,54 @@ export function UsersDirectoryClient({
         setUsers((prev) =>
           prev.map((u) => (u.id === userId ? { ...u, isDashboardAccessGranted: nextStatus } : u))
         );
-        setFeedback({
-          type: 'success',
-          message: `Updated dashboard access status for user.`,
-        });
-        setTimeout(() => setFeedback(null), 3000);
+        showToast(`Dashboard access status updated.`, 'success');
       } else {
-        setFeedback({
-          type: 'error',
-          message: res.error || 'Failed to update access status',
-        });
+        showToast((res as any).error || 'Failed to update access status', 'error');
       }
     });
   };
 
-  const handleRoleChangeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!roleModalUser || !selectedNewRole) return;
-
+  // Dispatch Credentials Directly
+  const handleDispatchCredentials = async (user: UserRecord) => {
+    setDispatchingUser(user);
     startTransition(async () => {
-      const res = await updateUserRoleAction(roleModalUser.id, selectedNewRole);
+      const res = await dispatchUserCredentialsAction(user.id);
       if (res.success) {
-        setUsers((prev) =>
-          prev.map((u) => (u.id === roleModalUser.id ? { ...u, role: selectedNewRole } : u))
+        showToast(
+          `Official ${user.role} login credentials & security keys dispatched to ${user.email}.`,
+          'success'
         );
-        setFeedback({
-          type: 'success',
-          message: `Role changed to ${selectedNewRole} for ${roleModalUser.name}.`,
-        });
-        setRoleModalUser(null);
-        setTimeout(() => setFeedback(null), 3000);
       } else {
-        setFeedback({
-          type: 'error',
-          message: res.error || 'Failed to update role',
-        });
+        showToast((res as any).error || 'Failed to dispatch credentials email.', 'error');
       }
+      setDispatchingUser(null);
     });
   };
 
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'SUPER_ADMIN':
-        return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'ACADEMIC_ADMIN':
-        return 'bg-violet-100 text-violet-800 border-violet-200';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'SECURITY_ADMIN':
-        return 'bg-rose-100 text-rose-800 border-rose-200';
-      case 'MENTOR':
-        return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'STUDENT':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'GUEST':
-        return 'bg-amber-100 text-amber-800 border-amber-200';
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'ACADEMIC_ADMIN':
       case 'CONTENT_MANAGER':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'MENTOR':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'STUDENT':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       default:
-        return 'bg-slate-100 text-slate-800 border-slate-200';
+        return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
-        <div
-          onClick={() => setActiveTab('ALL')}
-          className={`p-4 rounded-xl border transition-all cursor-pointer ${
-            activeTab === 'ALL'
-              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-              : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
-          }`}
-        >
-          <div className="text-[11px] font-medium opacity-80 uppercase tracking-wider">All Users</div>
-          <div className="text-2xl font-bold mt-1">{metrics.total}</div>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('STUDENT')}
-          className={`p-4 rounded-xl border transition-all cursor-pointer ${
-            activeTab === 'STUDENT'
-              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-              : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
-          }`}
-        >
-          <div className="text-[11px] font-medium opacity-80 uppercase tracking-wider">Students</div>
-          <div className="text-2xl font-bold mt-1">{metrics.students}</div>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('GUEST')}
-          className={`p-4 rounded-xl border transition-all cursor-pointer ${
-            activeTab === 'GUEST'
-              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-              : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
-          }`}
-        >
-          <div className="text-[11px] font-medium opacity-80 uppercase tracking-wider">Guests</div>
-          <div className="text-2xl font-bold mt-1">{metrics.guests}</div>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('MENTOR')}
-          className={`p-4 rounded-xl border transition-all cursor-pointer ${
-            activeTab === 'MENTOR'
-              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-              : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
-          }`}
-        >
-          <div className="text-[11px] font-medium opacity-80 uppercase tracking-wider">Faculty &amp; Mentors</div>
-          <div className="text-2xl font-bold mt-1">{metrics.mentors}</div>
-        </div>
-
-        <div
-          onClick={() => setActiveTab('ADMIN')}
-          className={`p-4 rounded-xl border transition-all cursor-pointer ${
-            activeTab === 'ADMIN'
-              ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
-              : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
-          }`}
-        >
-          <div className="text-[11px] font-medium opacity-80 uppercase tracking-wider">Admins &amp; Staff</div>
-          <div className="text-2xl font-bold mt-1">{metrics.admins}</div>
-        </div>
-      </div>
-
+      {/* Toast Feedback */}
       {feedback && (
         <div
-          className={`p-3.5 rounded-xl border text-xs flex items-center gap-2 ${
+          className={`p-3.5 rounded-xl border text-xs flex items-center gap-2 shadow-sm transition-all ${
             feedback.type === 'success'
               ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
               : 'bg-rose-50 text-rose-800 border-rose-200'
@@ -232,11 +373,97 @@ export function UsersDirectoryClient({
           ) : (
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           )}
-          <span>{feedback.message}</span>
+          <span className="font-medium">{feedback.message}</span>
         </div>
       )}
 
-      {/* Search and Filter Bar */}
+      {/* Top Action Bar & Metrics */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5 w-full sm:w-auto flex-1">
+          <button
+            onClick={() => setActiveTab('ALL')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              activeTab === 'ALL'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
+            }`}
+          >
+            <div className="text-[10px] font-semibold uppercase opacity-80">All Users</div>
+            <div className="text-xl font-bold mt-0.5">{metrics.total}</div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('STUDENT')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              activeTab === 'STUDENT'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
+            }`}
+          >
+            <div className="text-[10px] font-semibold uppercase opacity-80">Students</div>
+            <div className="text-xl font-bold mt-0.5">{metrics.students}</div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('MENTOR')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              activeTab === 'MENTOR'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
+            }`}
+          >
+            <div className="text-[10px] font-semibold uppercase opacity-80">Mentors</div>
+            <div className="text-xl font-bold mt-0.5">{metrics.mentors}</div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('STAFF')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              activeTab === 'STAFF'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
+            }`}
+          >
+            <div className="text-[10px] font-semibold uppercase opacity-80">Staff / Ops</div>
+            <div className="text-xl font-bold mt-0.5">{metrics.staff}</div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('SECURITY_ADMIN')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              activeTab === 'SECURITY_ADMIN'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
+            }`}
+          >
+            <div className="text-[10px] font-semibold uppercase opacity-80">Security</div>
+            <div className="text-xl font-bold mt-0.5">{metrics.securityAdmins}</div>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('SUPER_ADMIN')}
+            className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+              activeTab === 'SUPER_ADMIN'
+                ? 'bg-violet-600 text-white border-violet-600 shadow-sm'
+                : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
+            }`}
+          >
+            <div className="text-[10px] font-semibold uppercase opacity-80">Super Admins</div>
+            <div className="text-xl font-bold mt-0.5">{metrics.superAdmins}</div>
+          </button>
+        </div>
+
+        {/* Primary Action: Provision / Create New User */}
+        <button
+          onClick={() => handleOpenCreateModal('STUDENT')}
+          className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs flex items-center gap-2 shadow-xs shrink-0 cursor-pointer transition-all hover:scale-[1.01]"
+        >
+          <UserPlus className="w-4 h-4" />
+          <span>Provision New User</span>
+        </button>
+      </div>
+
+      {/* Search and Filters */}
       <div className="p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-xs">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
@@ -249,15 +476,13 @@ export function UsersDirectoryClient({
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-slate-500 whitespace-nowrap">
-            Showing <strong className="text-slate-900">{filteredUsers.length}</strong> of {users.length} users
-          </span>
+        <div className="flex items-center gap-2 text-xs text-slate-500 whitespace-nowrap">
+          Showing <strong className="text-slate-900">{filteredUsers.length}</strong> of {users.length} accounts
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-xs">
+      <div className="overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase text-[11px] font-semibold tracking-wider">
@@ -268,7 +493,7 @@ export function UsersDirectoryClient({
                 <th className="p-4">TS-ID</th>
                 <th className="p-4 text-center">Dashboard Access</th>
                 <th className="p-4">Joined Date</th>
-                <th className="p-4 text-right">Actions</th>
+                <th className="p-4 text-right">Actions &amp; Creds</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -281,16 +506,25 @@ export function UsersDirectoryClient({
               ) : (
                 filteredUsers.map((u) => {
                   const initial = u.name ? u.name.charAt(0).toUpperCase() : 'U';
+                  const isCurrentAdmin = u.id === currentUserId;
+                  const isPrimaryRoot = u.email === 'threadsecuritydeveloper@gmail.com';
 
                   return (
-                    <tr key={u.id} className="hover:bg-violet-50/30 transition-colors">
+                    <tr key={u.id} className="hover:bg-violet-50/20 transition-colors">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center text-xs shrink-0">
                             {initial}
                           </div>
                           <div>
-                            <div className="font-semibold text-slate-900">{u.name}</div>
+                            <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                              <span>{u.name}</span>
+                              {isCurrentAdmin && (
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-violet-100 text-violet-700 font-normal">
+                                  You
+                                </span>
+                              )}
+                            </div>
                             <div className="text-[11px] text-slate-400 font-mono">{u.id}</div>
                           </div>
                         </div>
@@ -325,7 +559,7 @@ export function UsersDirectoryClient({
                             {u.tsId}
                           </span>
                         ) : (
-                          <span className="text-slate-400 italic text-[11px]">None</span>
+                          <span className="text-slate-400 italic text-[11px]">Unassigned</span>
                         )}
                       </td>
 
@@ -360,16 +594,38 @@ export function UsersDirectoryClient({
                       </td>
 
                       <td className="p-4 text-right">
-                        <button
-                          onClick={() => {
-                            setRoleModalUser(u);
-                            setSelectedNewRole(u.role);
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-violet-50 text-slate-700 hover:text-violet-700 border border-slate-200 hover:border-violet-200 text-xs font-medium inline-flex items-center gap-1.5 transition-colors cursor-pointer"
-                        >
-                          <UserCog className="w-3.5 h-3.5 text-violet-600" />
-                          <span>Change Role</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {/* Dispatch Creds Button */}
+                          <button
+                            onClick={() => handleDispatchCredentials(u)}
+                            disabled={isPending || dispatchingUser?.id === u.id}
+                            title="Dispatch login credentials and access keys to user email"
+                            className="px-2.5 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 text-[11px] font-medium inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs disabled:opacity-50"
+                          >
+                            <Send className="w-3 h-3 text-violet-600" />
+                            <span>{dispatchingUser?.id === u.id ? 'Sending...' : 'Creds'}</span>
+                          </button>
+
+                          {/* Edit User Button */}
+                          <button
+                            onClick={() => handleOpenEditModal(u)}
+                            title="Edit user details and role"
+                            className="p-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] transition-colors cursor-pointer"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Delete User Button */}
+                          {!isCurrentAdmin && !isPrimaryRoot && (
+                            <button
+                              onClick={() => setDeletingUser(u)}
+                              title="Delete user account"
+                              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -380,48 +636,390 @@ export function UsersDirectoryClient({
         </div>
       </div>
 
-      {/* Role Change Modal */}
-      {roleModalUser && (
-        <Dialog open={!!roleModalUser} onOpenChange={() => setRoleModalUser(null)}>
+      {/* ── CREATE USER MODAL (With 5 Roles & Non-Student Keys Provisioning) ── */}
+      {isCreateModalOpen && (
+        <Dialog open={isCreateModalOpen} onOpenChange={() => setIsCreateModalOpen(false)}>
+          <DialogContent className="max-w-2xl bg-white border border-slate-200 text-slate-900 shadow-2xl rounded-3xl p-6 sm:p-8 font-sans max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="border-b border-slate-100 pb-3">
+              <DialogTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-violet-600" />
+                Provision Platform User &amp; Assign Keys
+              </DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleCreateUserSubmit} className="space-y-5 pt-3">
+              {/* Step 1: Core User Identity */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="space-y-1">
+                  <label className="text-slate-700 font-semibold text-[11px]">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={createFormData.name}
+                    onChange={(e) => setCreateFormData({ ...createFormData, name: e.target.value })}
+                    placeholder="e.g. Rahul Sharma"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-700 font-semibold text-[11px]">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={createFormData.email}
+                    onChange={(e) => setCreateFormData({ ...createFormData, email: e.target.value })}
+                    placeholder="e.g. rahul@example.com"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="space-y-1">
+                  <label className="text-slate-700 font-semibold text-[11px]">Contact Phone</label>
+                  <input
+                    type="tel"
+                    value={createFormData.phone}
+                    onChange={(e) => setCreateFormData({ ...createFormData, phone: e.target.value })}
+                    placeholder="+91 98765-43210"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-slate-700 font-semibold text-[11px]">Appointed TS-ID *</label>
+                    <button
+                      type="button"
+                      onClick={() => refreshSuggestedId(createFormData.role)}
+                      disabled={suggestingId}
+                      className="text-[10px] text-violet-600 hover:text-violet-800 flex items-center gap-1 font-mono"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${suggestingId ? 'animate-spin' : ''}`} /> Next +1
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={createFormData.customTsId}
+                    onChange={(e) => setCreateFormData({ ...createFormData, customTsId: e.target.value })}
+                    placeholder="e.g. TS-C546 or TS-MNT-101"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-mono font-semibold text-xs focus:outline-none focus:border-violet-500"
+                  />
+                </div>
+              </div>
+
+              {/* Step 2: 5 Roles Selection */}
+              <div className="space-y-2">
+                <label className="text-slate-700 font-semibold text-[11px] block">
+                  Select Role Assignment (5 Roles)
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {[
+                    { role: 'STUDENT', label: 'Student', icon: GraduationCap, desc: 'Candidate learner' },
+                    { role: 'MENTOR', label: 'Mentor', icon: Briefcase, desc: 'Faculty & instructor' },
+                    { role: 'ACADEMIC_ADMIN', label: 'Staff / Ops', icon: Layers, desc: 'Academic operations' },
+                    { role: 'SECURITY_ADMIN', label: 'Security Admin', icon: ShieldAlert, desc: 'SOC & security vault' },
+                    { role: 'SUPER_ADMIN', label: 'Super Admin', icon: Crown, desc: 'Master clearance' },
+                  ].map(({ role, label, icon: Icon, desc }) => {
+                    const isSelected = createFormData.role === role;
+                    return (
+                      <div
+                        key={role}
+                        onClick={async () => {
+                          const r = role as RoleType;
+                          setCreateFormData((prev) => ({ ...prev, role: r }));
+                          await refreshSuggestedId(r);
+                        }}
+                        className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
+                          isSelected
+                            ? 'bg-violet-50/80 border-violet-500 text-violet-900 shadow-xs ring-1 ring-violet-500'
+                            : 'bg-slate-50/50 border-slate-200 hover:border-slate-300 text-slate-700'
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-violet-600' : 'text-slate-500'}`} />
+                        <span className="font-bold text-xs">{label}</span>
+                        <span className="text-[10px] text-slate-500 leading-tight">{desc}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Step 3: Role-Specific Configurations */}
+              {createFormData.role === 'STUDENT' ? (
+                /* Student-Specific Fields */
+                <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100 space-y-3 text-xs">
+                  <div className="flex items-center gap-1.5 text-emerald-800 font-bold text-xs">
+                    <GraduationCap className="w-4 h-4 text-emerald-600" />
+                    <span>Student Enrollment Configuration</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-slate-600 text-[11px]">Domain Track</label>
+                      <select
+                        value={createFormData.track}
+                        onChange={(e) => setCreateFormData({ ...createFormData, track: e.target.value as any })}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                      >
+                        <option value="CYBER">Cybersecurity &amp; VAPT Track</option>
+                        <option value="AI">Artificial Intelligence &amp; ML Track</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-600 text-[11px]">Assign Initial Cohort / Batch</label>
+                      <select
+                        value={createFormData.batchId}
+                        onChange={(e) => setCreateFormData({ ...createFormData, batchId: e.target.value })}
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                      >
+                        <option value="">No Batch Assigned</option>
+                        {batches.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.batchCode} — {b.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-600 text-[11px]">Initial Password (optional)</label>
+                    <input
+                      type="text"
+                      value={createFormData.passkey}
+                      onChange={(e) => setCreateFormData({ ...createFormData, passkey: e.target.value })}
+                      placeholder="Auto-generated if left empty"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-violet-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* Non-Student Roles: Role Keys & Specialization */
+                <div className="p-4 rounded-2xl bg-violet-50/40 border border-violet-100 space-y-3 text-xs">
+                  <div className="flex items-center gap-1.5 text-violet-900 font-bold text-xs">
+                    <KeyRound className="w-4 h-4 text-violet-600" />
+                    <span>Non-Student Role Keys &amp; Department Clearance</span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    This user is being assigned as <strong>{createFormData.role}</strong>. Their designated Secret Key and Access Passkey will be securely dispatched to their inbox so they can complete clearance upon logging in.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-slate-700 font-medium text-[11px]">Department / Title</label>
+                      <input
+                        type="text"
+                        value={createFormData.department}
+                        onChange={(e) => setCreateFormData({ ...createFormData, department: e.target.value })}
+                        placeholder={
+                          createFormData.role === 'MENTOR'
+                            ? 'e.g. Lead Cybersecurity Mentor'
+                            : createFormData.role === 'SECURITY_ADMIN'
+                            ? 'e.g. SOC Lead & Incident Analyst'
+                            : 'e.g. Academic Curriculum Coordinator'
+                        }
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                      />
+                    </div>
+
+                    {createFormData.role === 'MENTOR' && (
+                      <div className="space-y-1">
+                        <label className="text-slate-700 font-medium text-[11px]">Map Cohort Batch</label>
+                        <select
+                          value={createFormData.batchId}
+                          onChange={(e) => setCreateFormData({ ...createFormData, batchId: e.target.value })}
+                          className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                        >
+                          <option value="">No Batch Assigned</option>
+                          {batches.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.batchCode} — {b.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1">
+                      <label className="text-slate-700 font-medium text-[11px]">
+                        Assigned Secret Key
+                      </label>
+                      <input
+                        type="text"
+                        value={createFormData.secretKey}
+                        onChange={(e) => setCreateFormData({ ...createFormData, secretKey: e.target.value })}
+                        placeholder="Leave empty for vault default"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-violet-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-slate-700 font-medium text-[11px]">
+                        Assigned Access Key / Passkey
+                      </label>
+                      <input
+                        type="text"
+                        value={createFormData.passkey}
+                        onChange={(e) => setCreateFormData({ ...createFormData, passkey: e.target.value })}
+                        placeholder="Auto-generated if left empty"
+                        className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-violet-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Automatic Dispatch Option */}
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="dispatchEmailCheckbox"
+                  checked={createFormData.dispatchEmail}
+                  onChange={(e) => setCreateFormData({ ...createFormData, dispatchEmail: e.target.checked })}
+                  className="rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                />
+                <label htmlFor="dispatchEmailCheckbox" className="text-xs text-slate-700 font-medium cursor-pointer">
+                  Automatically dispatch welcome email with credentials &amp; security keys to user inbox
+                </label>
+              </div>
+
+              {/* Modal Buttons */}
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isPending ? 'Provisioning Account...' : 'Provision User & Dispatch'}</span>
+                </button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* ── EDIT USER MODAL ── */}
+      {editingUser && (
+        <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
           <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 font-sans text-xs">
             <DialogHeader className="border-b border-slate-100 pb-3">
               <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <UserCog className="w-4 h-4 text-violet-600" />
-                Change Role: {roleModalUser.name}
+                Edit User: {editingUser.name}
               </DialogTitle>
             </DialogHeader>
 
-            <form onSubmit={handleRoleChangeSubmit} className="space-y-4 pt-2">
-              <div>
-                <label className="block text-slate-600 font-medium mb-1.5 text-[11px]">
-                  Select New Role
-                </label>
+            <form onSubmit={handleEditUserSubmit} className="space-y-4 pt-2">
+              <div className="space-y-1">
+                <label className="text-slate-600 text-[11px] font-semibold">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-600 text-[11px] font-semibold">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-600 text-[11px] font-semibold">Contact Phone</label>
+                <input
+                  type="tel"
+                  value={editFormData.phone}
+                  onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-600 text-[11px] font-semibold">Role Assignment</label>
                 <select
-                  value={selectedNewRole}
-                  onChange={(e) => setSelectedNewRole(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-violet-500 font-medium"
+                  value={editFormData.role}
+                  onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value as RoleType })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500 font-medium"
                 >
                   <option value="STUDENT">Student</option>
-                  <option value="GUEST">Guest</option>
                   <option value="MENTOR">Mentor (Faculty)</option>
-                  <option value="CONTENT_MANAGER">Content Manager</option>
-                  <option value="ACADEMIC_ADMIN">Academic Admin</option>
+                  <option value="ACADEMIC_ADMIN">Academic Admin (Staff)</option>
                   <option value="SECURITY_ADMIN">Security Admin</option>
                   <option value="SUPER_ADMIN">Super Admin</option>
                 </select>
               </div>
 
-              <div className="p-3 rounded-xl bg-violet-50/60 border border-violet-100 text-[11px] text-slate-600 space-y-1">
-                <span className="font-semibold text-violet-900 block">Access Policy Note:</span>
-                <p>
-                  Changing a user's role updates their dashboard permissions immediately. Ensure mentors have corresponding faculty profiles provisioned.
-                </p>
+              <div className="space-y-1">
+                <label className="text-slate-600 text-[11px] font-semibold">Reset Passkey / Key (optional)</label>
+                <input
+                  type="text"
+                  value={editFormData.newPasskey}
+                  onChange={(e) => setEditFormData({ ...editFormData, newPasskey: e.target.value })}
+                  placeholder="Leave empty to keep unchanged"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-violet-500"
+                />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.isActive}
+                    onChange={(e) => setEditFormData({ ...editFormData, isActive: e.target.checked })}
+                    className="rounded text-violet-600 border-slate-300"
+                  />
+                  <span>Active Account</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.isDashboardAccessGranted}
+                    onChange={(e) => setEditFormData({ ...editFormData, isDashboardAccessGranted: e.target.checked })}
+                    className="rounded text-violet-600 border-slate-300"
+                  />
+                  <span>Dashboard Access</span>
+                </label>
+              </div>
+
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.dispatchUpdatedCredentials}
+                    onChange={(e) => setEditFormData({ ...editFormData, dispatchUpdatedCredentials: e.target.checked })}
+                    className="rounded text-violet-600 border-slate-300"
+                  />
+                  <span>Dispatch updated credentials to user inbox</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setRoleModalUser(null)}
+                  onClick={() => setEditingUser(null)}
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
                 >
                   Cancel
@@ -431,10 +1029,57 @@ export function UsersDirectoryClient({
                   disabled={isPending}
                   className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-xs cursor-pointer disabled:opacity-50"
                 >
-                  {isPending ? 'Updating...' : 'Save Role'}
+                  {isPending ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* ── DELETE USER CONFIRMATION MODAL ── */}
+      {deletingUser && (
+        <Dialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 font-sans text-xs">
+            <DialogHeader className="border-b border-slate-100 pb-3">
+              <DialogTitle className="text-base font-bold text-rose-700 flex items-center gap-2">
+                <Trash2 className="w-4 h-4 text-rose-600" />
+                Delete User Account
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-3 pt-2">
+              <p className="text-slate-600 leading-relaxed">
+                Are you sure you want to permanently delete the account for{' '}
+                <strong className="text-slate-900">{deletingUser.name}</strong> ({deletingUser.email})?
+              </p>
+
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 space-y-1 text-[11px]">
+                <span className="font-bold block">Irreversible Security Action:</span>
+                <p>
+                  This will permanently delete this user’s identity records, profile data, and revoke their platform clearance immediately.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setDeletingUser(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteUser}
+                  disabled={isPending}
+                  className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isPending ? 'Deleting Account...' : 'Confirm Delete'}</span>
+                </button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       )}
