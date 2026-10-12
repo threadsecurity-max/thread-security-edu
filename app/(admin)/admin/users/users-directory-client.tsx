@@ -31,15 +31,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  toggleStudentDashboardAccessAction,
-  updateUserRoleAction,
-  createUserAction,
-  updateUserAction,
-  deleteUserAction,
-  dispatchUserCredentialsAction,
-  getSuggestedRoleIDAction,
-} from '@/features/admin/actions/admin.actions';
 import { RoleType } from '@prisma/client';
 
 export interface UserRecord {
@@ -161,14 +152,19 @@ export function UsersDirectoryClient({
     return true;
   });
 
-  // Fetch suggested ID based on role
+  // Fetch suggested ID based on role via REST API
   const refreshSuggestedId = async (targetRole: RoleType) => {
     setSuggestingId(true);
     try {
-      const res = await getSuggestedRoleIDAction(targetRole);
-      if (res.success && res.tsId) {
-        setCreateFormData((prev) => ({ ...prev, customTsId: res.tsId! }));
+      const res = await fetch(
+        `/api/admin/users?action=suggested-id&role=${targetRole}&track=${createFormData.track || 'CYBER'}`
+      );
+      const data = await res.json();
+      if (data.success && data.tsId) {
+        setCreateFormData((prev) => ({ ...prev, customTsId: data.tsId }));
       }
+    } catch (err: any) {
+      console.error('Failed to get suggested ID:', err);
     } finally {
       setSuggestingId(false);
     }
@@ -217,7 +213,7 @@ export function UsersDirectoryClient({
     await refreshSuggestedId(defaultRole);
   };
 
-  // Submit Create User
+  // Submit Create User via REST API
   const handleCreateUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!createFormData.name || !createFormData.email) {
@@ -226,44 +222,57 @@ export function UsersDirectoryClient({
     }
 
     startTransition(async () => {
-      const res = await createUserAction({
-        name: createFormData.name,
-        email: createFormData.email,
-        phone: createFormData.phone || undefined,
-        role: createFormData.role,
-        department: createFormData.department || undefined,
-        batchId: createFormData.role === 'STUDENT' || createFormData.role === 'MENTOR' ? createFormData.batchId : undefined,
-        track: createFormData.track,
-        customTsId: createFormData.customTsId || undefined,
-        passkey: createFormData.passkey || undefined,
-        secretKey: createFormData.secretKey || undefined,
-        dispatchEmail: createFormData.dispatchEmail,
-      });
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: createFormData.name,
+            email: createFormData.email,
+            phone: createFormData.phone || undefined,
+            role: createFormData.role,
+            department: createFormData.department || undefined,
+            batchId:
+              createFormData.role === 'STUDENT' || createFormData.role === 'MENTOR'
+                ? createFormData.batchId
+                : undefined,
+            track: createFormData.track,
+            customTsId: createFormData.customTsId || undefined,
+            passkey: createFormData.passkey || undefined,
+            secretKey: createFormData.secretKey || undefined,
+            dispatchEmail: createFormData.dispatchEmail,
+          }),
+        });
 
-      if (res.success && res.user) {
-        const newUserRecord: UserRecord = {
-          id: res.user.id,
-          name: res.user.name,
-          email: res.user.email,
-          role: res.user.role,
-          isActive: res.user.isActive,
-          isDashboardAccessGranted: res.user.isDashboardAccessGranted,
-          tsId: res.tsId || null,
-          phone: createFormData.phone || null,
-          batchId: createFormData.batchId || null,
-          createdAt: new Date().toISOString(),
-        };
+        const data = await res.json();
 
-        setUsers((prev) => [newUserRecord, ...prev]);
-        setIsCreateModalOpen(false);
-        showToast(
-          `User ${res.user.name} created as ${res.user.role} with TS-ID ${res.tsId}.${
-            createFormData.dispatchEmail ? ' Credentials dispatched to email.' : ''
-          }`,
-          'success'
-        );
-      } else {
-        showToast(res.error || 'Failed to create user.', 'error');
+        if (data.success && data.user) {
+          const newUserRecord: UserRecord = {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            isActive: data.user.isActive,
+            isDashboardAccessGranted: data.user.isDashboardAccessGranted,
+            tsId: data.tsId || null,
+            phone: createFormData.phone || null,
+            batchId: createFormData.batchId || null,
+            createdAt: new Date().toISOString(),
+          };
+
+          setUsers((prev) => [newUserRecord, ...prev]);
+          setIsCreateModalOpen(false);
+          showToast(
+            `User ${data.user.name} created as ${data.user.role} with TS-ID ${data.tsId}.${
+              createFormData.dispatchEmail ? ' Credentials dispatched to email.' : ''
+            }`,
+            'success'
+          );
+        } else {
+          showToast(data.error || 'Failed to create user.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while creating user.', 'error');
       }
     });
   };
@@ -284,93 +293,137 @@ export function UsersDirectoryClient({
     });
   };
 
-  // Submit Edit User
+  // Submit Edit User via REST API
   const handleEditUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
 
     startTransition(async () => {
-      const res = await updateUserAction(editingUser.id, {
-        name: editFormData.name,
-        email: editFormData.email,
-        phone: editFormData.phone,
-        role: editFormData.role,
-        isActive: editFormData.isActive,
-        isDashboardAccessGranted: editFormData.isDashboardAccessGranted,
-        newPasskey: editFormData.newPasskey || undefined,
-        newSecretKey: editFormData.newSecretKey || undefined,
-        dispatchUpdatedCredentials: editFormData.dispatchUpdatedCredentials,
-      });
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: editingUser.id,
+            name: editFormData.name,
+            email: editFormData.email,
+            phone: editFormData.phone,
+            role: editFormData.role,
+            isActive: editFormData.isActive,
+            isDashboardAccessGranted: editFormData.isDashboardAccessGranted,
+            newPasskey: editFormData.newPasskey || undefined,
+            newSecretKey: editFormData.newSecretKey || undefined,
+            dispatchUpdatedCredentials: editFormData.dispatchUpdatedCredentials,
+          }),
+        });
 
-      if (res.success && res.user) {
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === editingUser.id
-              ? {
-                  ...u,
-                  name: res.user.name,
-                  email: res.user.email,
-                  role: res.user.role,
-                  isActive: res.user.isActive,
-                  isDashboardAccessGranted: res.user.isDashboardAccessGranted,
-                  phone: editFormData.phone || null,
-                }
-              : u
-          )
-        );
-        setEditingUser(null);
-        showToast(`User ${res.user.name} updated successfully.`, 'success');
-      } else {
-        showToast(res.error || 'Failed to update user.', 'error');
+        const data = await res.json();
+
+        if (data.success && data.user) {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === editingUser.id
+                ? {
+                    ...u,
+                    name: data.user.name,
+                    email: data.user.email,
+                    role: data.user.role,
+                    isActive: data.user.isActive,
+                    isDashboardAccessGranted: data.user.isDashboardAccessGranted,
+                    phone: editFormData.phone || null,
+                  }
+                : u
+            )
+          );
+          setEditingUser(null);
+          showToast(`User ${data.user.name} updated successfully.`, 'success');
+        } else {
+          showToast(data.error || 'Failed to update user.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while updating user.', 'error');
       }
     });
   };
 
-  // Delete User
+  // Delete User via REST API
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
     startTransition(async () => {
-      const res = await deleteUserAction(deletingUser.id);
-      if (res.success) {
-        setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id));
-        setDeletingUser(null);
-        showToast(`User ${deletingUser.name} deleted successfully.`, 'success');
-      } else {
-        showToast((res as any).error || 'Failed to delete user.', 'error');
+      try {
+        const res = await fetch(`/api/admin/users?id=${encodeURIComponent(deletingUser.id)}`, {
+          method: 'DELETE',
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id));
+          setDeletingUser(null);
+          showToast(`User ${deletingUser.name} deleted successfully.`, 'success');
+        } else {
+          showToast(data.error || 'Failed to delete user.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while deleting user.', 'error');
       }
     });
   };
 
-  // Toggle Dashboard Access
+  // Toggle Dashboard Access via REST API
   const handleToggleAccess = async (userId: string, currentStatus: boolean) => {
     startTransition(async () => {
       const nextStatus = !currentStatus;
-      const res = await toggleStudentDashboardAccessAction(userId, nextStatus);
-      if (res.success) {
-        setUsers((prev) =>
-          prev.map((u) => (u.id === userId ? { ...u, isDashboardAccessGranted: nextStatus } : u))
-        );
-        showToast(`Dashboard access status updated.`, 'success');
-      } else {
-        showToast((res as any).error || 'Failed to update access status', 'error');
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'toggle-access',
+            userId,
+            grant: nextStatus,
+          }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setUsers((prev) =>
+            prev.map((u) => (u.id === userId ? { ...u, isDashboardAccessGranted: nextStatus } : u))
+          );
+          showToast(`Dashboard access status updated.`, 'success');
+        } else {
+          showToast(data.error || 'Failed to update access status', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while updating access status.', 'error');
       }
     });
   };
 
-  // Dispatch Credentials Directly
+  // Dispatch Credentials via REST API
   const handleDispatchCredentials = async (user: UserRecord) => {
     setDispatchingUser(user);
     startTransition(async () => {
-      const res = await dispatchUserCredentialsAction(user.id);
-      if (res.success) {
-        showToast(
-          `Official ${user.role} login credentials & security keys dispatched to ${user.email}.`,
-          'success'
-        );
-      } else {
-        showToast((res as any).error || 'Failed to dispatch credentials email.', 'error');
+      try {
+        const res = await fetch('/api/admin/users/dispatch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showToast(
+            `Official ${user.role} login credentials & security keys dispatched to ${user.email}.`,
+            'success'
+          );
+        } else {
+          showToast(data.error || 'Failed to dispatch credentials email.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while dispatching credentials email.', 'error');
+      } finally {
+        setDispatchingUser(null);
       }
-      setDispatchingUser(null);
     });
   };
 
