@@ -3,6 +3,8 @@ import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { ShieldCheck } from 'lucide-react';
 import { MentorDirectoryClient } from './mentor-directory-client';
+import { FacultyProvisionForm } from './faculty-provision-form';
+import { getNextSuggestedMentorID } from '@/server/services/admin.service';
 
 export const revalidate = 0;
 
@@ -15,9 +17,10 @@ export default async function AdminMentorDirectoryPage() {
   let mentors: any[] = [];
   let allBatches: any[] = [];
   let allCourses: any[] = [];
+  let suggestedMentorId = 'TS-MNT-101';
 
   try {
-    const [fetchedMentors, fetchedBatches, fetchedCourses] = await Promise.all([
+    const [fetchedMentors, fetchedBatches, fetchedCourses, nextId] = await Promise.all([
       prisma.mentorProfile.findMany({
         include: {
           user: {
@@ -61,11 +64,13 @@ export default async function AdminMentorDirectoryPage() {
         },
         orderBy: { title: 'asc' },
       }),
+      getNextSuggestedMentorID(),
     ]);
 
     mentors = fetchedMentors;
     allBatches = fetchedBatches;
     allCourses = fetchedCourses;
+    suggestedMentorId = nextId;
   } catch (e) {
     console.error('Failed to query mentors roster:', e);
   }
@@ -92,6 +97,13 @@ export default async function AdminMentorDirectoryPage() {
           </p>
         </div>
       </div>
+
+      {/* Embedded Faculty & Staff Provision Form */}
+      <FacultyProvisionForm
+        initialSuggestedId={suggestedMentorId}
+        allBatches={allBatches}
+        allCourses={allCourses}
+      />
 
       {/* Interactive Mentor Directory Client Component */}
       <MentorDirectoryClient mentors={mentors} allBatches={allBatches} allCourses={allCourses} />

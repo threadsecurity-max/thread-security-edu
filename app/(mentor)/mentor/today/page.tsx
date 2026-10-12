@@ -44,40 +44,40 @@ export default async function MentorTodayPage() {
       : allSessions.filter((s: any) => s.status !== 'CANCELLED').slice(0, 4);
 
   return (
-    <div className="space-y-6 text-slate-100 max-w-6xl mx-auto">
+    <div className="space-y-6 text-slate-900 font-sans max-w-6xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Link href="/mentor">
-              <Button variant="ghost" size="sm" className="text-xs font-mono text-slate-400 hover:text-white p-0 h-auto">
+              <Button variant="ghost" size="sm" className="text-xs font-mono text-slate-500 hover:text-slate-900 p-0 h-auto cursor-pointer">
                 <ArrowLeft className="w-3.5 h-3.5 mr-1" />
                 Back to Dashboard
               </Button>
             </Link>
-            <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px]">
+            <Badge className="bg-violet-50 text-violet-700 border border-violet-200 font-mono text-[10px]">
               LIVE CLASSROOM COCKPIT
             </Badge>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white font-mono tracking-tight flex items-center gap-2.5">
-            <Clock className="w-7 h-7 text-[#C6FF34]" />
-            Today's Teaching View
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+            <Clock className="w-7 h-7 text-violet-600" />
+            Today&apos;s Teaching View
           </h1>
-          <p className="text-xs md:text-sm text-slate-400 font-mono">
+          <p className="text-xs md:text-sm text-slate-500">
             {new Date().toLocaleDateString(undefined, {
               weekday: 'long',
               day: '2-digit',
               month: 'long',
               year: 'numeric',
             })}{' '}
-            • Low-friction operational view for live classroom attendance & lecture records.
+            • Low-friction operational view for live classroom attendance &amp; lecture records.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Link href="/mentor/calendar">
-            <Button variant="outline" size="sm" className="border-white/15 text-slate-300 font-mono text-xs gap-1.5 bg-white/5">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 font-mono text-xs gap-1.5 bg-white hover:bg-slate-50 shadow-xs cursor-pointer">
+              <Calendar className="w-3.5 h-3.5 text-slate-500" />
               Calendar View
             </Button>
           </Link>

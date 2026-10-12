@@ -30,6 +30,25 @@ export async function getNextSuggestedTSID(track: StudentTrack = 'CYBER'): Promi
   return `${prefix}${maxNum + 1}`;
 }
 
+export async function getNextSuggestedMentorID(): Promise<string> {
+  const allIdentities = await prisma.tSIdentity.findMany({
+    select: { tsId: true },
+  });
+
+  let maxNum = 100;
+  for (const record of allIdentities) {
+    const match = record.tsId.match(/^TS-M(?:NT)?-(\d+)$/i) || record.tsId.match(/^TS-M(\d+)$/i);
+    if (match && match[1]) {
+      const parsed = parseInt(match[1], 10);
+      if (!isNaN(parsed) && parsed > maxNum && parsed < 10000) {
+        maxNum = parsed;
+      }
+    }
+  }
+
+  return `TS-MNT-${maxNum + 1}`;
+}
+
 export async function createStudentService({
   name,
   email,
@@ -455,6 +474,7 @@ export async function createMentorService({
   schedule,
   passkey,
   dispatchEmail,
+  customMentorId,
 }: {
   name: string;
   email: string;
@@ -468,6 +488,7 @@ export async function createMentorService({
   schedule?: string;
   passkey?: string;
   dispatchEmail?: boolean;
+  customMentorId?: string;
 }) {
   const cleanEmail = email.toLowerCase().trim();
   const existing = await prisma.user.findUnique({
@@ -478,7 +499,7 @@ export async function createMentorService({
     throw new Error('An account with this email address already exists.');
   }
 
-  const mentorId = generateMentorTSID();
+  const mentorId = customMentorId?.trim().toUpperCase() || generateMentorTSID();
   const inviteToken = `tse-inv-${randomBytes(16).toString('hex')}`;
   const facultyPasskey = passkey?.trim() || `TSE-MNT-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
 

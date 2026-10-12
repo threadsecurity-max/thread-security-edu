@@ -15,36 +15,36 @@ export default async function MentorBatchesDirectoryPage() {
   const batches = await getMentorBatchesService(userId);
 
   return (
-    <div className="space-y-6 text-slate-100 max-w-7xl mx-auto">
+    <div className="space-y-6 text-slate-900 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Link href="/mentor">
-              <Button variant="ghost" size="sm" className="text-xs font-mono text-slate-400 hover:text-white p-0 h-auto">
+              <Button variant="ghost" size="sm" className="text-xs font-mono text-slate-500 hover:text-violet-700 p-0 h-auto">
                 <ArrowLeft className="w-3.5 h-3.5 mr-1" />
                 Mentor Home
               </Button>
             </Link>
-            <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px]">
+            <Badge className="bg-violet-100 text-violet-700 border border-violet-200 font-mono text-[10px]">
               ASSIGNED ACADEMIC WORKSPACES
             </Badge>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white font-mono tracking-tight flex items-center gap-2.5">
-            <Layers className="w-7 h-7 text-[#C6FF34]" />
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 font-mono tracking-tight flex items-center gap-2.5">
+            <Layers className="w-7 h-7 text-violet-600" />
             My Assigned Batches ({batches.length})
           </h1>
-          <p className="text-xs md:text-sm text-slate-400 font-mono">
+          <p className="text-xs md:text-sm text-slate-600 font-mono">
             Every cohort is an independent, isolated academic workspace. Choose a batch to manage students, attendance, curriculum, and broadcasts.
           </p>
         </div>
       </div>
 
       {batches.length === 0 ? (
-        <div className="p-16 rounded-3xl bg-[#0a0a0a] border border-white/10 text-center space-y-3 font-mono">
-          <Layers className="w-12 h-12 text-slate-500 mx-auto" />
-          <h3 className="text-lg font-bold text-white">No Batches Assigned</h3>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
+        <div className="p-16 rounded-3xl bg-white border border-slate-200 text-center space-y-3 font-mono shadow-xs">
+          <Layers className="w-12 h-12 text-slate-400 mx-auto" />
+          <h3 className="text-lg font-bold text-slate-900">No Batches Assigned</h3>
+          <p className="text-xs text-slate-500 max-w-md mx-auto">
             You are not currently assigned to any active batch. Contact your academic administrator to map your mentor account to cohorts.
           </p>
         </div>

@@ -14,6 +14,7 @@ import {
   toggleMentorAccessService,
   reassignStudentBatchService,
   getNextSuggestedTSID,
+  getNextSuggestedMentorID,
   dispatchStudentCredentialsService,
   dispatchMentorCredentialsService,
 } from '../../../server/services/admin.service';
@@ -27,6 +28,15 @@ export async function getSuggestedTSIDAction(track: StudentTrack = 'CYBER') {
     return { success: true, tsId };
   } catch {
     return { success: false, error: 'Failed to generate suggested TS-ID' };
+  }
+}
+
+export async function getSuggestedMentorIDAction() {
+  try {
+    const mentorId = await getNextSuggestedMentorID();
+    return { success: true, mentorId };
+  } catch {
+    return { success: false, mentorId: `TS-MNT-${Math.floor(100 + Math.random() * 900)}` };
   }
 }
 
@@ -163,6 +173,7 @@ export async function createMentorAction(formData: FormData) {
 
   const schedule = (formData.get('schedule') as string)?.trim() || undefined;
   const passkey = (formData.get('passkey') as string)?.trim() || undefined;
+  const customMentorId = (formData.get('customMentorId') as string)?.trim() || undefined;
   const dispatchEmail = formData.get('dispatchEmail') !== 'false' && formData.get('dispatchEmail') !== 'off';
 
   if (!name || !email) {
@@ -183,6 +194,7 @@ export async function createMentorAction(formData: FormData) {
       schedule,
       passkey,
       dispatchEmail,
+      customMentorId,
     });
 
     revalidatePath('/admin/mentors');

@@ -408,10 +408,10 @@ export function MentorDirectoryClient({ mentors, allBatches = [], allCourses = [
                     setDispatchCredsModalMentor(m);
                   }}
                   disabled={dispatchingMentorId === m.id}
-                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-all shadow-xs"
+                  className="px-2.5 py-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-all shadow-xs"
                   title="Dispatch Login Credentials Email to Faculty"
                 >
-                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
+                  <Mail className="w-3.5 h-3.5 text-violet-600" />
                   <span>{dispatchingMentorId === m.id ? 'Sending...' : 'Creds'}</span>
                 </button>
 
