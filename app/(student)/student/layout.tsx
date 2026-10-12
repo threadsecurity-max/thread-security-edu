@@ -41,11 +41,11 @@ export default async function StudentLayout({
   const studentName = student.name || session.name || 'Student';
 
   return (
-    <div className="min-h-screen flex bg-[#050706] text-white font-sans selection:bg-[#C6FF34] selection:text-black relative overflow-x-hidden">
+    <div className="min-h-screen flex bg-black text-white font-sans selection:bg-purple-600 selection:text-white relative overflow-x-hidden">
       {/* Ambient background glows */}
-      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-[#C6FF34]/[0.025] rounded-full blur-[140px] pointer-events-none z-0" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-emerald-600/[0.02] rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(#C6FF34_1px,transparent_1px)] [background-size:48px_48px] opacity-[0.02]" />
+      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-purple-600/[0.04] rounded-full blur-[140px] pointer-events-none z-0" />
+      <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-900/[0.03] rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(#9333ea_1px,transparent_1px)] [background-size:48px_48px] opacity-[0.02]" />
 
       {/* Desktop Collapsible Glass Sidebar */}
       <StudentSidebar
@@ -58,7 +58,7 @@ export default async function StudentLayout({
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10 bg-[#080B09]/80">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10 bg-[#09090d]/90">
         {/* Glass Topbar */}
         <StudentTopbar
           student={{

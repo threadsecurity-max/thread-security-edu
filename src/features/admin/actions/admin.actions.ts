@@ -14,6 +14,8 @@ import {
   toggleMentorAccessService,
   reassignStudentBatchService,
   getNextSuggestedTSID,
+  dispatchStudentCredentialsService,
+  dispatchMentorCredentialsService,
 } from '../../../server/services/admin.service';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
@@ -36,19 +38,54 @@ export async function createStudentAction(formData: FormData) {
   const customTsId = (formData.get('customTsId') as string)?.trim();
   const rawTrack = (formData.get('track') as string)?.trim() as StudentTrack;
   const track: StudentTrack = rawTrack === 'AI' ? 'AI' : 'CYBER';
+  const batchId = (formData.get('batchId') as string)?.trim() || undefined;
+  const tempPassword = (formData.get('tempPassword') as string)?.trim() || undefined;
+  const dispatchEmail = formData.get('dispatchEmail') !== 'false' && formData.get('dispatchEmail') !== 'off';
 
   if (!name || !email) {
     return { success: false, error: 'Name and Email are required fields.' };
   }
 
   try {
-    const result = await createStudentService({ name, email, phone, careerGoal, track, customTsId: customTsId || undefined });
+    const result = await createStudentService({
+      name,
+      email,
+      phone,
+      careerGoal,
+      track,
+      customTsId: customTsId || undefined,
+      batchId: batchId || undefined,
+      tempPassword,
+      dispatchEmail,
+    });
     revalidatePath('/admin');
     revalidatePath('/admin/students');
+    revalidatePath('/admin/batches');
     revalidatePath('/admin/audit');
-    return { success: true, user: result.user, tsId: result.tsId };
+    return {
+      success: true,
+      user: result.user,
+      tsId: result.tsId,
+      emailDispatched: result.emailDispatched,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create student account.';
+    return { success: false, error: msg };
+  }
+}
+
+export async function dispatchStudentCredentialsAction(userId: string, customPassword?: string) {
+  const session = await getSession();
+  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    return { success: false, error: 'Unauthorized: Admin privileges required.' };
+  }
+
+  try {
+    const res = await dispatchStudentCredentialsService(userId, customPassword);
+    revalidatePath('/admin/students');
+    return { success: true, email: res.email, tsId: res.tsId };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to dispatch credentials email.';
     return { success: false, error: msg };
   }
 }
@@ -117,6 +154,16 @@ export async function createMentorAction(formData: FormData) {
   const expertise = (formData.get('expertise') as string)?.trim() || 'Cybersecurity, VAPT';
   const bio = (formData.get('bio') as string)?.trim() || 'Lead instructor in offensive security.';
   const batchId = (formData.get('batchId') as string)?.trim() || undefined;
+  
+  const rawBatchIds = formData.getAll('batchIds');
+  const batchIds = rawBatchIds.length > 0 ? (rawBatchIds as string[]) : batchId ? [batchId] : undefined;
+  
+  const rawCourseIds = formData.getAll('courseIds');
+  const courseIds = rawCourseIds.length > 0 ? (rawCourseIds as string[]) : undefined;
+
+  const schedule = (formData.get('schedule') as string)?.trim() || undefined;
+  const passkey = (formData.get('passkey') as string)?.trim() || undefined;
+  const dispatchEmail = formData.get('dispatchEmail') !== 'false' && formData.get('dispatchEmail') !== 'off';
 
   if (!name || !email) {
     return { success: false, error: 'Name and Email are required fields.' };
@@ -131,16 +178,38 @@ export async function createMentorAction(formData: FormData) {
       expertise,
       bio,
       batchId: batchId || undefined,
+      batchIds,
+      courseIds,
+      schedule,
+      passkey,
+      dispatchEmail,
     });
 
     revalidatePath('/admin/mentors');
     revalidatePath('/admin/batches');
+    revalidatePath('/admin/courses');
     revalidatePath('/admin/students');
     revalidatePath('/admin/timetable');
     revalidatePath('/admin/audit');
-    return { success: true, mentor: result.mentor };
+    return { success: true, mentor: result.mentor, emailDispatched: result.emailDispatched };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create mentor.';
+    return { success: false, error: msg };
+  }
+}
+
+export async function dispatchMentorCredentialsAction(mentorProfileId: string, customPasskey?: string) {
+  const session = await getSession();
+  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    return { success: false, error: 'Unauthorized: Admin privileges required.' };
+  }
+
+  try {
+    const res = await dispatchMentorCredentialsService(mentorProfileId, customPasskey);
+    revalidatePath('/admin/mentors');
+    return { success: true, email: res.email, mentorId: res.mentorId };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to dispatch faculty credentials email.';
     return { success: false, error: msg };
   }
 }

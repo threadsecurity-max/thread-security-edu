@@ -74,17 +74,17 @@ export function NotificationDropdown({ userId }: NotificationDropdownProps) {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C6FF34] shadow-[0_0_8px_#C6FF34] animate-pulse" />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7] animate-pulse" />
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#080B09] border border-white/[0.12] shadow-2xl backdrop-blur-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#09090d] border border-white/[0.12] shadow-2xl backdrop-blur-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="p-3.5 border-b border-white/[0.08] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-white">Notifications</span>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-[#C6FF34]/10 text-[#C6FF34] text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold">
                   {unreadCount} new
                 </span>
               )}
@@ -93,7 +93,7 @@ export function NotificationDropdown({ userId }: NotificationDropdownProps) {
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
-                className="text-[11px] font-mono text-zinc-400 hover:text-[#C6FF34] transition-colors"
+                className="text-[11px] font-mono text-zinc-400 hover:text-purple-400 transition-colors"
               >
                 Mark all read
               </button>
@@ -118,7 +118,7 @@ export function NotificationDropdown({ userId }: NotificationDropdownProps) {
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-white flex items-center gap-1.5 line-clamp-1">
                       {!n.isRead && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C6FF34] shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
                       )}
                       {n.title}
                     </span>

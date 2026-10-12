@@ -30,11 +30,11 @@ export function RecentActivityTimeline({
       case 'MODULE_COMPLETED':
         return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />;
       case 'QUIZ_SCORED':
-        return <Cpu className="w-3.5 h-3.5 text-[#C6FF34]" />;
+        return <Cpu className="w-3.5 h-3.5 text-purple-400" />;
       case 'LAB_SUBMITTED':
-        return <Terminal className="w-3.5 h-3.5 text-amber-400" />;
+        return <Terminal className="w-3.5 h-3.5 text-purple-300" />;
       case 'ATTENDANCE_LOGGED':
-        return <Calendar className="w-3.5 h-3.5 text-blue-400" />;
+        return <Calendar className="w-3.5 h-3.5 text-purple-400" />;
       default:
         return <PlayCircle className="w-3.5 h-3.5 text-zinc-400" />;
     }
@@ -51,13 +51,13 @@ export function RecentActivityTimeline({
         {activities.map((act) => (
           <div key={act.id} className="relative group">
             {/* Timeline node */}
-            <div className="absolute -left-6 top-1 w-4 h-4 rounded-full bg-black border border-white/[0.15] flex items-center justify-center">
+            <div className="absolute -left-6 top-1 w-4 h-4 rounded-full bg-black border border-purple-500/30 flex items-center justify-center">
               {getIcon(act.type)}
             </div>
 
             <div className="space-y-0.5">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-white group-hover:text-[#C6FF34] transition-colors line-clamp-1">
+                <span className="text-xs font-semibold text-white group-hover:text-purple-400 transition-colors line-clamp-1">
                   {act.title}
                 </span>
                 <span className="text-[10px] font-mono text-zinc-500 shrink-0">

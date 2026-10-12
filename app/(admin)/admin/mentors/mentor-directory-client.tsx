@@ -29,6 +29,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Key,
 } from 'lucide-react';
 import {
   createMentorAction,
@@ -36,6 +37,7 @@ import {
   deleteMentorAction,
   toggleMentorAccessAction,
   assignBatchToMentorAction,
+  dispatchMentorCredentialsAction,
 } from '@/features/admin/actions/admin.actions';
 import { createBatchSessionAction } from '@/features/batch/actions/batch.actions';
 import { sendDirectMentorMessageAction } from '@/features/notifications/actions/notification.actions';
@@ -43,9 +45,10 @@ import { sendDirectMentorMessageAction } from '@/features/notifications/actions/
 interface MentorDirectoryClientProps {
   mentors: any[];
   allBatches?: any[];
+  allCourses?: any[];
 }
 
-export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirectoryClientProps) {
+export function MentorDirectoryClient({ mentors, allBatches = [], allCourses = [] }: MentorDirectoryClientProps) {
   // Modal states
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingMentor, setEditingMentor] = useState<any | null>(null);
@@ -54,6 +57,9 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
   const [scheduleMentor, setScheduleMentor] = useState<any | null>(null);
   const [assignBatchMentor, setAssignBatchMentor] = useState<any | null>(null);
   const [calendarViewOpen, setCalendarViewOpen] = useState(false);
+  const [dispatchCredsModalMentor, setDispatchCredsModalMentor] = useState<any | null>(null);
+  const [customPasskey, setCustomPasskey] = useState<string>('');
+  const [dispatchingMentorId, setDispatchingMentorId] = useState<string | null>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +90,12 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
     setLoading(false);
 
     if (res.success) {
-      setFeedbackMsg('Academic Mentor provisioned successfully.');
+      const isDispatched = (res as any).emailDispatched;
+      setFeedbackMsg(
+        isDispatched
+          ? 'Faculty mentor provisioned and login credentials dispatched to email.'
+          : 'Faculty mentor provisioned successfully.'
+      );
       if ((res as any).mentor) {
         setCreatedInviteInfo({
           mentorId: (res as any).mentor.user?.mentorIdentity?.mentorId || (res as any).mentor.user?.tsIdentity?.tsId || 'TS-MNT-ACTIVE',
@@ -92,6 +103,25 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
       }
     } else {
       setFeedbackMsg(res.error || 'Failed to create mentor.');
+    }
+  };
+
+  const handleDispatchMentorCreds = async (mentor: any, passkey?: string) => {
+    setDispatchingMentorId(mentor.id);
+    try {
+      const res = await dispatchMentorCredentialsAction(mentor.id, passkey);
+      if (res.success) {
+        setFeedbackMsg(`Credentials dispatched successfully to ${res.email} (${res.mentorId}).`);
+        setDispatchCredsModalMentor(null);
+        setCustomPasskey('');
+        setTimeout(() => setFeedbackMsg(null), 4000);
+      } else {
+        setFeedbackMsg(res.error || 'Failed to dispatch credentials.');
+      }
+    } catch (e: any) {
+      setFeedbackMsg(e.message || 'Error sending credentials.');
+    } finally {
+      setDispatchingMentorId(null);
     }
   };
 
@@ -327,11 +357,27 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Assigned Batches:</span>
+                      <span className="text-slate-500">Schedule:</span>
+                      <span className="text-slate-700 font-medium truncate max-w-[170px]" title={m.officeHours || 'Flexible'}>
+                        {m.officeHours || 'Flexible'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Batches:</span>
                       <span className="text-slate-800 font-semibold truncate max-w-[170px]">
                         {assignedBatchesCount > 0
                           ? assignedBatches.map((b: any) => b.batchCode).join(', ')
                           : 'None (Unassigned)'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Courses:</span>
+                      <span className="text-slate-800 font-medium truncate max-w-[170px]" title={m.courses?.map((c: any) => c.title).join(', ') || 'None'}>
+                        {m.courses && m.courses.length > 0
+                          ? m.courses.map((c: any) => c.title).join(', ')
+                          : 'None assigned'}
                       </span>
                     </div>
                   </div>
@@ -356,6 +402,19 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
 
               {/* Card Footer Actions */}
               <div className="p-3 border-t border-slate-100 flex items-center justify-between gap-1.5 flex-wrap bg-slate-50/50 rounded-b-2xl">
+                <button
+                  onClick={() => {
+                    setCustomPasskey('');
+                    setDispatchCredsModalMentor(m);
+                  }}
+                  disabled={dispatchingMentorId === m.id}
+                  className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-medium flex items-center gap-1 cursor-pointer transition-all shadow-xs"
+                  title="Dispatch Login Credentials Email to Faculty"
+                >
+                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{dispatchingMentorId === m.id ? 'Sending...' : 'Creds'}</span>
+                </button>
+
                 {/* Schedule class only if teaching a lecture / has assigned batch */}
                 <button
                   onClick={() => {
@@ -752,23 +811,6 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
                 />
               </div>
 
-              {/* Task 1: Batch from provision selection */}
-              <div>
-                <label className="block text-slate-700 font-semibold mb-1">Initial Batch Allocation</label>
-                <select
-                  name="batchId"
-                  defaultValue=""
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
-                >
-                  <option value="">-- No initial batch (assign later) --</option>
-                  {allBatches.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.batchCode} - {b.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="grid grid-cols-2 gap-2.5">
                 <div>
                   <label className="block text-slate-700 font-semibold mb-1">Designation / Title</label>
@@ -798,6 +840,91 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
                   placeholder="e.g. VAPT, Cloud Security, Red Teaming"
                   className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
                 />
+              </div>
+
+              {/* Schedule & Office Hours */}
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">
+                  Weekly Schedule &amp; Lecture Timings
+                </label>
+                <input
+                  type="text"
+                  name="schedule"
+                  placeholder="e.g. Mon, Wed, Fri • 7:00 PM - 9:00 PM IST"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                />
+              </div>
+
+              {/* Batch Allocation */}
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">Assigned Cohort Batch</label>
+                <select
+                  name="batchId"
+                  defaultValue=""
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-violet-600"
+                >
+                  <option value="">-- No initial batch (assign later) --</option>
+                  {allBatches.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.batchCode} - {b.title}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Connects the instructor to lead lectures and manage students of this batch.
+                </p>
+              </div>
+
+              {/* Course Curriculum Selection */}
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">
+                  Assigned Course Curriculums
+                </label>
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 max-h-36 overflow-y-auto space-y-1">
+                  {allCourses.length === 0 ? (
+                    <p className="text-slate-400 text-[11px]">No courses configured yet.</p>
+                  ) : (
+                    allCourses.map((c) => (
+                      <label key={c.id} className="flex items-center gap-2 cursor-pointer hover:bg-slate-100 p-1.5 rounded-lg transition-colors">
+                        <input
+                          type="checkbox"
+                          name="courseIds"
+                          value={c.id}
+                          className="w-3.5 h-3.5 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-slate-800 text-xs font-medium">{c.title}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Passkey & Dispatch Email */}
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
+                <div>
+                  <label className="block text-slate-700 font-semibold mb-1">
+                    Initial Security Passkey / Temporary Password
+                  </label>
+                  <input
+                    type="text"
+                    name="passkey"
+                    placeholder="Leave blank to auto-generate a secure passkey"
+                    className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600 font-mono"
+                  />
+                </div>
+
+                <label className="flex items-center gap-2 cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    name="dispatchEmail"
+                    value="true"
+                    defaultChecked
+                    className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                  />
+                  <span className="text-slate-700 text-xs font-medium">
+                    Dispatch login credentials email immediately to faculty inbox
+                  </span>
+                </label>
               </div>
 
               <div>
@@ -963,6 +1090,82 @@ export function MentorDirectoryClient({ mentors, allBatches = [] }: MentorDirect
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs"
                 >
                   Close Dossier
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* ── DISPATCH CREDENTIALS MODAL ── */}
+      {dispatchCredsModalMentor && (
+        <Dialog open={!!dispatchCredsModalMentor} onOpenChange={(open) => !open && setDispatchCredsModalMentor(null)}>
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 text-xs">
+            <DialogHeader className="border-b border-slate-100 pb-3">
+              <DialogTitle className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-emerald-600" />
+                Dispatch Credentials: {dispatchCredsModalMentor.user?.name}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-3.5 pt-2">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Recipient Email:</span>
+                  <span className="font-semibold text-slate-800">{dispatchCredsModalMentor.user?.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Faculty ID:</span>
+                  <span className="font-mono font-bold text-violet-700">
+                    {dispatchCredsModalMentor.user?.mentorIdentity?.mentorId || dispatchCredsModalMentor.user?.tsIdentity?.tsId || 'TS-MNT-ACTIVE'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Assigned Batches:</span>
+                  <span className="font-medium text-slate-700 truncate max-w-[200px]">
+                    {dispatchCredsModalMentor.batches?.map((b: any) => b.batchCode).join(', ') || 'None'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Assigned Courses:</span>
+                  <span className="font-medium text-slate-700 truncate max-w-[200px]">
+                    {dispatchCredsModalMentor.courses?.map((c: any) => c.title).join(', ') || 'None'}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-700 font-semibold mb-1">
+                  Custom Security Passkey / Temporary Password (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={customPasskey}
+                  onChange={(e) => setCustomPasskey(e.target.value)}
+                  placeholder="Leave empty to generate a secure random passkey"
+                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-violet-600 font-mono"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Sends official onboarding email with Faculty ID, assigned curriculum, schedule, portal login URL, and credentials.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setDispatchCredsModalMentor(null)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={loading || dispatchingMentorId === dispatchCredsModalMentor.id}
+                  onClick={() => handleDispatchMentorCreds(dispatchCredsModalMentor, customPasskey)}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{dispatchingMentorId === dispatchCredsModalMentor.id ? 'Dispatching...' : 'Dispatch Credentials'}</span>
                 </button>
               </div>
             </div>

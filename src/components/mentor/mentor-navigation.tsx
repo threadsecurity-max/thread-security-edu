@@ -58,13 +58,13 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
 
   const navSections: NavSection[] = [
     {
-      title: 'COMMAND CENTER',
+      title: 'OVERVIEW',
       items: [
-        { name: 'Console Overview', href: '/mentor', icon: LayoutDashboard, exact: true },
+        { name: 'Dashboard', href: '/mentor', icon: LayoutDashboard, exact: true },
       ],
     },
     {
-      title: 'STUDENTS & COHORTS',
+      title: 'STUDENTS & BATCHES',
       items: [
         { name: 'Student Directory', href: '/mentor/students', icon: Users },
         { name: 'My Batches', href: '/mentor/batches', icon: Layers },
@@ -73,20 +73,20 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
     {
       title: 'TEACHING & LABS',
       items: [
-        { name: "Today's Conduction", href: '/mentor/today', icon: Clock, badge: 'LIVE' },
+        { name: "Today's Schedule", href: '/mentor/today', icon: Clock },
         { name: 'Lectures', href: '/mentor/lectures', icon: Calendar },
-        { name: 'Attendance Center', href: '/mentor/attendance', icon: ShieldCheck },
-        { name: 'Cybersecurity Labs', href: '/mentor/labs', icon: Terminal, badge: 'CYBER' },
-        { name: 'Lab Submissions', href: '/mentor/submissions', icon: FileText, badge: 'GRADE' },
+        { name: 'Attendance', href: '/mentor/attendance', icon: ShieldCheck },
+        { name: 'Hands-on Labs', href: '/mentor/labs', icon: Terminal },
+        { name: 'Lab Submissions', href: '/mentor/submissions', icon: FileText },
         { name: 'Assessments', href: '/mentor/assessments', icon: Cpu },
-        { name: 'Assignments Hub', href: '/mentor/assignments', icon: FileText },
+        { name: 'Assignments', href: '/mentor/assignments', icon: FileText },
       ],
     },
     {
-      title: 'CONTENT & DISPATCH',
+      title: 'MATERIALS & ANNOUNCEMENTS',
       items: [
         { name: 'Study Materials', href: '/mentor/materials', icon: BookOpen },
-        { name: 'Batch Broadcasts', href: '/mentor/announcements', icon: Radio },
+        { name: 'Announcements', href: '/mentor/announcements', icon: Radio },
         { name: 'Blog Studio', href: '/mentor/blogs', icon: Globe },
       ],
     },
@@ -132,14 +132,14 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
               className="h-7 w-auto"
             />
             <span className="text-xs font-mono font-bold tracking-wider text-white">
-              COMMAND CENTER
+              FACULTY PORTAL
             </span>
           </Link>
         </div>
 
         <div className="flex items-center gap-2">
           <Link href="/mentor/today">
-            <span className="px-2.5 py-1 rounded-full bg-[#C6FF34] text-black text-[10px] font-bold font-mono shadow-sm">
+            <span className="px-2.5 py-1 rounded-full bg-purple-600 text-white text-[10px] font-bold font-mono shadow-sm shadow-purple-600/30">
               LIVE TODAY
             </span>
           </Link>
@@ -154,9 +154,9 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             onClick={() => setMobileDrawerOpen(false)}
           />
 
-          <div className="relative w-4/5 max-w-xs bg-[#050706] border-r border-white/[0.08] flex flex-col justify-between z-10 text-white shadow-2xl h-full overflow-hidden">
+          <div className="relative w-4/5 max-w-xs bg-[#09090d] border-r border-white/[0.08] flex flex-col justify-between z-10 text-white shadow-2xl h-full overflow-hidden">
             {/* Mobile Pinned Header */}
-            <div className="p-4 pb-3 border-b border-white/[0.08] bg-[#050706] space-y-3 shrink-0">
+            <div className="p-4 pb-3 border-b border-white/[0.08] bg-[#09090d] space-y-3 shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Image
@@ -169,7 +169,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
                   />
                   <div>
                     <span className="text-xs font-mono font-bold text-white block">THREAD SECURITY</span>
-                    <span className="text-[9px] font-mono text-[#C6FF34] block">COMMAND CENTER</span>
+                    <span className="text-[9px] font-mono text-purple-400 block">FACULTY PORTAL</span>
                   </div>
                 </div>
                 <button
@@ -186,8 +186,8 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             {/* Mobile Scrollable Nav */}
             <div className="p-4 overflow-y-auto sidebar-scroll flex-1 space-y-4">
               <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-xs font-mono">
-                <span className="text-[9px] text-[#C6FF34] font-bold uppercase tracking-widest block">
-                  AUTHORIZED FACULTY
+                <span className="text-[9px] text-purple-400 font-bold uppercase tracking-widest block">
+                  FACULTY ACCOUNT
                 </span>
                 <p className="font-bold text-white truncate pt-0.5">{user.name}</p>
                 <p className="text-[10px] text-zinc-400 truncate">{user.email}</p>
@@ -211,18 +211,18 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
                           onClick={() => setMobileDrawerOpen(false)}
                           className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono transition-all ${
                             active
-                              ? 'bg-[#C6FF34] text-black font-bold shadow-md'
+                              ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-600/30'
                               : 'text-zinc-300 hover:text-white hover:bg-white/[0.04]'
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
-                            <Icon className={`w-4 h-4 ${active ? 'text-black' : 'text-[#C6FF34]'}`} />
+                            <Icon className={`w-4 h-4 ${active ? 'text-white' : 'text-purple-400'}`} />
                             <span>{item.name}</span>
                           </div>
                           {item.badge && (
                             <span
                               className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                                active ? 'bg-black text-[#C6FF34]' : 'bg-white/[0.1] text-zinc-300'
+                                active ? 'bg-black text-purple-300' : 'bg-white/[0.1] text-zinc-300'
                               }`}
                             >
                               {item.badge}
@@ -237,7 +237,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             </div>
 
             {/* Mobile Pinned Footer */}
-            <div className="p-4 border-t border-white/[0.08] bg-[#050706] shrink-0">
+            <div className="p-4 border-t border-white/[0.08] bg-[#09090d] shrink-0">
               <Link href="/login" className="block">
                 <button className="w-full py-2 rounded-xl text-zinc-400 hover:text-white flex items-center justify-center gap-2 text-xs font-mono hover:bg-white/[0.04] transition-colors">
                   <LogOut className="w-4 h-4" />
@@ -251,7 +251,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
 
       {/* ── DESKTOP PERSISTENT COMMAND SIDEBAR (>= md) ── */}
       <aside
-        className={`bg-[#050706] border-r border-white/[0.08] text-white hidden md:flex flex-col shrink-0 h-screen sticky top-0 z-40 select-none transition-all duration-300 ease-in-out ${
+        className={`bg-[#09090d] border-r border-white/[0.08] text-white hidden md:flex flex-col shrink-0 h-screen sticky top-0 z-40 select-none transition-all duration-300 ease-in-out ${
           collapsed ? 'w-20' : 'w-64'
         }`}
       >
@@ -259,8 +259,8 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
         <div
           className={`p-4 pb-3 shrink-0 border-b transition-all duration-200 z-10 ${
             isScrolled
-              ? 'border-white/[0.12] bg-[#050706]/95 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.6)]'
-              : 'border-white/[0.06] bg-[#050706]'
+              ? 'border-white/[0.12] bg-[#09090d]/95 backdrop-blur-xl shadow-[0_8px_20px_rgba(0,0,0,0.6)]'
+              : 'border-white/[0.06] bg-[#09090d]'
           } ${collapsed ? 'px-2.5' : 'px-4'}`}
         >
           {/* Brand Row + Collapse Toggle */}
@@ -268,7 +268,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             <Link
               href="/mentor"
               className="flex items-center gap-2.5 overflow-hidden group min-w-0"
-              title="TSE Mentor Command Center"
+              title="Thread Security Faculty Portal"
             >
               <div className="relative shrink-0">
                 <Image
@@ -279,15 +279,15 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
                   unoptimized
                   className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
                 />
-                <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#C6FF34] ring-2 ring-[#050706]" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-purple-500 ring-2 ring-[#09090d]" />
               </div>
               {!collapsed && (
                 <div className="flex flex-col min-w-0">
                   <span className="font-mono text-xs font-bold tracking-wider text-white uppercase truncate">
                     THREAD SECURITY
                   </span>
-                  <span className="font-mono text-[9px] text-[#C6FF34] tracking-widest uppercase font-semibold">
-                    COMMAND CENTER
+                  <span className="font-mono text-[9px] text-purple-400 tracking-widest uppercase font-semibold">
+                    FACULTY PORTAL
                   </span>
                 </div>
               )}
@@ -299,7 +299,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
               className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0"
             >
               {collapsed ? (
-                <ChevronRight className="w-4 h-4 text-[#C6FF34]" />
+                <ChevronRight className="w-4 h-4 text-purple-400" />
               ) : (
                 <ChevronLeft className="w-4 h-4 text-zinc-400 hover:text-white" />
               )}
@@ -346,14 +346,14 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
                         collapsed ? 'justify-center p-2.5' : 'justify-between px-3 py-2'
                       } rounded-xl transition-all relative group ${
                         active
-                          ? 'bg-white/[0.08] text-white font-bold border border-white/[0.12] shadow-[0_2px_12px_rgba(0,0,0,0.5)]'
+                          ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30 shadow-[0_2px_12px_rgba(168,85,247,0.15)]'
                           : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <Icon
                           className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-110 ${
-                            active ? 'text-[#C6FF34]' : 'text-zinc-400 group-hover:text-zinc-200'
+                            active ? 'text-purple-400' : 'text-zinc-400 group-hover:text-zinc-200'
                           }`}
                         />
                         {!collapsed && <span className="truncate">{item.name}</span>}
@@ -373,7 +373,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
 
                       {/* Active indicator bar */}
                       {active && (
-                        <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[#C6FF34] shadow-[0_0_8px_#C6FF34]" />
+                        <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
                       )}
                     </Link>
                   );
@@ -385,7 +385,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
 
         {/* ── 3. PINNED BOTTOM FOOTER (Never scrolls away) ── */}
         <div
-          className={`shrink-0 border-t border-white/[0.08] bg-[#050706] space-y-2.5 ${
+          className={`shrink-0 border-t border-white/[0.08] bg-[#09090d] space-y-2.5 ${
             collapsed ? 'p-2' : 'p-3'
           }`}
         >
@@ -393,8 +393,8 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
           {!collapsed ? (
             <div className="p-2.5 rounded-xl bg-white/[0.025] border border-white/[0.06] space-y-1 font-mono text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] text-[#C6FF34] font-bold flex items-center gap-1 uppercase tracking-wider">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#C6FF34]" />
+                <span className="text-[9px] text-purple-400 font-bold flex items-center gap-1 uppercase tracking-wider">
+                  <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
                   FACULTY CLEARANCE
                 </span>
                 <span className="text-[8px] px-1 py-0.2 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20 font-bold uppercase">
@@ -406,7 +406,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
             </div>
           ) : (
             <div className="flex justify-center" title={`${user.name} (${user.email})`}>
-              <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-[#C6FF34]">
+              <div className="w-9 h-9 rounded-xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-purple-400">
                 <ShieldCheck className="w-4 h-4" />
               </div>
             </div>

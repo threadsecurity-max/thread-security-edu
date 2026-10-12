@@ -60,7 +60,7 @@ export default async function MentorLayout({ children }: { children: React.React
   const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ACADEMIC_ADMIN';
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden flex flex-col md:flex-row bg-[#050706] text-white font-sans selection:bg-[#C6FF34] selection:text-black">
+    <div className="min-h-screen md:h-screen md:overflow-hidden flex flex-col md:flex-row bg-[#09090d] text-white font-sans selection:bg-purple-600 selection:text-white">
       {/* Mentor Navigation (Responsive Sidebar & Mobile Drawer) */}
       <MentorNavigation
         user={{
@@ -73,23 +73,22 @@ export default async function MentorLayout({ children }: { children: React.React
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#080808] md:h-screen md:overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 bg-[#09090d] md:h-screen md:overflow-hidden">
         {/* Top Header Bar */}
         <header className="h-16 shrink-0 border-b border-white/10 bg-black/95 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-30">
           <div className="flex items-center gap-3">
-            <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px] tracking-wider font-bold">
-              MENTOR COMMAND CONSOLE
-            </Badge>
-            <span className="hidden sm:inline-block text-xs font-mono text-slate-400">
-              TEACH • TRACK • COMMUNICATE • REVIEW • REPORT
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-white tracking-tight">Faculty Workspace</span>
+              <span className="text-zinc-600 hidden sm:inline">/</span>
+              <span className="text-xs text-zinc-400 hidden sm:inline">Instructor Dashboard</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/mentor/notifications" className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors" title="Notifications">
               <Bell className="w-4 h-4 text-slate-300" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7] animate-pulse" />
               )}
             </Link>
 
@@ -103,7 +102,7 @@ export default async function MentorLayout({ children }: { children: React.React
 
             <Link
               href="/student"
-              className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-mono font-bold border border-white/20 hover:border-[#C6FF34] text-white hover:text-[#C6FF34] bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center px-3 py-1.5 rounded-xl text-xs font-mono font-bold border border-white/20 hover:border-purple-500/60 text-white hover:text-purple-300 bg-white/5 hover:bg-white/10 transition-all cursor-pointer"
             >
               Student View
             </Link>

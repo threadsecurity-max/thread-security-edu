@@ -67,7 +67,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-              className="fixed top-0 left-0 bottom-0 w-[min(82vw,300px)] bg-[#050706] text-white z-50 border-r border-white/10 shadow-2xl flex flex-col justify-between p-5 md:hidden safe-top safe-bottom safe-left"
+              className="fixed top-0 left-0 bottom-0 w-[min(82vw,300px)] bg-[#09090d] text-white z-50 border-r border-white/10 shadow-2xl flex flex-col justify-between p-5 md:hidden safe-top safe-bottom safe-left"
             >
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -91,11 +91,11 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                 </div>
 
                 {/* TS-ID Pill */}
-                <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-0.5 font-mono text-xs">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-wider block">
+                <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 space-y-0.5 font-mono text-xs">
+                  <span className="text-[10px] text-purple-300 uppercase tracking-wider block">
                     AUTHENTICATED TS-ID
                   </span>
-                  <span className="text-security-green font-bold text-sm block">{tsId}</span>
+                  <span className="text-purple-400 font-bold text-sm block">{tsId}</span>
                 </div>
 
                 {/* Full Nav in Drawer */}
@@ -106,11 +106,11 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname === '/student'
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
-                    <LayoutDashboard className="w-4 h-4 text-security-green" />
+                    <LayoutDashboard className="w-4 h-4 text-purple-400" />
                     <span>Dashboard</span>
                   </Link>
 
@@ -120,7 +120,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname.startsWith('/student/courses')
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
@@ -134,7 +134,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname.startsWith('/student/labs')
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
@@ -148,7 +148,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname.startsWith('/student/assessments')
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
@@ -162,7 +162,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname.startsWith('/student/assignments')
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
@@ -176,7 +176,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname.startsWith('/student/materials')
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
@@ -190,11 +190,11 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                     className={cn(
                       'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors',
                       pathname.startsWith('/student/attendance')
-                        ? 'bg-white/15 text-white font-bold'
+                        ? 'bg-purple-600/15 text-white font-bold border border-purple-500/30'
                         : 'hover:bg-white/5 hover:text-white'
                     )}
                   >
-                    <Calendar className="w-4 h-4 text-security-green" />
+                    <Calendar className="w-4 h-4 text-purple-400" />
                     <span>Batch & Attendance</span>
                   </Link>
                 </nav>
@@ -204,7 +204,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
               <div className="pt-4 border-t border-white/10 flex items-center justify-between">
                 <div className="truncate">
                   <span className="text-xs font-bold text-white block truncate">{studentName}</span>
-                  <span className="text-[10px] text-security-green font-mono block">Verified Student</span>
+                  <span className="text-[10px] text-purple-400 font-mono block">Verified Student</span>
                 </div>
                 <Link
                   href="/login"
@@ -222,7 +222,7 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
       {/* Persistent Mobile Bottom Navigation (< md) */}
       <nav
         aria-label="Student mobile navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#050706]/95 backdrop-blur-xl border-t border-white/[0.08] safe-bottom shadow-[0_-4px_24px_rgba(0,0,0,0.6)]"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#09090d]/95 backdrop-blur-xl border-t border-white/[0.08] safe-bottom shadow-[0_-4px_24px_rgba(0,0,0,0.6)]"
       >
         <div className="grid grid-cols-5 h-14 items-center px-1 max-w-lg mx-auto">
           {bottomNavItems.map((item) => {
@@ -238,15 +238,15 @@ export function StudentMobileNav({ tsId, studentName }: StudentMobileNavProps) {
                 href={item.href}
                 className={cn(
                   'touch-target flex flex-col items-center justify-center gap-1 rounded-lg transition-colors py-1 text-center',
-                  isActive ? 'text-[#C6FF34] font-extrabold' : 'text-zinc-500 hover:text-white'
+                  isActive ? 'text-purple-400 font-extrabold' : 'text-zinc-500 hover:text-white'
                 )}
               >
                 <div className="relative">
-                  <Icon className={cn('w-5 h-5', isActive && 'text-[#C6FF34] stroke-[2.5]')} />
+                  <Icon className={cn('w-5 h-5', isActive && 'text-purple-400 stroke-[2.5]')} />
                   {isActive && (
                     <motion.div
                       layoutId="student-tab-dot"
-                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#C6FF34] rounded-full shadow-[0_0_6px_#C6FF34]"
+                      className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-purple-500 rounded-full shadow-[0_0_6px_#a855f7]"
                     />
                   )}
                 </div>

@@ -20,7 +20,7 @@ export function GlassCard({
   };
 
   const glowStyles = glow
-    ? 'relative before:absolute before:-inset-px before:rounded-3xl before:bg-gradient-to-b before:from-[#C6FF34]/20 before:to-transparent before:-z-10 before:opacity-80'
+    ? 'relative before:absolute before:-inset-px before:rounded-3xl before:bg-gradient-to-b before:from-purple-500/20 before:to-transparent before:-z-10 before:opacity-80'
     : '';
 
   return (

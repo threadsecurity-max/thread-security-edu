@@ -34,20 +34,20 @@ export function QuickCreateDropdown({ collapsed = false }: { collapsed?: boolean
         <button
           onClick={() => setOpen(!open)}
           title="Quick Create Action"
-          className="w-10 h-10 mx-auto rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold flex items-center justify-center shadow-[0_4px_16px_rgba(198,255,52,0.18)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          className="w-10 h-10 mx-auto rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold flex items-center justify-center shadow-[0_4px_16px_rgba(168,85,247,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
         >
           <Plus className="w-5 h-5 stroke-[3]" />
         </button>
       ) : (
         <button
           onClick={() => setOpen(!open)}
-          className="w-full py-2.5 px-3.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold text-xs flex items-center justify-between shadow-[0_4px_16px_rgba(198,255,52,0.18)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+          className="w-full py-2.5 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs flex items-center justify-between shadow-[0_4px_16px_rgba(168,85,247,0.3)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
         >
           <span className="flex items-center gap-2">
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Quick Create</span>
           </span>
-          <span className="text-[10px] bg-black/15 px-1.5 py-0.5 rounded">Action</span>
+          <span className="text-[10px] bg-black/25 text-purple-200 px-1.5 py-0.5 rounded font-medium">Action</span>
         </button>
       )}
 
@@ -57,7 +57,7 @@ export function QuickCreateDropdown({ collapsed = false }: { collapsed?: boolean
             className="fixed inset-0 z-40"
             onClick={() => setOpen(false)}
           />
-          <div className={`absolute ${collapsed ? 'left-12 top-0' : 'left-0 right-0 top-12'} z-50 p-2 rounded-2xl bg-[#0a0a0a] border border-white/[0.12] shadow-2xl backdrop-blur-2xl space-y-1 w-64 md:w-72`}>
+          <div className={`absolute ${collapsed ? 'left-12 top-0' : 'left-0 right-0 top-12'} z-50 p-2 rounded-2xl bg-[#09090d] border border-white/[0.12] shadow-2xl backdrop-blur-2xl space-y-1 w-64 md:w-72`}>
             <div className="px-2.5 py-1 text-[10px] font-mono text-zinc-500 uppercase tracking-widest font-bold">
               OPERATIONAL ACTIONS
             </div>
@@ -70,11 +70,11 @@ export function QuickCreateDropdown({ collapsed = false }: { collapsed?: boolean
                   onClick={() => setOpen(false)}
                   className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-white/[0.06] transition-colors group"
                 >
-                  <div className="p-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#C6FF34] group-hover:bg-[#C6FF34] group-hover:text-black transition-colors shrink-0 mt-0.5">
+                  <div className="p-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-colors shrink-0 mt-0.5">
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-xs font-mono font-bold text-white group-hover:text-[#C6FF34] transition-colors block">
+                    <span className="text-xs font-mono font-bold text-white group-hover:text-purple-300 transition-colors block">
                       {act.label}
                     </span>
                     <span className="text-[10px] text-zinc-400 line-clamp-1">

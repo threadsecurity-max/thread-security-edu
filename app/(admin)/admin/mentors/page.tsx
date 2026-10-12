@@ -14,9 +14,10 @@ export default async function AdminMentorDirectoryPage() {
 
   let mentors: any[] = [];
   let allBatches: any[] = [];
+  let allCourses: any[] = [];
 
   try {
-    const [fetchedMentors, fetchedBatches] = await Promise.all([
+    const [fetchedMentors, fetchedBatches, fetchedCourses] = await Promise.all([
       prisma.mentorProfile.findMany({
         include: {
           user: {
@@ -51,10 +52,20 @@ export default async function AdminMentorDirectoryPage() {
         },
         orderBy: { batchCode: 'asc' },
       }),
+      prisma.course.findMany({
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          mentorId: true,
+        },
+        orderBy: { title: 'asc' },
+      }),
     ]);
 
     mentors = fetchedMentors;
     allBatches = fetchedBatches;
+    allCourses = fetchedCourses;
   } catch (e) {
     console.error('Failed to query mentors roster:', e);
   }
@@ -83,7 +94,7 @@ export default async function AdminMentorDirectoryPage() {
       </div>
 
       {/* Interactive Mentor Directory Client Component */}
-      <MentorDirectoryClient mentors={mentors} allBatches={allBatches} />
+      <MentorDirectoryClient mentors={mentors} allBatches={allBatches} allCourses={allCourses} />
     </div>
   );
 }

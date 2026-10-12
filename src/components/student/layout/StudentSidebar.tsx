@@ -89,14 +89,14 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
                 unoptimized
                 className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
               />
-              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#C6FF34] ring-2 ring-[#050706]" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-purple-500 ring-2 ring-[#050706]" />
             </div>
             {!collapsed && (
               <div className="flex flex-col">
                 <span className="font-mono text-xs font-bold tracking-wider text-white uppercase whitespace-nowrap">
                   THREAD SECURITY
                 </span>
-                <span className="font-mono text-[9px] text-[#C6FF34] tracking-widest uppercase">
+                <span className="font-mono text-[9px] text-purple-400 tracking-widest uppercase font-semibold">
                   EDUCATION TERMINAL
                 </span>
               </div>
@@ -108,31 +108,31 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer shrink-0"
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? <ChevronRight className="w-4 h-4 text-purple-400" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Authenticated TS-ID Badge Card */}
         {!collapsed ? (
           <div className="p-3 rounded-2xl bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] space-y-1 font-mono text-xs relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#C6FF34]/[0.03] rounded-full blur-xl pointer-events-none" />
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-600/[0.05] rounded-full blur-xl pointer-events-none" />
             <div className="flex items-center justify-between">
               <span className="text-[9px] text-zinc-400 uppercase tracking-widest font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C6FF34] animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
                 VERIFIED ID
               </span>
-              <span className="text-[9px] text-emerald-400 font-bold bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+              <span className="text-[9px] text-purple-300 font-bold bg-purple-500/15 px-1.5 py-0.2 rounded border border-purple-500/30">
                 ACTIVE
               </span>
             </div>
             <div className="text-white font-bold text-xs flex items-center gap-1.5 truncate pt-0.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#C6FF34] shrink-0" />
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-400 shrink-0" />
               <span className="text-zinc-200 tracking-tight font-mono">{student.tsId}</span>
             </div>
           </div>
         ) : (
           <div className="flex justify-center" title={`Verified TS-ID: ${student.tsId}`}>
-            <span className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[#C6FF34] hover:bg-white/[0.06] transition-colors cursor-pointer">
+            <span className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-purple-400 hover:bg-white/[0.06] transition-colors cursor-pointer">
               <ShieldCheck className="w-4 h-4" />
             </span>
           </div>
@@ -171,7 +171,7 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
                       <Icon
                         className={cn(
                           'w-4 h-4 shrink-0 transition-transform group-hover:scale-105',
-                          isActive ? 'text-[#C6FF34]' : 'text-zinc-400 group-hover:text-zinc-200'
+                          isActive ? 'text-purple-400' : 'text-zinc-400 group-hover:text-zinc-200'
                         )}
                       />
 
@@ -189,9 +189,9 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
                       {/* Active indicator dot & left accent bar */}
                       {isActive && (
                         <>
-                          <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[#C6FF34] shadow-[0_0_8px_#C6FF34]" />
+                          <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
                           {!collapsed && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#C6FF34] shrink-0 shadow-[0_0_6px_#C6FF34]" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0 shadow-[0_0_6px_#a855f7]" />
                           )}
                         </>
                       )}
@@ -208,9 +208,9 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
           <div className="pt-3 border-t border-white/[0.06] space-y-1 text-xs font-mono">
             <Link
               href="/workshops"
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-zinc-400 hover:text-[#C6FF34] hover:bg-white/[0.03] transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-zinc-400 hover:text-purple-400 hover:bg-white/[0.03] transition-colors"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#C6FF34]" />
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>Cyber Workshops</span>
             </Link>
             <Link
@@ -241,7 +241,7 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
           {!collapsed && (
             <div className="min-w-0 flex-1 truncate">
               <span className="text-xs font-bold text-white block truncate">{student.name}</span>
-              <span className="text-[10px] text-[#C6FF34] font-mono block">Enrolled Student</span>
+              <span className="text-[10px] text-purple-400 font-mono block">Enrolled Student</span>
             </div>
           )}
         </div>

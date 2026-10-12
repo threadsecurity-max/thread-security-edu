@@ -44,6 +44,8 @@ import {
   fetchDeliveredLecturesAuditAction,
   fetchPendingCorrectionRequestsAction,
   adminApproveOrRejectCorrectionAction,
+  bulkAssignStudentsToBatchAction,
+  assignBatchMentorAction,
 } from '@/features/batch/actions/batch.actions';
 
 function BatchCalendarDatePicker({
@@ -205,6 +207,8 @@ export function BatchManagementClient({
   // Form inputs
   const [tsIdInput, setTsIdInput] = useState('');
   const [searchStudent, setSearchStudent] = useState('');
+  const [studentFilterTab, setStudentFilterTab] = useState<'ALL' | 'UNASSIGNED' | 'IN_BATCH'>('ALL');
+  const [selectedStudentProfileIds, setSelectedStudentProfileIds] = useState<string[]>([]);
   const [newSessionTitle, setNewSessionTitle] = useState('');
   const [newSessionDate, setNewSessionDate] = useState('');
   const [newSessionAgenda, setNewSessionAgenda] = useState('');
@@ -271,7 +275,16 @@ export function BatchManagementClient({
     const name = s.user?.name?.toLowerCase() || '';
     const email = s.user?.email?.toLowerCase() || '';
     const tsId = s.user?.tsIdentity?.tsId?.toLowerCase() || '';
-    return name.includes(q) || email.includes(q) || tsId.includes(q);
+    const matchesSearch = name.includes(q) || email.includes(q) || tsId.includes(q);
+    if (!matchesSearch) return false;
+
+    if (studentFilterTab === 'UNASSIGNED') {
+      return !s.batchId;
+    }
+    if (studentFilterTab === 'IN_BATCH' && selectedBatchForStudents) {
+      return s.batchId === selectedBatchForStudents.id;
+    }
+    return true;
   });
 
   // Flat list of all sessions across all batches for calendar placement
@@ -412,6 +425,40 @@ export function BatchManagementClient({
     } else {
       setFeedbackMsg(res.error || 'Failed to enroll student by Student ID.');
     }
+  };
+
+  const handleAssignBatchMentor = async (batchId: string, mentorId: string | null) => {
+    setLoading(true);
+    setFeedbackMsg(null);
+    const res = await assignBatchMentorAction(batchId, mentorId);
+    setLoading(false);
+    if (res.success) {
+      setFeedbackMsg('✓ Faculty mentor assigned to cohort batch successfully!');
+      setTimeout(() => setFeedbackMsg(null), 2500);
+    } else {
+      setFeedbackMsg(res.error || 'Failed to assign mentor.');
+    }
+  };
+
+  const handleBulkAssignStudents = async () => {
+    if (!selectedBatchForStudents || selectedStudentProfileIds.length === 0) return;
+    setLoading(true);
+    setFeedbackMsg(null);
+    const res = await bulkAssignStudentsToBatchAction(selectedStudentProfileIds, selectedBatchForStudents.id);
+    setLoading(false);
+    if (res.success) {
+      setFeedbackMsg(`✓ Successfully assigned ${res.count} students to ${selectedBatchForStudents.batchCode}!`);
+      setSelectedStudentProfileIds([]);
+      setTimeout(() => setFeedbackMsg(null), 3000);
+    } else {
+      setFeedbackMsg(res.error || 'Failed to bulk assign students.');
+    }
+  };
+
+  const toggleSelectStudent = (id: string) => {
+    setSelectedStudentProfileIds((prev) =>
+      prev.includes(id) ? prev.filter((sId) => sId !== id) : [...prev, id]
+    );
   };
 
   const handleCreateSession = async (e: React.FormEvent) => {
@@ -630,14 +677,25 @@ export function BatchManagementClient({
 
                   <CardContent className="p-5 pt-0 space-y-3.5 text-xs text-slate-700">
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5 font-mono text-[11px]">
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-slate-500">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="flex items-center gap-1.5 text-slate-500 shrink-0">
                           <ShieldCheck className="w-3.5 h-3.5 text-violet-600" />
                           Faculty Lead:
                         </span>
-                        <strong className="text-slate-900 font-bold truncate max-w-[150px]">
-                          {batch.mentor?.user?.name || 'Unassigned'}
-                        </strong>
+                        <select
+                          value={batch.mentorId || ''}
+                          disabled={loading}
+                          onChange={(e) => handleAssignBatchMentor(batch.id, e.target.value || null)}
+                          className="bg-white border border-slate-200 text-slate-900 rounded-lg px-2 py-0.5 text-[11px] font-sans font-medium focus:outline-none focus:border-violet-600 max-w-[170px] truncate cursor-pointer"
+                          title="Assign or reassign faculty teacher to this batch"
+                        >
+                          <option value="">-- Unassigned --</option>
+                          {mentors.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.user?.name || m.title || 'Mentor'}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div className="flex items-center justify-between">
@@ -1959,63 +2017,179 @@ export function BatchManagementClient({
                 </div>
               </form>
 
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-                <input
-                  placeholder="Filter student directory by Name, Email, or TS-ID..."
-                  value={searchStudent}
-                  onChange={(e) => setSearchStudent(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-900 pl-9 pr-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600 focus:bg-white"
-                />
+              {/* Student Filter Tabs */}
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setStudentFilterTab('ALL')}
+                  className={`flex-1 py-1.5 px-2.5 rounded-lg font-medium transition-all cursor-pointer ${
+                    studentFilterTab === 'ALL'
+                      ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  All ({allStudents.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudentFilterTab('UNASSIGNED')}
+                  className={`flex-1 py-1.5 px-2.5 rounded-lg font-medium transition-all cursor-pointer ${
+                    studentFilterTab === 'UNASSIGNED'
+                      ? 'bg-white text-amber-700 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Unassigned ({allStudents.filter((s) => !s.batchId).length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStudentFilterTab('IN_BATCH')}
+                  className={`flex-1 py-1.5 px-2.5 rounded-lg font-medium transition-all cursor-pointer ${
+                    studentFilterTab === 'IN_BATCH'
+                      ? 'bg-white text-violet-700 shadow-xs font-semibold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  In This Batch ({allStudents.filter((s) => s.batchId === selectedBatchForStudents.id).length})
+                </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white">
-                {filteredStudents.map((student) => {
-                  const isAssigned = student.batchId === selectedBatchForStudents.id;
-                  const tsId = student.user?.tsIdentity?.tsId || 'TS-STUDENT';
+              {/* Search & Bulk Assign Bar */}
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    placeholder="Filter students by Name, Email, or TS-ID..."
+                    value={searchStudent}
+                    onChange={(e) => setSearchStudent(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 text-slate-900 pl-9 pr-3 py-2 rounded-xl text-xs focus:outline-none focus:border-violet-600 focus:bg-white"
+                  />
+                </div>
 
-                  return (
-                    <div
-                      key={student.id}
-                      className="p-3 flex items-center justify-between gap-3 hover:bg-violet-50/40 transition-colors"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-xs text-slate-900">
-                            {student.user?.name || 'Student'}
-                          </span>
-                          <span className="font-mono text-[10px] text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200 font-semibold">
-                            {tsId}
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-slate-500 block font-sans">
-                          {student.user?.email} • Goal: {student.careerGoal || 'Cyber Security'}
-                        </span>
-                      </div>
-
-                      {isAssigned ? (
-                        <button
-                          disabled={loading}
-                          onClick={() => handleAssignStudent(student.id, null)}
-                          className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-mono font-semibold cursor-pointer transition-all active:scale-95"
-                        >
-                          Remove from Batch
-                        </button>
-                      ) : (
-                        <button
-                          disabled={loading}
-                          onClick={() =>
-                            handleAssignStudent(student.id, selectedBatchForStudents.id)
+                {/* Bulk Assign Controls */}
+                {filteredStudents.some((s) => s.batchId !== selectedBatchForStudents.id) && (
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-violet-50/60 border border-violet-200 text-xs">
+                    <label className="flex items-center gap-2 cursor-pointer text-slate-700 font-medium">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedStudentProfileIds.length > 0 &&
+                          filteredStudents
+                            .filter((s) => s.batchId !== selectedBatchForStudents.id)
+                            .every((s) => selectedStudentProfileIds.includes(s.id))
+                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const unassignedIds = filteredStudents
+                              .filter((s) => s.batchId !== selectedBatchForStudents.id)
+                              .map((s) => s.id);
+                            setSelectedStudentProfileIds(unassignedIds);
+                          } else {
+                            setSelectedStudentProfileIds([]);
                           }
-                          className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-mono font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
-                        >
-                          <Plus className="w-3 h-3 text-violet-600" />
-                          <span>Assign</span>
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
+                        }}
+                        className="w-3.5 h-3.5 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                      />
+                      <span>Select all unassigned in view ({selectedStudentProfileIds.length} selected)</span>
+                    </label>
+
+                    <button
+                      type="button"
+                      disabled={loading || selectedStudentProfileIds.length === 0}
+                      onClick={handleBulkAssignStudents}
+                      className="px-3 py-1 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>Assign Selected ({selectedStudentProfileIds.length})</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Student Roster List */}
+              <div className="flex-1 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white min-h-[220px]">
+                {filteredStudents.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400">
+                    No students match current filter criteria.
+                  </div>
+                ) : (
+                  filteredStudents.map((student) => {
+                    const isAssigned = student.batchId === selectedBatchForStudents.id;
+                    const isOtherBatch = student.batchId && student.batchId !== selectedBatchForStudents.id;
+                    const isSelected = selectedStudentProfileIds.includes(student.id);
+                    const tsId = student.user?.tsIdentity?.tsId || 'TS-STUDENT';
+
+                    return (
+                      <div
+                        key={student.id}
+                        className={`p-3 flex items-center justify-between gap-3 transition-colors ${
+                          isSelected ? 'bg-violet-50/70' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {!isAssigned && (
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelectStudent(student.id)}
+                              className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 cursor-pointer"
+                            />
+                          )}
+
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-xs text-slate-900">
+                                {student.user?.name || 'Student'}
+                              </span>
+                              <span className="font-mono text-[10px] text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200 font-semibold">
+                                {tsId}
+                              </span>
+                              {isAssigned && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                                  In This Batch
+                                </span>
+                              )}
+                              {isOtherBatch && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] bg-slate-100 text-slate-600 border border-slate-200">
+                                  In Other Batch
+                                </span>
+                              )}
+                              {!student.batchId && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
+                                  Unassigned
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-[11px] text-slate-500 block font-sans">
+                              {student.user?.email} • Track: {student.track || 'Cyber Security'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isAssigned ? (
+                          <button
+                            disabled={loading}
+                            onClick={() => handleAssignStudent(student.id, null)}
+                            className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-mono font-semibold cursor-pointer transition-all active:scale-95"
+                          >
+                            Remove from Batch
+                          </button>
+                        ) : (
+                          <button
+                            disabled={loading}
+                            onClick={() =>
+                              handleAssignStudent(student.id, selectedBatchForStudents.id)
+                            }
+                            className="px-3 py-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 text-xs font-mono font-semibold cursor-pointer transition-all active:scale-95 flex items-center gap-1"
+                          >
+                            <Plus className="w-3 h-3 text-violet-600" />
+                            <span>{isOtherBatch ? 'Transfer' : 'Assign'}</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
             </div>
 

@@ -34,7 +34,7 @@ export function LearningStreakWidget({
             <div
               className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs transition-all ${
                 item.active
-                  ? 'bg-[#C6FF34] text-black font-bold shadow-[0_0_8px_rgba(198,255,52,0.3)]'
+                  ? 'bg-purple-600 text-white font-bold shadow-[0_0_10px_rgba(168,85,247,0.4)]'
                   : 'bg-white/[0.04] border border-white/[0.06] text-zinc-600'
               }`}
               title={item.date}

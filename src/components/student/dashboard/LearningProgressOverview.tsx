@@ -62,7 +62,7 @@ export function LearningProgressOverview({
                 cx="50"
                 cy="50"
                 r={radius}
-                className="text-[#C6FF34] transition-all duration-1000 ease-out"
+                className="text-purple-500 transition-all duration-1000 ease-out"
                 strokeWidth="8"
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
@@ -97,7 +97,7 @@ export function LearningProgressOverview({
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1 hover:border-white/[0.12] transition-colors">
             <div className="flex items-center justify-between text-zinc-400">
               <span className="text-[10px] font-mono uppercase tracking-wider">MODULES</span>
-              <Layers className="w-3.5 h-3.5 text-[#C6FF34]" />
+              <Layers className="w-3.5 h-3.5 text-purple-400" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold font-mono text-white">
@@ -111,7 +111,7 @@ export function LearningProgressOverview({
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1 hover:border-white/[0.12] transition-colors">
             <div className="flex items-center justify-between text-zinc-400">
               <span className="text-[10px] font-mono uppercase tracking-wider">ASSESSMENTS</span>
-              <Cpu className="w-3.5 h-3.5 text-emerald-400" />
+              <Cpu className="w-3.5 h-3.5 text-purple-300" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold font-mono text-white">
@@ -125,7 +125,7 @@ export function LearningProgressOverview({
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1 hover:border-white/[0.12] transition-colors">
             <div className="flex items-center justify-between text-zinc-400">
               <span className="text-[10px] font-mono uppercase tracking-wider">LEARNING TIME</span>
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <Clock className="w-3.5 h-3.5 text-purple-400" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold font-mono text-white">{totalHours}</span>
@@ -137,7 +137,7 @@ export function LearningProgressOverview({
           <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1 hover:border-white/[0.12] transition-colors">
             <div className="flex items-center justify-between text-zinc-400">
               <span className="text-[10px] font-mono uppercase tracking-wider">ACTIVE COURSES</span>
-              <BookOpen className="w-3.5 h-3.5 text-[#C6FF34]" />
+              <BookOpen className="w-3.5 h-3.5 text-purple-400" />
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-xl font-bold font-mono text-white">

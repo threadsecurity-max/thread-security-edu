@@ -37,7 +37,7 @@ export function StudentStatusCard({
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#C6FF34]/20 via-white/10 to-[#C6FF34]/40 border border-[#C6FF34]/40 flex items-center justify-center text-white font-mono font-bold text-lg shadow-inner">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600/30 via-white/10 to-purple-600/50 border border-purple-500/40 flex items-center justify-center text-white font-mono font-bold text-lg shadow-inner">
               {student.avatarUrl ? (
                 <img
                   src={student.avatarUrl}
@@ -48,7 +48,7 @@ export function StudentStatusCard({
                 initial
               )}
             </div>
-            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#C6FF34] border-2 border-black" title="Verified Session" />
+            <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-purple-500 border-2 border-black" title="Verified Session" />
           </div>
 
           <div className="space-y-0.5">
@@ -66,8 +66,8 @@ export function StudentStatusCard({
           <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest block mb-0.5">
             AUTHENTICATED TS-ID
           </span>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#C6FF34]/10 border border-[#C6FF34]/30 text-[#C6FF34] font-mono font-bold text-xs shadow-[0_0_12px_rgba(198,255,52,0.12)]">
-            <ShieldCheck className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs shadow-[0_0_12px_rgba(168,85,247,0.15)]">
+            <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
             {student.tsId}
           </span>
         </div>
@@ -111,8 +111,8 @@ export function StudentStatusCard({
           <span className="text-[10px] font-mono uppercase text-zinc-500 tracking-wider block">
             OVERALL PROGRESS
           </span>
-          <span className="text-xs font-mono font-bold text-[#C6FF34] flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <span className="text-xs font-mono font-bold text-purple-400 flex items-center gap-1">
+            <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
             {overallProgressPercent}%
           </span>
         </div>

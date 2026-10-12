@@ -193,22 +193,35 @@ export function StudentProvisionForm({ initialSuggestedId }: StudentProvisionFor
 
           <div className="lg:col-span-1">
             <label className="block text-[11px] font-medium text-slate-600 mb-1.5">
-              Career Goal
+              Initial Password / Passkey
             </label>
             <input
               type="text"
-              name="careerGoal"
-              placeholder="SOC / VAPT / Cloud"
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-violet-500 focus:bg-white transition-colors"
+              name="tempPassword"
+              placeholder="Auto-generated if empty"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 font-mono text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-violet-500 focus:bg-white transition-colors"
             />
           </div>
         </div>
 
-        <div className="flex justify-end pt-1">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              name="dispatchEmail"
+              defaultChecked
+              value="true"
+              className="w-4 h-4 rounded text-violet-600 accent-violet-600 cursor-pointer"
+            />
+            <span className="font-medium">
+              Automatically dispatch welcome email with login credentials &amp; TS-ID to student inbox
+            </span>
+          </label>
+
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-xs active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-xs active:scale-95 transition-all cursor-pointer disabled:opacity-50"
           >
             {isPending ? (
               <RefreshCw className="w-4 h-4 animate-spin" />

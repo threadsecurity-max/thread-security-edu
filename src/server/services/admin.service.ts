@@ -1,6 +1,7 @@
 import { prisma } from '../database/prisma';
 import { logAuditEvent } from '../security/audit';
 import { generateTSID, generateDomainTSID, StudentTrack } from '@/lib/auth/ts-id';
+import { sendStudentOnboardingEmail, sendFacultyOnboardingEmail } from '../email/onboarding.service';
 
 /**
  * Calculates the next available TS-ID for a student based on existing IDs + 1.
@@ -36,6 +37,9 @@ export async function createStudentService({
   careerGoal,
   track = 'CYBER',
   customTsId,
+  batchId,
+  tempPassword,
+  dispatchEmail,
 }: {
   name: string;
   email: string;
@@ -43,6 +47,9 @@ export async function createStudentService({
   careerGoal?: string;
   track?: StudentTrack;
   customTsId?: string;
+  batchId?: string;
+  tempPassword?: string;
+  dispatchEmail?: boolean;
 }) {
   const cleanEmail = email.trim().toLowerCase();
   const existing = await prisma.user.findUnique({
@@ -65,13 +72,18 @@ export async function createStudentService({
     }
   }
 
+  const generatedPassword = tempPassword?.trim() || `TSE-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: {
         email: cleanEmail,
         name: name.trim(),
-        passwordHash: 'MFA_OTP_ONLY',
+        passwordHash: generatedPassword,
         role: 'STUDENT',
+        isActive: true,
+        isDashboardAccessGranted: true,
+        dashboardAccessGrantedAt: new Date(),
       },
     });
 
@@ -86,6 +98,7 @@ export async function createStudentService({
       data: {
         userId: newUser.id,
         phone: phone?.trim() || null,
+        batchId: batchId || null,
         careerGoal: careerGoal?.trim() || (track === 'AI' ? 'Artificial Intelligence & Machine Learning' : 'Cybersecurity & VAPT Specialist'),
       },
     });
@@ -100,7 +113,96 @@ export async function createStudentService({
     details: `Created new student account for ${name} (${cleanEmail}, Track: ${track}, TS-ID: ${tsId}).`,
   });
 
-  return { user, tsId };
+  let emailDispatched = false;
+  if (dispatchEmail !== false) {
+    try {
+      let batchCode: string | undefined;
+      let courseTitle: string | undefined;
+      let mentorName: string | undefined;
+
+      if (batchId) {
+        const batch = await prisma.batch.findUnique({
+          where: { id: batchId },
+          include: { course: true, mentor: { include: { user: true } } },
+        });
+        if (batch) {
+          batchCode = batch.batchCode;
+          courseTitle = batch.course?.title;
+          mentorName = batch.mentor?.user?.name;
+        }
+      }
+
+      const emailRes = await sendStudentOnboardingEmail({
+        toEmail: cleanEmail,
+        studentName: name.trim(),
+        tsId,
+        tempPassword: generatedPassword,
+        batchCode,
+        courseTitle,
+        mentorName,
+      });
+      emailDispatched = emailRes.success;
+    } catch (emailErr) {
+      console.warn('[Student Onboarding Email Warning]:', emailErr);
+    }
+  }
+
+  return { user, tsId, emailDispatched };
+}
+
+export async function dispatchStudentCredentialsService(userId: string, customPassword?: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      tsIdentity: true,
+      studentProfile: {
+        include: {
+          batch: {
+            include: {
+              course: true,
+              mentor: { include: { user: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!user || user.role !== 'STUDENT') {
+    throw new Error('Student account not found.');
+  }
+
+  const tsId = user.tsIdentity?.tsId || 'TS-STUDENT';
+  const tempPassword = customPassword?.trim() || `TSE-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      passwordHash: tempPassword,
+      isDashboardAccessGranted: true,
+      isActive: true,
+    },
+  });
+
+  const batch = user.studentProfile?.batch;
+  const emailRes = await sendStudentOnboardingEmail({
+    toEmail: user.email,
+    studentName: user.name,
+    tsId,
+    tempPassword,
+    batchCode: batch?.batchCode,
+    courseTitle: batch?.course?.title,
+    mentorName: batch?.mentor?.user?.name,
+  });
+
+  await logAuditEvent({
+    action: 'STUDENT_CREDENTIALS_DISPATCHED',
+    entity: 'USER',
+    entityId: user.id,
+    details: `Dispatched login credentials email to student ${user.name} (${user.email}, TS-ID: ${tsId}).`,
+  });
+
+  return { success: true, email: user.email, tsId, emailResult: emailRes };
 }
 
 export async function reassignStudentTrackService(userId: string, track: StudentTrack) {
@@ -348,6 +450,11 @@ export async function createMentorService({
   expertise,
   bio,
   batchId,
+  batchIds,
+  courseIds,
+  schedule,
+  passkey,
+  dispatchEmail,
 }: {
   name: string;
   email: string;
@@ -356,6 +463,11 @@ export async function createMentorService({
   expertise: string;
   bio: string;
   batchId?: string;
+  batchIds?: string[];
+  courseIds?: string[];
+  schedule?: string;
+  passkey?: string;
+  dispatchEmail?: boolean;
 }) {
   const cleanEmail = email.toLowerCase().trim();
   const existing = await prisma.user.findUnique({
@@ -368,13 +480,14 @@ export async function createMentorService({
 
   const mentorId = generateMentorTSID();
   const inviteToken = `tse-inv-${randomBytes(16).toString('hex')}`;
+  const facultyPasskey = passkey?.trim() || `TSE-MNT-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
 
   const result = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
         email: cleanEmail,
         name: name.trim(),
-        passwordHash: 'MFA_OTP_ONLY',
+        passwordHash: facultyPasskey,
         role: 'MENTOR',
         isActive: true,
         isDashboardAccessGranted: true,
@@ -389,6 +502,7 @@ export async function createMentorService({
         company: company.trim(),
         expertise: expertise.trim(),
         bio: bio.trim(),
+        officeHours: schedule?.trim() || null,
       },
     });
 
@@ -401,7 +515,6 @@ export async function createMentorService({
         },
       });
     } catch {
-      // Fallback to TSIdentity if mentorIdentity not yet migrated
       await tx.tSIdentity.create({
         data: {
           tsId: mentorId,
@@ -410,7 +523,6 @@ export async function createMentorService({
       });
     }
 
-    // Create an Invitation Token record
     try {
       await (tx as any).invitationToken.create({
         data: {
@@ -418,7 +530,7 @@ export async function createMentorService({
           email: cleanEmail,
           role: 'MENTOR',
           targetId: user.id,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
       });
     } catch {}
@@ -426,14 +538,46 @@ export async function createMentorService({
     return { user, mentor, mentorId, inviteToken };
   });
 
-  if (batchId) {
+  // Assign Batches to Mentor
+  const targetBatchIds = new Set<string>();
+  if (batchId) targetBatchIds.add(batchId);
+  if (batchIds && Array.isArray(batchIds)) {
+    batchIds.forEach((b) => b && targetBatchIds.add(b));
+  }
+
+  const assignedBatchCodes: string[] = [];
+  if (targetBatchIds.size > 0) {
+    const ids = Array.from(targetBatchIds);
     try {
-      await prisma.batch.update({
-        where: { id: batchId },
+      await prisma.batch.updateMany({
+        where: { id: { in: ids } },
         data: { mentorId: result.mentor.id },
       });
+      const bList = await prisma.batch.findMany({
+        where: { id: { in: ids } },
+        select: { batchCode: true },
+      });
+      assignedBatchCodes.push(...bList.map((b) => b.batchCode));
     } catch (e) {
-      console.warn('Failed to assign batch during mentor provision:', e);
+      console.warn('Failed to assign batches during mentor provision:', e);
+    }
+  }
+
+  // Assign Courses to Mentor
+  const assignedCourseTitles: string[] = [];
+  if (courseIds && Array.isArray(courseIds) && courseIds.length > 0) {
+    try {
+      await prisma.course.updateMany({
+        where: { id: { in: courseIds } },
+        data: { mentorId: result.mentor.id },
+      });
+      const cList = await prisma.course.findMany({
+        where: { id: { in: courseIds } },
+        select: { title: true },
+      });
+      assignedCourseTitles.push(...cList.map((c) => c.title));
+    } catch (e) {
+      console.warn('Failed to assign courses during mentor provision:', e);
     }
   }
 
@@ -441,10 +585,79 @@ export async function createMentorService({
     action: 'MENTOR_CREATED',
     entity: 'MENTOR_PROFILE',
     entityId: result.mentor.id,
-    details: `Created mentor ${name} (${cleanEmail}, Mentor ID: ${mentorId}).`,
+    details: `Created mentor ${name} (${cleanEmail}, Mentor ID: ${mentorId}, Batches: ${assignedBatchCodes.join(', ') || 'None'}).`,
   });
 
-  return result;
+  // Dispatch Welcome Credentials Email to Faculty
+  let emailDispatched = false;
+  if (dispatchEmail !== false) {
+    try {
+      const emailRes = await sendFacultyOnboardingEmail({
+        toEmail: cleanEmail,
+        facultyName: name.trim(),
+        mentorId,
+        tempPassword: facultyPasskey,
+        batches: assignedBatchCodes,
+        courses: assignedCourseTitles,
+        schedule: schedule?.trim(),
+      });
+      emailDispatched = emailRes.success;
+    } catch (emailErr) {
+      console.warn('[Faculty Onboarding Email Warning]:', emailErr);
+    }
+  }
+
+  return { ...result, emailDispatched };
+}
+
+export async function dispatchMentorCredentialsService(mentorProfileId: string, customPasskey?: string) {
+  const mentor = await prisma.mentorProfile.findUnique({
+    where: { id: mentorProfileId },
+    include: {
+      user: {
+        include: {
+          tsIdentity: true,
+        },
+      },
+      batches: { select: { batchCode: true } },
+      courses: { select: { title: true } },
+    },
+  });
+
+  if (!mentor || !mentor.user) {
+    throw new Error('Mentor profile not found.');
+  }
+
+  const mentorId = (mentor.user as any).mentorIdentity?.mentorId || mentor.user.tsIdentity?.tsId || 'TS-MNT-ACTIVE';
+  const facultyPasskey = customPasskey?.trim() || `TSE-MNT-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+
+  await prisma.user.update({
+    where: { id: mentor.userId },
+    data: {
+      passwordHash: facultyPasskey,
+      isDashboardAccessGranted: true,
+      isActive: true,
+    },
+  });
+
+  const emailRes = await sendFacultyOnboardingEmail({
+    toEmail: mentor.user.email,
+    facultyName: mentor.user.name,
+    mentorId,
+    tempPassword: facultyPasskey,
+    batches: mentor.batches.map((b) => b.batchCode),
+    courses: mentor.courses.map((c) => c.title),
+    schedule: mentor.officeHours || undefined,
+  });
+
+  await logAuditEvent({
+    action: 'MENTOR_CREDENTIALS_DISPATCHED',
+    entity: 'MENTOR_PROFILE',
+    entityId: mentor.id,
+    details: `Dispatched login credentials email to mentor ${mentor.user.name} (${mentor.user.email}, Mentor ID: ${mentorId}).`,
+  });
+
+  return { success: true, email: mentor.user.email, mentorId, emailResult: emailRes };
 }
 
 export async function assignBatchToMentorService(mentorProfileId: string, batchId: string) {

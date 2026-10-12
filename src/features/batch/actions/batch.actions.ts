@@ -380,4 +380,103 @@ export async function deleteBatchAction(batchId: string) {
   }
 }
 
+/**
+ * Super Admin or Academic Admin bulk-assigns multiple students to a batch (or unassigns if null)
+ */
+export async function bulkAssignStudentsToBatchAction(
+  studentProfileIds: string[],
+  batchId: string | null
+) {
+  const session = await getSession();
+  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    return { success: false, error: 'Unauthorized.' };
+  }
+
+  if (!studentProfileIds || studentProfileIds.length === 0) {
+    return { success: false, error: 'No students selected.' };
+  }
+
+  try {
+    const { prisma } = await import('@/server/database/prisma');
+
+    await prisma.studentProfile.updateMany({
+      where: { id: { in: studentProfileIds } },
+      data: { batchId: batchId || null },
+    });
+
+    // Also link enrolled course if batch has a course
+    if (batchId) {
+      const targetBatch = await prisma.batch.findUnique({
+        where: { id: batchId },
+        select: { courseId: true },
+      });
+
+      if (targetBatch?.courseId) {
+        const studentProfiles = await prisma.studentProfile.findMany({
+          where: { id: { in: studentProfileIds } },
+          select: { userId: true },
+        });
+
+        for (const sp of studentProfiles) {
+          try {
+            await (prisma as any).enrollment.upsert({
+              where: {
+                userId_courseId: {
+                  userId: sp.userId,
+                  courseId: targetBatch.courseId,
+                },
+              },
+              update: { status: 'ACTIVE' },
+              create: {
+                userId: sp.userId,
+                courseId: targetBatch.courseId,
+                progressPercent: 0,
+                status: 'ACTIVE',
+              },
+            });
+          } catch {}
+        }
+      }
+    }
+
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin/students');
+    revalidatePath('/mentor');
+    revalidatePath('/student');
+    return { success: true, count: studentProfileIds.length };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to bulk assign students.' };
+  }
+}
+
+/**
+ * Super Admin or Academic Admin assigns or updates the faculty mentor for a batch
+ */
+export async function assignBatchMentorAction(batchId: string, mentorId: string | null) {
+  const session = await getSession();
+  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    return { success: false, error: 'Unauthorized.' };
+  }
+
+  try {
+    const { prisma } = await import('@/server/database/prisma');
+    const updated = await prisma.batch.update({
+      where: { id: batchId },
+      data: { mentorId: mentorId || null },
+      include: {
+        mentor: { include: { user: true } },
+      },
+    });
+
+    revalidatePath('/admin/batches');
+    revalidatePath('/admin/mentors');
+    revalidatePath('/admin/timetable');
+    revalidatePath('/mentor');
+    return { success: true, batch: updated };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to assign mentor to batch.' };
+  }
+}
+
+
 

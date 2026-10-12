@@ -95,13 +95,13 @@ export function StudentAnnouncementModal({
       />
 
       {/* Dialog Box */}
-      <div className="relative w-full max-w-lg bg-[#0a0c10] border border-[#C6FF34]/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(198,255,52,0.15)] z-10 space-y-5 text-xs font-mono text-white">
+      <div className="relative w-full max-w-lg bg-[#0a0c10] border border-purple-500/40 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(168,85,247,0.18)] z-10 space-y-5 text-xs font-mono text-white">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-white/10 pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
                 FACULTY BROADCAST // ACADEMIC COHORT
               </span>
             </div>
@@ -128,8 +128,8 @@ export function StudentAnnouncementModal({
 
         {/* Acknowledgement Message Input */}
         <div className="space-y-2 p-4 rounded-2xl bg-white/[0.02] border border-white/10">
-          <label className="text-[11px] font-bold text-[#C6FF34] uppercase tracking-wider flex items-center gap-1.5">
-            <MessageSquare className="w-3.5 h-3.5" />
+          <label className="text-[11px] font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+            <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
             Send Acknowledgement to Faculty Mentor:
           </label>
           <textarea
@@ -137,7 +137,7 @@ export function StudentAnnouncementModal({
             value={ackMessage}
             onChange={(e) => setAckMessage(e.target.value)}
             placeholder="Type your confirmation note to faculty..."
-            className="w-full px-3 py-2 rounded-xl bg-black border border-white/20 text-zinc-200 text-xs font-mono placeholder:text-zinc-600 focus:outline-none focus:border-[#C6FF34]"
+            className="w-full px-3 py-2 rounded-xl bg-black border border-white/20 text-zinc-200 text-xs font-mono placeholder:text-zinc-600 focus:outline-none focus:border-purple-500"
           />
         </div>
 
@@ -163,7 +163,7 @@ export function StudentAnnouncementModal({
             type="button"
             disabled={submitting}
             onClick={handleAcknowledge}
-            className="px-6 py-3 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-[0_2px_16px_rgba(198,255,52,0.25)] transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+            className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs flex items-center justify-center gap-2 shadow-[0_2px_16px_rgba(168,85,247,0.3)] transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
           >
             {submitting ? (
               <span>Notifying Mentor...</span>

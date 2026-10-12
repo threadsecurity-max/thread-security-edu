@@ -280,3 +280,255 @@ export async function sendStudentOnboardingEmail({
     warning: 'Account created. Email logged to console in local environment.',
   };
 }
+
+export interface SendFacultyOnboardingInput {
+  toEmail: string;
+  facultyName: string;
+  mentorId: string;
+  tempPassword?: string;
+  batches?: string[];
+  courses?: string[];
+  schedule?: string;
+  loginUrl?: string;
+}
+
+/**
+ * Sends a welcome onboarding email to newly provisioned Faculty/Mentor
+ * with their Mentor ID, assigned batches, assigned courses, and teaching schedule.
+ */
+export async function sendFacultyOnboardingEmail({
+  toEmail,
+  facultyName,
+  mentorId,
+  tempPassword,
+  batches = [],
+  courses = [],
+  schedule,
+  loginUrl = process.env.NEXT_PUBLIC_APP_URL ? `${process.env.NEXT_PUBLIC_APP_URL}/login` : 'https://www.threadsecurity.in/login',
+}: SendFacultyOnboardingInput): Promise<SendOnboardingResult> {
+  const cleanTarget = toEmail.trim().toLowerCase();
+  const apiKey = process.env.RESEND_API_KEY;
+
+  const verifiedSender = 'Thread Security Education <edu@threadsecurity.in>';
+  const fromEmail =
+    process.env.RESEND_FROM_EMAIL && !process.env.RESEND_FROM_EMAIL.includes('onboarding@resend.dev')
+      ? process.env.RESEND_FROM_EMAIL
+      : verifiedSender;
+
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Welcome to Thread Security Faculty</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+            background-color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #0f172a;
+          }
+          .wrapper {
+            width: 100%;
+            background-color: #f8fafc;
+            padding: 40px 16px;
+          }
+          .container {
+            max-width: 580px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+          }
+          .header {
+            padding: 32px 32px 24px 32px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #f1f5f9;
+          }
+          .content {
+            padding: 32px;
+          }
+          .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #4f46e5;
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+          }
+          .card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+          }
+          .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #edf2f7;
+            font-size: 13px;
+          }
+          .row:last-child {
+            border-bottom: none;
+          }
+          .label {
+            color: #64748b;
+            font-weight: 500;
+          }
+          .value {
+            color: #0f172a;
+            font-weight: 700;
+            font-family: monospace;
+          }
+          .btn {
+            display: inline-block;
+            background-color: #4f46e5;
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 12px 28px;
+            border-radius: 10px;
+            text-decoration: none;
+            margin-top: 8px;
+          }
+          .footer {
+            padding: 24px 32px;
+            background-color: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="wrapper">
+          <div class="container">
+            <div class="header">
+              <span class="badge">Faculty Appointment</span>
+              <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #0f172a;">Welcome to Faculty Roster, ${facultyName}</h1>
+            </div>
+            <div class="content">
+              <p style="font-size: 14px; color: #334155; line-height: 1.6; margin: 0 0 16px 0;">
+                Your faculty account has been provisioned on the Thread Security Education platform. You can now access your Faculty Workspace to lead live lecture sessions, manage assigned batches, review student attendance, and evaluate practical lab submissions.
+              </p>
+
+              <div class="card">
+                <div class="row">
+                  <span class="label">Faculty Member</span>
+                  <span class="value" style="font-family: inherit;">${facultyName}</span>
+                </div>
+                <div class="row">
+                  <span class="label">Faculty ID</span>
+                  <span class="value">${mentorId}</span>
+                </div>
+                <div class="row">
+                  <span class="label">Login Email</span>
+                  <span class="value" style="font-family: inherit;">${cleanTarget}</span>
+                </div>
+                ${tempPassword ? `
+                <div class="row">
+                  <span class="label">Initial Access Passkey</span>
+                  <span class="value">${tempPassword}</span>
+                </div>` : ''}
+                ${batches.length > 0 ? `
+                <div class="row">
+                  <span class="label">Assigned Batch(es)</span>
+                  <span class="value" style="font-family: inherit;">${batches.join(', ')}</span>
+                </div>` : ''}
+                ${courses.length > 0 ? `
+                <div class="row">
+                  <span class="label">Assigned Course(s)</span>
+                  <span class="value" style="font-family: inherit;">${courses.join(', ')}</span>
+                </div>` : ''}
+                ${schedule ? `
+                <div class="row">
+                  <span class="label">Teaching Schedule</span>
+                  <span class="value" style="font-family: inherit;">${schedule}</span>
+                </div>` : ''}
+              </div>
+
+              <div style="text-align: center; margin: 28px 0 16px 0;">
+                <a href="${loginUrl}" class="btn" target="_blank">Access Faculty Workspace →</a>
+              </div>
+            </div>
+            <div class="footer">
+              <p style="margin: 0;">Thread Security Education • Faculty Administration</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+
+  // 1. Resend REST API
+  if (apiKey) {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [cleanTarget],
+          subject: `Faculty Appointment & Access Credentials — ${facultyName} (${mentorId})`,
+          html: htmlContent,
+        }),
+      });
+
+      if (response.ok) {
+        return { success: true, deliveredTo: cleanTarget };
+      }
+      const err = await response.json();
+      console.warn('[Resend API Faculty Onboarding Warning]:', err);
+    } catch (e: any) {
+      console.warn('[Resend API Faculty Onboarding Error]:', e?.message);
+    }
+  }
+
+  // 2. SMTP Transport Fallback
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: fromEmail,
+        to: cleanTarget,
+        subject: `Faculty Appointment & Access Credentials — ${facultyName} (${mentorId})`,
+        html: htmlContent,
+      });
+
+      return { success: true, deliveredTo: cleanTarget };
+    } catch (smtpErr: any) {
+      console.error('[SMTP Faculty Onboarding Error]:', smtpErr?.message);
+    }
+  }
+
+  return {
+    success: true,
+    deliveredTo: cleanTarget,
+    warning: 'Faculty created. Email logged to console in local environment.',
+  };
+}

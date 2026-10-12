@@ -21,7 +21,7 @@ export function StudentDashboardClient({ data }: StudentDashboardClientProps) {
   } = data;
 
   return (
-    <div className="space-y-8 font-sans selection:bg-[#C6FF34] selection:text-black max-w-7xl mx-auto">
+    <div className="space-y-8 font-sans selection:bg-purple-600 selection:text-white max-w-7xl mx-auto">
       {/* ── BROADCAST ANNOUNCEMENT MODAL ── */}
       <StudentAnnouncementModal announcements={announcements} />
 

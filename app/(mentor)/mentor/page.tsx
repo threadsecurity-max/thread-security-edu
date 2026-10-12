@@ -107,31 +107,31 @@ export default async function MentorDashboardPage() {
 
   return (
     <div className="space-y-8 text-white font-mono max-w-7xl mx-auto pb-12">
-      {/* ── 1. GREETING & COMMAND OVERVIEW HEADER (Rule #7) ── */}
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent border border-white/[0.08] backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* ── 1. GREETING & OVERVIEW HEADER ── */}
+      <div className="p-6 md:p-8 rounded-2xl bg-zinc-900/60 border border-white/[0.08] backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2 relative z-10">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C6FF34]/10 text-[#C6FF34] border border-[#C6FF34]/30 uppercase">
-              THREAD SECURITY COMMAND CENTER
+            <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-300 border border-purple-500/20 tracking-wide uppercase">
+              FACULTY PORTAL
             </span>
             <span className="text-xs text-zinc-400">
-              FACULTY OPERATIONAL CONSOLE
+              Thread Security
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white tracking-tight leading-tight">
-            Good afternoon, Mentor.
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight">
+            Welcome back{session?.name ? `, ${session.name.split(' ')[0]}` : ''}
           </h1>
 
           <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed font-sans">
-            Here&apos;s what&apos;s happening with your batches today. Manage active rosters, schedule hands-on labs, record student attendance, and evaluate security submissions.
+            Here is an overview of your active courses, scheduled lectures, and student submissions.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0 relative z-10">
           <Link href="/mentor/lectures?create=true">
-            <button className="px-4 py-2.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-bold text-xs flex items-center gap-2 shadow-[0_4px_16px_rgba(198,255,52,0.18)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer">
+            <button className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-[0_4px_16px_rgba(168,85,247,0.3)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer">
               <Clock className="w-4 h-4 stroke-[2.5]" />
               <span>Schedule Session</span>
             </button>
@@ -149,7 +149,7 @@ export default async function MentorDashboardPage() {
         <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between text-zinc-400 text-xs">
             <span>Students</span>
-            <Users className="w-3.5 h-3.5 text-[#C6FF34]" />
+            <Users className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <p className="text-2xl font-serif font-bold text-white">{totalStudentsCount}</p>
           <span className="text-[10px] text-zinc-500">Authorized Cohorts</span>
@@ -158,7 +158,7 @@ export default async function MentorDashboardPage() {
         <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between text-zinc-400 text-xs">
             <span>Active Batches</span>
-            <Layers className="w-3.5 h-3.5 text-sky-400" />
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <p className="text-2xl font-serif font-bold text-white">{batches.length}</p>
           <span className="text-[10px] text-zinc-500">Assigned Workspaces</span>
@@ -167,7 +167,7 @@ export default async function MentorDashboardPage() {
         <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between text-zinc-400 text-xs">
             <span>Today&apos;s Lectures</span>
-            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <Clock className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <p className="text-2xl font-serif font-bold text-white">{activeLecturesToShow.length}</p>
           <span className="text-[10px] text-zinc-500">Syllabus Delivery</span>
@@ -194,7 +194,7 @@ export default async function MentorDashboardPage() {
         <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between text-zinc-400 text-xs">
             <span>Upcoming Labs</span>
-            <Terminal className="w-3.5 h-3.5 text-[#C6FF34]" />
+            <Terminal className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <p className="text-2xl font-serif font-bold text-white">{allLabs.length}</p>
           <span className="text-[10px] text-zinc-500">Target Ranges</span>
@@ -203,42 +203,42 @@ export default async function MentorDashboardPage() {
         <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col justify-between space-y-2">
           <div className="flex items-center justify-between text-zinc-400 text-xs">
             <span>Assessments</span>
-            <Award className="w-3.5 h-3.5 text-emerald-400" />
+            <Award className="w-3.5 h-3.5 text-purple-400" />
           </div>
           <p className="text-2xl font-serif font-bold text-white">{assessments.length}</p>
           <span className="text-[10px] text-zinc-500">Theoretical Tests</span>
         </div>
       </div>
 
-      {/* ── 3. TODAY'S COMMAND CENTER (Rule #8) ── */}
+      {/* ── 3. TODAY'S SESSIONS ── */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#C6FF34]" />
-              <h2 className="text-lg font-serif font-bold text-white">
-                TODAY&apos;S COMMAND CENTER
+              <span className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
+              <h2 className="text-lg font-bold text-white">
+                Today&apos;s Schedule
               </h2>
             </div>
             <p className="text-xs text-zinc-400 font-sans">
-              Immediate operational schedule. Jump directly into live lectures, attendance, lab terminals, or tests.
+              Your live lectures, lab sessions, and classes scheduled for today.
             </p>
           </div>
 
           <Link href="/mentor/attendance">
-            <button className="text-xs text-[#C6FF34] hover:underline flex items-center gap-1 font-bold">
-              <span>Open Fast Attendance Ledger</span>
+            <button className="text-xs text-purple-400 hover:text-purple-300 hover:underline flex items-center gap-1 font-semibold">
+              <span>View Attendance</span>
               <ArrowRight className="w-3 h-3" />
             </button>
           </Link>
         </div>
 
         {activeLecturesToShow.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl space-y-3">
+          <div className="p-12 text-center rounded-2xl bg-white/[0.02] border border-white/[0.08] backdrop-blur-xl space-y-3">
             <Clock className="w-10 h-10 text-zinc-600 mx-auto" />
-            <h3 className="text-base font-serif font-bold text-white">No conduction scheduled today</h3>
+            <h3 className="text-base font-bold text-white">No sessions scheduled for today</h3>
             <p className="text-xs text-zinc-400 max-w-md mx-auto font-sans">
-              All batch lectures and labs are cleared. Schedule your next live module or inspect student submissions.
+              You have no active classes scheduled today. Schedule a lecture or review student submissions.
             </p>
           </div>
         ) : (
@@ -255,7 +255,7 @@ export default async function MentorDashboardPage() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
                           {batch?.batchCode || 'COHORT'}
                         </span>
                         <span className="text-xs text-zinc-400 flex items-center gap-1">
@@ -294,33 +294,33 @@ export default async function MentorDashboardPage() {
                     )}
                   </div>
 
-                  {/* Contextual Action Buttons (Rule #8) */}
+                  {/* Contextual Action Buttons */}
                   <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center gap-2">
                     <Link href={`/mentor/attendance?batchId=${sess.batchId}&sessionId=${sess.id}`}>
-                      <button className="px-3.5 py-1.5 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                      <button className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_2px_8px_rgba(168,85,247,0.25)] transition-all cursor-pointer">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>[Mark Attendance]</span>
+                        <span>Mark Attendance</span>
                       </button>
                     </Link>
 
                     <Link href="/mentor/lectures">
                       <button className="px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold transition-all border border-white/[0.1] flex items-center gap-1.5 cursor-pointer">
-                        <Video className="w-3.5 h-3.5 text-[#C6FF34]" />
-                        <span>[Open Lecture]</span>
+                        <Video className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Open Lecture</span>
                       </button>
                     </Link>
 
                     <Link href="/mentor/labs">
                       <button className="px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold transition-all border border-white/[0.1] flex items-center gap-1.5 cursor-pointer">
-                        <Terminal className="w-3.5 h-3.5 text-sky-400" />
-                        <span>[Open Lab]</span>
+                        <Terminal className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Open Lab</span>
                       </button>
                     </Link>
 
                     <Link href="/mentor/assignments">
                       <button className="px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-white text-xs font-bold transition-all border border-white/[0.1] flex items-center gap-1.5 cursor-pointer">
-                        <Award className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>[View Assessment]</span>
+                        <Award className="w-3.5 h-3.5 text-purple-400" />
+                        <span>View Assessment</span>
                       </button>
                     </Link>
                   </div>
@@ -336,7 +336,7 @@ export default async function MentorDashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
           <div>
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#C6FF34]" />
+              <Layers className="w-4 h-4 text-purple-400" />
               <h2 className="text-lg font-serif font-bold text-white">
                 My Assigned Batches ({batches.length})
               </h2>
