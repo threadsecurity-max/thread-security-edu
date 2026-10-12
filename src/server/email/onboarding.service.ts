@@ -159,48 +159,72 @@ export async function sendStudentOnboardingEmail({
             </div>
 
             <div class="content">
-              <div class="card">
-                <div class="row">
-                  <span class="label">Candidate TS-ID</span>
-                  <span class="value" style="color: #15803d;">${tsId}</span>
-                </div>
-                <div class="row">
-                  <span class="label">Login Email</span>
-                  <span class="value">${cleanTarget}</span>
-                </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin: 24px 0; overflow: hidden;">
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Candidate TS-ID
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #15803d; font-weight: 700; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right; font-family: monospace;">
+                    <span style="display: inline-block; background-color: #f0fdf4; color: #15803d; padding: 3px 10px; border-radius: 6px; border: 1px solid #bbf7d0;">${tsId}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Login Email
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${cleanTarget}
+                  </td>
+                </tr>
                 ${
                   tempPassword
-                    ? `<div class="row">
-                        <span class="label">Temporary Access Password</span>
-                        <span class="value" style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${tempPassword}</span>
-                      </div>`
+                    ? `<tr>
+                        <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                          Temporary Access Password
+                        </td>
+                        <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                          <span style="display: inline-block; background-color: #0f172a; color: #ffffff; padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700;">${tempPassword}</span>
+                        </td>
+                      </tr>`
                     : ''
                 }
                 ${
                   batchCode
-                    ? `<div class="row">
-                        <span class="label">Assigned Cohort Batch</span>
-                        <span class="value">${batchCode}</span>
-                      </div>`
+                    ? `<tr>
+                        <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                          Assigned Cohort Batch
+                        </td>
+                        <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 700; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right; font-family: monospace;">
+                          ${batchCode}
+                        </td>
+                      </tr>`
                     : ''
                 }
                 ${
                   courseTitle
-                    ? `<div class="row">
-                        <span class="label">Curriculum Track</span>
-                        <span class="value" style="font-family: inherit;">${courseTitle}</span>
-                      </div>`
+                    ? `<tr>
+                        <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                          Curriculum Track
+                        </td>
+                        <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                          ${courseTitle}
+                        </td>
+                      </tr>`
                     : ''
                 }
                 ${
                   mentorName
-                    ? `<div class="row">
-                        <span class="label">Faculty Lead</span>
-                        <span class="value" style="font-family: inherit;">${mentorName}</span>
-                      </div>`
+                    ? `<tr>
+                        <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; text-align: left;">
+                          Faculty Lead
+                        </td>
+                        <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; text-align: right;">
+                          ${mentorName}
+                        </td>
+                      </tr>`
                     : ''
                 }
-              </div>
+              </table>
 
               <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 20px 0;">
                 You can log in to access your practical cyber sandboxes, live lectures, assignments, and verified certifications. You may log in directly with your email or TS-ID using secure OTP or your temporary password.
@@ -425,40 +449,76 @@ export async function sendFacultyOnboardingEmail({
                 Your faculty account has been provisioned on the Thread Security Education platform. You can now access your Faculty Workspace to lead live lecture sessions, manage assigned batches, review student attendance, and evaluate practical lab submissions.
               </p>
 
-              <div class="card">
-                <div class="row">
-                  <span class="label">Faculty Member</span>
-                  <span class="value" style="font-family: inherit;">${facultyName}</span>
-                </div>
-                <div class="row">
-                  <span class="label">Faculty ID</span>
-                  <span class="value">${mentorId}</span>
-                </div>
-                <div class="row">
-                  <span class="label">Login Email</span>
-                  <span class="value" style="font-family: inherit;">${cleanTarget}</span>
-                </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin: 24px 0; overflow: hidden;">
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Faculty Member
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 700; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${facultyName}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Faculty ID
+                  </td>
+                  <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    <span style="display: inline-block; background-color: #eef2ff; color: #4338ca; padding: 3px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; border: 1px solid #c7d2fe;">${mentorId}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Login Email
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #2563eb; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${cleanTarget}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Faculty Secret Key
+                  </td>
+                  <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    <span style="display: inline-block; background-color: #ede9fe; color: #5b21b6; padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; border: 1px solid #ddd6fe; letter-spacing: 0.05em;">${process.env.MENTOR_SECRET_KEY || 'TSE-MENTOR-78987'}</span>
+                  </td>
+                </tr>
                 ${tempPassword ? `
-                <div class="row">
-                  <span class="label">Initial Access Passkey</span>
-                  <span class="value">${tempPassword}</span>
-                </div>` : ''}
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Faculty Access Passkey
+                  </td>
+                  <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    <span style="display: inline-block; background-color: #1e1b4b; color: #ffffff; padding: 4px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; border: 1px solid #312e81; letter-spacing: 0.05em;">${tempPassword}</span>
+                  </td>
+                </tr>` : ''}
                 ${batches.length > 0 ? `
-                <div class="row">
-                  <span class="label">Assigned Batch(es)</span>
-                  <span class="value" style="font-family: inherit;">${batches.join(', ')}</span>
-                </div>` : ''}
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Assigned Batch(es)
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${batches.join(', ')}
+                  </td>
+                </tr>` : ''}
                 ${courses.length > 0 ? `
-                <div class="row">
-                  <span class="label">Assigned Course(s)</span>
-                  <span class="value" style="font-family: inherit;">${courses.join(', ')}</span>
-                </div>` : ''}
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Assigned Course(s)
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${courses.join(', ')}
+                  </td>
+                </tr>` : ''}
                 ${schedule ? `
-                <div class="row">
-                  <span class="label">Teaching Schedule</span>
-                  <span class="value" style="font-family: inherit;">${schedule}</span>
-                </div>` : ''}
-              </div>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; text-align: left;">
+                    Teaching Schedule
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; text-align: right;">
+                    ${schedule}
+                  </td>
+                </tr>` : ''}
+              </table>
 
               <div style="text-align: center; margin: 28px 0 16px 0;">
                 <a href="${loginUrl}" class="btn" target="_blank">Access Faculty Workspace →</a>
@@ -675,38 +735,66 @@ export async function sendStaffOrAdminOnboardingEmail({
                 Your account has been officially provisioned as <strong>${roleTitle}</strong> on the Thread Security Education platform. Please find your role-specific security credentials and access keys below.
               </p>
 
-              <div class="card">
-                <div class="row">
-                  <span class="label">Assigned Identity</span>
-                  <span class="value" style="font-family: inherit;">${name}</span>
-                </div>
-                <div class="row">
-                  <span class="label">Platform Role</span>
-                  <span class="value" style="color: #7c3aed;">${roleTitle}</span>
-                </div>
-                <div class="row">
-                  <span class="label">Account TS-ID</span>
-                  <span class="value">${tsId}</span>
-                </div>
-                <div class="row">
-                  <span class="label">Login Email</span>
-                  <span class="value" style="font-family: inherit;">${cleanTarget}</span>
-                </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; border-collapse: separate; border-spacing: 0; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; margin: 24px 0; overflow: hidden;">
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Assigned Identity
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 700; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${name}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Platform Role
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #7c3aed; font-weight: 700; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${roleTitle}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Account TS-ID
+                  </td>
+                  <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    <span style="display: inline-block; background-color: #ede9fe; color: #5b21b6; padding: 3px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; border: 1px solid #ddd6fe;">${tsId}</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Login Email
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #2563eb; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${cleanTarget}
+                  </td>
+                </tr>
                 ${department ? `
-                <div class="row">
-                  <span class="label">Department / Unit</span>
-                  <span class="value" style="font-family: inherit;">${department}</span>
-                </div>` : ''}
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Department / Unit
+                  </td>
+                  <td align="right" style="padding: 12px 16px; font-size: 13px; color: #0f172a; font-weight: 600; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    ${department}
+                  </td>
+                </tr>` : ''}
                 ${secretKey ? `
-                <div class="row">
-                  <span class="label">Assigned Secret Key</span>
-                  <span class="value" style="color: #0f172a; background-color: #ede9fe; padding: 2px 6px; border-radius: 4px;">${secretKey}</span>
-                </div>` : ''}
-                <div class="row">
-                  <span class="label">Security Access Key / Passkey</span>
-                  <span class="value" style="color: #0f172a; background-color: #ede9fe; padding: 2px 6px; border-radius: 4px;">${passkey}</span>
-                </div>
-              </div>
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: left;">
+                    Assigned Secret Key
+                  </td>
+                  <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; border-bottom: 1px solid #edf2f7; text-align: right;">
+                    <span style="display: inline-block; background-color: #ede9fe; color: #5b21b6; padding: 4px 10px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; border: 1px solid #ddd6fe; letter-spacing: 0.05em;">${secretKey}</span>
+                  </td>
+                </tr>` : ''}
+                <tr>
+                  <td style="padding: 12px 16px; font-size: 13px; color: #64748b; font-weight: 500; width: 42%; vertical-align: middle; text-align: left;">
+                    Security Access Key / Passkey
+                  </td>
+                  <td align="right" style="padding: 12px 16px; width: 58%; vertical-align: middle; text-align: right;">
+                    <span style="display: inline-block; background-color: #1e1b4b; color: #ffffff; padding: 4px 12px; border-radius: 6px; font-family: monospace; font-size: 12px; font-weight: 700; border: 1px solid #312e81; letter-spacing: 0.05em;">${passkey}</span>
+                  </td>
+                </tr>
+              </table>
 
               <div style="background-color: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 12px 16px; margin: 20px 0;">
                 <p style="margin: 0; font-size: 12px; color: #92400e; font-weight: 500;">

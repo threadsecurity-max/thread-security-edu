@@ -97,6 +97,14 @@ export default async function AdminUsersDirectoryPage() {
         metrics={metrics}
         batches={batches}
         currentUserId={session.userId}
+        defaultEnvKeys={{
+          adminSecretKey: process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080',
+          adminPasskey: process.env.ADMIN_PASSKEY || 'ThreadSec@789',
+          mentorSecretKey: process.env.MENTOR_SECRET_KEY || 'TSE-MENTOR-78987',
+          mentorPasskey: process.env.MENTOR_PASSKEY || 'MentorThreadSec@525',
+          securityAdminSecretKey: process.env.SECURITY_ADMIN_SECRET_KEY || 'TSE-SEC-ADMIN-789',
+          securityAdminPasskey: process.env.SECURITY_ADMIN_PASSKEY || 'ThreadSec@789789789',
+        }}
       />
     </div>
   );

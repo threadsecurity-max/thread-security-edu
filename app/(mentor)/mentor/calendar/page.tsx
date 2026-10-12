@@ -1,7 +1,6 @@
 import { getSession } from '@/lib/auth/session';
 import { getMentorCalendarService, getMentorBatchesService } from '@/server/services/batch.service';
 import { CalendarClient } from './calendar-client';
-import { Badge } from '@/components/ui/badge';
 import { Calendar as CalendarIcon } from 'lucide-react';
 
 export const revalidate = 0;
@@ -21,21 +20,19 @@ export default async function MentorCalendarPage() {
   });
 
   return (
-    <div className="space-y-6 text-slate-100 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] border border-[#C6FF34]/30 font-mono text-[10px]">
-              SCHEDULE CONDUCTION TIMELINE
-            </Badge>
+    <div className="space-y-6 text-slate-900 font-sans max-w-7xl mx-auto">
+      {/* Header Banner */}
+      <div className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+            <CalendarIcon className="w-3.5 h-3.5" />
+            Faculty Schedule & Cohorts
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-white font-mono tracking-tight flex items-center gap-2.5 mt-1">
-            <CalendarIcon className="w-7 h-7 text-[#C6FF34]" />
-            Faculty Academic Calendar
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            Academic Calendar & Timetable
           </h1>
-          <p className="text-xs md:text-sm text-slate-400 font-mono">
-            Unified chronological schedule of lecture sessions, attendance locking deadlines, and curriculum deliveries across your assigned cohorts.
+          <p className="text-sm text-slate-500">
+            View upcoming lecture sessions, cohort class timings, and attendance completion windows across your assigned batches.
           </p>
         </div>
       </div>

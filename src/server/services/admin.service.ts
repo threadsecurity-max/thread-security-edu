@@ -972,17 +972,17 @@ export async function createUserService({
   let resolvedSecretKey = secretKey?.trim();
 
   if (role === 'SECURITY_ADMIN') {
-    resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TS-SEC-VAULT-2026';
-    resolvedPasskey = resolvedPasskey || `SEC-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TSE-SEC-ADMIN-789';
+    resolvedPasskey = resolvedPasskey || process.env.SECURITY_ADMIN_PASSKEY || 'ThreadSec@789789789';
   } else if (role === 'ACADEMIC_ADMIN' || role === 'CONTENT_MANAGER') {
-    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-ADMIN-VAULT-2026';
-    resolvedPasskey = resolvedPasskey || `STF-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
+    resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
   } else if (role === 'SUPER_ADMIN') {
-    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-MASTER-ROOT-2026';
-    resolvedPasskey = resolvedPasskey || `ADM-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
+    resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
   } else if (role === 'MENTOR') {
-    resolvedSecretKey = resolvedSecretKey || process.env.MENTOR_SECRET_KEY || 'TS-MNT-2026-X9';
-    resolvedPasskey = resolvedPasskey || `MNT-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.MENTOR_SECRET_KEY || 'TSE-MENTOR-78987';
+    resolvedPasskey = resolvedPasskey || process.env.MENTOR_PASSKEY || 'MentorThreadSec@525';
   } else {
     // STUDENT or GUEST
     resolvedPasskey = resolvedPasskey || `TSE-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
@@ -999,7 +999,11 @@ export async function createUserService({
         isActive: true,
         isDashboardAccessGranted: true,
         dashboardAccessGrantedAt: new Date(),
-        approvedBy: actorId || 'Admin',
+        approvedBy: JSON.stringify({
+          actorId: actorId || 'Admin',
+          secretKey: resolvedSecretKey,
+          passkey: resolvedPasskey,
+        }),
       },
     });
 
@@ -1292,21 +1296,26 @@ export async function dispatchUserCredentialsService(
   // Staff / Security Admin / Super Admin
   let resolvedSecretKey = customSecretKey?.trim();
   if (user.role === 'SECURITY_ADMIN') {
-    resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TS-SEC-VAULT-2026';
-    resolvedPasskey = resolvedPasskey || `SEC-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TSE-SEC-ADMIN-789';
+    resolvedPasskey = resolvedPasskey || process.env.SECURITY_ADMIN_PASSKEY || 'ThreadSec@789789789';
   } else if (user.role === 'SUPER_ADMIN') {
-    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-MASTER-ROOT-2026';
-    resolvedPasskey = resolvedPasskey || `ADM-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
+    resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
   } else {
     // ACADEMIC_ADMIN or CONTENT_MANAGER
-    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TS-ADMIN-VAULT-2026';
-    resolvedPasskey = resolvedPasskey || `STF-KEY-${Math.random().toString(36).substring(2, 8).toUpperCase()}!`;
+    resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
+    resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
   }
 
   await prisma.user.update({
     where: { id: userId },
     data: {
       passwordHash: resolvedPasskey,
+      approvedBy: JSON.stringify({
+        actorId: 'Admin',
+        secretKey: resolvedSecretKey,
+        passkey: resolvedPasskey,
+      }),
       isDashboardAccessGranted: true,
       isActive: true,
     },

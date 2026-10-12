@@ -50,6 +50,7 @@ function AuthContent() {
   const [maskedEmail, setMaskedEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [isSecAdminFlow, setIsSecAdminFlow] = useState(false);
+  const [isStaffFlow, setIsStaffFlow] = useState(false);
 
   // Sign Up States
   const [firstName, setFirstName] = useState('');
@@ -107,14 +108,22 @@ function AuthContent() {
       if (res.isSecurityAdminSecretKey) {
         setEnteredSecAdminKey(cleanInput);
         setIsSecAdminFlow(true);
+        setIsStaffFlow(false);
         setStep('SEC_ADMIN_PASSKEY');
       } else if (res.isMentor || res.isMentorSecretKey) {
-        setMentorSecretKey(cleanInput);
+        setMentorSecretKey(cleanInput.startsWith('TSE-') ? cleanInput : '');
+        setIsStaffFlow(false);
         setStep('MENTOR_CREDS');
+      } else if (res.isStaff) {
+        setIsStaffFlow(true);
+        setAdminSecretKey(cleanInput.startsWith('TSE-') ? cleanInput : '');
+        setStep('ADMIN_CREDS');
       } else if (res.isAdminSecretKey) {
+        setIsStaffFlow(false);
         setAdminSecretKey(cleanInput);
         setStep('ADMIN_CREDS');
       } else if (res.isAdmin) {
+        setIsStaffFlow(false);
         setStep('ADMIN_CREDS');
       } else {
         setStep('OTP');
@@ -596,15 +605,33 @@ function AuthContent() {
 
               {step === 'ADMIN_CREDS' && (
                 <form onSubmit={handleAdminCredsSubmit} className="space-y-4">
+                  {isStaffFlow ? (
+                    <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center gap-2.5">
+                      <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0" />
+                      <div>
+                        <p className="text-xs font-semibold text-purple-200">Staff Clearance Verification</p>
+                        <p className="text-[11px] text-purple-300/70">Academic Operations &amp; Staff Security Clearance</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-500/25 flex items-center gap-2.5">
+                      <Shield className="w-4 h-4 text-purple-400 shrink-0" />
+                      <div>
+                        <p className="text-xs font-semibold text-purple-200">Admin Clearance Verification</p>
+                        <p className="text-[11px] text-purple-300/70">Security &amp; Master Platform Operations</p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <label className="flex items-center gap-1.5 text-xs font-medium text-purple-200/90">
-                      <KeyRound className="w-3.5 h-3.5 text-purple-400" /> Admin Secret Key
+                      <KeyRound className="w-3.5 h-3.5 text-purple-400" /> {isStaffFlow ? 'Staff Secret Key' : 'Admin Secret Key'}
                     </label>
                     <Input
                       type="password"
                       value={adminSecretKey}
                       onChange={(e) => setAdminSecretKey(e.target.value)}
-                      placeholder="Secret Key"
+                      placeholder={isStaffFlow ? 'Enter Staff Secret Key (e.g. TSE-ADMIN-8080)' : 'Secret Key'}
                       className="h-11 bg-[#171032]/80 border-purple-500/25 text-white placeholder:text-purple-300/30 rounded-xl px-3.5 focus:border-purple-400 text-sm"
                       required
                       autoFocus
@@ -613,13 +640,13 @@ function AuthContent() {
 
                   <div className="space-y-2">
                     <label className="flex items-center gap-1.5 text-xs font-medium text-purple-200/90">
-                      <Lock className="w-3.5 h-3.5 text-purple-400" /> Admin Passkey
+                      <Lock className="w-3.5 h-3.5 text-purple-400" /> {isStaffFlow ? 'Staff Passkey' : 'Admin Passkey'}
                     </label>
                     <Input
                       type="password"
                       value={adminPasskey}
                       onChange={(e) => setAdminPasskey(e.target.value)}
-                      placeholder="Passkey"
+                      placeholder={isStaffFlow ? 'Enter Staff Passkey (e.g. ThreadSec@789)' : 'Passkey'}
                       className="h-11 bg-[#171032]/80 border-purple-500/25 text-white placeholder:text-purple-300/30 rounded-xl px-3.5 focus:border-purple-400 text-sm"
                       required
                     />
@@ -629,7 +656,10 @@ function AuthContent() {
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => setStep('IDENTIFIER')}
+                      onClick={() => {
+                        setStep('IDENTIFIER');
+                        setIsStaffFlow(false);
+                      }}
                       className="w-1/3 h-11 border-purple-500/30 bg-[#171032]/50 text-purple-200 hover:bg-purple-900/30 rounded-xl"
                     >
                       Back
@@ -639,7 +669,7 @@ function AuthContent() {
                       disabled={loading || isLockedOut}
                       className="w-2/3 h-11 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium rounded-xl shadow-[0_4px_20px_rgba(124,58,237,0.35)]"
                     >
-                      {loading ? 'Verifying...' : 'Verify Access'}
+                      {loading ? 'Verifying...' : isStaffFlow ? 'Verify Staff Clearance' : 'Verify Access'}
                     </Button>
                   </div>
                 </form>

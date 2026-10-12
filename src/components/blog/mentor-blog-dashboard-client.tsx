@@ -16,6 +16,7 @@ import {
   Loader2,
   FolderCheck,
   CheckCircle,
+  BookOpen,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -64,7 +65,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
       const res = await fetch('/api/mentor/blogs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'Untitled Cybersecurity Article' }),
+        body: JSON.stringify({ title: 'Untitled Article' }),
       });
       const data = await res.json();
       if (res.ok && data.blog?.id) {
@@ -77,7 +78,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
   };
 
   const handleDeleteBlog = async (blogId: string) => {
-    if (!confirm('Are you sure you want to delete this blog draft? This action cannot be undone.')) return;
+    if (!confirm('Are you sure you want to delete this article? This action cannot be undone.')) return;
     try {
       const res = await fetch(`/api/mentor/blogs/${blogId}`, { method: 'DELETE' });
       if (res.ok) {
@@ -95,63 +96,67 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
   const reviewCount = blogs.filter((b) => b.status === 'REVIEW').length;
 
   return (
-    <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto text-white">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/10">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#C6FF34] uppercase tracking-wider mb-1">
-            <Globe className="w-4 h-4" />
-            EDITORIAL PUBLISHING ENGINE
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto text-slate-900 font-sans">
+      {/* Header Banner */}
+      <div className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+            <Globe className="w-3.5 h-3.5" />
+            Faculty Articles & Research
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Mentor Blog Directory</h1>
-          <p className="text-xs text-slate-400 font-mono mt-1">
-            Author, structure, and publish technical cybersecurity research to the public TSE blog platform.
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            Technical Articles & Publications
+          </h1>
+          <p className="text-sm text-slate-500">
+            Author, review, and publish cybersecurity research guides and educational articles for the academy.
           </p>
         </div>
 
         <Button
           onClick={handleCreateNewBlog}
           disabled={creating}
-          className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-11 px-5 rounded-xl shadow-lg shadow-[#C6FF34]/10 shrink-0"
+          className="bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs h-10 px-5 rounded-xl shadow-xs transition-all active:scale-[0.99] cursor-pointer shrink-0"
         >
           {creating ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Provisioning Drive Workspace...
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Preparing Workspace...
             </>
           ) : (
             <>
-              <Plus className="w-4 h-4 mr-2" /> + Create New Article
+              <Plus className="w-4 h-4 mr-2" /> Write New Article
             </>
           )}
         </Button>
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-[#0e0e0e] border border-white/10 space-y-1">
-          <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Total Articles</span>
-          <p className="text-2xl font-black font-mono text-white">{totalCount}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
+            <BookOpen className="w-3.5 h-3.5 text-slate-400" /> Total Articles
+          </span>
+          <p className="text-2xl font-bold text-slate-900">{totalCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#0e0e0e] border border-emerald-500/20 space-y-1">
-          <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase flex items-center gap-1">
-            <CheckCircle className="w-3 h-3" /> Live Published
+        <div className="p-5 rounded-2xl bg-white border border-emerald-100 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-emerald-700 flex items-center gap-1.5">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Published Live
           </span>
-          <p className="text-2xl font-black font-mono text-emerald-400">{publishedCount}</p>
+          <p className="text-2xl font-bold text-emerald-600">{publishedCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#0e0e0e] border border-amber-500/20 space-y-1">
-          <span className="text-[10px] font-mono font-bold text-amber-400 uppercase flex items-center gap-1">
-            <Clock className="w-3 h-3" /> Working Drafts
+        <div className="p-5 rounded-2xl bg-white border border-amber-100 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-amber-700 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-amber-600" /> Working Drafts
           </span>
-          <p className="text-2xl font-black font-mono text-amber-400">{draftCount}</p>
+          <p className="text-2xl font-bold text-amber-600">{draftCount}</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#0e0e0e] border border-sky-500/20 space-y-1">
-          <span className="text-[10px] font-mono font-bold text-sky-400 uppercase flex items-center gap-1">
-            <FolderCheck className="w-3 h-3" /> Under Review
+        <div className="p-5 rounded-2xl bg-white border border-violet-100 shadow-xs space-y-1">
+          <span className="text-xs font-medium text-violet-700 flex items-center gap-1.5">
+            <FolderCheck className="w-3.5 h-3.5 text-violet-600" /> Under Review
           </span>
-          <p className="text-2xl font-black font-mono text-sky-400">{reviewCount}</p>
+          <p className="text-2xl font-bold text-violet-600">{reviewCount}</p>
         </div>
       </div>
 
@@ -163,20 +168,22 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
             placeholder="Search articles by title..."
-            className="pl-9 bg-[#121212] border-white/10 text-white text-xs font-mono focus:border-[#C6FF34]"
+            className="pl-9 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-[#121212] p-1 border border-white/10 rounded-xl w-full md:w-auto overflow-x-auto">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 border border-slate-200 rounded-xl w-full md:w-auto overflow-x-auto">
           {['ALL', 'DRAFT', 'REVIEW', 'PUBLISHED'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-                statusFilter === st ? 'bg-white text-black shadow-md' : 'text-slate-400 hover:text-white'
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                statusFilter === st
+                  ? 'bg-white text-violet-700 shadow-xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              {st}
+              {st === 'ALL' ? 'All Articles' : st.charAt(0) + st.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
@@ -184,23 +191,25 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
 
       {/* Articles Table / Grid */}
       {loading ? (
-        <div className="p-12 text-center text-slate-500 font-mono text-xs animate-pulse bg-[#0e0e0e] border border-white/10 rounded-2xl">
-          Loading mentor publication dashboard...
+        <div className="p-12 text-center text-slate-500 text-xs font-medium bg-white border border-slate-200 rounded-2xl shadow-xs animate-pulse">
+          Loading faculty articles...
         </div>
       ) : blogs.length === 0 ? (
-        <div className="p-12 text-center bg-[#0e0e0e] border border-white/10 rounded-2xl space-y-3">
-          <FileText className="w-10 h-10 text-slate-600 mx-auto" />
-          <h3 className="text-base font-bold text-white font-mono">No Blogs Found</h3>
-          <p className="text-xs text-slate-400 font-mono max-w-sm mx-auto">
-            You have no articles matching the criteria. Click "+ Create New Article" to launch the workspace.
+        <div className="p-12 text-center bg-white border border-slate-200 rounded-2xl shadow-xs space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center mx-auto">
+            <FileText className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-semibold text-slate-900">No Articles Found</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            No articles match the selected filter. Click "Write New Article" to start drafting a new piece.
           </p>
         </div>
       ) : (
-        <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs font-mono">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-[#141414] border-b border-white/10 text-slate-400 font-bold uppercase">
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold">
                   <th className="p-4">Article Title</th>
                   <th className="p-4">Category</th>
                   <th className="p-4">Status</th>
@@ -209,58 +218,73 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100">
                 {blogs.map((b) => (
-                  <tr key={b.id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-bold text-white max-w-xs truncate">
-                      <Link href={`/mentor/blogs/${b.id}/edit`} className="hover:text-[#C6FF34] transition-colors">
+                  <tr key={b.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="p-4 max-w-xs">
+                      <Link
+                        href={`/mentor/blogs/${b.id}/edit`}
+                        className="font-semibold text-slate-900 hover:text-violet-600 transition-colors block truncate"
+                      >
                         {b.title}
                       </Link>
-                      {b.subtitle && <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">{b.subtitle}</p>}
+                      {b.subtitle && (
+                        <p className="text-[11px] text-slate-500 font-normal truncate mt-0.5">{b.subtitle}</p>
+                      )}
                     </td>
 
                     <td className="p-4">
                       {b.category ? (
-                        <Badge className="bg-white/10 text-slate-300 font-normal border-none text-[10px]">
+                        <Badge className="bg-slate-100 text-slate-700 font-normal border-slate-200 text-[10px] rounded-md">
                           {b.category.name}
                         </Badge>
                       ) : (
-                        <span className="text-slate-500">—</span>
+                        <span className="text-slate-400">—</span>
                       )}
                     </td>
 
                     <td className="p-4">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                           b.status === 'PUBLISHED'
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : b.status === 'REVIEW'
-                            ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                            ? 'bg-violet-50 text-violet-700 border border-violet-200'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
                         }`}
                       >
                         {b.status}
                       </span>
                     </td>
 
-                    <td className="p-4 text-slate-400">{b.readingTime ? `${b.readingTime} min read` : '1 min read'}</td>
+                    <td className="p-4 text-slate-600">{b.readingTime ? `${b.readingTime} min read` : '1 min read'}</td>
 
-                    <td className="p-4 text-slate-400 font-bold flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 text-slate-500" />
-                      {b.viewCount || 0}
+                    <td className="p-4 text-slate-600 font-medium">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Eye className="w-3.5 h-3.5 text-slate-400" />
+                        {b.viewCount || 0}
+                      </span>
                     </td>
 
                     <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         <Link href={`/mentor/blogs/${b.id}/edit`}>
-                          <Button size="sm" variant="ghost" className="h-8 text-xs font-mono text-slate-300 hover:text-white hover:bg-white/10">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 text-xs font-medium text-slate-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg cursor-pointer"
+                          >
                             <Edit className="w-3.5 h-3.5 mr-1" /> Edit
                           </Button>
                         </Link>
 
                         {b.status === 'PUBLISHED' && (
                           <Link href={`/blog/${b.slug}`} target="_blank">
-                            <Button size="sm" variant="ghost" className="h-8 text-xs font-mono text-emerald-400 hover:bg-emerald-500/10">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded-lg cursor-pointer"
+                            >
                               <ExternalLink className="w-3.5 h-3.5 mr-1" /> View
                             </Button>
                           </Link>
@@ -270,7 +294,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteBlog(b.id)}
-                          className="h-8 text-xs font-mono text-rose-400 hover:bg-rose-500/10"
+                          className="h-8 text-xs font-medium text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>

@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       isAdmin: res.isAdmin,
+      isStaff: (res as any).isStaff || false,
+      userRole: (res as any).userRole || undefined,
       isAdminSecretKey: (res as any).isAdminSecretKey || false,
       isMentor: (res as any).isMentor || false,
       isMentorSecretKey: (res as any).isMentorSecretKey || false,
@@ -25,6 +27,7 @@ export async function POST(req: NextRequest) {
       email: res.email,
       tsId: res.tsId,
       warning: res.warning,
+      debugOtp: (res as any).debugOtp,
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Failed to send MFA verification code.';

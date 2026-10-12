@@ -512,17 +512,6 @@ export function MentorStudentDirectoryClient({
                     />
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-slate-600 block text-[11px]">Phone (Optional)</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-violet-500"
-                    />
-                  </div>
-
                   <div className="pt-2 flex justify-end">
                     <button
                       type="button"
@@ -538,6 +527,17 @@ export function MentorStudentDirectoryClient({
 
               {createStep === 2 && (
                 <div className="space-y-3 font-mono text-xs">
+                  <div className="space-y-1">
+                    <label className="text-slate-600 block text-[11px]">Phone Number (Optional)</label>
+                    <input
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-violet-500"
+                    />
+                  </div>
+
                   <div className="space-y-1">
                     <label className="text-slate-600 block text-[11px]">Select Cohort Batch *</label>
                     <select

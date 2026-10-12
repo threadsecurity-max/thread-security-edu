@@ -6,11 +6,18 @@ import { MentorVerifyClient } from '../verify/mentor-verify-client';
 
 export const revalidate = 0; // Fresh academic data on every load
 
-export default async function MentorAssignmentsPage() {
+export default async function MentorAssignmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ create?: string }>;
+}) {
   const session = await getSession();
   if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
     redirect('/login?error=UnauthorizedAccess');
   }
+
+  const params = await searchParams;
+  const showCreate = params?.create === 'true';
 
   // Mentor clearance check
   const hasClearance = await hasMentorClearance();
@@ -116,6 +123,7 @@ export default async function MentorAssignmentsPage() {
       initialAssignments={assignments}
       currentUserId={session.userId}
       userRole={session.role}
+      showCreateInitial={showCreate}
     />
   );
 }

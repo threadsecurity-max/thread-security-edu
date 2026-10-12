@@ -90,16 +90,16 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
   const weekDayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Calendar Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-white/5 border border-white/10 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 p-1 rounded-xl">
             <Button
               variant="ghost"
               size="sm"
               onClick={prevMonth}
-              className="h-8 w-8 p-0 text-slate-400 hover:text-white"
+              className="h-8 w-8 p-0 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
@@ -107,7 +107,7 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
               variant="ghost"
               size="sm"
               onClick={goToday}
-              className="h-8 px-2.5 text-xs font-mono text-slate-200 hover:text-white"
+              className="h-8 px-3 text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-white rounded-lg cursor-pointer"
             >
               Today
             </Button>
@@ -115,19 +115,19 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
               variant="ghost"
               size="sm"
               onClick={nextMonth}
-              className="h-8 w-8 p-0 text-slate-400 hover:text-white"
+              className="h-8 w-8 p-0 text-slate-600 hover:text-slate-900 hover:bg-white rounded-lg cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
 
-          <h2 className="text-xl font-bold text-white font-mono">
+          <h2 className="text-xl font-bold text-slate-900">
             {monthName} {year}
           </h2>
         </div>
 
         {/* Filter Badges */}
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto bg-slate-100 p-1 border border-slate-200 rounded-xl">
           {[
             { id: 'ALL', label: 'All Sessions' },
             { id: 'PENDING', label: 'Attendance Pending' },
@@ -137,10 +137,10 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
             <button
               key={f.id}
               onClick={() => setFilterType(f.id)}
-              className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
                 filterType === f.id
-                  ? 'bg-white text-black font-bold shadow-md'
-                  : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-white text-violet-700 font-semibold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {f.label}
@@ -150,9 +150,9 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
       </div>
 
       {/* Interactive Month Calendar Grid */}
-      <div className="rounded-3xl border border-white/10 bg-[#0a0a0a] overflow-hidden shadow-2xl p-4 sm:p-6">
+      <div className="rounded-2xl md:rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-xs p-4 sm:p-6">
         {/* Days of Week Header */}
-        <div className="grid grid-cols-7 gap-2 text-center text-xs font-mono font-bold text-slate-400 uppercase tracking-wider pb-3 border-b border-white/10">
+        <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider pb-3 border-b border-slate-200">
           {weekDayLabels.map((d) => (
             <div key={d} className="py-1">
               {d}
@@ -164,7 +164,7 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
         <div className="grid grid-cols-7 gap-1.5 sm:gap-2 pt-3">
           {/* Empty prefix cells */}
           {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-            <div key={`empty-${i}`} className="min-h-[90px] sm:min-h-[110px] p-2 rounded-2xl bg-white/[0.01]" />
+            <div key={`empty-${i}`} className="min-h-[90px] sm:min-h-[110px] p-2 rounded-xl bg-slate-50/50" />
           ))}
 
           {/* Month Days */}
@@ -179,24 +179,24 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
             return (
               <div
                 key={`day-${dayNum}`}
-                className={`min-h-[90px] sm:min-h-[110px] p-2 rounded-2xl border flex flex-col justify-between transition-colors ${
+                className={`min-h-[90px] sm:min-h-[110px] p-2 rounded-xl border flex flex-col justify-between transition-colors ${
                   isToday
-                    ? 'bg-[#C6FF34]/5 border-[#C6FF34]/40 shadow-inner'
-                    : 'bg-white/[0.02] border-white/5 hover:border-white/20'
+                    ? 'bg-violet-50/60 border-violet-300 ring-2 ring-violet-500/20 shadow-xs'
+                    : 'bg-white border-slate-100 hover:border-slate-300 hover:bg-slate-50/40'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span
-                    className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded-lg ${
+                    className={`text-xs font-semibold px-1.5 py-0.5 rounded-md ${
                       isToday
-                        ? 'bg-white text-black'
-                        : 'text-slate-300'
+                        ? 'bg-violet-600 text-white font-bold'
+                        : 'text-slate-700'
                     }`}
                   >
                     {dayNum}
                   </span>
                   {dayEvents.length > 0 && (
-                    <span className="text-[10px] font-mono text-[#C6FF34]">
+                    <span className="text-[10px] font-semibold text-violet-700">
                       {dayEvents.length} {dayEvents.length === 1 ? 'class' : 'classes'}
                     </span>
                   )}
@@ -208,10 +208,10 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
                     <button
                       key={ev.id}
                       onClick={() => setSelectedEvent(ev)}
-                      className="w-full text-left p-1 rounded bg-white/5 hover:bg-white/10 text-[10px] font-mono truncate block border border-white/5 transition-all cursor-pointer"
+                      className="w-full text-left p-1.5 rounded-lg bg-violet-50/70 hover:bg-violet-100 text-[11px] truncate block border border-violet-200/50 transition-all cursor-pointer group"
                     >
-                      <span className="text-[#C6FF34] font-bold">[{ev.batchCode}]</span>{' '}
-                      <span className="text-slate-200">{ev.title}</span>
+                      <span className="text-violet-700 font-semibold">[{ev.batchCode}]</span>{' '}
+                      <span className="text-slate-700 group-hover:text-slate-900 font-medium">{ev.title}</span>
                     </button>
                   ))}
                 </div>
@@ -224,35 +224,35 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
       {/* Event Details Dialog */}
       {selectedEvent && (
         <Dialog open={true} onOpenChange={() => setSelectedEvent(null)}>
-          <DialogContent className="max-w-md bg-[#0a0a0a] border border-white/20 text-white p-6 rounded-2xl shadow-2xl font-mono">
-            <DialogHeader className="border-b border-white/10 pb-3">
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 p-6 rounded-2xl md:rounded-3xl shadow-xl font-sans">
+            <DialogHeader className="border-b border-slate-100 pb-3">
               <div className="flex items-center justify-between">
-                <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] text-[10px]">
+                <Badge className="bg-violet-50 text-violet-700 border-violet-200 text-xs font-semibold">
                   {selectedEvent.batchCode}
                 </Badge>
                 <Badge
                   variant="outline"
-                  className={`text-[10px] ${
-                    selectedEvent.isLocked ? 'border-red-500/30 text-red-400' : 'border-emerald-500/30 text-emerald-400'
+                  className={`text-xs font-semibold ${
+                    selectedEvent.isLocked ? 'border-rose-200 bg-rose-50 text-rose-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'
                   }`}
                 >
-                  {selectedEvent.isLocked ? '🔒 Attendance Locked' : '● Editable Window'}
+                  {selectedEvent.isLocked ? '🔒 Attendance Locked' : '● Open for Attendance'}
                 </Badge>
               </div>
 
-              <DialogTitle className="text-base font-bold text-white mt-1">
+              <DialogTitle className="text-lg font-bold text-slate-900 mt-2">
                 {selectedEvent.title}
               </DialogTitle>
 
-              <p className="text-xs text-slate-400">
-                Batch: <strong className="text-white">{selectedEvent.batchTitle}</strong>
+              <p className="text-xs text-slate-500">
+                Batch: <strong className="text-slate-800">{selectedEvent.batchTitle}</strong>
               </p>
             </DialogHeader>
 
-            <div className="py-3 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-400">
+            <div className="py-3 space-y-2.5 text-xs">
+              <div className="flex justify-between text-slate-500">
                 <span>Date & Time:</span>
-                <strong className="text-white">
+                <strong className="text-slate-900 font-semibold">
                   {new Date(selectedEvent.date).toLocaleString([], {
                     weekday: 'short',
                     day: '2-digit',
@@ -263,28 +263,28 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
                 </strong>
               </div>
 
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-slate-500">
                 <span>Curriculum Module:</span>
-                <strong className="text-slate-200">{selectedEvent.moduleTitle}</strong>
+                <strong className="text-slate-800 font-semibold">{selectedEvent.moduleTitle}</strong>
               </div>
 
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-slate-500">
                 <span>Duration:</span>
-                <strong className="text-slate-200">{selectedEvent.durationMins} Minutes</strong>
+                <strong className="text-slate-800 font-semibold">{selectedEvent.durationMins} Minutes</strong>
               </div>
 
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-slate-500">
                 <span>Attendance Logged:</span>
-                <strong className={selectedEvent.isMarked ? 'text-emerald-400' : 'text-amber-400'}>
+                <strong className={selectedEvent.isMarked ? 'text-emerald-700 font-semibold' : 'text-amber-700 font-semibold'}>
                   {selectedEvent.isMarked ? `✓ Marked (${selectedEvent.presentCount} present)` : '● Unmarked'}
                 </strong>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+            <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
               <Link href={`/mentor/batches/${selectedEvent.batchId}`}>
-                <Button size="sm" variant="outline" className="border-white/15 text-xs text-slate-300">
-                  Open Batch <ExternalLink className="w-3 h-3 ml-1" />
+                <Button size="sm" variant="outline" className="border-slate-200 text-xs text-slate-700 hover:bg-slate-50 rounded-xl cursor-pointer">
+                  Open Batch <ExternalLink className="w-3.5 h-3.5 ml-1" />
                 </Button>
               </Link>
 
@@ -294,9 +294,9 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
                   setSelectedEventForAttendance(selectedEvent);
                   setSelectedEvent(null);
                 }}
-                className="bg-white hover:bg-slate-200 text-black text-xs font-bold gap-1.5 shadow-md"
+                className="bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium gap-1.5 shadow-xs rounded-xl cursor-pointer"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <CheckCircle2 className="w-3.5 h-3.5" />
                 Mark Attendance
               </Button>
             </div>
@@ -317,3 +317,4 @@ export function CalendarClient({ events, batchesMap }: CalendarClientProps) {
     </div>
   );
 }
+

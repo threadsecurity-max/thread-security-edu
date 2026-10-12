@@ -15,8 +15,9 @@ export default async function MentorNotificationsPage() {
   });
 
   return (
-    <div className="text-slate-100 max-w-5xl mx-auto">
+    <div className="space-y-6 text-slate-900 font-sans max-w-5xl mx-auto">
       <NotificationsClient initialNotifications={notifications} />
     </div>
   );
 }
+

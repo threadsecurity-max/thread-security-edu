@@ -238,15 +238,47 @@ export async function verifySecurityAdminCredentials(secretKey: string, passkey:
 }
 
 /**
- * Standard Admin Credentials Verification
+ * Extracts assigned secret key and passkey from user record (JSON in approvedBy or passwordHash format)
+ */
+export function getStoredUserCredentials(user: { passwordHash?: string | null; approvedBy?: string | null }) {
+  let assignedSecretKey: string | undefined;
+  let assignedPasskey: string | undefined = user.passwordHash || undefined;
+
+  if (user.approvedBy) {
+    try {
+      const parsed = JSON.parse(user.approvedBy);
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.secretKey) assignedSecretKey = String(parsed.secretKey).trim();
+        if (parsed.passkey) assignedPasskey = String(parsed.passkey).trim();
+      }
+    } catch {
+      if (user.approvedBy.startsWith('secKey:')) {
+        assignedSecretKey = user.approvedBy.replace('secKey:', '').split('|')[0].trim();
+      }
+    }
+  }
+
+  if (user.passwordHash && user.passwordHash.includes(':::')) {
+    const [p, s] = user.passwordHash.split(':::');
+    if (p) assignedPasskey = p.trim();
+    if (s && !assignedSecretKey) assignedSecretKey = s.trim();
+  }
+
+  return { assignedSecretKey, assignedPasskey };
+}
+
+/**
+ * Standard Admin & Staff Credentials Verification
  */
 export async function verifyAdminCredentials(emailOrTsId: string, secretKey: string, passkey: string) {
   const query = emailOrTsId.trim();
+  const cleanSecretKey = secretKey.trim();
+  const cleanPasskey = passkey.trim();
   await checkLockoutStatus(query);
 
   // Check if this is the Security Admin backdoor
-  if (verifySecurityAdminSecretKey(secretKey) && verifySecurityAdminPasskey(passkey)) {
-    return verifySecurityAdminCredentials(secretKey, passkey);
+  if (verifySecurityAdminSecretKey(cleanSecretKey) && verifySecurityAdminPasskey(cleanPasskey)) {
+    return verifySecurityAdminCredentials(cleanSecretKey, cleanPasskey);
   }
 
   const superAdminEmail = (process.env.FACULTY_NOTIFY_EMAIL || 'threadsecurity@gmail.com').trim().toLowerCase();
@@ -299,30 +331,50 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
 
   if (!user || !user.isActive) {
     await recordFailedAttempt(query);
-    throw new Error('No active administrator account found matching that Email Address or TS-ID.');
+    throw new Error('No active administrator or staff account found matching that Email Address or TS-ID.');
   }
 
   const isAdminRole =
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
+    (user.role as string) === 'CONTENT_MANAGER' ||
     (user.role as string) === 'SECURITY_ADMIN' ||
     user.email.toLowerCase() === 'threadsecurity@gmail.com' ||
     user.email.toLowerCase() === superAdminEmail;
 
   if (!isAdminRole) {
     await recordFailedAttempt(query);
-    throw new Error('Unauthorized: This account does not possess Administrative privileges.');
+    throw new Error('Unauthorized: This account does not possess Administrative or Staff privileges.');
   }
 
-  // Validate Admin Secret Key & Passkey using Salted Crypto Vault
-  if (!verifyGeneralAdminSecretKey(secretKey)) {
+  const isStaff = user.role === 'ACADEMIC_ADMIN' || (user.role as string) === 'CONTENT_MANAGER';
+  const roleLabel = isStaff ? 'Staff' : 'Admin';
+
+  const { assignedSecretKey, assignedPasskey } = getStoredUserCredentials(user);
+
+  // Validate Secret Key:
+  // Accept assigned key, or env ADMIN_SECRET_KEY, or SECURITY_ADMIN_SECRET_KEY
+  const isSecretKeyValid =
+    (assignedSecretKey && cleanSecretKey.toUpperCase() === assignedSecretKey.toUpperCase()) ||
+    verifyGeneralAdminSecretKey(cleanSecretKey) ||
+    verifySecurityAdminSecretKey(cleanSecretKey);
+
+  if (!isSecretKeyValid) {
     await recordFailedAttempt(query);
-    throw new Error('Invalid Admin Secret Key. Access denied.');
+    throw new Error(`Invalid ${roleLabel} Secret Key. Access denied.`);
   }
 
-  if (!verifyGeneralAdminPasskey(passkey)) {
+  // Validate Passkey:
+  // Accept assigned passkey, or user.passwordHash, or env ADMIN_PASSKEY, or SECURITY_ADMIN_PASSKEY
+  const isPasskeyValid =
+    (assignedPasskey && cleanPasskey === assignedPasskey) ||
+    cleanPasskey === user.passwordHash ||
+    verifyGeneralAdminPasskey(cleanPasskey) ||
+    verifySecurityAdminPasskey(cleanPasskey);
+
+  if (!isPasskeyValid) {
     await recordFailedAttempt(query);
-    throw new Error('Invalid Admin Passkey. Verification failed.');
+    throw new Error(`Invalid ${roleLabel} Passkey. Verification failed.`);
   }
 
   await resetFailedAttempts(query);
@@ -445,16 +497,31 @@ export async function verifyMentorCredentials(
     throw new Error('Unauthorized: This account does not possess Mentor Faculty privileges.');
   }
 
-  // Validate Mentor Secret Key against environment
-  if (!verifyMentorSecretKey(secretKey)) {
+  const { assignedSecretKey, assignedPasskey } = getStoredUserCredentials(user);
+  const cleanSecretKey = secretKey.trim();
+  const cleanPasskey = passkey.trim();
+
+  // Validate Mentor Secret Key:
+  const isSecretKeyValid =
+    (assignedSecretKey && cleanSecretKey.toUpperCase() === assignedSecretKey.toUpperCase()) ||
+    verifyMentorSecretKey(cleanSecretKey) ||
+    verifyGeneralAdminSecretKey(cleanSecretKey);
+
+  if (!isSecretKeyValid) {
     await recordFailedAttempt(query);
-    throw new Error('Invalid Mentor Faculty Secret Key.');
+    throw new Error('Invalid Mentor Faculty Secret Key. Access denied.');
   }
 
-  // Validate Mentor Passkey against environment
-  if (!verifyMentorPasskey(passkey)) {
+  // Validate Mentor Passkey:
+  const isPasskeyValid =
+    (assignedPasskey && cleanPasskey === assignedPasskey) ||
+    cleanPasskey === user.passwordHash ||
+    verifyMentorPasskey(cleanPasskey) ||
+    verifyGeneralAdminPasskey(cleanPasskey);
+
+  if (!isPasskeyValid) {
     await recordFailedAttempt(query);
-    throw new Error('Invalid Mentor Faculty Passkey.');
+    throw new Error('Invalid Mentor Faculty Passkey. Verification failed.');
   }
 
   await resetFailedAttempts(query);
@@ -617,9 +684,11 @@ export async function requestOtpService(emailOrTsId: string) {
     throw new Error('No active account found matching that Email Address or TS-ID.');
   }
 
+  const isStaff = user.role === 'ACADEMIC_ADMIN' || (user.role as string) === 'CONTENT_MANAGER';
   const isAdmin =
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
+    (user.role as string) === 'CONTENT_MANAGER' ||
     (user.role as string) === 'SECURITY_ADMIN' ||
     user.email.toLowerCase() === 'threadsecurity@gmail.com' ||
     user.email.toLowerCase() === superAdminEmail;
@@ -629,16 +698,18 @@ export async function requestOtpService(emailOrTsId: string) {
   const parts = user.email.split('@');
   const maskedEmail = `${parts[0][0]}***${parts[0].slice(-1)}@${parts[1]}`;
 
-  // IF ADMIN OR MENTOR: Return role challenge requirement WITHOUT sending OTP yet.
+  // IF ADMIN, STAFF, OR MENTOR: Return role challenge requirement WITHOUT sending OTP yet.
   // The single OTP will be dispatched in Step 2 after passkey verification.
-  if (isAdmin || isMentor) {
+  if (isAdmin || isMentor || isStaff) {
     return {
       success: true,
       isAdmin,
+      isStaff,
       isMentor,
+      userRole: user.role,
       maskedEmail,
       email: user.email,
-      tsId: user.tsIdentity?.tsId || (isAdmin ? 'TS-ADMIN' : 'TSE-MENTOR'),
+      tsId: user.tsIdentity?.tsId || (isStaff ? 'TS-STF-01' : isAdmin ? 'TS-ADMIN' : 'TSE-MENTOR'),
     };
   }
 
@@ -879,8 +950,8 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     };
   }
 
-  // Handle Super Admin / General Admin user provisioning & redirection
-  if (isGeneralAdmin || (user && (user.role === 'SUPER_ADMIN' || user.role === 'ACADEMIC_ADMIN'))) {
+  // Handle Super Admin / General Admin / Staff user provisioning & redirection
+  if (isGeneralAdmin || (user && (user.role === 'SUPER_ADMIN' || user.role === 'ACADEMIC_ADMIN' || (user.role as string) === 'CONTENT_MANAGER'))) {
     let adminUser: any = user || await prisma.user.findFirst({
       where: {
         OR: [
@@ -915,18 +986,18 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     const clientIp = await getClientIpAddress();
     await logAuditEvent({
       actorId: adminUser?.id,
-      action: 'ADMIN_LOGIN_SUCCESS',
+      action: adminUser.role === 'SUPER_ADMIN' ? 'ADMIN_LOGIN_SUCCESS' : 'STAFF_LOGIN_SUCCESS',
       entity: 'USER',
       entityId: adminUser?.id,
       ipAddress: clientIp,
-      details: 'Super Admin authenticated successfully via MFA OTP.',
+      details: `${adminUser.role} authenticated successfully via MFA OTP.`,
     });
 
     return {
       id: adminUser.id,
       email: adminUser.email,
       name: adminUser.name,
-      role: 'SUPER_ADMIN',
+      role: adminUser.role || 'SUPER_ADMIN',
       tsId: adminUser.tsIdentity?.tsId || 'TSE-ADMIN-8080',
       isDashboardAccessGranted: true,
       redirectTo: '/admin',

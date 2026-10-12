@@ -70,11 +70,21 @@ interface BatchOption {
   title: string;
 }
 
+export interface DefaultEnvKeys {
+  adminSecretKey: string;
+  adminPasskey: string;
+  mentorSecretKey: string;
+  mentorPasskey: string;
+  securityAdminSecretKey: string;
+  securityAdminPasskey: string;
+}
+
 interface UsersDirectoryClientProps {
   initialUsers: UserRecord[];
   metrics: UserMetrics;
   batches: BatchOption[];
   currentUserId: string;
+  defaultEnvKeys?: DefaultEnvKeys;
 }
 
 type TabType = 'ALL' | 'STUDENT' | 'MENTOR' | 'STAFF' | 'SECURITY_ADMIN' | 'SUPER_ADMIN';
@@ -84,6 +94,7 @@ export function UsersDirectoryClient({
   metrics,
   batches,
   currentUserId,
+  defaultEnvKeys,
 }: UsersDirectoryClientProps) {
   const [users, setUsers] = useState<UserRecord[]>(initialUsers);
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
@@ -163,8 +174,32 @@ export function UsersDirectoryClient({
     }
   };
 
+  // Role default keys matching .env configuration
+  const getDefaultKeysForRole = (targetRole: RoleType) => {
+    if (targetRole === 'ACADEMIC_ADMIN' || targetRole === 'CONTENT_MANAGER' || targetRole === 'SUPER_ADMIN') {
+      return {
+        secretKey: defaultEnvKeys?.adminSecretKey || 'TSE-ADMIN-8080',
+        passkey: defaultEnvKeys?.adminPasskey || 'ThreadSec@789',
+      };
+    }
+    if (targetRole === 'MENTOR') {
+      return {
+        secretKey: defaultEnvKeys?.mentorSecretKey || 'TSE-MENTOR-78987',
+        passkey: defaultEnvKeys?.mentorPasskey || 'MentorThreadSec@525',
+      };
+    }
+    if (targetRole === 'SECURITY_ADMIN') {
+      return {
+        secretKey: defaultEnvKeys?.securityAdminSecretKey || 'TSE-SEC-ADMIN-789',
+        passkey: defaultEnvKeys?.securityAdminPasskey || 'ThreadSec@789789789',
+      };
+    }
+    return { secretKey: '', passkey: '' };
+  };
+
   // Handle open create modal
   const handleOpenCreateModal = async (defaultRole: RoleType = 'STUDENT') => {
+    const keys = getDefaultKeysForRole(defaultRole);
     setCreateFormData({
       name: '',
       email: '',
@@ -174,8 +209,8 @@ export function UsersDirectoryClient({
       batchId: batches[0]?.id || '',
       track: 'CYBER',
       customTsId: '',
-      passkey: '',
-      secretKey: '',
+      passkey: keys.passkey,
+      secretKey: keys.secretKey,
       dispatchEmail: true,
     });
     setIsCreateModalOpen(true);
@@ -729,7 +764,13 @@ export function UsersDirectoryClient({
                         key={role}
                         onClick={async () => {
                           const r = role as RoleType;
-                          setCreateFormData((prev) => ({ ...prev, role: r }));
+                          const keys = getDefaultKeysForRole(r);
+                          setCreateFormData((prev) => ({
+                            ...prev,
+                            role: r,
+                            secretKey: keys.secretKey,
+                            passkey: keys.passkey,
+                          }));
                           await refreshSuggestedId(r);
                         }}
                         className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between gap-1 ${
@@ -847,27 +888,37 @@ export function UsersDirectoryClient({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div className="space-y-1">
-                      <label className="text-slate-700 font-medium text-[11px]">
-                        Assigned Secret Key
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-slate-700 font-medium text-[11px]">
+                          Assigned Secret Key
+                        </label>
+                        <span className="text-[10px] text-violet-600 font-mono">
+                          .env Default: {createFormData.role === 'MENTOR' ? (defaultEnvKeys?.mentorSecretKey || 'TSE-MENTOR-78987') : createFormData.role === 'SECURITY_ADMIN' ? (defaultEnvKeys?.securityAdminSecretKey || 'TSE-SEC-ADMIN-789') : (defaultEnvKeys?.adminSecretKey || 'TSE-ADMIN-8080')}
+                        </span>
+                      </div>
                       <input
                         type="text"
                         value={createFormData.secretKey}
                         onChange={(e) => setCreateFormData({ ...createFormData, secretKey: e.target.value })}
-                        placeholder="Leave empty for vault default"
+                        placeholder="e.g. TSE-ADMIN-8080 or custom key"
                         className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-violet-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-slate-700 font-medium text-[11px]">
-                        Assigned Access Key / Passkey
-                      </label>
+                      <div className="flex items-center justify-between">
+                        <label className="text-slate-700 font-medium text-[11px]">
+                          Assigned Access Key / Passkey
+                        </label>
+                        <span className="text-[10px] text-violet-600 font-mono">
+                          .env Default: {createFormData.role === 'MENTOR' ? (defaultEnvKeys?.mentorPasskey || 'MentorThreadSec@525') : createFormData.role === 'SECURITY_ADMIN' ? (defaultEnvKeys?.securityAdminPasskey || 'ThreadSec@789789789') : (defaultEnvKeys?.adminPasskey || 'ThreadSec@789')}
+                        </span>
+                      </div>
                       <input
                         type="text"
                         value={createFormData.passkey}
                         onChange={(e) => setCreateFormData({ ...createFormData, passkey: e.target.value })}
-                        placeholder="Auto-generated if left empty"
+                        placeholder="e.g. ThreadSec@789 or custom passkey"
                         className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-900 font-mono text-xs focus:outline-none focus:border-violet-500"
                       />
                     </div>

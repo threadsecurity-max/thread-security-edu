@@ -185,51 +185,50 @@ export function MentorAttendanceCenterClient({
   const fidelityRate = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 100;
 
   return (
-    <div className="space-y-6 text-white font-mono">
+    <div className="space-y-6 text-slate-900 font-sans">
       {/* Toast Alert */}
       {toastMessage && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-2xl text-xs flex items-center gap-2 border ${
+          className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl text-xs flex items-center gap-2 border transition-all ${
             toastMessage.type === 'success'
-              ? 'bg-[#050706] border-[#C6FF34]/40 text-[#C6FF34]'
-              : 'bg-[#050706] border-rose-500/40 text-rose-400'
+              ? 'bg-white border-emerald-200 text-emerald-800'
+              : 'bg-white border-rose-200 text-rose-800'
           }`}
         >
           {toastMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-[#C6FF34]" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-rose-400" />
+            <AlertCircle className="w-4 h-4 text-rose-600" />
           )}
-          <span>{toastMessage.text}</span>
+          <span className="font-medium">{toastMessage.text}</span>
         </div>
       )}
 
       {/* ── HEADER BANNER ── */}
-      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent border border-white/[0.08] backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white border border-slate-200 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2 relative z-10">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" />
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#C6FF34]/10 text-[#C6FF34] border border-[#C6FF34]/30 uppercase">
-              ATTENDANCE CONDUCTION CONSOLE
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+              Class Attendance
             </span>
-            <span className="text-xs text-zinc-400">
-              REAL-TIME CHECK-IN RECORDING
+            <span className="text-xs text-slate-500 font-medium">
+              Student Presence &amp; Observation Ledger
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white tracking-tight leading-tight">
-            Cohort Attendance &amp; Observation Center
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
+            Attendance &amp; Participation Ledger
           </h1>
 
-          <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed font-sans">
-            Mark student presence, record per-session faculty observations (&ldquo;What they are up to&rdquo;), and accumulate verified learning hours.
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+            Record candidate attendance, add per-session faculty notes, and track overall cohort attendance rates seamlessly.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0 relative z-10">
-          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-center min-w-[120px]">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-widest block">SESSION FIDELITY</span>
-            <span className="text-2xl font-extrabold text-[#C6FF34] block mt-0.5">
+          <div className="p-4 rounded-2xl bg-violet-50/70 border border-violet-100 text-center min-w-[130px]">
+            <span className="text-[11px] text-violet-700 font-semibold tracking-wider uppercase block">ATTENDANCE RATE</span>
+            <span className="text-2xl font-bold text-violet-900 block mt-0.5">
               {fidelityRate}%
             </span>
           </div>
@@ -237,15 +236,15 @@ export function MentorAttendanceCenterClient({
       </div>
 
       {/* ── SELECTOR RAIL (Batch & Session) ── */}
-      <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] backdrop-blur-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="p-4 md:p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
           {/* Batch Selector */}
           <div className="space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-widest block">Cohort Batch</label>
+            <label className="text-[11px] text-slate-600 font-semibold uppercase tracking-wider block">Cohort Batch</label>
             <select
               value={selectedBatchId}
               onChange={(e) => handleBatchChange(e.target.value)}
-              className="px-3 py-2 text-xs rounded-xl border border-white/[0.08] bg-black/60 text-white focus:outline-none focus:border-[#C6FF34] cursor-pointer"
+              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 cursor-pointer font-medium"
             >
               {batches.map((b) => (
                 <option key={b.id} value={b.id}>
@@ -258,11 +257,11 @@ export function MentorAttendanceCenterClient({
           {/* Session Selector */}
           {currentBatch?.sessions.length ? (
             <div className="space-y-1 flex-1">
-              <label className="text-[10px] text-zinc-500 uppercase tracking-widest block">Conducted Lecture</label>
+              <label className="text-[11px] text-slate-600 font-semibold uppercase tracking-wider block">Lecture Session</label>
               <select
                 value={selectedSessionId}
                 onChange={(e) => handleSessionChange(e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-white/[0.08] bg-black/60 text-white focus:outline-none focus:border-[#C6FF34] cursor-pointer"
+                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 cursor-pointer font-medium"
               >
                 {currentBatch.sessions.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -272,7 +271,7 @@ export function MentorAttendanceCenterClient({
               </select>
             </div>
           ) : (
-            <div className="text-xs text-zinc-500 py-2">No sessions scheduled for this cohort.</div>
+            <div className="text-xs text-slate-500 py-2">No sessions scheduled for this cohort.</div>
           )}
         </div>
 
@@ -280,7 +279,7 @@ export function MentorAttendanceCenterClient({
         <div className="flex items-center gap-2 pt-2 md:pt-0">
           <button
             onClick={handleMarkAllPresent}
-            className="px-4 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 hover:text-white border border-white/[0.1] text-xs font-bold transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-all cursor-pointer"
           >
             Mark All Present
           </button>
@@ -288,7 +287,7 @@ export function MentorAttendanceCenterClient({
           <button
             onClick={handleSaveAttendance}
             disabled={saving || !currentSession}
-            className="px-5 py-2 rounded-xl bg-[#C6FF34] hover:bg-[#b5f425] text-black font-bold text-xs flex items-center gap-2 shadow-[0_4px_16px_rgba(198,255,52,0.18)] transition-all cursor-pointer disabled:opacity-50"
+            className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs flex items-center gap-2 shadow-xs transition-all cursor-pointer disabled:opacity-50 active:scale-[0.99]"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save Attendance'}</span>
@@ -299,21 +298,21 @@ export function MentorAttendanceCenterClient({
       {/* ── SESSION CONDUCTION SUMMARY BADGES ── */}
       {currentSession && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-0.5">
-            <span className="text-[10px] text-zinc-500 uppercase block">Duration</span>
-            <span className="text-sm font-bold text-white block">{currentSession.durationMins || 120} Minutes</span>
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-0.5">
+            <span className="text-[11px] text-slate-500 font-medium block">Duration</span>
+            <span className="text-base font-bold text-slate-900 block">{currentSession.durationMins || 90} Minutes</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-0.5">
-            <span className="text-[10px] text-zinc-500 uppercase block">Present Count</span>
-            <span className="text-sm font-bold text-[#C6FF34] block">{presentCount} Candidates</span>
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-0.5">
+            <span className="text-[11px] text-slate-500 font-medium block">Present</span>
+            <span className="text-base font-bold text-emerald-600 block">{presentCount} Students</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-0.5">
-            <span className="text-[10px] text-zinc-500 uppercase block">Absent Count</span>
-            <span className="text-sm font-bold text-rose-400 block">{totalCount - presentCount} Candidates</span>
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-0.5">
+            <span className="text-[11px] text-slate-500 font-medium block">Absent</span>
+            <span className="text-base font-bold text-rose-600 block">{totalCount - presentCount} Students</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-0.5">
-            <span className="text-[10px] text-zinc-500 uppercase block">Session Date</span>
-            <span className="text-sm font-bold text-white block">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-0.5">
+            <span className="text-[11px] text-slate-500 font-medium block">Session Date</span>
+            <span className="text-base font-bold text-slate-900 block">
               {new Date(currentSession.sessionDate).toLocaleDateString()}
             </span>
           </div>
@@ -321,23 +320,23 @@ export function MentorAttendanceCenterClient({
       )}
 
       {/* ── CANDIDATE ATTENDANCE LEDGER ── */}
-      <div className="rounded-3xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-xl">
+      <div className="rounded-2xl md:rounded-3xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-white/[0.04] text-zinc-300 border-b border-white/[0.06]">
+            <thead className="bg-slate-50/80 text-slate-600 border-b border-slate-200">
               <tr>
-                <th className="p-4 font-bold">Candidate</th>
-                <th className="p-4 font-bold">TS-ID</th>
-                <th className="p-4 font-bold">Status</th>
-                <th className="p-4 font-bold">Mentor Observation Remark (&quot;What you are up to&quot;)</th>
+                <th className="p-4 font-semibold">Student Name</th>
+                <th className="p-4 font-semibold">Student ID</th>
+                <th className="p-4 font-semibold">Attendance Status</th>
+                <th className="p-4 font-semibold">Instructor Notes &amp; Observations</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04] text-zinc-300">
+            <tbody className="divide-y divide-slate-100 text-slate-700">
               {studentsList.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="p-12 text-center text-zinc-500">
-                    <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                    No candidates enrolled in this cohort yet.
+                  <td colSpan={4} className="p-12 text-center text-slate-400">
+                    <Users className="w-8 h-8 mx-auto mb-2 opacity-40 text-slate-400" />
+                    No students enrolled in this cohort yet.
                   </td>
                 </tr>
               ) : (
@@ -345,16 +344,16 @@ export function MentorAttendanceCenterClient({
                   const state = attendanceState[sp.id] || { status: 'PRESENT', remarks: '' };
 
                   return (
-                    <tr key={sp.id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr key={sp.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="p-4">
-                        <div className="space-y-0.5 font-sans">
-                          <span className="font-bold text-white block text-sm">{sp.user.name}</span>
-                          <span className="text-[11px] text-zinc-400 block font-mono">{sp.user.email}</span>
+                        <div className="space-y-0.5">
+                          <span className="font-bold text-slate-900 block text-sm">{sp.user.name}</span>
+                          <span className="text-xs text-slate-500 block font-normal">{sp.user.email}</span>
                         </div>
                       </td>
 
-                      <td className="p-4 font-mono">
-                        <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-[#C6FF34]/10 text-[#C6FF34] border border-[#C6FF34]/20 inline-block">
+                      <td className="p-4">
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200 font-mono inline-block">
                           {sp.user.tsIdentity?.tsId || 'N/A'}
                         </span>
                       </td>
@@ -371,16 +370,16 @@ export function MentorAttendanceCenterClient({
                                   [sp.id]: { ...state, status: st },
                                 })
                               }
-                              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                                 state.status === st
                                   ? st === 'PRESENT'
-                                    ? 'bg-[#C6FF34] text-black shadow-sm'
+                                    ? 'bg-emerald-600 text-white shadow-xs'
                                     : st === 'LATE'
-                                    ? 'bg-amber-400 text-black shadow-sm'
+                                    ? 'bg-amber-500 text-white shadow-xs'
                                     : st === 'ABSENT'
-                                    ? 'bg-rose-500 text-white shadow-sm'
-                                    : 'bg-blue-400 text-black shadow-sm'
-                                  : 'bg-white/[0.04] text-zinc-400 hover:text-white'
+                                    ? 'bg-rose-600 text-white shadow-xs'
+                                    : 'bg-sky-600 text-white shadow-xs'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                               }`}
                             >
                               {st === 'PRESENT'
@@ -405,8 +404,8 @@ export function MentorAttendanceCenterClient({
                               [sp.id]: { ...state, remarks: e.target.value },
                             })
                           }
-                          placeholder="e.g. Cleared packet analysis challenge. Active participation in terminal."
-                          className="w-full px-3 py-1.5 rounded-xl border border-white/[0.08] bg-black/60 text-white placeholder-zinc-500 focus:outline-none focus:border-[#C6FF34] text-xs font-sans"
+                          placeholder="e.g. Active participation, completed practical exercise"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 text-xs"
                         />
                       </td>
                     </tr>
