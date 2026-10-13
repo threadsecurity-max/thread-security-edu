@@ -13,13 +13,70 @@ import {
   AlertCircle,
   Tag as TagIcon,
   ExternalLink,
+  HelpCircle,
+  Lightbulb,
+  Sparkles,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { BlogEditor } from '@/components/blog/editor/BlogEditor';
 import { SEOPanel } from '@/components/blog/editor/SEOPanel';
 import { ImageUploader } from '@/components/blog/editor/ImageUploader';
+
+function FieldHelp({
+  title,
+  purpose,
+  example,
+  tip,
+}: {
+  title: string;
+  purpose: string;
+  example: string;
+  tip?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center w-4 h-4 rounded-full text-slate-400 hover:text-[#C6FF34] hover:bg-[#C6FF34]/10 transition-colors focus:outline-none"
+          aria-label={`Guidance for ${title}`}
+        >
+          <HelpCircle className="w-3.5 h-3.5" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent
+        side="top"
+        align="start"
+        className="max-w-sm p-3.5 bg-[#121214] border border-white/15 text-slate-200 shadow-2xl rounded-xl space-y-2 text-xs"
+      >
+        <div className="flex items-center gap-1.5 font-bold border-b border-white/10 pb-1.5 font-mono text-[11px] uppercase tracking-wider text-[#C6FF34]">
+          <Lightbulb className="w-3.5 h-3.5 text-[#C6FF34]" />
+          {title} Guide
+        </div>
+        <p className="text-slate-300 leading-snug">{purpose}</p>
+        <div className="bg-black/60 border border-white/10 rounded-lg p-2 font-mono text-[10px] text-slate-300">
+          <span className="text-slate-500 block uppercase font-bold text-[9px] mb-0.5">Example:</span>
+          &ldquo;{example}&rdquo;
+        </div>
+        {tip && (
+          <p className="text-[10px] text-[#C6FF34] font-medium flex items-start gap-1 leading-tight pt-0.5">
+            <span>💡</span>
+            <span>{tip}</span>
+          </p>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 interface MentorBlogEditorClientProps {
   initialBlog: any;
@@ -168,7 +225,8 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto text-white">
+    <TooltipProvider delayDuration={100}>
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto text-white">
       {/* Top Header Navigation */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -289,11 +347,31 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           {/* Main Writing Area (2 Cols) */}
           <div className="lg:col-span-2 space-y-6">
             {/* Title & Subtitle Inputs */}
-            <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-4 shadow-xl">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                  BLOG TITLE *
-                </label>
+            <div className="bg-[#0e0e0e] border border-white/10 rounded-2xl p-6 space-y-5 shadow-xl">
+              {/* Blog Title */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    BLOG TITLE <span className="text-[#C6FF34]">*</span>
+                    <FieldHelp
+                      title="Article Title"
+                      purpose="The primary headline for your research paper, technical writeup, or tutorial. Must be compelling, clear, and between 40-60 characters."
+                      example="AI-Powered Threat Detection in Modern Security Operations Centers (SOC)"
+                      tip="Place your main keyword near the beginning for maximum Google SERP impact."
+                    />
+                  </label>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                      title.length >= 35 && title.length <= 65
+                        ? 'bg-[#C6FF34]/15 text-[#C6FF34] font-bold'
+                        : title.length > 65
+                        ? 'bg-amber-500/15 text-amber-400'
+                        : 'text-slate-500'
+                    }`}
+                  >
+                    {title.length}/60 chars {title.length >= 35 && title.length <= 65 ? '✓ Optimal' : ''}
+                  </span>
+                </div>
                 <Input
                   value={title}
                   onChange={(e) => {
@@ -301,14 +379,29 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                     if (!metaTitle) setMetaTitle(e.target.value);
                   }}
                   placeholder="e.g. AI-Powered Threat Detection for Modern SOCs"
-                  className="bg-[#141414] border-white/10 text-white font-extrabold text-lg md:text-xl h-12 focus:border-[#C6FF34]"
+                  className="bg-[#141414] border-white/10 text-white font-extrabold text-lg md:text-xl h-12 focus:border-[#C6FF34] focus:ring-1 focus:ring-[#C6FF34]/30"
                 />
+                <p className="text-[10px] text-slate-500 font-mono">
+                  Keep concise and front-load your core cybersecurity focus keyword for Google rankability.
+                </p>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                  SUBTITLE / STANDFIRST *
-                </label>
+              {/* Subtitle / Standfirst */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    SUBTITLE / STANDFIRST <span className="text-[#C6FF34]">*</span>
+                    <FieldHelp
+                      title="Subtitle / Standfirst"
+                      purpose="A high-level secondary thesis (1-2 sentences) directly below the title. Expands on the problem statement or core innovation."
+                      example="How neural network telemetry reduces SIEM alert fatigue by 74% in enterprise Kubernetes clusters."
+                      tip="Acts as the hook that converts search visitors into engaged learners."
+                    />
+                  </label>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    {subtitle.length}/120 chars
+                  </span>
+                </div>
                 <Input
                   value={subtitle}
                   onChange={(e) => {
@@ -316,29 +409,66 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                     if (!metaDescription) setMetaDescription(e.target.value);
                   }}
                   placeholder="A brief editorial subtitle describing the core thesis of your research..."
-                  className="bg-[#141414] border-white/10 text-slate-200 text-xs h-10 focus:border-[#C6FF34]"
+                  className="bg-[#141414] border-white/10 text-slate-200 text-xs h-10 focus:border-[#C6FF34] focus:ring-1 focus:ring-[#C6FF34]/30"
                 />
+                <p className="text-[10px] text-slate-500 font-mono">
+                  Secondary thesis sentence appearing below the headline and on social previews.
+                </p>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                  SHORT EXCERPT (CARD SUMMARY)
-                </label>
+              {/* Short Excerpt */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    SHORT EXCERPT (CARD SUMMARY)
+                    <FieldHelp
+                      title="Short Excerpt"
+                      purpose="The snippet displayed on public blog listing cards, search engine previews, and social media links. Should summarize the entire post concisely."
+                      example="A practical benchmark comparing LLM-driven incident response against traditional rule-based SIEM detection engines."
+                      tip="Keep under 160 characters so Google and mobile cards don't truncate it."
+                    />
+                  </label>
+                  <span
+                    className={`text-[10px] font-mono px-2 py-0.5 rounded ${
+                      excerpt.length >= 80 && excerpt.length <= 160
+                        ? 'bg-[#C6FF34]/15 text-[#C6FF34] font-bold'
+                        : excerpt.length > 160
+                        ? 'bg-rose-500/15 text-rose-400'
+                        : 'text-slate-500'
+                    }`}
+                  >
+                    {excerpt.length}/160 chars {excerpt.length >= 80 && excerpt.length <= 160 ? '✓ Snippet Ready' : ''}
+                  </span>
+                </div>
                 <textarea
                   value={excerpt}
                   onChange={(e) => setExcerpt(e.target.value)}
                   rows={2}
                   placeholder="Summary shown on the public blog listing cards..."
-                  className="w-full p-3 rounded-lg bg-[#141414] border border-white/10 text-white focus:border-[#C6FF34] focus:outline-none text-xs font-mono"
+                  className="w-full p-3 rounded-lg bg-[#141414] border border-white/10 text-white focus:border-[#C6FF34] focus:ring-1 focus:ring-[#C6FF34]/30 focus:outline-none text-xs font-mono leading-relaxed"
                 />
+                <p className="text-[10px] text-slate-500 font-mono">
+                  Shown on public blog listing cards, student dashboard feeds, and Google description meta tag.
+                </p>
               </div>
             </div>
 
             {/* Rich Text Editor */}
             <div className="space-y-2">
-              <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-                ARTICLE STRUCTURED CONTENT (TIPTAP EDITOR)
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-mono font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                  ARTICLE STRUCTURED CONTENT (TIPTAP EDITOR)
+                  <FieldHelp
+                    title="Structured Article Body & Headings Hierarchy"
+                    purpose="Your complete technical article or tutorial. Use H1 for main chapters, H2 for key subtopics, and H3 for specific steps or lists to create an automatic Google-crawled Table of Contents."
+                    example="Introduction -> Threat Landscape (H1) -> Attack Vectors (H2) -> Step 1: Ingestion (H3)"
+                    tip="All H1, H2, and H3 headers are automatically styled with accent lines and assigned anchor IDs for Google Sitelinks."
+                  />
+                </label>
+                <span className="text-[9px] font-mono text-[#C6FF34] bg-[#C6FF34]/10 border border-[#C6FF34]/20 px-2 py-0.5 rounded font-bold">
+                  H1, H2, H3 Sitelinks Anchored
+                </span>
+              </div>
               <BlogEditor content={content} onChange={setContent} blogId={blog.id} />
             </div>
 
@@ -380,7 +510,15 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
             {/* Category & Tags Selector */}
             <div className="p-5 rounded-2xl bg-[#0e0e0e] border border-white/10 space-y-4 font-mono text-xs shadow-xl">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase text-slate-300">PRIMARY CATEGORY *</label>
+                <label className="text-[10px] font-bold uppercase text-slate-300 flex items-center gap-1.5">
+                  PRIMARY CATEGORY *
+                  <FieldHelp
+                    title="Primary Academic / Research Category"
+                    purpose="Assigns your publication to an official TSE topic hub (e.g., SOC Operations, Cloud Security, Threat Intelligence) for targeted student navigation."
+                    example="Cloud Security, Threat Intelligence, Penetration Testing"
+                    tip="Helps Google group related articles under category clusters."
+                  />
+                </label>
                 <select
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
@@ -397,8 +535,14 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
 
               {/* Tags Input */}
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase text-slate-300 flex items-center gap-1">
+                <label className="text-[10px] font-bold uppercase text-slate-300 flex items-center gap-1.5">
                   <TagIcon className="w-3.5 h-3.5 text-[#C6FF34]" /> TOPICS / TAGS
+                  <FieldHelp
+                    title="Article Topics & Keywords"
+                    purpose="Granular technical keywords that connect this publication to related articles, research tracks, and course prerequisites across TSE."
+                    example="ZeroTrust, SIEM, Mitre-ATT&CK, Python, EDR"
+                    tip="Add 3 to 6 targeted technical tags for optimal internal linking equity."
+                  />
                 </label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -447,6 +591,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }
