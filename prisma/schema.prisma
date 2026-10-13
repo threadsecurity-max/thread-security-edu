@@ -168,6 +168,10 @@ model MentorProfile {
   bio          String
   expertise    String
   officeHours  String?
+  linkedinUrl  String?
+  mediumUrl    String?
+  twitterUrl   String?
+  githubUrl    String?
   totalMentees Int      @default(0)
   students     StudentProfile[]
   courses      Course[]

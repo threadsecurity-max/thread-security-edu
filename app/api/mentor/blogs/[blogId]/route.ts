@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth/session';
 import { getBlogById, updateBlog, deleteBlog } from '@/server/services/blog.service';
 
@@ -39,6 +40,17 @@ export async function PATCH(
     const body = await req.json();
 
     const updatedBlog = await updateBlog(blogId, session.userId, body);
+
+    try {
+      revalidatePath('/blog');
+      if (updatedBlog.slug) {
+        revalidatePath(`/blog/${updatedBlog.slug}`);
+      }
+      revalidatePath('/');
+    } catch (e) {
+      console.warn('Revalidation notice:', e);
+    }
+
     return NextResponse.json({ success: true, blog: updatedBlog });
   } catch (error: any) {
     console.error('Error updating blog:', error);
@@ -58,6 +70,14 @@ export async function DELETE(
 
     const { blogId } = await params;
     await deleteBlog(blogId, session.userId);
+
+    try {
+      revalidatePath('/blog');
+      revalidatePath('/');
+    } catch (e) {
+      console.warn('Revalidation notice:', e);
+    }
+
     return NextResponse.json({ success: true, message: 'Blog deleted successfully' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to delete blog' }, { status: 500 });

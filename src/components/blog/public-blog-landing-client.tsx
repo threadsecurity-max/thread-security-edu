@@ -187,34 +187,84 @@ export function PublicBlogLandingClient({
                   </div>
                 </div>
 
-                <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 space-y-6 shadow-2xl">
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                    <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-[#C6FF34]" /> LATEST POSTS
-                    </h3>
+                <div className="lg:col-span-5 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 space-y-5 shadow-2xl flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                      <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#C6FF34] animate-pulse" /> LATEST POSTS
+                      </h3>
+                      <span className="text-[10px] font-mono text-slate-500 uppercase">ACADEMY DISPATCHES</span>
+                    </div>
+
+                    {latestPosts.length > 0 ? (
+                      <div className="divide-y divide-white/10">
+                        {latestPosts.map((post) => (
+                          <div key={post.id} className="py-4 first:pt-3 last:pb-0 flex items-start justify-between gap-4 group">
+                            <div className="flex-1 space-y-1.5">
+                              <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                                <span className="text-[#C6FF34] font-bold uppercase">{post.category?.name || 'Article'}</span>
+                                <span>·</span>
+                                <span>{post.readingTime || 4} min read</span>
+                              </div>
+
+                              <Link href={`/blog/${post.slug}`}>
+                                <h4 className="text-sm font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug line-clamp-2">
+                                  {post.title}
+                                </h4>
+                              </Link>
+
+                              <p className="text-[11px] font-mono text-slate-500 pt-0.5">
+                                By {post.author?.user?.name || 'Mentor'} · {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recent'}
+                              </p>
+                            </div>
+
+                            <Link href={`/blog/${post.slug}`} className="shrink-0 w-24 aspect-[1080/711] overflow-hidden rounded-xl border border-white/10 group-hover:border-[#C6FF34]/50 transition-colors">
+                              <BlogCoverImage blog={post} className="w-full h-full object-cover" hoverZoom />
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Editorial Spotlight Fallback when only 1 article is live */
+                      <div className="pt-4 space-y-4 font-mono">
+                        <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                          Faculty research dispatches are reviewed and published weekly. Upcoming technical releases in progress:
+                        </p>
+
+                        <div className="space-y-2.5">
+                          <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-[#C6FF34] font-bold uppercase">THREAT INTELLIGENCE</span>
+                              <span className="text-slate-500">IN EDITORIAL REVIEW</span>
+                            </div>
+                            <p className="text-xs font-bold text-white">Adversary Emulation with C2 Frameworks & MITRE ATT&CK</p>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-sky-400 font-bold uppercase">CLOUD SEC</span>
+                              <span className="text-slate-500">UPCOMING</span>
+                            </div>
+                            <p className="text-xs font-bold text-white">Hardening Multi-Tenant Kubernetes Clusters Against Escape Vulnerabilities</p>
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                            <div className="flex items-center justify-between text-[10px]">
+                              <span className="text-rose-400 font-bold uppercase">OFFENSIVE OPS</span>
+                              <span className="text-slate-500">UPCOMING</span>
+                            </div>
+                            <p className="text-xs font-bold text-white">Reverse Engineering Embedded Firmware with Ghidra & Binwalk</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="divide-y divide-white/10 space-y-4">
-                    {latestPosts.map((post) => (
-                      <div key={post.id} className="pt-4 first:pt-0 space-y-2 group">
-                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                          <span className="text-[#C6FF34] font-bold">{post.category?.name || 'Article'}</span>
-                          <span>{post.readingTime || 4} min read</span>
-                        </div>
-
-                        <Link href={`/blog/${post.slug}`}>
-                          <h4 className="text-base font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug">
-                            {post.title}
-                          </h4>
-                        </Link>
-
-                        <p className="text-xs text-slate-400 line-clamp-2">{post.excerpt || post.subtitle}</p>
-
-                        <p className="text-[10px] font-mono text-slate-500 pt-1">
-                          By {post.author?.user?.name || 'Mentor'} · {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString() : 'Recent'}
-                        </p>
-                      </div>
-                    ))}
+                  <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                    <span>Thread Security Research Stream</span>
+                    <Link href="/courses" className="text-[#C6FF34] hover:underline flex items-center gap-1 font-bold">
+                      Explore Labs →
+                    </Link>
                   </div>
                 </div>
               </section>

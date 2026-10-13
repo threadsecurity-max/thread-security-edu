@@ -19,6 +19,7 @@ import {
   BookOpen,
   Sparkles,
   ExternalLink,
+  Globe,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -189,11 +190,28 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
           {/* Author & Metadata Bar */}
           <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs font-mono text-slate-400">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold font-mono text-white">
-                {blog.author?.user?.name?.[0] || 'M'}
+              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold font-mono text-white overflow-hidden shrink-0">
+                {blog.author?.user?.avatarUrl ? (
+                  <img src={blog.author.user.avatarUrl} alt={blog.author.user.name} className="w-full h-full object-cover" />
+                ) : (
+                  blog.author?.user?.name?.[0] || 'M'
+                )}
               </div>
               <div className="text-left">
-                <p className="font-bold text-white">{blog.author?.user?.name || 'Faculty Lead'}</p>
+                <p className="font-bold text-white flex items-center gap-1.5">
+                  {blog.author?.user?.name || 'Faculty Lead'}
+                  {blog.author?.linkedinUrl && (
+                    <a
+                      href={blog.author.linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0077b5] hover:text-[#00a0dc] transition-colors inline-block"
+                      title="Contact on LinkedIn"
+                    >
+                      <Linkedin className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </p>
                 <p className="text-[10px] text-[#C6FF34]">{blog.author?.title || 'Thread Security Mentor'}</p>
               </div>
             </div>
@@ -235,22 +253,46 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
             {toc.length === 0 ? (
               <p className="text-[11px] text-slate-500 italic">No section headings found.</p>
             ) : (
-              <nav className="space-y-1.5 text-xs">
+              <nav className="space-y-1 text-xs">
                 {toc.map((item) => {
                   const isActive = activeHeadingId === item.id;
                   return (
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      className={`block transition-all truncate rounded-lg py-1 ${
-                        item.level === 2 ? 'pl-3' : item.level === 3 ? 'pl-5 text-[11px]' : 'font-bold'
+                      className={`group flex items-start gap-2.5 transition-all rounded-lg py-1.5 px-2 ${
+                        item.level === 2 ? 'ml-3 text-[11px]' : item.level === 3 ? 'ml-6 text-[10px]' : 'font-semibold'
                       } ${
                         isActive
-                          ? 'text-[#C6FF34] font-bold border-l-2 border-[#C6FF34] pl-2 bg-[#C6FF34]/10 shadow-sm'
+                          ? 'text-[#C6FF34] font-bold bg-[#C6FF34]/10 shadow-sm'
                           : 'text-slate-400 hover:text-white hover:bg-white/5'
                       }`}
                     >
-                      {item.text}
+                      {/* Technical Cyber Bullet Indicator */}
+                      <span className="shrink-0 mt-1 flex items-center justify-center">
+                        {item.level === 1 ? (
+                          <span
+                            className={`w-2 h-2 rounded-full transition-all ${
+                              isActive ? 'bg-[#C6FF34] ring-4 ring-[#C6FF34]/20 scale-110' : 'bg-[#C6FF34]/70 group-hover:bg-[#C6FF34]'
+                            }`}
+                          />
+                        ) : item.level === 2 ? (
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full border transition-all ${
+                              isActive
+                                ? 'border-[#C6FF34] bg-[#C6FF34] ring-2 ring-[#C6FF34]/20'
+                                : 'border-slate-500 bg-transparent group-hover:border-slate-300'
+                            }`}
+                          />
+                        ) : (
+                          <span
+                            className={`w-1 h-1 rounded-sm transition-all ${
+                              isActive ? 'bg-[#C6FF34]' : 'bg-slate-600 group-hover:bg-slate-400'
+                            }`}
+                          />
+                        )}
+                      </span>
+                      <span className="truncate leading-snug">{item.text}</span>
                     </a>
                   );
                 })}
@@ -309,11 +351,14 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      className={`block truncate transition-colors ${
+                      className={`flex items-center gap-2 truncate transition-colors py-1 ${
+                        item.level === 2 ? 'pl-3 text-[11px]' : item.level === 3 ? 'pl-5 text-[10px]' : 'font-semibold'
+                      } ${
                         activeHeadingId === item.id ? 'text-[#C6FF34] font-bold' : 'text-slate-300 hover:text-white'
                       }`}
                     >
-                      • {item.text}
+                      <span className={`w-1.5 h-1.5 rounded-full ${activeHeadingId === item.id ? 'bg-[#C6FF34]' : 'bg-slate-500'}`} />
+                      <span className="truncate">{item.text}</span>
                     </a>
                   ))}
                 </div>
@@ -381,7 +426,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
             <div className="mt-8 p-6 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-4 font-mono shadow-xl">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-white/20 flex items-center justify-center text-lg font-bold text-white overflow-hidden shrink-0">
+                  <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-white/20 flex items-center justify-center text-lg font-bold text-white overflow-hidden shrink-0 shadow-md">
                     {blog.author?.user?.avatarUrl ? (
                       <img src={blog.author.user.avatarUrl} alt={blog.author.user.name} className="w-full h-full object-cover" />
                     ) : (
@@ -405,16 +450,88 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                 </div>
               </div>
 
+              {/* Sanitized Author Bio - Guaranteed to NEVER show Unified User Directory boilerplate */}
               <p className="text-xs text-slate-300 font-sans leading-relaxed">
-                {blog.author?.bio ||
-                  'Experienced cybersecurity researcher & mentor guiding students through enterprise SOC operations, defensive engineering, and real-world adversary emulation.'}
+                {(() => {
+                  const rawBio = blog.author?.bio || '';
+                  if (!rawBio || rawBio.includes('Unified User Directory') || rawBio.trim() === 'Faculty mentor profile.') {
+                    return 'Experienced cybersecurity mentor & researcher guiding students through enterprise SOC operations, defensive engineering, and hands-on laboratory practice.';
+                  }
+                  return rawBio;
+                })()}
               </p>
 
               {blog.author?.expertise && (
-                <div className="pt-2 text-[11px] text-slate-400">
+                <div className="pt-1 text-[11px] text-slate-400">
                   <strong className="text-slate-300">Specializations:</strong> {blog.author.expertise}
                 </div>
               )}
+
+              {/* Author Creds & Contact Links (LinkedIn, Medium, Twitter/X, GitHub) */}
+              <div className="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2.5">
+                <span className="text-[10px] font-bold uppercase text-slate-400 mr-1">CONNECT WITH AUTHOR:</span>
+
+                {blog.author?.linkedinUrl ? (
+                  <a
+                    href={blog.author.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0077b5]/15 hover:bg-[#0077b5]/25 border border-[#0077b5]/30 text-white transition-all text-xs font-bold"
+                  >
+                    <Linkedin className="w-3.5 h-3.5 text-[#0077b5]" />
+                    Connect on LinkedIn
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </a>
+                ) : (
+                  <a
+                    href="https://www.linkedin.com/company/threadsecurity"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/20 text-slate-300 transition-all text-xs"
+                  >
+                    <Linkedin className="w-3.5 h-3.5 text-[#0077b5]" />
+                    Faculty LinkedIn
+                  </a>
+                )}
+
+                {blog.author?.mediumUrl && (
+                  <a
+                    href={blog.author.mediumUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white transition-all text-xs font-bold"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-emerald-400" />
+                    Medium
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </a>
+                )}
+
+                {blog.author?.twitterUrl && (
+                  <a
+                    href={blog.author.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white transition-all text-xs font-bold"
+                  >
+                    <Twitter className="w-3.5 h-3.5 text-sky-400" />
+                    Twitter / X
+                    <ExternalLink className="w-3 h-3 text-slate-400" />
+                  </a>
+                )}
+
+                {blog.author?.githubUrl && (
+                  <a
+                    href={blog.author.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white transition-all text-xs font-bold"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 text-purple-400" />
+                    GitHub
+                  </a>
+                )}
+              </div>
             </div>
           </article>
         </div>

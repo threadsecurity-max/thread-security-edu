@@ -1030,7 +1030,7 @@ export async function createUserService({
           title: department || 'Faculty Mentor',
           company: 'Thread Security',
           expertise: department || 'Cybersecurity & Systems',
-          bio: 'Faculty mentor onboarded via Unified User Directory.',
+          bio: 'Faculty mentor & research guide at Thread Security Education.',
         },
       });
       if (batchId) {

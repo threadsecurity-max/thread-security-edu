@@ -32,6 +32,7 @@ import { SEOPanel } from '@/components/blog/editor/SEOPanel';
 import { ImageUploader } from '@/components/blog/editor/ImageUploader';
 import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
 import { getBlogCoverImageUrl } from '@/lib/blog/coverImageHelper';
+import { AuthorCredentialsCard } from '@/components/blog/editor/AuthorCredentialsCard';
 
 function FieldHelp({
   title,
@@ -379,7 +380,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           <Button
             onClick={handlePublish}
             disabled={saving}
-            className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 px-4 rounded-xl shadow-lg shadow-[#C6FF34]/10"
+            className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 px-4 rounded-xl shadow-lg shadow-[#C6FF34]/10 cursor-pointer"
           >
             {publishStatus === 'PUBLISHED' ? 'Update Live Article' : 'Publish to Platform'}
           </Button>
@@ -696,6 +697,9 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                 </div>
               </div>
             </div>
+
+            {/* Author Profile & Social Credentials Card */}
+            <AuthorCredentialsCard />
 
             {/* Real-time SEO Scoring Panel */}
             <SEOPanel
