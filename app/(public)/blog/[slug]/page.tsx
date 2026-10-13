@@ -88,6 +88,10 @@ export default async function PublicBlogArticlePage({
         publishedTime={blog.publishedAt?.toISOString()}
         modifiedTime={blog.updatedAt?.toISOString()}
         authorName={blog.author?.user?.name || 'Thread Security Mentor'}
+        authorRole={blog.author?.title || 'Lead Cybersecurity Mentor'}
+        category={blog.category?.name}
+        keywords={blog.tags?.map((t: any) => t.name)}
+        wordCount={blog.content ? blog.content.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).length : undefined}
         imageUrl={ogImage}
       />
       <BreadcrumbJsonLd

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -18,6 +18,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+function processContentHeadings(content: string) {
+  if (!content) return content;
+  return content.replace(/<(h[1-3])([^>]*)>(.*?)<\/\1>/gi, (match, tag, attrs, inner) => {
+    if (/id=["'][^"']+["']/i.test(attrs)) return match;
+    const text = inner.replace(/<[^>]*>/g, '').trim();
+    const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    if (!id) return match;
+    return `<${tag}${attrs} id="${id}">${inner}</${tag}>`;
+  });
+}
+
 interface PublicBlogArticleClientProps {
   blog: any;
   relatedBlogs: any[];
@@ -26,6 +37,8 @@ interface PublicBlogArticleClientProps {
 export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticleClientProps) {
   const [copied, setCopied] = useState(false);
   const [toc, setToc] = useState<{ id: string; text: string; level: number }[]>([]);
+
+  const processedContent = useMemo(() => processContentHeadings(blog.content), [blog.content]);
 
   // Dynamically extract Headings for Table of Contents
   useEffect(() => {
@@ -36,7 +49,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
 
     const items = headings.map((h, idx) => {
       const text = h.textContent || `Section ${idx + 1}`;
-      const id = text.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `section-${idx + 1}`;
       return {
         id,
         text,
@@ -119,18 +132,22 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
       {/* Main Content Layout: Desktop 2-Column */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
         {/* Featured Hero Cover Image */}
-        {blog.media?.[0]?.url && (
-          <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-white/10 bg-black aspect-[1080/711] relative mb-12 shadow-2xl">
-            <Image
-              src={blog.media[0].url}
-              alt={blog.media[0].altText || blog.title}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 896px"
-              className="object-cover"
-            />
-          </div>
-        )}
+        {(() => {
+          const coverMedia = blog.media?.find((m: any) => m.id === blog.coverImageId) || blog.media?.[0];
+          if (!coverMedia?.url) return null;
+          return (
+            <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-white/10 bg-black aspect-[1080/711] relative mb-12 shadow-2xl">
+              <Image
+                src={coverMedia.url}
+                alt={coverMedia.altText || blog.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 896px"
+                className="object-cover"
+              />
+            </div>
+          );
+        })()}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Table of Contents Sticky Sidebar */}
@@ -216,8 +233,8 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
 
             {/* Structured Rich HTML Render */}
             <div
-              className="prose prose-invert max-w-none text-slate-200 text-base md:text-lg leading-relaxed font-sans prose-headings:font-serif prose-headings:text-white prose-a:text-[#C6FF34] prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded"
-              dangerouslySetInnerHTML={{ __html: blog.content || '<p>No content written yet.</p>' }}
+              className="tiptap prose prose-invert max-w-none text-slate-200 text-base md:text-lg leading-relaxed font-sans prose-headings:font-serif prose-headings:text-white prose-a:text-[#C6FF34] prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded"
+              dangerouslySetInnerHTML={{ __html: processedContent || '<p>No content written yet.</p>' }}
             />
 
             {/* Tags */}

@@ -321,7 +321,11 @@ export interface ArticleJsonLdProps {
   publishedTime?: string;
   modifiedTime?: string;
   authorName?: string;
+  authorRole?: string;
   imageUrl?: string;
+  category?: string;
+  keywords?: string[];
+  wordCount?: number;
 }
 
 export function ArticleJsonLd({
@@ -331,26 +335,44 @@ export function ArticleJsonLd({
   publishedTime,
   modifiedTime,
   authorName = 'Thread Security Mentor',
+  authorRole = 'Cybersecurity Mentor & Research Lead',
   imageUrl,
+  category,
+  keywords,
+  wordCount,
 }: ArticleJsonLdProps) {
   const articleUrl = `${APP_URL}/blog/${slug}`;
 
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    '@type': ['TechArticle', 'BlogPosting'],
     headline: title,
     description,
     url: articleUrl,
-    mainEntityOfPage: articleUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl,
+    },
+    inLanguage: 'en-IN',
+    articleSection: category || 'Cybersecurity Research',
+    keywords: keywords && keywords.length > 0 ? keywords.join(', ') : 'Cybersecurity, Threat Intelligence, Thread Security',
+    wordCount: wordCount || undefined,
     datePublished: publishedTime || new Date().toISOString(),
     dateModified: modifiedTime || publishedTime || new Date().toISOString(),
     author: {
       '@type': 'Person',
       name: authorName,
+      jobTitle: authorRole,
+      worksFor: {
+        '@type': 'EducationalOrganization',
+        name: 'Thread Security Education',
+        url: APP_URL,
+      },
     },
     publisher: {
       '@type': 'EducationalOrganization',
       name: 'Thread Security Education',
+      url: APP_URL,
       logo: {
         '@type': 'ImageObject',
         url: `${APP_URL}/logos/TSE%20Logo%20Dark.svg`,

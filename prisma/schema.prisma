@@ -990,7 +990,8 @@ model BlogMedia {
   id            String   @id @default(cuid())
   blogId        String
   blog          Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
-  driveFileId   String   @unique
+  url           String?  @db.Text
+  driveFileId   String?  @unique
   driveFolderId String?
   fileName      String
   mimeType      String

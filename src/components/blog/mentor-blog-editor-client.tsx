@@ -55,8 +55,12 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
   const [focusKeyword, setFocusKeyword] = useState(initialBlog.seo?.focusKeyword || '');
 
   // UI State
+  const initialCover =
+    initialBlog.media?.find((m: any) => m.id === initialBlog.coverImageId)?.url ||
+    initialBlog.media?.[0]?.url ||
+    null;
   const [coverImageId, setCoverImageId] = useState<string | null>(initialBlog.coverImageId || null);
-  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(initialCover);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const [previewTab, setPreviewTab] = useState<'editor' | 'preview'>('editor');
@@ -263,9 +267,22 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           )}
 
           <div
-            className="prose prose-invert max-w-none text-slate-200 leading-relaxed text-base"
+            className="tiptap prose prose-invert max-w-none text-slate-200 leading-relaxed text-base"
             dangerouslySetInnerHTML={{ __html: content || '<p>No content written yet...</p>' }}
           />
+
+          {tags.length > 0 && (
+            <div className="pt-6 border-t border-white/10 space-y-2 font-mono">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">ARTICLE TOPICS / TAGS</span>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((t) => (
+                  <Badge key={t} className="bg-white/5 border border-white/10 text-slate-300 font-normal">
+                    #{t}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -322,7 +339,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
               <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
                 ARTICLE STRUCTURED CONTENT (TIPTAP EDITOR)
               </label>
-              <BlogEditor content={content} onChange={setContent} />
+              <BlogEditor content={content} onChange={setContent} blogId={blog.id} />
             </div>
 
             {/* Featured Image Component */}
@@ -333,26 +350,30 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                 setCoverImageId(media.id);
                 setCoverImageUrl(media.url);
               }}
+              onRemove={() => {
+                setCoverImageId(null);
+                setCoverImageUrl(null);
+              }}
             />
           </div>
 
-          {/* Right Sidebar: Categories, Tags, Google Drive Status, SEO Panel (1 Col) */}
+          {/* Right Sidebar: Categories, Tags, Cloudinary CDN Status, SEO Panel (1 Col) */}
           <div className="space-y-6">
-            {/* Google Drive Status Box */}
-            <div className="p-4 rounded-2xl bg-[#0e0e0e] border border-white/10 space-y-2 font-mono text-xs">
+            {/* Cloudinary CDN Media Layer Status Box */}
+            <div className="p-4 rounded-2xl bg-[#0e0e0e] border border-white/10 space-y-2 font-mono text-xs shadow-xl">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] text-[#C6FF34] font-bold uppercase flex items-center gap-1">
-                  <FolderCheck className="w-3.5 h-3.5" /> GOOGLE DRIVE MEDIA LAYER
+                  <FolderCheck className="w-3.5 h-3.5" /> CLOUDINARY CDN MEDIA ENGINE
                 </span>
-                <Badge className="bg-emerald-500/20 text-emerald-400 text-[9px] border border-emerald-500/30 font-bold">
-                  PROVISIONED
+                <Badge className="bg-[#C6FF34]/15 text-[#C6FF34] text-[9px] border border-[#C6FF34]/30 font-bold">
+                  ACTIVE & OPTIMIZED
                 </Badge>
               </div>
               <p className="text-[11px] text-slate-300">
-                Folder ID: <code className="bg-white/10 px-1 py-0.5 rounded text-white">{blog.driveFolderId || 'Local-Only'}</code>
+                Cloud: <code className="bg-white/10 px-1 py-0.5 rounded text-white font-bold">qliovzms</code> · WebP/AVIF Auto-Delivery
               </p>
               <p className="text-[10px] text-slate-400">
-                Uploaded article images will be mirrored directly to your associated Google Drive media folder.
+                Article images and cover assets are hosted via high-speed global CDN with perceptual compression.
               </p>
             </div>
 
