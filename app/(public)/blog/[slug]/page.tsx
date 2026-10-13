@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { PublicBlogArticleClient } from '@/components/blog/public-blog-article-client';
 import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
+import { getBlogCoverImageUrl } from '@/lib/blog/coverImageHelper';
 
 const APP_URL =
   process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
@@ -28,8 +29,9 @@ export async function generateMetadata({
 
   const metaTitle = blog.seo?.metaTitle || `${blog.title} | TSE Research Blog`;
   const metaDesc = blog.seo?.metaDescription || blog.excerpt || blog.subtitle || '';
-  const ogImage = blog.media?.[0]?.url || blog.seo?.ogImage || undefined;
-  const canonicalUrl = `${APP_URL}/blog/${slug}`;
+  const coverMedia = blog.media?.find((m: any) => m.id === blog.coverImageId) || blog.media?.[0];
+  const ogImage = coverMedia?.url || blog.seo?.ogImage || undefined;
+  const canonicalUrl = blog.seo?.canonicalUrl || `${APP_URL}/blog/${slug}`;
 
   return {
     title: metaTitle,
@@ -77,7 +79,8 @@ export default async function PublicBlogArticlePage({
   }
 
   const related = await getRelatedBlogs(blog.id, blog.categoryId, 3);
-  const ogImage = blog.media?.[0]?.url || blog.seo?.ogImage || undefined;
+  const coverUrl = getBlogCoverImageUrl(blog);
+  const ogImage = coverUrl || blog.seo?.ogImage || undefined;
 
   return (
     <>

@@ -30,6 +30,8 @@ import {
 import { BlogEditor } from '@/components/blog/editor/BlogEditor';
 import { SEOPanel } from '@/components/blog/editor/SEOPanel';
 import { ImageUploader } from '@/components/blog/editor/ImageUploader';
+import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
+import { getBlogCoverImageUrl } from '@/lib/blog/coverImageHelper';
 
 function FieldHelp({
   title,
@@ -110,12 +112,10 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
     initialBlog.seo?.metaDescription || initialBlog.subtitle || ''
   );
   const [focusKeyword, setFocusKeyword] = useState(initialBlog.seo?.focusKeyword || '');
+  const [canonicalUrl, setCanonicalUrl] = useState(initialBlog.seo?.canonicalUrl || '');
 
   // UI State
-  const initialCover =
-    initialBlog.media?.find((m: any) => m.id === initialBlog.coverImageId)?.url ||
-    initialBlog.media?.[0]?.url ||
-    null;
+  const initialCover = getBlogCoverImageUrl(initialBlog);
   const [coverImageId, setCoverImageId] = useState<string | null>(initialBlog.coverImageId || null);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(initialCover);
   const [saving, setSaving] = useState(false);
@@ -123,6 +123,75 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
   const [previewTab, setPreviewTab] = useState<'editor' | 'preview'>('editor');
   const [publishStatus, setPublishStatus] = useState(initialBlog.status || 'DRAFT');
   const [error, setError] = useState<string | null>(null);
+
+  // Local Draft Auto-Recovery State
+  const LOCAL_STORAGE_KEY = `tse_blog_draft_${blog.id}`;
+  const [hasLocalDraft, setHasLocalDraft] = useState(false);
+  const [localDraftTime, setLocalDraftTime] = useState<string | null>(null);
+
+  // Check on mount for unsaved local device draft
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.timestamp && parsed.content && parsed.content !== initialBlog.content) {
+          setHasLocalDraft(true);
+          setLocalDraftTime(new Date(parsed.timestamp).toLocaleTimeString());
+        }
+      }
+    } catch (e) {
+      console.warn('Local draft inspection failed:', e);
+    }
+  }, [blog.id, initialBlog.content, LOCAL_STORAGE_KEY]);
+
+  // Background auto-save to localStorage every 15 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      try {
+        if (title || content) {
+          localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            JSON.stringify({
+              title,
+              subtitle,
+              excerpt,
+              content,
+              categoryId,
+              tags,
+              timestamp: Date.now(),
+            })
+          );
+        }
+      } catch (e) {}
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [title, subtitle, excerpt, content, categoryId, tags, LOCAL_STORAGE_KEY]);
+
+  const restoreLocalDraft = () => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.title) setTitle(parsed.title);
+        if (parsed.subtitle) setSubtitle(parsed.subtitle);
+        if (parsed.excerpt) setExcerpt(parsed.excerpt);
+        if (parsed.content) setContent(parsed.content);
+        if (parsed.categoryId) setCategoryId(parsed.categoryId);
+        if (parsed.tags) setTags(parsed.tags);
+        setHasLocalDraft(false);
+      }
+    } catch (e) {
+      console.error('Failed to restore local draft:', e);
+    }
+  };
+
+  const dismissLocalDraft = () => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      setHasLocalDraft(false);
+    } catch (e) {}
+  };
 
   // Fetch Categories
   useEffect(() => {
@@ -159,6 +228,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
               metaTitle,
               metaDescription,
               focusKeyword,
+              canonicalUrl,
             },
           }),
         });
@@ -171,6 +241,10 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
         setBlog(data.blog);
         setPublishStatus(data.blog.status);
         setLastSaved(new Date().toLocaleTimeString());
+        try {
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          setHasLocalDraft(false);
+        } catch (e) {}
         setSaving(false);
         return true;
       } catch (err: any) {
@@ -193,6 +267,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
       metaTitle,
       metaDescription,
       focusKeyword,
+      LOCAL_STORAGE_KEY,
     ]
   );
 
@@ -237,17 +312,30 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           </Link>
           <div className="h-5 w-px bg-white/10" />
           <div>
-            <h1 className="text-lg font-bold font-mono text-white flex items-center gap-2">
-              <Globe className="w-4 h-4 text-[#C6FF34]" /> EDITORIAL WORKSPACE
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold font-mono text-white flex items-center gap-2">
+                <Globe className="w-4 h-4 text-[#C6FF34]" /> EDITORIAL WORKSPACE
+              </h1>
+              <Badge
+                className={`font-mono text-[9px] uppercase tracking-wider font-bold ${
+                  publishStatus === 'PUBLISHED'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    : publishStatus === 'REVIEW'
+                    ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
+                    : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                }`}
+              >
+                {publishStatus === 'PUBLISHED' ? '● LIVE' : publishStatus === 'REVIEW' ? '● UNDER REVIEW' : '● DRAFT'}
+              </Badge>
+            </div>
             <p className="text-[11px] text-slate-400 font-mono">
-              Blog ID: {blog.id} · {lastSaved ? `Autosaved at ${lastSaved}` : 'Unsaved changes'}
+              Slug: <code className="text-slate-300">/blog/{blog.slug}</code> {publishStatus === 'PUBLISHED' ? '(🔒 Locked)' : '(⚡ Auto-syncs)'} · {lastSaved ? `Saved ${lastSaved}` : 'Unsaved changes'}
             </p>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex items-center bg-[#121212] p-1 border border-white/10 rounded-xl">
             <button
               onClick={() => setPreviewTab('editor')}
@@ -268,7 +356,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           </div>
 
           <Button
-            onClick={() => handleSave()}
+            onClick={() => handleSave('DRAFT')}
             disabled={saving}
             variant="outline"
             className="border-white/20 text-white hover:bg-white/10 font-mono text-xs h-9"
@@ -276,6 +364,17 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
             {saving ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1" />}
             Save Draft
           </Button>
+
+          {publishStatus !== 'PUBLISHED' && (
+            <Button
+              onClick={() => handleSave('REVIEW')}
+              disabled={saving}
+              variant="outline"
+              className="border-sky-500/30 text-sky-400 hover:bg-sky-500/10 font-mono text-xs h-9"
+            >
+              Submit for Review
+            </Button>
+          )}
 
           <Button
             onClick={handlePublish}
@@ -294,6 +393,26 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           )}
         </div>
       </div>
+
+      {/* Local Auto-Recovery Alert Banner */}
+      {hasLocalDraft && (
+        <div className="p-3.5 rounded-xl bg-[#C6FF34]/10 border border-[#C6FF34]/30 text-white text-xs font-mono flex items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#C6FF34] shrink-0" />
+            <span>
+              ⚡ <strong className="text-[#C6FF34]">Local Auto-Recovery Available:</strong> We detected an unsaved local device draft from <span className="underline">{localDraftTime}</span>.
+            </span>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button size="sm" onClick={restoreLocalDraft} className="h-7 bg-[#C6FF34] text-black hover:bg-[#b2eb2a] text-xs font-bold font-mono">
+              Restore Draft
+            </Button>
+            <Button size="sm" variant="ghost" onClick={dismissLocalDraft} className="h-7 text-slate-400 hover:text-white text-xs font-mono">
+              Dismiss
+            </Button>
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="p-3 rounded-xl bg-rose-950/20 border border-rose-500/30 text-rose-300 text-xs font-mono flex items-center gap-2">
@@ -318,11 +437,16 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
             </div>
           </div>
 
-          {coverImageUrl && (
-            <div className="rounded-2xl overflow-hidden border border-white/10 aspect-[1080/711]">
-              <img src={coverImageUrl} alt={title} className="w-full h-full object-cover" />
-            </div>
-          )}
+          <BlogCoverImage
+            blog={{
+              ...blog,
+              title,
+              coverImageId,
+              media: coverImageUrl ? [{ id: coverImageId, url: coverImageUrl }] : blog.media,
+            }}
+            priority
+            className="my-4 shadow-2xl"
+          />
 
           <div
             className="tiptap prose prose-invert max-w-none text-slate-200 leading-relaxed text-base"
@@ -581,11 +705,15 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
               metaTitle={metaTitle}
               metaDescription={metaDescription}
               focusKeyword={focusKeyword}
+              canonicalUrl={canonicalUrl}
               coverImageId={coverImageId}
               onUpdateSEO={(seoData) => {
                 setMetaTitle(seoData.metaTitle);
                 setMetaDescription(seoData.metaDescription);
                 setFocusKeyword(seoData.focusKeyword);
+                if (seoData.canonicalUrl !== undefined) {
+                  setCanonicalUrl(seoData.canonicalUrl);
+                }
               }}
             />
           </div>

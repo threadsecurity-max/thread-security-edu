@@ -23,42 +23,63 @@ export async function POST(
 
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
+    const providedImageUrl = (formData.get('imageUrl') as string) || '';
     const altText = (formData.get('altText') as string) || '';
     const caption = (formData.get('caption') as string) || '';
     const isCover = formData.get('isCover') === 'true';
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+    if (!file && !providedImageUrl) {
+      return NextResponse.json({ error: 'No file or image URL provided' }, { status: 400 });
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = file.name || `blog-image-${Date.now()}`;
-    const mimeType = file.type || 'image/png';
-
-    // 1. Upload to Cloudinary CDN for instant auto-optimization (WebP/AVIF, quality: auto)
     let url = '';
     let publicId = `media-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    let width: number | null = null;
-    let height: number | null = null;
+    let fileName = `blog-cover-${Date.now()}`;
+    let mimeType = 'image/jpeg';
+    let width: number | null = 1080;
+    let height: number | null = 711;
 
-    try {
-      const cloudinaryResult = await uploadMediaToCloudinary(buffer, 'blogs', 'image');
-      if (cloudinaryResult.success && (cloudinaryResult.secureUrl || cloudinaryResult.url)) {
-        url = (cloudinaryResult.secureUrl || cloudinaryResult.url) as string;
-        if (cloudinaryResult.publicId) {
-          publicId = cloudinaryResult.publicId;
+    if (file) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      fileName = file.name || `blog-image-${Date.now()}`;
+      mimeType = file.type || 'image/png';
+
+      // 1. Upload to Cloudinary CDN for instant auto-optimization (WebP/AVIF, quality: auto)
+      try {
+        const cloudinaryResult = await uploadMediaToCloudinary(buffer, 'blogs', 'image');
+        if (cloudinaryResult.success && (cloudinaryResult.secureUrl || cloudinaryResult.url)) {
+          url = (cloudinaryResult.secureUrl || cloudinaryResult.url) as string;
+          if (cloudinaryResult.publicId) {
+            publicId = cloudinaryResult.publicId;
+          }
+          width = cloudinaryResult.width || null;
+          height = cloudinaryResult.height || null;
         }
-        width = cloudinaryResult.width || null;
-        height = cloudinaryResult.height || null;
+      } catch (uploadErr) {
+        console.warn('Cloudinary direct upload failed, fallback to data url:', uploadErr);
       }
-    } catch (uploadErr) {
-      console.warn('Cloudinary direct upload failed, fallback to data url:', uploadErr);
-    }
 
-    // Fallback if Cloudinary is offline or unconfigured
-    if (!url) {
-      const base64 = buffer.toString('base64');
-      url = `data:${mimeType};base64,${base64}`;
+      // Fallback if Cloudinary is offline or unconfigured
+      if (!url) {
+        const base64 = buffer.toString('base64');
+        url = `data:${mimeType};base64,${base64}`;
+      }
+    } else if (providedImageUrl) {
+      url = providedImageUrl;
+      fileName = `cover-preset-${Date.now()}.jpg`;
+
+      // Attempt to mirror external image to Cloudinary for reliable delivery
+      try {
+        const cloudinaryResult = await uploadMediaToCloudinary(providedImageUrl, 'blogs', 'image');
+        if (cloudinaryResult.success && (cloudinaryResult.secureUrl || cloudinaryResult.url)) {
+          url = (cloudinaryResult.secureUrl || cloudinaryResult.url) as string;
+          if (cloudinaryResult.publicId) {
+            publicId = cloudinaryResult.publicId;
+          }
+        }
+      } catch (e) {
+        // Retain original URL if mirroring fails
+      }
     }
 
     // 2. Persist in BlogMedia database table

@@ -137,11 +137,18 @@ export function BlogEditor({
       return;
     }
 
+    const defaultAlt = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+    const userAlt = window.prompt(
+      'Enter Image Alt-Text (Descriptive label for Google Image Search & Screen Readers):',
+      defaultAlt
+    );
+    const finalAlt = (userAlt !== null && userAlt.trim()) ? userAlt.trim() : defaultAlt;
+
     try {
       setIsUploadingImage(true);
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('altText', file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '));
+      formData.append('altText', finalAlt);
       formData.append('caption', '');
       formData.append('isCover', 'false');
 
@@ -156,7 +163,7 @@ export function BlogEditor({
       }
 
       if (data.media?.url) {
-        editor.chain().focus().setImage({ src: data.media.url, alt: data.media.altText || file.name }).run();
+        editor.chain().focus().setImage({ src: data.media.url, alt: finalAlt }).run();
       }
     } catch (err: any) {
       console.error('Error uploading inline image:', err);
@@ -732,6 +739,36 @@ export function BlogEditor({
               <span>{activeNode.label}</span>
             </div>
           </div>
+
+          {/* Live Word Count & Reading Time Meter */}
+          {(() => {
+            const editorText = editor ? editor.getText() : '';
+            const currentWordCount = editorText.trim() ? editorText.trim().split(/\s+/).filter(Boolean).length : 0;
+            const currentReadingMinutes = Math.max(1, Math.ceil(currentWordCount / 200));
+
+            return (
+              <div className="flex items-center gap-2">
+                <div
+                  className={`px-2.5 py-0.5 rounded-full border text-[10px] font-bold flex items-center gap-1.5 transition-colors ${
+                    currentWordCount >= 1500
+                      ? 'bg-[#C6FF34]/15 border-[#C6FF34]/30 text-[#C6FF34]'
+                      : currentWordCount >= 300
+                      ? 'bg-sky-400/15 border-sky-400/30 text-sky-400'
+                      : 'bg-amber-400/15 border-amber-400/30 text-amber-400'
+                  }`}
+                >
+                  <span>{currentWordCount.toLocaleString()} words</span>
+                  <span>·</span>
+                  <span>{currentReadingMinutes} min read</span>
+                  {currentWordCount >= 1500 ? (
+                    <span className="hidden sm:inline">✓ Pillar Post</span>
+                  ) : currentWordCount < 300 ? (
+                    <span className="hidden sm:inline">Short Draft</span>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Heading Structure Guide for Faculty */}
           <div className="hidden lg:flex items-center gap-3 text-[10px] text-slate-400">

@@ -552,6 +552,7 @@ export async function getRelatedBlogs(blogId: string, categoryId?: string | null
     orderBy: { publishedAt: 'desc' },
     include: {
       category: true,
+      media: true,
       author: {
         include: {
           user: { select: { name: true, avatarUrl: true } },

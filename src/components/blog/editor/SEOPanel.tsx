@@ -27,11 +27,13 @@ interface SEOPanelProps {
   metaTitle: string;
   metaDescription: string;
   focusKeyword: string;
+  canonicalUrl?: string;
   coverImageId?: string | null;
   onUpdateSEO: (seoData: {
     metaTitle: string;
     metaDescription: string;
     focusKeyword: string;
+    canonicalUrl?: string;
     keywords?: string[];
   }) => void;
 }
@@ -50,6 +52,7 @@ export function SEOPanel({
   metaTitle,
   metaDescription,
   focusKeyword,
+  canonicalUrl,
   coverImageId,
   onUpdateSEO,
 }: SEOPanelProps) {
@@ -349,12 +352,36 @@ export function SEOPanel({
                     metaTitle,
                     metaDescription: e.target.value,
                     focusKeyword,
+                    canonicalUrl,
                   })
                 }
                 rows={2}
                 placeholder="Action-oriented summary enticing Google users to click..."
                 className="w-full p-2.5 rounded-lg bg-[#181818] border border-white/10 text-white focus:border-[#C6FF34] focus:outline-none text-xs"
               />
+            </div>
+
+            {/* Custom Canonical URL */}
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-300 font-bold uppercase tracking-wider block">
+                CUSTOM CANONICAL URL (OPTIONAL)
+              </label>
+              <Input
+                value={canonicalUrl || ''}
+                onChange={(e) =>
+                  onUpdateSEO({
+                    metaTitle,
+                    metaDescription,
+                    focusKeyword,
+                    canonicalUrl: e.target.value,
+                  })
+                }
+                placeholder="https://original-publisher.com/post (leave blank if original)"
+                className="bg-[#181818] border-white/10 text-white text-xs h-9"
+              />
+              <p className="text-[9px] text-slate-400">
+                Specify original source URL if cross-posting from Medium, Substack, or academic journals.
+              </p>
             </div>
           </div>
 

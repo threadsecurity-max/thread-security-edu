@@ -14,6 +14,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
 
 interface PublicBlogLandingClientProps {
   initialBlogs: any[];
@@ -139,18 +140,11 @@ export function PublicBlogLandingClient({
             {featuredBlog && (
               <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-7 space-y-4 bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 md:p-8 hover:border-white/20 transition-all group shadow-2xl">
-                  {featuredBlog.media?.[0]?.url || featuredBlog.coverImageId ? (
-                    <div className="rounded-2xl overflow-hidden aspect-[1080/711] border border-white/10 bg-black relative">
-                      <Image
-                        src={featuredBlog.media?.[0]?.url || '/placeholder-blog.png'}
-                        alt={featuredBlog.title}
-                        fill
-                        priority
-                        sizes="(max-width: 1024px) 100vw, 600px"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  ) : null}
+                  <BlogCoverImage
+                    blog={featuredBlog}
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 700px"
+                  />
 
                   <div className="flex items-center gap-3 pt-2">
                     <Badge className="bg-[#C6FF34] text-black font-mono font-bold text-[11px] uppercase tracking-wider">
@@ -238,17 +232,10 @@ export function PublicBlogLandingClient({
                       className="bg-[#0a0a0a] border border-white/10 hover:border-white/20 rounded-2xl p-5 space-y-4 flex flex-col justify-between group transition-all"
                     >
                       <div className="space-y-3">
-                        {b.media?.[0]?.url && (
-                          <div className="rounded-xl overflow-hidden aspect-[1080/711] border border-white/10 bg-black relative">
-                            <Image
-                              src={b.media[0].url}
-                              alt={b.title}
-                              fill
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          </div>
-                        )}
+                        <BlogCoverImage
+                          blog={b}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
 
                         <div className="flex items-center justify-between text-xs font-mono">
                           <Badge className="bg-white/10 text-slate-300 font-normal border-none text-[10px]">

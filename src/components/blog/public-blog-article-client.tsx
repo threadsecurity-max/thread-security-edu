@@ -14,9 +14,15 @@ import {
   Check,
   ChevronRight,
   List,
+  ShieldCheck,
+  Award,
+  BookOpen,
+  Sparkles,
+  ExternalLink,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
 
 function processContentHeadings(content: string) {
   if (!content) return content;
@@ -37,6 +43,7 @@ interface PublicBlogArticleClientProps {
 export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticleClientProps) {
   const [copied, setCopied] = useState(false);
   const [toc, setToc] = useState<{ id: string; text: string; level: number }[]>([]);
+  const [activeHeadingId, setActiveHeadingId] = useState<string>('');
 
   const processedContent = useMemo(() => processContentHeadings(blog.content), [blog.content]);
 
@@ -60,6 +67,59 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
     setToc(items);
   }, [blog.content]);
 
+  // Active Heading Scrollspy
+  useEffect(() => {
+    if (typeof window === 'undefined' || toc.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveHeadingId(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-90px 0px -65% 0px', threshold: 0.1 }
+    );
+
+    toc.forEach((item) => {
+      const el = document.getElementById(item.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [toc]);
+
+  // Attach One-Click Copy Buttons to Pre Code blocks
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const preElements = document.querySelectorAll('.tiptap pre');
+    preElements.forEach((pre) => {
+      if (pre.querySelector('.code-copy-btn')) return;
+      (pre as HTMLElement).style.position = 'relative';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className =
+        'code-copy-btn absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-[11px] font-mono transition-all border border-white/10 flex items-center gap-1 z-10 backdrop-blur-md cursor-pointer';
+      copyBtn.innerHTML = '<span>Copy</span>';
+
+      copyBtn.onclick = (e) => {
+        e.preventDefault();
+        const code =
+          (pre.querySelector('code') as HTMLElement)?.innerText ||
+          (pre as HTMLElement).innerText ||
+          pre.textContent ||
+          '';
+        navigator.clipboard.writeText(code);
+        copyBtn.innerHTML = '<span class="text-[#C6FF34] font-bold">✓ Copied</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = '<span>Copy</span>';
+        }, 2000);
+      };
+
+      pre.appendChild(copyBtn);
+    });
+  }, [processedContent]);
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
@@ -68,6 +128,30 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
 
   const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : '';
   const shareTitle = encodeURIComponent(blog.title);
+
+  // Dynamic Course Lead Generation Mapping
+  const categoryName = (blog.category?.name || '').toLowerCase();
+  const courseCta =
+    categoryName.includes('soc') || categoryName.includes('threat')
+      ? {
+          title: 'Certified SOC Analyst & Incident Response Masterclass',
+          desc: 'Gain 100+ hours of hands-on security operations center telemetry, Splunk, Elastic, and incident triaging with guaranteed career assistance.',
+          slug: 'cyber-security-course',
+          tag: 'FLAGSHIP INDUSTRY ACCREDITED',
+        }
+      : categoryName.includes('hack') || categoryName.includes('pen') || categoryName.includes('red')
+      ? {
+          title: 'Practical Ethical Hacking & Penetration Testing Track',
+          desc: 'Train with active red-team operators on network exploitation, privilege escalation, web vulnerabilities, and adversary emulation.',
+          slug: 'cyber-security-course',
+          tag: 'OFFENSIVE SECURITY',
+        }
+      : {
+          title: 'End-to-End Cybersecurity Defense & Cloud Security Accelerator',
+          desc: 'Master the technical pipeline from network packet analysis to enterprise Kubernetes security and SIEM detection engineering.',
+          slug: 'cyber-security-course',
+          tag: 'INDUSTRY CERTIFIED CAREER TRACK',
+        };
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-[#C6FF34] selection:text-black">
@@ -132,22 +216,14 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
       {/* Main Content Layout: Desktop 2-Column */}
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
         {/* Featured Hero Cover Image */}
-        {(() => {
-          const coverMedia = blog.media?.find((m: any) => m.id === blog.coverImageId) || blog.media?.[0];
-          if (!coverMedia?.url) return null;
-          return (
-            <div className="max-w-4xl mx-auto rounded-3xl overflow-hidden border border-white/10 bg-black aspect-[1080/711] relative mb-12 shadow-2xl">
-              <Image
-                src={coverMedia.url}
-                alt={coverMedia.altText || blog.title}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 896px"
-                className="object-cover"
-              />
-            </div>
-          );
-        })()}
+        <div className="max-w-4xl mx-auto mb-12 shadow-2xl">
+          <BlogCoverImage
+            blog={blog}
+            priority
+            sizes="(max-width: 1024px) 100vw, 896px"
+            className="rounded-3xl"
+          />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Table of Contents Sticky Sidebar */}
@@ -159,18 +235,25 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
             {toc.length === 0 ? (
               <p className="text-[11px] text-slate-500 italic">No section headings found.</p>
             ) : (
-              <nav className="space-y-2 text-xs">
-                {toc.map((item) => (
-                  <a
-                    key={item.id}
-                    href={`#${item.id}`}
-                    className={`block text-slate-400 hover:text-[#C6FF34] transition-colors truncate ${
-                      item.level === 2 ? 'pl-2' : item.level === 3 ? 'pl-4 text-[11px]' : 'font-bold text-slate-200'
-                    }`}
-                  >
-                    {item.text}
-                  </a>
-                ))}
+              <nav className="space-y-1.5 text-xs">
+                {toc.map((item) => {
+                  const isActive = activeHeadingId === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      className={`block transition-all truncate rounded-lg py-1 ${
+                        item.level === 2 ? 'pl-3' : item.level === 3 ? 'pl-5 text-[11px]' : 'font-bold'
+                      } ${
+                        isActive
+                          ? 'text-[#C6FF34] font-bold border-l-2 border-[#C6FF34] pl-2 bg-[#C6FF34]/10 shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {item.text}
+                    </a>
+                  );
+                })}
               </nav>
             )}
 
@@ -223,7 +306,13 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                 </span>
                 <div className="space-y-1.5 pl-2">
                   {toc.map((item) => (
-                    <a key={item.id} href={`#${item.id}`} className="block text-slate-300 hover:text-[#C6FF34] truncate">
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      className={`block truncate transition-colors ${
+                        activeHeadingId === item.id ? 'text-[#C6FF34] font-bold' : 'text-slate-300 hover:text-white'
+                      }`}
+                    >
                       • {item.text}
                     </a>
                   ))}
@@ -250,6 +339,83 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                 </div>
               </div>
             )}
+
+            {/* High-Converting Course Lead Generation CTA Banner */}
+            <div className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-[#12160d] via-[#0d0d0f] to-[#0a0a0a] border border-[#C6FF34]/30 shadow-2xl relative overflow-hidden group">
+              <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#C6FF34]/10 rounded-full blur-3xl pointer-events-none group-hover:bg-[#C6FF34]/20 transition-all" />
+              <div className="relative space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Badge className="bg-[#C6FF34] text-black font-mono font-bold text-[10px] tracking-wider uppercase">
+                    {courseCta.tag}
+                  </Badge>
+                  <div className="flex items-center gap-1.5 text-xs font-mono text-[#C6FF34]">
+                    <Award className="w-4 h-4" />
+                    <span>100% Practical Defense Labs</span>
+                  </div>
+                </div>
+
+                <h3 className="text-xl md:text-2xl font-black font-serif text-white leading-snug">
+                  {courseCta.title}
+                </h3>
+
+                <p className="text-sm text-slate-300 leading-relaxed max-w-2xl font-sans">
+                  {courseCta.desc}
+                </p>
+
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <Link href={`/courses/${courseCta.slug}`}>
+                    <Button className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-10 px-6 rounded-xl shadow-lg shadow-[#C6FF34]/20">
+                      Explore Syllabus & Enroll <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
+                  <Link href="/courses">
+                    <Button variant="ghost" className="text-slate-300 hover:text-white font-mono text-xs h-10">
+                      Browse All TSE Tracks
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Author E-E-A-T Verified Profile Card */}
+            <div className="mt-8 p-6 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-4 font-mono shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-white/20 flex items-center justify-center text-lg font-bold text-white overflow-hidden shrink-0">
+                    {blog.author?.user?.avatarUrl ? (
+                      <img src={blog.author.user.avatarUrl} alt={blog.author.user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      blog.author?.user?.name?.[0] || 'M'
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-base font-bold text-white font-sans">{blog.author?.user?.name || 'TSE Security Mentor'}</h4>
+                      <span className="flex items-center gap-1 text-[10px] text-[#C6FF34] bg-[#C6FF34]/15 px-2 py-0.5 rounded-full border border-[#C6FF34]/30 font-bold">
+                        <ShieldCheck className="w-3 h-3" /> VERIFIED FACULTY
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      {blog.author?.title || 'Senior Cybersecurity Mentor'} · {blog.author?.company || 'Thread Security'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-500">Academic Verified · E-E-A-T Indexed</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                {blog.author?.bio ||
+                  'Experienced cybersecurity researcher & mentor guiding students through enterprise SOC operations, defensive engineering, and real-world adversary emulation.'}
+              </p>
+
+              {blog.author?.expertise && (
+                <div className="pt-2 text-[11px] text-slate-400">
+                  <strong className="text-slate-300">Specializations:</strong> {blog.author.expertise}
+                </div>
+              )}
+            </div>
           </article>
         </div>
 
@@ -269,7 +435,8 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                   key={rel.id}
                   className="bg-[#0a0a0a] border border-white/10 hover:border-white/20 rounded-2xl p-5 space-y-3 flex flex-col justify-between group transition-all"
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-3">
+                    <BlogCoverImage blog={rel} className="rounded-xl aspect-[16/9]" />
                     <span className="text-[10px] font-mono text-[#C6FF34] font-bold uppercase">{rel.category?.name || 'Research'}</span>
                     <Link href={`/blog/${rel.slug}`}>
                       <h4 className="text-base font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug">
