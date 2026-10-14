@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/server/database/prisma';
-import { getSession } from '@/lib/auth/session';
+import { getSession, isAdminRole } from '@/lib/auth/session';
 import { Sparkles, Globe, Activity } from 'lucide-react';
 import { BroadcastMessageModal } from '@/components/notifications/broadcast-modal';
 import { BroadcastNotificationBanner } from '@/components/notifications/broadcast-banner';
@@ -14,17 +14,27 @@ export default async function AdminLayout({
 }) {
   const session = await getSession();
 
-  // Strict role validation: allow SUPER_ADMIN, ACADEMIC_ADMIN, and SECURITY_ADMIN
-  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN' && session.role !== 'SECURITY_ADMIN')) {
+  // Unified role validation for admin portal
+  if (!session || !isAdminRole(session.role)) {
     redirect('/login?error=UnauthorizedAccess');
   }
 
-  const [admin, mentorsCount] = await Promise.all([
-    prisma.user.findFirst({
-      where: { id: session.userId },
-    }),
-    prisma.mentorProfile.count(),
-  ]);
+  let admin = null;
+  let mentorsCount = 0;
+  try {
+    const [fetchedAdmin, count] = await Promise.all([
+      session.userId
+        ? prisma.user.findFirst({
+            where: { id: session.userId },
+          }).catch(() => null)
+        : null,
+      prisma.mentorProfile.count().catch(() => 0),
+    ]);
+    admin = fetchedAdmin;
+    mentorsCount = count || 0;
+  } catch (err) {
+    console.error('[Admin Layout] Failed to fetch admin metadata:', err);
+  }
 
   const headerActions = (
     <>

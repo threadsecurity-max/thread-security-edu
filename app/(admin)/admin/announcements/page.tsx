@@ -3,7 +3,7 @@ import { getCurrentUser, isAdminRole } from '@/lib/auth/session';
 import { prisma } from '@/server/database/prisma';
 import { getAdminConversationsService } from '@/server/services/message.service';
 import { getBroadcastAnalyticsService } from '@/server/services/notification.service';
-import { AnnouncementsClient } from '@/app/(admin)/admin/announcements/announcements-client';
+import { AnnouncementsClient } from './announcements-client';
 
 export const metadata = {
   title: 'Announcements & Direct Messaging | Thread Security Admin',
