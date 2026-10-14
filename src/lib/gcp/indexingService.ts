@@ -76,8 +76,12 @@ export async function requestGoogleInstantIndexing(
       isMock: false,
     };
   } catch (error: any) {
-    const errorMessage = error?.message || 'Failed to submit URL to Google Indexing API';
-    console.error('[Indexing Service] Request failed:', error);
+    const rawError = error?.message || 'Failed to submit URL to Google Indexing API';
+    let errorMessage = rawError;
+    if (rawError.includes('Could not load the default credentials')) {
+      errorMessage = 'Google Cloud Authentication Required: GCP_PRIVATE_KEY is missing or invalid in your .env configuration. To submit live URLs to Google Indexing API, add the service account private key to .env.';
+    }
+    console.error('[Indexing Service] Request failed:', errorMessage);
 
     try {
       await (prisma as any).indexingLog.create({
