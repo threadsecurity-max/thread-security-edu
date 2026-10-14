@@ -2,11 +2,9 @@ import { Metadata } from 'next';
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import PlacementHighlightsClient from '../placements/PlacementHighlightsClient';
 
-const APP_URL =
-  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.NEXTAUTH_URL ||
-  'https://threadsecurity.in';
+import { getSiteUrl } from '@/lib/seo/siteUrl';
+
+const APP_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   title: 'Cyber Security Placement Training & Job Assistance | Hiring Partners',

@@ -4,10 +4,9 @@ import { prisma } from '@/server/database/prisma';
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
 
-const APP_URL =
-  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  'https://www.threadsecurity.in';
+import { getSiteUrl } from '@/lib/seo/siteUrl';
+
+const APP_URL = getSiteUrl();
 
 function escapeXml(unsafe: string) {
   return (unsafe || '').replace(/[<>&'"]/g, (c) => {

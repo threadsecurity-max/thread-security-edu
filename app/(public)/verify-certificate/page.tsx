@@ -9,11 +9,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Award, ShieldCheck, CheckCircle2, Search, Lock } from 'lucide-react';
 import ScrollFloat from '@/components/ui/ScrollFloat';
 
-const APP_URL =
-  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.NEXTAUTH_URL ||
-  'https://threadsecurity.in';
+import { getSiteUrl } from '@/lib/seo/siteUrl';
+
+const APP_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   title: 'Cryptographic Certificate Verification | Verify TS-ID Credentials',

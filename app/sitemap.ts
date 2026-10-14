@@ -6,11 +6,10 @@ import { MASTER_COURSES } from '@/lib/courses/courseRegistry';
 export const dynamic = 'force-dynamic';
 export const revalidate = 3600;
 
+import { getSiteUrl } from '@/lib/seo/siteUrl';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl =
-    process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    'https://www.threadsecurity.in';
+  const baseUrl = getSiteUrl();
 
   const now = new Date();
 

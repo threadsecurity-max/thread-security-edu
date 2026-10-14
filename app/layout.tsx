@@ -44,13 +44,12 @@ export const viewport: Viewport = {
   ],
 };
 
-const APP_URL =
-  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  'https://www.threadsecurity.in';
+import { getSiteMetadataBase, getSiteUrl } from '@/lib/seo/siteUrl';
+
+const APP_URL = getSiteUrl();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(APP_URL),
+  metadataBase: getSiteMetadataBase(),
   title: {
     default: 'Thread Security Education — Advanced Cybersecurity & AI Training Institute',
     template: '%s | Thread Security Education',

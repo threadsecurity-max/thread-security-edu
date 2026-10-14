@@ -4,11 +4,9 @@ import { prisma } from '@/server/database/prisma';
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { WorkshopGalleryClient, WorkshopItem } from './WorkshopGalleryClient';
 
-const APP_URL =
-  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.NEXTAUTH_URL ||
-  'https://threadsecurity.in';
+import { getSiteUrl } from '@/lib/seo/siteUrl';
+
+const APP_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   title: 'Cybersecurity Workshops, 45 Days Summer Training & 6 Month Internships',

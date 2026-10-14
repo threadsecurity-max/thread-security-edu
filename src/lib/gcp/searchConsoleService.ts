@@ -125,6 +125,10 @@ export async function fetchSearchConsolePerformance(
 }
 
 function getMockSearchPerformance(siteUrl: string, startDate: string, endDate: string): SearchPerformanceData {
+  const cleanWebUrl = siteUrl.startsWith('sc-domain:')
+    ? `https://${siteUrl.replace(/^sc-domain:/, '')}`
+    : siteUrl.replace(/\/$/, '');
+
   return {
     siteUrl,
     startDate,
@@ -143,11 +147,11 @@ function getMockSearchPerformance(siteUrl: string, startDate: string, endDate: s
       { query: 'thread security education certificate', clicks: 980, impressions: 12400, ctr: 7.90, position: 1.8 },
     ],
     topPages: [
-      { page: `${siteUrl}/courses/cyber-threat-defense`, clicks: 4890, impressions: 72000, ctr: 6.79, position: 3.1 },
-      { page: `${siteUrl}/courses/soc-analyst-mastery`, clicks: 3620, impressions: 58000, ctr: 6.24, position: 4.0 },
-      { page: `${siteUrl}/courses/red-team-ops`, clicks: 2840, impressions: 46000, ctr: 6.17, position: 4.9 },
-      { page: `${siteUrl}/blog`, clicks: 1980, impressions: 39000, ctr: 5.07, position: 8.2 },
-      { page: `${siteUrl}/workshops`, clicks: 1520, impressions: 31000, ctr: 4.90, position: 9.1 },
+      { page: `${cleanWebUrl}/courses/cyber-threat-defense`, clicks: 4890, impressions: 72000, ctr: 6.79, position: 3.1 },
+      { page: `${cleanWebUrl}/courses/soc-analyst-mastery`, clicks: 3620, impressions: 58000, ctr: 6.24, position: 4.0 },
+      { page: `${cleanWebUrl}/courses/red-team-ops`, clicks: 2840, impressions: 46000, ctr: 6.17, position: 4.9 },
+      { page: `${cleanWebUrl}/blog`, clicks: 1980, impressions: 39000, ctr: 5.07, position: 8.2 },
+      { page: `${cleanWebUrl}/workshops`, clicks: 1520, impressions: 31000, ctr: 4.90, position: 9.1 },
     ],
     isMockData: true,
   };

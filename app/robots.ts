@@ -1,10 +1,8 @@
 import { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/seo/siteUrl';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl =
-    process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    'https://www.threadsecurity.in';
+  const baseUrl = getSiteUrl();
 
   return {
     rules: [

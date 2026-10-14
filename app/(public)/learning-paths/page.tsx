@@ -8,11 +8,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Layers, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import ScrollFloat from '@/components/ui/ScrollFloat';
 
-const APP_URL =
-  process.env.GCP_SEARCH_CONSOLE_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  process.env.NEXTAUTH_URL ||
-  'https://threadsecurity.in';
+import { getSiteUrl } from '@/lib/seo/siteUrl';
+
+const APP_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   title: 'Cyber Security Career Roadmaps & Learning Paths | Beginner to Expert',
