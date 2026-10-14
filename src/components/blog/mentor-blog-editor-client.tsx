@@ -415,6 +415,21 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
         </div>
       )}
 
+      {/* Editorial Review Pending Banner */}
+      {publishStatus === 'REVIEW' && (
+        <div className="p-3.5 rounded-xl bg-sky-950/20 border border-sky-500/30 text-white text-xs font-mono flex items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse shrink-0" />
+            <span>
+              📋 <strong className="text-sky-400">Submitted for Editorial Review:</strong> This article is in the Admin Review Queue. An administrator will review your technical depth, verify SEO tags, and publish it to the live platform.
+            </span>
+          </div>
+          <span className="text-[10px] text-sky-400 font-bold uppercase tracking-wider shrink-0 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+            PENDING ADMIN SIGNOFF
+          </span>
+        </div>
+      )}
+
       {error && (
         <div className="p-3 rounded-xl bg-rose-950/20 border border-rose-500/30 text-rose-300 text-xs font-mono flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />

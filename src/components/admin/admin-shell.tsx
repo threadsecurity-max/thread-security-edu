@@ -115,6 +115,7 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
     {
       title: 'Operations',
       items: [
+        { name: 'Editorial & Blogs', href: '/admin/blogs', icon: BookOpen },
         { name: 'Tasks (CSM & SEO)', href: '/admin/tasks', icon: CheckSquare },
         { name: 'Faculty Messages', href: '/admin/messages', icon: MessageSquare },
         { name: 'Lead Pipeline', href: '/admin/leads', icon: Sliders },

@@ -561,3 +561,226 @@ export async function getRelatedBlogs(blogId: string, categoryId?: string | null
     },
   });
 }
+
+// ============================================================================
+// ADMIN EDITORIAL & MODERATION SERVICES
+// ============================================================================
+
+export async function getAdminBlogs(options?: {
+  search?: string;
+  status?: string;
+  categoryId?: string;
+  page?: number;
+  limit?: number;
+}) {
+  await seedBlogCategoriesIfEmpty();
+  const page = options?.page || 1;
+  const limit = options?.limit || 15;
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+
+  if (options?.status && options.status !== 'ALL') {
+    where.status = options.status;
+  }
+
+  if (options?.categoryId && options.categoryId !== 'ALL') {
+    where.categoryId = options.categoryId;
+  }
+
+  if (options?.search) {
+    where.OR = [
+      { title: { contains: options.search, mode: 'insensitive' } },
+      { subtitle: { contains: options.search, mode: 'insensitive' } },
+      { excerpt: { contains: options.search, mode: 'insensitive' } },
+      { author: { user: { name: { contains: options.search, mode: 'insensitive' } } } },
+    ];
+  }
+
+  const [blogs, total, pendingReviewCount, publishedCount, draftCount, allBlogsForViews] = await Promise.all([
+    db.blog.findMany({
+      where,
+      orderBy: [
+        // Prioritize pending reviews first, then most recently updated
+        { updatedAt: 'desc' },
+      ],
+      skip,
+      take: limit,
+      include: {
+        category: true,
+        tags: true,
+        seo: true,
+        media: true,
+        author: {
+          include: {
+            user: { select: { id: true, name: true, email: true, avatarUrl: true } },
+          },
+        },
+      },
+    }),
+    db.blog.count({ where }),
+    db.blog.count({ where: { status: 'REVIEW' } }),
+    db.blog.count({ where: { status: 'PUBLISHED' } }),
+    db.blog.count({ where: { status: 'DRAFT' } }),
+    db.blog.findMany({ select: { viewCount: true } }),
+  ]);
+
+  const totalViews = allBlogsForViews.reduce((acc: number, curr: any) => acc + (curr.viewCount || 0), 0);
+
+  return {
+    blogs,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+    metrics: {
+      totalCount: allBlogsForViews.length,
+      pendingReviewCount,
+      publishedCount,
+      draftCount,
+      totalViews,
+    },
+  };
+}
+
+export async function adminApproveAndPublishBlog(blogId: string, adminUserId: string) {
+  const blog = await db.blog.findUnique({
+    where: { id: blogId },
+    include: {
+      author: {
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+      },
+    },
+  });
+
+  if (!blog) throw new Error('Blog article not found');
+
+  const now = new Date();
+  const updatedBlog = await db.blog.update({
+    where: { id: blogId },
+    data: {
+      status: 'PUBLISHED',
+      publishedAt: blog.publishedAt || now,
+    },
+    include: {
+      author: {
+        include: {
+          user: { select: { id: true, name: true } },
+        },
+      },
+    },
+  });
+
+  // Notify the faculty mentor author
+  try {
+    const { createNotificationService } = await import('./notification.service');
+    await createNotificationService({
+      userId: blog.author.userId,
+      title: 'Article Approved & Published! 🚀',
+      message: `Your research guide "${blog.title}" has been reviewed and officially published to the public platform.`,
+      type: 'SUCCESS',
+      linkUrl: `/blog/${blog.slug}`,
+    });
+  } catch (err) {
+    console.warn('Could not dispatch notification to author:', err);
+  }
+
+  // Revalidate public routes
+  try {
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/blog');
+    if (blog.slug) {
+      revalidatePath(`/blog/${blog.slug}`);
+    }
+    revalidatePath('/');
+  } catch (err) {
+    console.warn('Cache revalidation notice:', err);
+  }
+
+  return updatedBlog;
+}
+
+export async function adminRequestBlogRevisions(blogId: string, adminUserId: string, feedbackNote?: string) {
+  const blog = await db.blog.findUnique({
+    where: { id: blogId },
+    include: {
+      author: {
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+        },
+      },
+    },
+  });
+
+  if (!blog) throw new Error('Blog article not found');
+
+  const updatedBlog = await db.blog.update({
+    where: { id: blogId },
+    data: {
+      status: 'DRAFT',
+    },
+    include: {
+      author: {
+        include: {
+          user: { select: { id: true, name: true } },
+        },
+      },
+    },
+  });
+
+  // Send feedback notification to the mentor
+  try {
+    const { createNotificationService } = await import('./notification.service');
+    const reasonText = feedbackNote?.trim() || 'Please review your article draft and resubmit once updated.';
+    await createNotificationService({
+      userId: blog.author.userId,
+      title: 'Revisions Requested on Article 📝',
+      message: `Editorial feedback on "${blog.title}": ${reasonText}`,
+      type: 'WARNING',
+      linkUrl: `/mentor/blogs/${blog.id}/edit`,
+    });
+  } catch (err) {
+    console.warn('Could not dispatch notification to author:', err);
+  }
+
+  // Revalidate paths
+  try {
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/blog');
+    if (blog.slug) {
+      revalidatePath(`/blog/${blog.slug}`);
+    }
+    revalidatePath('/');
+  } catch (err) {
+    console.warn('Cache revalidation notice:', err);
+  }
+
+  return updatedBlog;
+}
+
+export async function adminToggleFeaturedBlog(blogId: string, adminUserId: string) {
+  const blog = await db.blog.findUnique({
+    where: { id: blogId },
+  });
+
+  if (!blog) throw new Error('Blog article not found');
+
+  const updatedBlog = await db.blog.update({
+    where: { id: blogId },
+    data: {
+      featured: !blog.featured,
+    },
+  });
+
+  try {
+    const { revalidatePath } = await import('next/cache');
+    revalidatePath('/blog');
+    revalidatePath('/');
+  } catch (err) {
+    console.warn('Cache revalidation notice:', err);
+  }
+
+  return updatedBlog;
+}
+
