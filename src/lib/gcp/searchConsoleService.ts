@@ -26,7 +26,7 @@ export interface SearchPerformanceData {
 export async function fetchSearchConsolePerformance(
   days: number = 28
 ): Promise<SearchPerformanceData> {
-  const siteUrl = process.env.GCP_SEARCH_CONSOLE_SITE_URL || 'https://threadsec.com';
+  let siteUrl = process.env.GCP_SEARCH_CONSOLE_SITE_URL || 'sc-domain:threadsecurity.in';
   const auth = getGcpAuthClient();
 
   const endDateObj = new Date();
@@ -40,12 +40,11 @@ export async function fetchSearchConsolePerformance(
     return getMockSearchPerformance(siteUrl, startDate, endDate);
   }
 
-  try {
-    const searchconsole = google.searchconsole({ version: 'v1', auth });
-
-    // 1. Fetch Query level metrics
+  // Helper to query search console with fallback between domain property and URL prefix
+  async function runQuery(targetSite: string) {
+    const searchconsole = google.searchconsole({ version: 'v1', auth: auth as any });
     const queryRes = await searchconsole.searchanalytics.query({
-      siteUrl,
+      siteUrl: targetSite,
       requestBody: {
         startDate,
         endDate,
@@ -54,9 +53,8 @@ export async function fetchSearchConsolePerformance(
       },
     });
 
-    // 2. Fetch Page level metrics
     const pageRes = await searchconsole.searchanalytics.query({
-      siteUrl,
+      siteUrl: targetSite,
       requestBody: {
         startDate,
         endDate,
@@ -64,6 +62,26 @@ export async function fetchSearchConsolePerformance(
         rowLimit: 10,
       },
     });
+
+    return { queryRes, pageRes };
+  }
+
+  try {
+    let result;
+    try {
+      result = await runQuery(siteUrl);
+    } catch (primaryErr: any) {
+      // If primary query fails and siteUrl was https://..., try sc-domain:...
+      if (siteUrl.startsWith('http')) {
+        const domain = siteUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+        siteUrl = `sc-domain:${domain}`;
+        result = await runQuery(siteUrl);
+      } else {
+        throw primaryErr;
+      }
+    }
+
+    const { queryRes, pageRes } = result;
 
     const queryRows: SearchMetricRow[] = (queryRes.data.rows || []).map((row) => ({
       query: row.keys?.[0] || 'Unknown Query',

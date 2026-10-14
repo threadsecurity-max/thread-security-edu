@@ -16,6 +16,8 @@
 credentials.json
 *service-account*.json
 gcp-key*.json
+thread-security-*.json
+*.json.key
 
 # SQLite & local databases
 *.db
