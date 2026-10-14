@@ -37,10 +37,28 @@ export async function getAdminConversationsService(adminId: string) {
       },
       include: {
         participantA: {
-          select: { id: true, name: true, email: true, role: true },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            tsIdentity: { select: { tsId: true } },
+            studentProfile: {
+              select: { batch: { select: { batchCode: true, title: true } } },
+            },
+          },
         },
         participantB: {
-          select: { id: true, name: true, email: true, role: true },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            tsIdentity: { select: { tsId: true } },
+            studentProfile: {
+              select: { batch: { select: { batchCode: true, title: true } } },
+            },
+          },
         },
         messages: {
           orderBy: { createdAt: 'desc' },
@@ -124,6 +142,20 @@ export async function sendAdminMessageService(
       where: { id: conv.id },
       data: { updatedAt: new Date() },
     });
+
+    try {
+      await (prisma as any).notification.create({
+        data: {
+          userId: recipientId,
+          title: 'Direct Directive from Academic Admin',
+          message: content.length > 120 ? content.slice(0, 117) + '...' : content,
+          type: 'DIRECT_MESSAGE',
+          linkUrl: '/messages',
+        },
+      });
+    } catch (notifErr) {
+      console.warn('[Message Service] Notification creation ignored:', notifErr);
+    }
 
     return { conversationId: conv.id, message };
   } catch (error) {

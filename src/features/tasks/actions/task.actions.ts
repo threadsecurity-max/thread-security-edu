@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getCurrentUser } from '@/lib/auth/session';
+import { getCurrentUser, isAdminRole } from '@/lib/auth/session';
 import {
   createAdminTaskService,
   updateAdminTaskService,
@@ -15,7 +15,7 @@ import {
 export async function getAdminTasksAction(filter?: TaskFilter) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !isAdminRole(user.role)) {
       return { success: false, error: 'Unauthorized: Admin access required', data: [] };
     }
     const tasks = await getAdminTasksService(filter);
@@ -29,7 +29,7 @@ export async function getAdminTasksAction(filter?: TaskFilter) {
 export async function createAdminTaskAction(input: CreateTaskInput) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !isAdminRole(user.role)) {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
@@ -49,7 +49,7 @@ export async function createAdminTaskAction(input: CreateTaskInput) {
 export async function updateAdminTaskAction(taskId: string, input: UpdateTaskInput) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !isAdminRole(user.role)) {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
@@ -65,7 +65,7 @@ export async function updateAdminTaskAction(taskId: string, input: UpdateTaskInp
 export async function deleteAdminTaskAction(taskId: string) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !isAdminRole(user.role)) {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 

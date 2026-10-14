@@ -15,6 +15,13 @@ import {
   fromBase64Url,
 } from './session-token';
 
+export const ADMIN_ROLES = ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'SECURITY_ADMIN', 'ADMIN'];
+
+export function isAdminRole(role?: string | null): boolean {
+  if (!role) return false;
+  return ADMIN_ROLES.includes(role.toUpperCase());
+}
+
 export type { UserSession };
 export {
   SESSION_COOKIE_NAME,

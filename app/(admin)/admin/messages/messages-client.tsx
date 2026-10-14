@@ -48,7 +48,15 @@ interface ConversationItem {
 interface MessagesClientProps {
   currentUserId: string;
   initialConversations: ConversationItem[];
-  mentors: { id: string; name: string | null; email: string }[];
+  mentors: { id: string; name: string | null; email: string; role?: string }[];
+  students?: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+    tsId?: string | null;
+    batchCode?: string | null;
+  }[];
 }
 
 const DIRECTIVE_TEMPLATES = [
@@ -62,6 +70,7 @@ export function MessagesClient({
   currentUserId,
   initialConversations,
   mentors,
+  students = [],
 }: MessagesClientProps) {
   const [conversations, setConversations] = useState<ConversationItem[]>(initialConversations);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(
@@ -140,14 +149,16 @@ export function MessagesClient({
 
   const handleStartNewThread = async () => {
     if (!selectedMentorForNewChat) return;
-    const mentor = mentors.find((m) => m.id === selectedMentorForNewChat);
-    if (!mentor) return;
+    const recipient =
+      mentors.find((m) => m.id === selectedMentorForNewChat) ||
+      students.find((s) => s.id === selectedMentorForNewChat);
+    if (!recipient) return;
 
     // Check if conversation already exists
     const existing = conversations.find(
       (c) =>
-        (c.participantAId === mentor.id && c.participantBId === currentUserId) ||
-        (c.participantBId === mentor.id && c.participantAId === currentUserId)
+        (c.participantAId === recipient.id && c.participantBId === currentUserId) ||
+        (c.participantBId === recipient.id && c.participantAId === currentUserId)
     );
 
     if (existing) {
@@ -160,8 +171,8 @@ export function MessagesClient({
     // Create a new synthetic conversation or send first hello
     startTransition(async () => {
       const res = await sendAdminMessageAction(
-        mentor.id,
-        `Hello ${mentor.name || 'Faculty'}, this is the Thread Security Academic Command Center.`
+        recipient.id,
+        `Hello ${recipient.name || 'Member'}, this is the Thread Security Academic Command Center.`
       );
       if (res.success && res.data) {
         setIsNewChatOpen(false);
@@ -413,19 +424,30 @@ export function MessagesClient({
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-mono text-slate-400 mb-1">
-                  FACULTY / MENTOR ROSTER
+                  RECIPIENT (FACULTY MENTOR OR STUDENT)
                 </label>
                 <select
                   value={selectedMentorForNewChat}
                   onChange={(e) => setSelectedMentorForNewChat(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white"
                 >
-                  <option value="">Select a mentor to message</option>
-                  {mentors.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name || m.email} ({m.email})
-                    </option>
-                  ))}
+                  <option value="">Select a mentor or student to message</option>
+                  <optgroup label="Faculty & Mentors">
+                    {mentors.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name || m.email} (Faculty • {m.email})
+                      </option>
+                    ))}
+                  </optgroup>
+                  {students.length > 0 && (
+                    <optgroup label="Enrolled Students">
+                      {students.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name || s.email} (Student {s.tsId ? `• ${s.tsId}` : ''} {s.batchCode ? `• ${s.batchCode}` : ''})
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 

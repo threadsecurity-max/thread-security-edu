@@ -19,7 +19,7 @@ export default async function AdminTimetablePage() {
       session.role !== 'SUPER_ADMIN' &&
       session.role !== 'ACADEMIC_ADMIN')
   ) {
-    redirect('/auth/login');
+    redirect('/login');
   }
 
   const [batches, mentors, courses] = await Promise.all([

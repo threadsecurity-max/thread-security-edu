@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getCurrentUser } from '@/lib/auth/session';
+import { getCurrentUser, isAdminRole } from '@/lib/auth/session';
 import {
   getAdminConversationsService,
   getConversationMessagesService,
@@ -11,8 +11,8 @@ import {
 export async function getAdminConversationsAction() {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
-      return { success: false, error: 'Unauthorized', data: [] };
+    if (!user || !isAdminRole(user.role)) {
+      return { success: false, error: 'Unauthorized: Admin access required', data: [] };
     }
     const conversations = await getAdminConversationsService(user.userId);
     return { success: true, data: conversations };
@@ -39,7 +39,7 @@ export async function getConversationMessagesAction(conversationId: string) {
 export async function sendAdminMessageAction(recipientId: string, content: string) {
   try {
     const user = await getCurrentUser();
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !isAdminRole(user.role)) {
       return { success: false, error: 'Unauthorized: Admin access required' };
     }
 
@@ -49,6 +49,7 @@ export async function sendAdminMessageAction(recipientId: string, content: strin
 
     const res = await sendAdminMessageService(user.userId, recipientId, content);
     revalidatePath('/admin/messages');
+    revalidatePath('/admin/announcements');
     return { success: true, data: res };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to send message';

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/lib/auth/session';
+import { getCurrentUser, isAdminRole } from '@/lib/auth/session';
 import { prisma } from '@/server/database/prisma';
 import { getAdminTasksService } from '@/server/services/task.service';
 import { TasksClient } from '@/app/(admin)/admin/tasks/tasks-client';
@@ -11,8 +11,8 @@ export const metadata = {
 
 export default async function AdminTasksPage() {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'ADMIN') {
-    redirect('/auth/login');
+  if (!user || !isAdminRole(user.role)) {
+    redirect('/login');
   }
 
   // Fetch initial tasks
