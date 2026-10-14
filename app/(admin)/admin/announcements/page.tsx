@@ -13,7 +13,13 @@ export const metadata = {
 export const revalidate = 0;
 
 export default async function AdminAnnouncementsPage() {
-  const user = await getCurrentUser();
+  let user: any = null;
+  try {
+    user = await getCurrentUser();
+  } catch (err) {
+    console.error('[Announcements Page] Failed to fetch current user:', err);
+  }
+
   if (!user || !isAdminRole(user.role)) {
     redirect('/login?error=UnauthorizedAccess');
   }
@@ -21,20 +27,23 @@ export default async function AdminAnnouncementsPage() {
   // 1. Get every conversation the admin had earlier (with mentors and students)
   let initialConversations: any[] = [];
   try {
-    initialConversations = await getAdminConversationsService(user.userId);
+    const rawConvs = await getAdminConversationsService(user.userId);
+    initialConversations = JSON.parse(JSON.stringify(rawConvs || []));
   } catch (e) {
     console.error('[Announcements Page] Error fetching conversations:', e);
+    initialConversations = [];
   }
 
   // 2. Get mentors roster
   let mentors: { id: string; name: string | null; email: string; role: string }[] = [];
   try {
-    mentors = await prisma.user.findMany({
+    const rawMentors = await prisma.user.findMany({
       where: { role: 'MENTOR' },
       select: { id: true, name: true, email: true, role: true },
       orderBy: { name: 'asc' },
       take: 100,
     });
+    mentors = JSON.parse(JSON.stringify(rawMentors || []));
   } catch (e) {
     console.error('[Announcements Page] Error fetching mentors:', e);
     mentors = [];
@@ -67,7 +76,7 @@ export default async function AdminAnnouncementsPage() {
       orderBy: { createdAt: 'desc' },
       take: 200,
     });
-    students = rawStudents.map((s) => ({
+    students = (rawStudents || []).map((s) => ({
       id: s.id,
       name: s.name,
       email: s.email,
@@ -88,15 +97,16 @@ export default async function AdminAnnouncementsPage() {
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
-    batches = rawBatches.map((b) => ({ id: b.id, name: b.title, code: b.batchCode }));
+    batches = (rawBatches || []).map((b) => ({ id: b.id, name: b.title, code: b.batchCode }));
   } catch {
     batches = [];
   }
 
   // 5. Get broadcast analytics
-  let analytics: any = null;
+  let analytics: any = { totalSent: 0, readRate: 0, recentBroadcasts: [] };
   try {
-    analytics = await getBroadcastAnalyticsService();
+    const rawAnalytics = await getBroadcastAnalyticsService();
+    analytics = JSON.parse(JSON.stringify(rawAnalytics || { totalSent: 0, readRate: 0, recentBroadcasts: [] }));
   } catch {
     analytics = { totalSent: 0, readRate: 0, recentBroadcasts: [] };
   }

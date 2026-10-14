@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser, isAdminRole } from '@/lib/auth/session';
 import { prisma } from '@/server/database/prisma';
 import { getAdminConversationsService } from '@/server/services/message.service';
-import { MessagesClient } from '@/app/(admin)/admin/messages/messages-client';
+import { MessagesClient } from './messages-client';
 
 export const metadata = {
   title: 'Faculty & Student Messaging | Thread Security Admin',
@@ -12,17 +12,25 @@ export const metadata = {
 export const revalidate = 0;
 
 export default async function AdminMessagesPage() {
-  const user = await getCurrentUser();
+  let user: any = null;
+  try {
+    user = await getCurrentUser();
+  } catch (err) {
+    console.error('[Messages Page] Failed to fetch current user:', err);
+  }
+
   if (!user || !isAdminRole(user.role)) {
     redirect('/login?error=UnauthorizedAccess');
   }
 
   // Get conversations
-  let initialConversations = [];
+  let initialConversations: any[] = [];
   try {
-    initialConversations = await getAdminConversationsService(user.userId);
+    const rawConvs = await getAdminConversationsService(user.userId);
+    initialConversations = JSON.parse(JSON.stringify(rawConvs || []));
   } catch (e) {
     console.error('Error fetching conversations:', e);
+    initialConversations = [];
   }
 
   // Get all mentors for the "Start Chat" roster
