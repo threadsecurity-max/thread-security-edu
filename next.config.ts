@@ -1,11 +1,13 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  output: process.env.VERCEL ? undefined : 'standalone',
+  serverExternalPackages: ['googleapis'],
   devIndicators: false,
   reactStrictMode: true,
   compress: true,
   experimental: {
+    webpackMemoryOptimizations: true,
     serverActions: {
       bodySizeLimit: '10mb',
     },
