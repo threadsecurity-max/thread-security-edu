@@ -76,7 +76,7 @@ function FieldHelp({
         </div>
         {tip && (
           <p className="text-[10px] text-[#C6FF34] font-medium flex items-start gap-1 leading-tight pt-0.5">
-            <span>💡</span>
+            <Sparkles className="w-3.5 h-3.5 text-[#C6FF34] shrink-0 mt-0.5" />
             <span>{tip}</span>
           </p>
         )}
@@ -428,8 +428,8 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                 <h1 className="text-lg md:text-xl font-bold font-mono text-white flex items-center gap-2">
                   <Globe className="w-4 h-4 text-[#C6FF34]" /> BLOG STUDIO WORKSPACE
                 </h1>
-                <Badge
-                  className={`font-mono text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 ${
+                <div
+                  className={`font-mono text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 ${
                     isScheduled
                       ? 'bg-violet-500/20 text-violet-300 border border-violet-500/40'
                       : publishStatus === 'PUBLISHED'
@@ -439,14 +439,28 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                       : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                   }`}
                 >
-                  {isScheduled
-                    ? `⏰ SCHEDULED (${getCountdownLabel(publishedAt)})`
-                    : publishStatus === 'PUBLISHED'
-                    ? '● LIVE ARTICLE'
-                    : publishStatus === 'REVIEW'
-                    ? '● UNDER REVIEW'
-                    : '● WORKING DRAFT'}
-                </Badge>
+                  {isScheduled ? (
+                    <>
+                      <Clock className="w-3 h-3 animate-pulse text-violet-400" />
+                      SCHEDULED ({getCountdownLabel(publishedAt)})
+                    </>
+                  ) : publishStatus === 'PUBLISHED' ? (
+                    <>
+                      <Check className="w-3 h-3 text-emerald-400" />
+                      LIVE ARTICLE
+                    </>
+                  ) : publishStatus === 'REVIEW' ? (
+                    <>
+                      <Clock className="w-3 h-3 text-sky-400" />
+                      UNDER REVIEW
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle className="w-3 h-3 text-amber-400" />
+                      WORKING DRAFT
+                    </>
+                  )}
+                </div>
               </div>
               <p className="text-xs text-slate-300 font-mono mt-1 flex items-center gap-2 flex-wrap">
                 <span>
@@ -519,7 +533,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
             >
               <Clock className="w-3.5 h-3.5" />
               {isScheduled
-                ? 'Manage Schedule ⏰'
+                ? 'Manage Schedule'
                 : publishStatus === 'PUBLISHED'
                 ? 'Update Live / Schedule'
                 : 'Publish / Schedule'}
@@ -643,7 +657,9 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-sm text-white">🚀 Publish Now</span>
+                    <span className="font-bold text-sm text-white flex items-center gap-1.5">
+                      <Globe className="w-4 h-4 text-emerald-400" /> Publish Now
+                    </span>
                     {scheduleType === 'immediate' && (
                       <Check className="w-4 h-4 text-[#C6FF34]" />
                     )}
@@ -662,7 +678,9 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-bold text-sm text-white">⏰ Schedule Release</span>
+                    <span className="font-bold text-sm text-white flex items-center gap-1.5">
+                      <Calendar className="w-4 h-4 text-violet-400" /> Schedule Release
+                    </span>
                     {scheduleType === 'scheduled' && (
                       <Check className="w-4 h-4 text-violet-400" />
                     )}
@@ -717,16 +735,20 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                   type="button"
                   onClick={handleConfirmPublishOrSchedule}
                   disabled={saving}
-                  className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 px-4 rounded-xl cursor-pointer shadow-lg shadow-[#C6FF34]/20"
+                  className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 px-4 rounded-xl cursor-pointer shadow-lg shadow-[#C6FF34]/20 flex items-center gap-1.5"
                 >
                   {saving ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Saving...
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
                     </>
                   ) : scheduleType === 'scheduled' ? (
-                    'Confirm & Schedule Article ⏰'
+                    <>
+                      <Calendar className="w-3.5 h-3.5" /> Confirm & Schedule Article
+                    </>
                   ) : (
-                    'Publish Live to Platform 🚀'
+                    <>
+                      <Globe className="w-3.5 h-3.5" /> Publish Live to Platform
+                    </>
                   )}
                 </Button>
               </div>
@@ -806,7 +828,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                         : 'text-slate-500'
                     }`}
                   >
-                    {title.length}/60 chars {title.length >= 35 && title.length <= 65 ? '✓ Optimal' : ''}
+                    {title.length}/60 chars {title.length >= 35 && title.length <= 65 ? '· Optimal' : ''}
                   </span>
                 </div>
                 <Input
@@ -874,7 +896,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                         : 'text-slate-500'
                     }`}
                   >
-                    {excerpt.length}/160 chars {excerpt.length >= 80 && excerpt.length <= 160 ? '✓ Snippet Ready' : ''}
+                    {excerpt.length}/160 chars {excerpt.length >= 80 && excerpt.length <= 160 ? '· Snippet Ready' : ''}
                   </span>
                 </div>
                 <textarea

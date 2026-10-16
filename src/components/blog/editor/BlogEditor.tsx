@@ -7,6 +7,10 @@ import LinkExtension from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import {
   Bold,
   Italic,
@@ -31,6 +35,11 @@ import {
   Loader2,
   HelpCircle,
   Sparkles,
+  Table as TableIcon,
+  Plus,
+  Trash2,
+  Check,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,6 +77,15 @@ export function BlogEditor({
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'tiptap-table border-collapse w-full my-6 text-sm text-left border border-white/20 rounded-xl overflow-hidden shadow-xl',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       ImageExtension.configure({
         allowBase64: true,
         HTMLAttributes: {
@@ -223,6 +241,13 @@ export function BlogEditor({
         dot: 'bg-[#C6FF34]',
       };
     }
+    if (editor.isActive('table')) {
+      return {
+        label: 'Academic Data Table Matrix',
+        color: 'text-[#C6FF34] border-[#C6FF34]/30 bg-[#C6FF34]/10',
+        dot: 'bg-[#C6FF34]',
+      };
+    }
     if (editor.isActive('codeBlock')) {
       return {
         label: 'Code Block Surface',
@@ -370,8 +395,8 @@ export function BlogEditor({
                 <p className="text-[11px] text-slate-300">
                   Use for main subject breaks (e.g. <span className="text-white italic">"1. Threat Landscape Overview"</span>).
                 </p>
-                <p className="text-[10px] text-slate-400">
-                  💡 Best practice: 2–4 per article for clear Google outline structure.
+                <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3 text-[#C6FF34]" /> Best practice: 2–4 per article for clear Google outline structure.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -684,6 +709,40 @@ export function BlogEditor({
 
           <div className="w-px h-5 bg-white/10 mx-0.5" />
 
+          {/* Table Insertion & Controls */}
+          <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (editor.isActive('table')) {
+                      editor.chain().focus().deleteTable().run();
+                    } else {
+                      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+                    }
+                  }}
+                  className={`h-8 px-2.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
+                    editor.isActive('table')
+                      ? 'bg-[#C6FF34] text-black shadow-md shadow-[#C6FF34]/20'
+                      : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <TableIcon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{editor.isActive('table') ? 'Table Active' : 'Insert Table'}</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-bold">{editor.isActive('table') ? 'Table Active (Click to remove)' : 'Insert 3×3 Research Table'}</p>
+                <p className="text-[11px] text-slate-400">Comparison matrices, CVE mappings, benchmark stats</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+
+          <div className="w-px h-5 bg-white/10 mx-0.5" />
+
           {/* Undo / Redo */}
           <div className="flex items-center gap-0.5 bg-black/40 p-1 rounded-xl border border-white/5">
             <Tooltip>
@@ -732,6 +791,124 @@ export function BlogEditor({
           )}
         </div>
 
+        {/* Dynamic Table Manipulation Toolbar (Visible when cursor is inside any table cell) */}
+        {editor.isActive('table') && (
+          <div className="flex flex-wrap items-center gap-1.5 px-3 py-2 bg-[#18181c] border-b border-[#C6FF34]/30 text-white select-none text-xs font-mono animate-in fade-in duration-200">
+            <span className="text-[11px] font-bold uppercase text-[#C6FF34] flex items-center gap-1.5 mr-1">
+              <TableIcon className="w-3.5 h-3.5 text-[#C6FF34]" />
+              TABLE CONTROLS:
+            </span>
+
+            {/* Column actions */}
+            <div className="flex items-center gap-0.5 bg-black/50 p-0.5 rounded-lg border border-white/10">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().addColumnBefore().run()}
+                className="h-7 px-2 text-[11px] text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Add Column Before"
+              >
+                <Plus className="w-3 h-3 mr-1 text-[#C6FF34]" /> Col Left
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+                className="h-7 px-2 text-[11px] text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Add Column After"
+              >
+                <Plus className="w-3 h-3 mr-1 text-[#C6FF34]" /> Col Right
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().deleteColumn().run()}
+                className="h-7 px-2 text-[11px] text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 cursor-pointer"
+                title="Delete Current Column"
+              >
+                <Trash2 className="w-3 h-3 mr-1" /> Del Col
+              </Button>
+            </div>
+
+            <div className="w-px h-4 bg-white/10 mx-0.5" />
+
+            {/* Row actions */}
+            <div className="flex items-center gap-0.5 bg-black/50 p-0.5 rounded-lg border border-white/10">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().addRowBefore().run()}
+                className="h-7 px-2 text-[11px] text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Add Row Above"
+              >
+                <Plus className="w-3 h-3 mr-1 text-sky-400" /> Row Above
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+                className="h-7 px-2 text-[11px] text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Add Row Below"
+              >
+                <Plus className="w-3 h-3 mr-1 text-sky-400" /> Row Below
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().deleteRow().run()}
+                className="h-7 px-2 text-[11px] text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 cursor-pointer"
+                title="Delete Current Row"
+              >
+                <Trash2 className="w-3 h-3 mr-1" /> Del Row
+              </Button>
+            </div>
+
+            <div className="w-px h-4 bg-white/10 mx-0.5" />
+
+            {/* Cell merge / split & header toggle */}
+            <div className="flex items-center gap-0.5 bg-black/50 p-0.5 rounded-lg border border-white/10">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().mergeOrSplit().run()}
+                className="h-7 px-2 text-[11px] text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Merge or Split Cells"
+              >
+                Merge / Split
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+                className="h-7 px-2 text-[11px] text-slate-300 hover:text-white hover:bg-white/10 cursor-pointer"
+                title="Toggle Header Row"
+              >
+                Header Row
+              </Button>
+            </div>
+
+            {/* Delete entire table */}
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              className="ml-auto h-7 px-2.5 text-[11px] text-rose-400 hover:text-white hover:bg-rose-600/30 border border-rose-500/30 rounded-lg cursor-pointer"
+              title="Delete Entire Table"
+            >
+              <Trash2 className="w-3 h-3 mr-1" /> Remove Table
+            </Button>
+          </div>
+        )}
+
         {/* Live Block Hierarchy & Cursor Position Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2 bg-[#111113] border-b border-white/5 text-[11px] font-mono select-none">
           {/* Active Node Pill */}
@@ -764,7 +941,9 @@ export function BlogEditor({
                   <span>·</span>
                   <span>{currentReadingMinutes} min read</span>
                   {currentWordCount >= 1500 ? (
-                    <span className="hidden sm:inline">✓ Pillar Post</span>
+                    <span className="hidden sm:inline-flex items-center gap-1">
+                      <Check className="w-3 h-3 text-[#C6FF34]" /> Pillar Post
+                    </span>
                   ) : currentWordCount < 300 ? (
                     <span className="hidden sm:inline">Short Draft</span>
                   ) : null}
@@ -779,11 +958,11 @@ export function BlogEditor({
             <span className="flex items-center gap-1 text-slate-300">
               <span className="w-2 h-2 rounded-full bg-[#C6FF34]" /> H1 Major
             </span>
-            <span className="text-slate-600">›</span>
+            <ChevronRight className="w-3 h-3 text-slate-600" />
             <span className="flex items-center gap-1 text-slate-300">
               <span className="w-2 h-2 rounded-full bg-sky-400" /> H2 Sub
             </span>
-            <span className="text-slate-600">›</span>
+            <ChevronRight className="w-3 h-3 text-slate-600" />
             <span className="flex items-center gap-1 text-slate-300">
               <span className="w-2 h-2 rounded-full bg-purple-400" /> H3 Detail
             </span>

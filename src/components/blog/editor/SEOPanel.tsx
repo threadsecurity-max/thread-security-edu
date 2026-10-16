@@ -15,6 +15,7 @@ import {
   Monitor,
   Link2,
   ExternalLink,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -271,7 +272,9 @@ export function SEOPanel({
                   TS
                 </div>
                 <span className="text-slate-300 font-medium">Thread Security Education</span>
-                <span className="text-slate-500">› blog › {simulatedSlug}</span>
+                <span className="text-slate-500 inline-flex items-center gap-1">
+                  <ChevronRight className="w-3 h-3 text-slate-500" /> blog <ChevronRight className="w-3 h-3 text-slate-500" /> {simulatedSlug}
+                </span>
               </div>
 
               <h4 className="text-base text-[#8ab4f8] hover:underline cursor-pointer leading-snug line-clamp-2 font-normal">

@@ -122,3 +122,92 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, blockquote, dt, dd {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ==========================================================
+   RESEARCH & ACADEMIC DATA TABLES (TipTap + Prose)
+   High-contrast, responsive, cyber-academic aesthetic
+   ========================================================== */
+.tiptap table,
+.prose table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1.75rem 0;
+  overflow-x: auto;
+  display: table;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(12, 12, 14, 0.85);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.6);
+}
+
+.tiptap table th,
+.prose table th {
+  background-color: #16161a;
+  color: #C6FF34;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.85rem 1rem;
+  border-bottom: 2px solid rgba(198, 255, 52, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.tiptap table th:last-child,
+.prose table th:last-child {
+  border-right: none;
+}
+
+.tiptap table td,
+.prose table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  vertical-align: top;
+}
+
+.tiptap table td:last-child,
+.prose table td:last-child {
+  border-right: none;
+}
+
+.tiptap table tr:last-child td,
+.prose table tr:last-child td {
+  border-bottom: none;
+}
+
+.tiptap table tr:hover,
+.prose table tr:hover {
+  background-color: rgba(255, 255, 255, 0.025);
+}
+
+/* TipTap Selected Table Cell Highlight */
+.tiptap table .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(198, 255, 52, 0.15);
+  border: 1px solid #C6FF34;
+  pointer-events: none;
+}
+
+.tiptap table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #C6FF34;
+  pointer-events: none;
+}
+

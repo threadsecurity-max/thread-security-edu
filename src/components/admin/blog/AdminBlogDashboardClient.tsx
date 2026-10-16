@@ -514,7 +514,7 @@ export function AdminBlogDashboardClient({
             >
               <option value="ALL">All Statuses</option>
               <option value="REVIEW">Pending Review</option>
-              <option value="SCHEDULED">⏰ Scheduled Releases</option>
+              <option value="SCHEDULED">Scheduled Releases</option>
               <option value="PUBLISHED">Published Live</option>
               <option value="DRAFT">Drafts</option>
             </select>
@@ -585,24 +585,27 @@ export function AdminBlogDashboardClient({
                       <td className="py-3.5 px-4">
                         {b.status === 'PUBLISHED' && (
                           b.publishedAt && new Date(b.publishedAt) > new Date() ? (
-                            <Badge className="bg-sky-500/15 border-sky-500/30 text-sky-600 dark:text-sky-400 font-bold text-[10px] gap-1">
-                              <Clock className="w-2.5 h-2.5 animate-pulse" />
+                            <Badge className="bg-sky-500/15 border-sky-500/30 text-sky-600 dark:text-sky-400 font-bold text-[10px] gap-1 inline-flex items-center">
+                              <Clock className="w-3 h-3 animate-pulse" />
                               SCHEDULED
                             </Badge>
                           ) : (
-                            <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
-                              ● LIVE
+                            <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-[10px] gap-1 inline-flex items-center">
+                              <CheckCircle2 className="w-3 h-3" />
+                              LIVE
                             </Badge>
                           )
                         )}
                         {b.status === 'REVIEW' && (
-                          <Badge className="bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-[10px] animate-pulse">
-                            ● PENDING REVIEW
+                          <Badge className="bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-[10px] animate-pulse gap-1 inline-flex items-center">
+                            <Clock className="w-3 h-3" />
+                            PENDING REVIEW
                           </Badge>
                         )}
                         {b.status === 'DRAFT' && (
-                          <Badge className="bg-slate-500/15 border-slate-500/30 text-slate-600 dark:text-slate-400 text-[10px]">
-                            ● DRAFT
+                          <Badge className="bg-slate-500/15 border-slate-500/30 text-slate-600 dark:text-slate-400 text-[10px] gap-1 inline-flex items-center">
+                            <FileText className="w-3 h-3" />
+                            DRAFT
                           </Badge>
                         )}
                       </td>
@@ -611,14 +614,15 @@ export function AdminBlogDashboardClient({
                         <button
                           type="button"
                           onClick={() => handleToggleFeatured(b.id)}
-                          className={`p-1 rounded-lg border transition-all ${
+                          className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                             b.featured
-                              ? 'bg-[#C6FF34]/15 border-[#C6FF34] text-[#C6FF34]'
-                              : 'bg-transparent border-slate-300 dark:border-white/10 text-slate-400 hover:text-white'
+                              ? 'bg-[#C6FF34]/15 border-[#C6FF34] text-black dark:text-[#C6FF34] shadow-sm shadow-[#C6FF34]/20'
+                              : 'bg-white/5 border-slate-200 dark:border-white/10 text-slate-400 hover:text-white hover:border-white/20'
                           }`}
-                          title={b.featured ? 'Featured on Home Hero' : 'Mark as Featured Hero'}
+                          title={b.featured ? 'Featured on Home Hero (Click to unmark)' : 'Mark as Featured Hero'}
                         >
-                          <Star className={`w-3.5 h-3.5 ${b.featured ? 'fill-[#C6FF34]' : ''}`} />
+                          <Star className={`w-3.5 h-3.5 ${b.featured ? 'fill-[#C6FF34] text-[#C6FF34]' : 'text-slate-400'}`} />
+                          <span className="hidden sm:inline">{b.featured ? 'FEATURED' : 'Standard'}</span>
                         </button>
                       </td>
 

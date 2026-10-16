@@ -111,7 +111,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
           pre.textContent ||
           '';
         navigator.clipboard.writeText(code);
-        copyBtn.innerHTML = '<span class="text-[#C6FF34] font-bold">✓ Copied</span>';
+        copyBtn.innerHTML = '<span class="text-[#C6FF34] font-bold inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Copied</span>';
         setTimeout(() => {
           copyBtn.innerHTML = '<span>Copy</span>';
         }, 2000);

@@ -17,6 +17,8 @@ import {
   FolderCheck,
   CheckCircle,
   BookOpen,
+  Star,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -204,16 +206,17 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                 statusFilter === st
                   ? 'bg-white text-violet-800 shadow-sm font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
+              {st === 'SCHEDULED' && <Calendar className="w-3.5 h-3.5 text-violet-600" />}
               {st === 'ALL'
                 ? 'All Articles'
                 : st === 'SCHEDULED'
-                ? '⏰ Scheduled'
+                ? 'Scheduled'
                 : st.charAt(0) + st.slice(1).toLowerCase()}
             </button>
           ))}
@@ -253,12 +256,20 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                 {blogs.map((b) => (
                   <tr key={b.id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="p-4 max-w-xs">
-                      <Link
-                        href={`/mentor/blogs/${b.id}/edit`}
-                        className="font-semibold text-slate-900 hover:text-violet-600 transition-colors block truncate"
-                      >
-                        {b.title}
-                      </Link>
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/mentor/blogs/${b.id}/edit`}
+                          className="font-semibold text-slate-900 hover:text-violet-600 transition-colors block truncate"
+                        >
+                          {b.title}
+                        </Link>
+                        {b.featured && (
+                          <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-[9px] font-mono font-bold flex items-center gap-0.5 shrink-0 px-1.5 py-0">
+                            <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-600" />
+                            FEATURED
+                          </Badge>
+                        )}
+                      </div>
                       {b.subtitle && (
                         <p className="text-[11px] text-slate-500 font-normal truncate mt-0.5">{b.subtitle}</p>
                       )}
@@ -277,8 +288,9 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                     <td className="p-4">
                       {b.status === 'PUBLISHED' && b.publishedAt && new Date(b.publishedAt).getTime() > Date.now() ? (
                         <div className="space-y-0.5">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-300">
-                            ⏰ Scheduled
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-300">
+                            <Clock className="w-3 h-3 text-violet-600" />
+                            Scheduled
                           </span>
                           <span className="block text-[10px] text-slate-500 font-mono">
                             {new Date(b.publishedAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
