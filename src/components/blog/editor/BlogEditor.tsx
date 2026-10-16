@@ -112,13 +112,16 @@ export function BlogEditor({
 
   const setLink = () => {
     const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter link URL (e.g. https://threadsecurity.in):', previousUrl);
+    const url = window.prompt('Enter link URL (e.g. https://threadsecurity.in):', previousUrl || 'https://');
     if (url === null) return;
-    if (url === '') {
+    const trimmed = url.trim();
+    if (trimmed === '' || trimmed === 'https://') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    // Clean link URL to prevent unclosed quotes or illegal characters from breaking JSON payloads
+    const cleanUrl = trimmed.replace(/["'<>\\]/g, '');
+    editor.chain().focus().extendMarkRange('link').setLink({ href: cleanUrl }).run();
   };
 
   const addImageByUrl = () => {

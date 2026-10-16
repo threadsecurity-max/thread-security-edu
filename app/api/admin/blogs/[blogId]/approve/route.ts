@@ -13,11 +13,14 @@ export async function POST(
     }
 
     const { blogId } = await params;
-    const updatedBlog = await adminApproveAndPublishBlog(blogId, session.userId);
+    const body = await req.json().catch(() => ({}));
+    const updatedBlog = await adminApproveAndPublishBlog(blogId, session.userId, body.scheduledAt);
 
     return NextResponse.json({
       success: true,
-      message: 'Article officially approved and published to the live platform!',
+      message: body.scheduledAt
+        ? `Article approved and scheduled for release on ${new Date(body.scheduledAt).toLocaleString()}`
+        : 'Article officially approved and published to the live platform!',
       blog: updatedBlog,
     });
   } catch (error: any) {

@@ -42,11 +42,24 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/mentor/blogs?search=${encodeURIComponent(search)}&status=${statusFilter}`
+        `/api/mentor/blogs?search=${encodeURIComponent(search)}&status=${statusFilter === 'SCHEDULED' ? 'ALL' : statusFilter}`
       );
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('Non-JSON response fetching mentor blogs:', text);
+      }
       if (res.ok) {
-        setBlogs(data.blogs || []);
+        let loadedBlogs = data.blogs || [];
+        if (statusFilter === 'SCHEDULED') {
+          const now = Date.now();
+          loadedBlogs = loadedBlogs.filter(
+            (b: any) => b.status === 'PUBLISHED' && b.publishedAt && new Date(b.publishedAt).getTime() > now
+          );
+        }
+        setBlogs(loadedBlogs);
       }
     } catch (err) {
       console.error('Failed to load blogs:', err);
@@ -67,7 +80,8 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'Untitled Article' }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       if (res.ok && data.blog?.id) {
         router.push(`/mentor/blogs/${data.blog.id}/edit`);
       }
@@ -90,36 +104,42 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
   };
 
   // Metrics
+  const now = Date.now();
   const totalCount = blogs.length;
-  const publishedCount = blogs.filter((b) => b.status === 'PUBLISHED').length;
+  const scheduledCount = blogs.filter(
+    (b) => b.status === 'PUBLISHED' && b.publishedAt && new Date(b.publishedAt).getTime() > now
+  ).length;
+  const publishedCount = blogs.filter(
+    (b) => b.status === 'PUBLISHED' && (!b.publishedAt || new Date(b.publishedAt).getTime() <= now)
+  ).length;
   const draftCount = blogs.filter((b) => b.status === 'DRAFT').length;
   const reviewCount = blogs.filter((b) => b.status === 'REVIEW').length;
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto text-slate-900 font-sans">
+    <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto text-slate-900 font-sans">
       {/* Header Banner */}
-      <div className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 md:p-8 rounded-2xl md:rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-violet-100 text-violet-800 border border-violet-200">
             <Globe className="w-3.5 h-3.5" />
-            Faculty Articles & Research
+            Faculty Research & Publications Studio
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
             Technical Articles & Publications
           </h1>
-          <p className="text-sm text-slate-500">
-            Author, review, and publish cybersecurity research guides and educational articles for the academy.
+          <p className="text-xs md:text-sm text-slate-600 font-normal">
+            Author, review, schedule, and publish cybersecurity research guides and educational articles for the academy.
           </p>
         </div>
 
         <Button
           onClick={handleCreateNewBlog}
           disabled={creating}
-          className="bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs h-10 px-5 rounded-xl shadow-xs transition-all active:scale-[0.99] cursor-pointer shrink-0"
+          className="bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs h-10 px-5 rounded-xl shadow-md transition-all active:scale-[0.99] cursor-pointer shrink-0"
         >
           {creating ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Preparing Workspace...
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Preparing Studio...
             </>
           ) : (
             <>
@@ -129,61 +149,72 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
         </Button>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-1">
-          <span className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
+      {/* Metrics Row (5 Cards) */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+          <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
             <BookOpen className="w-3.5 h-3.5 text-slate-400" /> Total Articles
           </span>
           <p className="text-2xl font-bold text-slate-900">{totalCount}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-emerald-100 shadow-xs space-y-1">
-          <span className="text-xs font-medium text-emerald-700 flex items-center gap-1.5">
+        <div className="p-5 rounded-2xl bg-white border border-emerald-200 shadow-sm space-y-1">
+          <span className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
             <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Published Live
           </span>
-          <p className="text-2xl font-bold text-emerald-600">{publishedCount}</p>
+          <p className="text-2xl font-bold text-emerald-700">{publishedCount}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-amber-100 shadow-xs space-y-1">
-          <span className="text-xs font-medium text-amber-700 flex items-center gap-1.5">
+        <div className="p-5 rounded-2xl bg-white border border-violet-200 shadow-sm space-y-1">
+          <span className="text-xs font-semibold text-violet-800 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-violet-600" /> Scheduled Releases
+          </span>
+          <p className="text-2xl font-bold text-violet-700">{scheduledCount}</p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-1">
+          <span className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-amber-600" /> Working Drafts
           </span>
-          <p className="text-2xl font-bold text-amber-600">{draftCount}</p>
+          <p className="text-2xl font-bold text-amber-700">{draftCount}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-violet-100 shadow-xs space-y-1">
-          <span className="text-xs font-medium text-violet-700 flex items-center gap-1.5">
-            <FolderCheck className="w-3.5 h-3.5 text-violet-600" /> Under Review
+        <div className="p-5 rounded-2xl bg-white border border-sky-200 shadow-sm space-y-1 col-span-2 lg:col-span-1">
+          <span className="text-xs font-semibold text-sky-800 flex items-center gap-1.5">
+            <FolderCheck className="w-3.5 h-3.5 text-sky-600" /> Under Review
           </span>
-          <p className="text-2xl font-bold text-violet-600">{reviewCount}</p>
+          <p className="text-2xl font-bold text-sky-700">{reviewCount}</p>
         </div>
       </div>
 
       {/* Controls: Search & Filter Tabs */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <Input
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
             placeholder="Search articles by title..."
-            className="pl-9 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+            className="pl-9 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 text-xs rounded-xl focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
           />
         </div>
 
-        <div className="flex items-center gap-1 bg-slate-100 p-1 border border-slate-200 rounded-xl w-full md:w-auto overflow-x-auto">
-          {['ALL', 'DRAFT', 'REVIEW', 'PUBLISHED'].map((st) => (
+        <div className="flex items-center gap-1 bg-slate-200/80 p-1 border border-slate-300 rounded-xl w-full md:w-auto overflow-x-auto">
+          {['ALL', 'DRAFT', 'REVIEW', 'SCHEDULED', 'PUBLISHED'].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
                 statusFilter === st
-                  ? 'bg-white text-violet-700 shadow-xs font-semibold'
+                  ? 'bg-white text-violet-800 shadow-sm font-bold'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              {st === 'ALL' ? 'All Articles' : st.charAt(0) + st.slice(1).toLowerCase()}
+              {st === 'ALL'
+                ? 'All Articles'
+                : st === 'SCHEDULED'
+                ? '⏰ Scheduled'
+                : st.charAt(0) + st.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
@@ -244,17 +275,28 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                     </td>
 
                     <td className="p-4">
-                      <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                          b.status === 'PUBLISHED'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : b.status === 'REVIEW'
-                            ? 'bg-violet-50 text-violet-700 border border-violet-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}
-                      >
-                        {b.status}
-                      </span>
+                      {b.status === 'PUBLISHED' && b.publishedAt && new Date(b.publishedAt).getTime() > Date.now() ? (
+                        <div className="space-y-0.5">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-800 border border-violet-300">
+                            ⏰ Scheduled
+                          </span>
+                          <span className="block text-[10px] text-slate-500 font-mono">
+                            {new Date(b.publishedAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            b.status === 'PUBLISHED'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              : b.status === 'REVIEW'
+                              ? 'bg-sky-100 text-sky-800 border border-sky-300'
+                              : 'bg-amber-100 text-amber-800 border border-amber-300'
+                          }`}
+                        >
+                          {b.status === 'PUBLISHED' ? 'Live' : b.status === 'REVIEW' ? 'Review' : 'Draft'}
+                        </span>
+                      )}
                     </td>
 
                     <td className="p-4 text-slate-600">{b.readingTime ? `${b.readingTime} min read` : '1 min read'}</td>
@@ -272,20 +314,20 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                           <Button
                             size="sm"
                             variant="ghost"
-                            className="h-8 text-xs font-medium text-slate-600 hover:text-violet-700 hover:bg-violet-50 rounded-lg cursor-pointer"
+                            className="h-8 text-xs font-semibold text-slate-700 hover:text-violet-700 hover:bg-violet-50 rounded-lg cursor-pointer"
                           >
                             <Edit className="w-3.5 h-3.5 mr-1" /> Edit
                           </Button>
                         </Link>
 
-                        {b.status === 'PUBLISHED' && (
+                        {b.status === 'PUBLISHED' && (!b.publishedAt || new Date(b.publishedAt).getTime() <= Date.now()) && (
                           <Link href={`/blog/${b.slug}`} target="_blank">
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-8 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded-lg cursor-pointer"
+                              className="h-8 text-xs font-semibold text-emerald-800 hover:bg-emerald-50 rounded-lg cursor-pointer"
                             >
-                              <ExternalLink className="w-3.5 h-3.5 mr-1" /> View
+                              <ExternalLink className="w-3.5 h-3.5 mr-1" /> View Live
                             </Button>
                           </Link>
                         )}

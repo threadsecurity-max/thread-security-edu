@@ -41,6 +41,16 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/mentor/blog',
+        destination: '/mentor/blogs',
+        permanent: false,
+      },
+      {
+        source: '/mentor/blog/:path*',
+        destination: '/mentor/blogs/:path*',
+        permanent: false,
+      },
+      {
         source: '/auth/login',
         destination: '/login',
         permanent: true,

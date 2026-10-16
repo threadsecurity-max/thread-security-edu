@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   Send,
   Plus,
+  Calendar,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ interface AdminBlogDashboardClientProps {
       pendingReviewCount: number;
       publishedCount: number;
       draftCount: number;
+      scheduledCount?: number;
       totalViews: number;
     };
   };
@@ -69,6 +71,11 @@ export function AdminBlogDashboardClient({
   const [selectedBlogForReject, setSelectedBlogForReject] = useState<any | null>(null);
   const [feedbackNote, setFeedbackNote] = useState('');
 
+  // Schedule Modal State
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [selectedBlogForSchedule, setSelectedBlogForSchedule] = useState<any | null>(null);
+  const [scheduleDateTime, setScheduleDateTime] = useState('');
+
   // Preview Modal State
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [previewBlog, setPreviewBlog] = useState<any | null>(null);
@@ -82,7 +89,13 @@ export function AdminBlogDashboardClient({
       if (categoryFilter !== 'ALL') params.set('categoryId', categoryFilter);
 
       const res = await fetch(`/api/admin/blogs?${params.toString()}`);
-      const data = await res.json();
+      const text = await res.text();
+      let data: any = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('Non-JSON admin response:', text);
+      }
       if (res.ok) {
         setBlogs(data.blogs || []);
         if (data.metrics) setMetrics(data.metrics);
@@ -103,23 +116,28 @@ export function AdminBlogDashboardClient({
     fetchBlogs();
   };
 
-  // 1-Click Approve & Publish
-  const handleApprove = async (blogId: string) => {
+  // 1-Click Approve & Publish or Schedule
+  const handleApprove = async (blogId: string, scheduledAt?: string) => {
     setActionLoadingId(blogId);
     try {
       const res = await fetch(`/api/admin/blogs/${blogId}/approve`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scheduledAt ? { scheduledAt } : {}),
       });
-      const data = await res.json();
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
       if (!res.ok) throw new Error(data.error || 'Failed to approve blog');
 
+      const targetPubAt = scheduledAt ? new Date(scheduledAt).toISOString() : new Date().toISOString();
       setBlogs((prev) =>
-        prev.map((b) => (b.id === blogId ? { ...b, status: 'PUBLISHED', publishedAt: new Date().toISOString() } : b))
+        prev.map((b) => (b.id === blogId ? { ...b, status: 'PUBLISHED', publishedAt: targetPubAt } : b))
       );
       setMetrics((prev) => ({
         ...prev,
         pendingReviewCount: Math.max(0, prev.pendingReviewCount - 1),
-        publishedCount: prev.publishedCount + 1,
+        publishedCount: prev.publishedCount + (scheduledAt ? 0 : 1),
+        scheduledCount: (prev.scheduledCount || 0) + (scheduledAt ? 1 : 0),
       }));
     } catch (err: any) {
       alert(err.message || 'Error approving blog');
@@ -163,6 +181,26 @@ export function AdminBlogDashboardClient({
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  // Open Schedule Dialog
+  const openScheduleDialog = (blog: any) => {
+    setSelectedBlogForSchedule(blog);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(9, 0, 0, 0);
+    const localIso = new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    setScheduleDateTime(localIso);
+    setScheduleModalOpen(true);
+  };
+
+  // Confirm Scheduled Approval
+  const handleConfirmSchedule = async () => {
+    if (!selectedBlogForSchedule || !scheduleDateTime) return;
+    const targetIso = new Date(scheduleDateTime).toISOString();
+    await handleApprove(selectedBlogForSchedule.id, targetIso);
+    setScheduleModalOpen(false);
+    setSelectedBlogForSchedule(null);
   };
 
   // Toggle Featured status
@@ -232,71 +270,91 @@ export function AdminBlogDashboardClient({
       </div>
 
       {/* KPI Metrics Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
         {/* Pending Review Queue KPI */}
-        <div className={`p-5 rounded-2xl border transition-all ${
+        <div className={`p-4 rounded-2xl border transition-all ${
           metrics.pendingReviewCount > 0
             ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
             : 'bg-white dark:bg-[#0c0c0c] border-slate-200 dark:border-white/10'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               PENDING APPROVAL
             </span>
             <Clock className={`w-4 h-4 ${metrics.pendingReviewCount > 0 ? 'text-amber-500 animate-pulse' : 'text-slate-400'}`} />
           </div>
-          <p className="text-3xl font-extrabold mt-2 font-mono">
+          <p className="text-2xl md:text-3xl font-extrabold mt-2 font-mono">
             {metrics.pendingReviewCount}
           </p>
-          <p className="text-[11px] text-slate-500 mt-1 font-mono">
-            {metrics.pendingReviewCount > 0 ? 'Requires editorial decision' : 'All clear - queue is empty'}
+          <p className="text-[10px] text-slate-500 mt-1 font-mono">
+            {metrics.pendingReviewCount > 0 ? 'Editorial decision required' : 'Queue is empty'}
+          </p>
+        </div>
+
+        {/* Scheduled Articles KPI */}
+        <div className={`p-4 rounded-2xl border transition-all ${
+          (metrics.scheduledCount || 0) > 0
+            ? 'bg-sky-500/10 border-sky-500/30 text-sky-900 dark:text-sky-200'
+            : 'bg-white dark:bg-[#0c0c0c] border-slate-200 dark:border-white/10'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              SCHEDULED RELEASES
+            </span>
+            <Calendar className={`w-4 h-4 ${(metrics.scheduledCount || 0) > 0 ? 'text-sky-400' : 'text-slate-400'}`} />
+          </div>
+          <p className="text-2xl md:text-3xl font-extrabold mt-2 font-mono text-sky-600 dark:text-sky-400">
+            {metrics.scheduledCount || 0}
+          </p>
+          <p className="text-[10px] text-slate-500 mt-1 font-mono">
+            Queued for timed launch
           </p>
         </div>
 
         {/* Published Articles KPI */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/10">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               PUBLISHED LIVE
             </span>
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
-          <p className="text-3xl font-extrabold mt-2 font-mono text-emerald-600 dark:text-emerald-400">
+          <p className="text-2xl md:text-3xl font-extrabold mt-2 font-mono text-emerald-600 dark:text-emerald-400">
             {metrics.publishedCount}
           </p>
-          <p className="text-[11px] text-slate-500 mt-1 font-mono">
+          <p className="text-[10px] text-slate-500 mt-1 font-mono">
             Indexed on Google SERP
           </p>
         </div>
 
         {/* Total Reader Views KPI */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/10">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               CUMULATIVE VIEWS
             </span>
             <Eye className="w-4 h-4 text-sky-500" />
           </div>
-          <p className="text-3xl font-extrabold mt-2 font-mono text-sky-600 dark:text-sky-400">
+          <p className="text-2xl md:text-3xl font-extrabold mt-2 font-mono text-sky-600 dark:text-sky-400">
             {metrics.totalViews.toLocaleString()}
           </p>
-          <p className="text-[11px] text-slate-500 mt-1 font-mono">
-            Across all research papers
+          <p className="text-[10px] text-slate-500 mt-1 font-mono">
+            Across research publications
           </p>
         </div>
 
         {/* Total Drafts KPI */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/10">
+        <div className="p-4 rounded-2xl bg-white dark:bg-[#0c0c0c] border border-slate-200 dark:border-white/10">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               DRAFTS IN PROGRESS
             </span>
             <FileText className="w-4 h-4 text-purple-500" />
           </div>
-          <p className="text-3xl font-extrabold mt-2 font-mono text-purple-600 dark:text-purple-400">
+          <p className="text-2xl md:text-3xl font-extrabold mt-2 font-mono text-purple-600 dark:text-purple-400">
             {metrics.draftCount}
           </p>
-          <p className="text-[11px] text-slate-500 mt-1 font-mono">
+          <p className="text-[10px] text-slate-500 mt-1 font-mono">
             Faculty works in progress
           </p>
         </div>
@@ -372,18 +430,30 @@ export function AdminBlogDashboardClient({
 
                 {/* Decision Actions */}
                 <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-white/10">
-                  <Button
-                    onClick={() => handleApprove(blog.id)}
-                    disabled={actionLoadingId === blog.id}
-                    className="w-full bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 rounded-xl shadow-md cursor-pointer"
-                  >
-                    {actionLoadingId === blog.id ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-1.5" />
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                    )}
-                    Approve & Make Live
-                  </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={() => handleApprove(blog.id)}
+                      disabled={actionLoadingId === blog.id}
+                      className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-9 rounded-xl shadow-md cursor-pointer"
+                    >
+                      {actionLoadingId === blog.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin mr-1" />
+                      ) : (
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                      )}
+                      Approve Now
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      onClick={() => openScheduleDialog(blog)}
+                      disabled={actionLoadingId === blog.id}
+                      className="border-sky-500/40 text-sky-500 dark:text-sky-400 hover:bg-sky-500/10 font-mono font-bold text-xs h-9 rounded-xl cursor-pointer"
+                    >
+                      <Calendar className="w-3.5 h-3.5 mr-1" />
+                      Schedule
+                    </Button>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     <Button
@@ -444,6 +514,7 @@ export function AdminBlogDashboardClient({
             >
               <option value="ALL">All Statuses</option>
               <option value="REVIEW">Pending Review</option>
+              <option value="SCHEDULED">⏰ Scheduled Releases</option>
               <option value="PUBLISHED">Published Live</option>
               <option value="DRAFT">Drafts</option>
             </select>
@@ -513,9 +584,16 @@ export function AdminBlogDashboardClient({
 
                       <td className="py-3.5 px-4">
                         {b.status === 'PUBLISHED' && (
-                          <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
-                            ● LIVE
-                          </Badge>
+                          b.publishedAt && new Date(b.publishedAt) > new Date() ? (
+                            <Badge className="bg-sky-500/15 border-sky-500/30 text-sky-600 dark:text-sky-400 font-bold text-[10px] gap-1">
+                              <Clock className="w-2.5 h-2.5 animate-pulse" />
+                              SCHEDULED
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
+                              ● LIVE
+                            </Badge>
+                          )
                         )}
                         {b.status === 'REVIEW' && (
                           <Badge className="bg-amber-500/15 border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-[10px] animate-pulse">
@@ -548,21 +626,46 @@ export function AdminBlogDashboardClient({
                         {b.viewCount || 0}
                       </td>
 
-                      <td className="py-3.5 px-4 text-slate-400 text-[11px]">
-                        {b.publishedAt ? new Date(b.publishedAt).toLocaleDateString() : 'Unpublished'}
+                      <td className="py-3.5 px-4 text-[11px]">
+                        {b.publishedAt ? (
+                          <div>
+                            <span className={new Date(b.publishedAt) > new Date() ? 'text-sky-400 font-bold' : 'text-slate-400'}>
+                              {new Date(b.publishedAt).toLocaleDateString()}
+                            </span>
+                            {new Date(b.publishedAt) > new Date() && (
+                              <span className="block text-[10px] text-sky-400 font-mono">
+                                @ {new Date(b.publishedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-slate-400">Unpublished</span>
+                        )}
                       </td>
 
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {b.status === 'REVIEW' && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleApprove(b.id)}
-                              disabled={actionLoadingId === b.id}
-                              className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-bold text-[10px] h-7 px-2.5 rounded-lg"
-                            >
-                              Approve
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApprove(b.id)}
+                                disabled={actionLoadingId === b.id}
+                                className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-bold text-[10px] h-7 px-2.5 rounded-lg"
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openScheduleDialog(b)}
+                                disabled={actionLoadingId === b.id}
+                                className="border-sky-500/40 text-sky-500 dark:text-sky-400 hover:bg-sky-500/10 font-bold text-[10px] h-7 px-2 rounded-lg"
+                                title="Schedule Release"
+                              >
+                                <Calendar className="w-3 h-3" />
+                              </Button>
+                            </>
                           )}
 
                           {b.status === 'PUBLISHED' && (
@@ -658,6 +761,74 @@ export function AdminBlogDashboardClient({
                   <Send className="w-3.5 h-3.5 mr-1" />
                 )}
                 Send Feedback & Revert to Draft
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SCHEDULE RELEASE MODAL */}
+      {scheduleModalOpen && selectedBlogForSchedule && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#121212] border border-white/10 rounded-2xl p-6 max-w-md w-full space-y-4 text-white font-mono shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h3 className="text-sm font-bold flex items-center gap-2 text-sky-400 uppercase">
+                <Calendar className="w-4 h-4" /> Schedule Article Release
+              </h3>
+              <button
+                onClick={() => setScheduleModalOpen(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-xs font-bold text-white line-clamp-1">Article: {selectedBlogForSchedule.title}</p>
+              <p className="text-[11px] text-slate-400">
+                Author: {selectedBlogForSchedule.author?.user?.name || 'Faculty Mentor'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[11px] font-bold uppercase text-slate-300">
+                Select Exact Date & Time *
+              </label>
+              <Input
+                type="datetime-local"
+                value={scheduleDateTime}
+                onChange={(e) => setScheduleDateTime(e.target.value)}
+                className="bg-[#181818] border-white/20 text-white font-mono text-xs h-10"
+              />
+              {scheduleDateTime && (
+                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-[11px] text-sky-300">
+                  <p className="font-bold">Scheduled Target:</p>
+                  <p>{new Date(scheduleDateTime).toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setScheduleModalOpen(false)}
+                className="text-xs font-mono border-white/10 h-8"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleConfirmSchedule}
+                disabled={actionLoadingId === selectedBlogForSchedule.id || !scheduleDateTime}
+                className="bg-sky-500 text-black hover:bg-sky-400 font-bold text-xs h-8 px-4"
+              >
+                {actionLoadingId === selectedBlogForSchedule.id ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                ) : (
+                  <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                )}
+                Confirm Timed Release
               </Button>
             </div>
           </div>

@@ -310,6 +310,7 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
   status?: 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
   featured?: boolean;
   coverImageId?: string | null;
+  publishedAt?: Date | string | null;
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -329,7 +330,13 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
 
   // Verify mentor ownership or admin
   const user = await db.user.findUnique({ where: { id: authorUserId } });
-  if (blog.author.userId !== authorUserId && user?.role !== 'SUPER_ADMIN' && user?.role !== 'ACADEMIC_ADMIN') {
+  const isSuperOrAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ACADEMIC_ADMIN';
+  const isAuthor =
+    blog.author?.userId === authorUserId ||
+    blog.authorId === authorUserId ||
+    (blog.author && blog.author.id === authorUserId);
+
+  if (!isSuperOrAdmin && !isAuthor) {
     throw new Error('Unauthorized to update this blog');
   }
 
@@ -340,21 +347,31 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
 
   const readingTime = data.content ? calculateReadingTime(data.content) : blog.readingTime;
 
-  // Handle Tags
+  // Handle Tags safely
   let tagsConnect: { id: string }[] = [];
   if (data.tagNames && Array.isArray(data.tagNames)) {
     tagsConnect = await Promise.all(
-      data.tagNames.map(async (name) => {
-        const cleanName = name.trim();
-        const tagSlug = slugify(cleanName, { lower: true, strict: true });
-        const tag = await db.blogTag.upsert({
-          where: { slug: tagSlug },
-          update: { name: cleanName },
-          create: { name: cleanName, slug: tagSlug },
-        });
-        return { id: tag.id };
-      })
+      data.tagNames
+        .filter((name) => typeof name === 'string' && name.trim())
+        .map(async (name) => {
+          const cleanName = name.trim();
+          const tagSlug = slugify(cleanName, { lower: true, strict: true }) || `tag-${Date.now()}`;
+          const tag = await db.blogTag.upsert({
+            where: { slug: tagSlug },
+            update: { name: cleanName },
+            create: { name: cleanName, slug: tagSlug },
+          });
+          return { id: tag.id };
+        })
     );
+  }
+
+  // Precise Publication and Scheduling Date/Time
+  let targetPublishedAt = blog.publishedAt;
+  if (data.publishedAt !== undefined) {
+    targetPublishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
+  } else if (data.status === 'PUBLISHED' && !blog.publishedAt) {
+    targetPublishedAt = new Date();
   }
 
   // Update Blog record
@@ -371,7 +388,7 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
       featured: data.featured !== undefined ? data.featured : blog.featured,
       coverImageId: data.coverImageId !== undefined ? data.coverImageId : blog.coverImageId,
       categoryId: data.categoryId !== undefined ? data.categoryId : blog.categoryId,
-      publishedAt: data.status === 'PUBLISHED' && !blog.publishedAt ? new Date() : blog.publishedAt,
+      publishedAt: targetPublishedAt,
       tags: data.tagNames ? { set: tagsConnect } : undefined,
       seo: data.seo ? {
         upsert: {
@@ -409,17 +426,24 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
     },
   });
 
-  // Log Revision
+  // Log Revision safely without crashing update if user/revision fails
   if (data.content && data.content !== blog.content) {
-    const revisionCount = await db.blogRevision.count({ where: { blogId } });
-    await db.blogRevision.create({
-      data: {
-        blogId,
-        content: data.content,
-        changedById: authorUserId,
-        version: revisionCount + 1,
-      },
-    });
+    try {
+      const revisionCount = await db.blogRevision.count({ where: { blogId } });
+      const changeUserId = user ? user.id : blog.author?.userId;
+      if (changeUserId) {
+        await db.blogRevision.create({
+          data: {
+            blogId,
+            content: data.content,
+            changedById: changeUserId,
+            version: revisionCount + 1,
+          },
+        });
+      }
+    } catch (revError) {
+      console.warn('Could not record blog revision history (non-critical):', revError);
+    }
   }
 
   return updatedBlog;
@@ -454,8 +478,17 @@ export async function getPublicBlogs(params?: {
   const limit = params?.limit || 9;
   const skip = (page - 1) * limit;
 
+  const now = new Date();
   const where: any = {
     status: 'PUBLISHED',
+    AND: [
+      {
+        OR: [
+          { publishedAt: { lte: now } },
+          { publishedAt: null },
+        ],
+      },
+    ],
   };
 
   if (params?.featuredOnly) {
@@ -531,6 +564,11 @@ export async function getPublicBlogBySlug(slug: string) {
     return null;
   }
 
+  // If blog is scheduled for future release, keep hidden from public
+  if (blog.publishedAt && new Date(blog.publishedAt) > new Date()) {
+    return null;
+  }
+
   // Increment view count asynchronously
   db.blog.update({
     where: { id: blog.id },
@@ -542,11 +580,16 @@ export async function getPublicBlogBySlug(slug: string) {
 
 export async function getRelatedBlogs(blogId: string, categoryId?: string | null, limit = 3) {
   if (!categoryId) return [];
+  const now = new Date();
   return db.blog.findMany({
     where: {
       status: 'PUBLISHED',
       categoryId,
       id: { not: blogId },
+      OR: [
+        { publishedAt: { lte: now } },
+        { publishedAt: null },
+      ],
     },
     take: limit,
     orderBy: { publishedAt: 'desc' },
@@ -581,7 +624,12 @@ export async function getAdminBlogs(options?: {
   const where: any = {};
 
   if (options?.status && options.status !== 'ALL') {
-    where.status = options.status;
+    if (options.status === 'SCHEDULED') {
+      where.status = 'PUBLISHED';
+      where.publishedAt = { gt: new Date() };
+    } else {
+      where.status = options.status;
+    }
   }
 
   if (options?.categoryId && options.categoryId !== 'ALL') {
@@ -597,7 +645,8 @@ export async function getAdminBlogs(options?: {
     ];
   }
 
-  const [blogs, total, pendingReviewCount, publishedCount, draftCount, allBlogsForViews] = await Promise.all([
+  const now = new Date();
+  const [blogs, total, pendingReviewCount, publishedCount, draftCount, scheduledCount, allBlogsForViews] = await Promise.all([
     db.blog.findMany({
       where,
       orderBy: [
@@ -622,6 +671,7 @@ export async function getAdminBlogs(options?: {
     db.blog.count({ where: { status: 'REVIEW' } }),
     db.blog.count({ where: { status: 'PUBLISHED' } }),
     db.blog.count({ where: { status: 'DRAFT' } }),
+    db.blog.count({ where: { status: 'PUBLISHED', publishedAt: { gt: now } } }),
     db.blog.findMany({ select: { viewCount: true } }),
   ]);
 
@@ -637,12 +687,13 @@ export async function getAdminBlogs(options?: {
       pendingReviewCount,
       publishedCount,
       draftCount,
+      scheduledCount,
       totalViews,
     },
   };
 }
 
-export async function adminApproveAndPublishBlog(blogId: string, adminUserId: string) {
+export async function adminApproveAndPublishBlog(blogId: string, adminUserId: string, scheduledAt?: string | Date | null) {
   const blog = await db.blog.findUnique({
     where: { id: blogId },
     include: {
@@ -657,11 +708,13 @@ export async function adminApproveAndPublishBlog(blogId: string, adminUserId: st
   if (!blog) throw new Error('Blog article not found');
 
   const now = new Date();
+  const targetPublishedAt = scheduledAt ? new Date(scheduledAt) : (blog.publishedAt || now);
+
   const updatedBlog = await db.blog.update({
     where: { id: blogId },
     data: {
       status: 'PUBLISHED',
-      publishedAt: blog.publishedAt || now,
+      publishedAt: targetPublishedAt,
     },
     include: {
       author: {

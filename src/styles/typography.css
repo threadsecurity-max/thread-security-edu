@@ -15,6 +15,10 @@ h1, h2, h3, h4, h5, h6, p, span, a, li, blockquote, dt, dd {
   font-family: var(--font-lora), 'Lora', Georgia, Cambria, 'Times New Roman', serif;
 }
 
+.font-valley-sans {
+  font-family: 'Valley Sans', var(--font-outfit), system-ui, -apple-system, sans-serif;
+}
+
 .tse-display {
   font-family: var(--font-outfit), system-ui, -apple-system, sans-serif;
   font-size: clamp(2rem, 1.35rem + 3.25vw, 4.5rem); /* 32px @ 320px -> 72px @ 1920px+ */
