@@ -58,15 +58,15 @@ export default async function PublicHomePage({
   const isGuestPending = Boolean(session && (session.role === 'STUDENT' || session.role === 'GUEST') && !session.isDashboardAccessGranted);
   const showNotice = Boolean(params.notice || isGuestPending);
 
-  // Fetch real data from PostgreSQL database with resilient connection retry
+  // Fetch real data from PostgreSQL database with resilient fallback
   let courses: any[] = [];
   let mentors: any[] = [];
   let totalCourses = 0;
   let totalLabs = 0;
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      courses = await prisma.course.findMany({
+  try {
+    const [fetchedCourses, fetchedMentors, courseCount, labCount] = await Promise.all([
+      prisma.course.findMany({
         where: { status: 'PUBLISHED' },
         include: {
           mentor: {
@@ -76,26 +76,21 @@ export default async function PublicHomePage({
           labs: true,
         },
         take: 3,
-      });
-
-      mentors = await prisma.mentorProfile.findMany({
+      }),
+      prisma.mentorProfile.findMany({
         include: { user: true },
         take: 2,
-      });
+      }),
+      prisma.course.count({ where: { status: 'PUBLISHED' } }),
+      prisma.lab.count(),
+    ]);
 
-      totalCourses = await prisma.course.count({ where: { status: 'PUBLISHED' } });
-      totalLabs = await prisma.lab.count();
-      break; // Success, exit loop
-    } catch (error: any) {
-      console.warn(`[PublicHomePage] Database query attempt ${attempt} warning:`, error?.message || error);
-      if (attempt === 1) {
-        try {
-          await prisma.$connect();
-        } catch (reconnectErr) {
-          // Suppress redundant reconnect log
-        }
-      }
-    }
+    courses = fetchedCourses || [];
+    mentors = fetchedMentors || [];
+    totalCourses = courseCount || 0;
+    totalLabs = labCount || 0;
+  } catch (error: any) {
+    // Silent fallback to avoid flooding dev terminal during connection outages
   }
 
   // Resilient fallbacks ensuring zero UI disruption during temporary database reconnects
