@@ -76,3 +76,8 @@ Thumbs.db
 *.ntvs*
 *.njsproj
 *.sln
+
+# Minor project manual & packaging
+*minor-project*
+*MINOR_PROJECT*
+MINOR_PROJECT_MANUAL.md

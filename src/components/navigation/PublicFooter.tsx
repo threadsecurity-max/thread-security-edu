@@ -14,6 +14,7 @@ import {
   Clock,
   Star,
   Shield,
+  ShieldCheck,
   Sliders,
   X,
   ExternalLink,
@@ -266,6 +267,14 @@ export function PublicFooter() {
                 </svg>
               </a>
             </div>
+
+            {/* Quick Accreditation Badge in Brand Column */}
+            <div className="pt-1 flex items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] font-medium text-slate-700 shadow-2xs">
+                <ShieldCheck className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <span>Govt. Recognized &amp; ISO 9001 Certified</span>
+              </div>
+            </div>
           </div>
 
           {/* Column 2: COURSES */}
@@ -426,8 +435,95 @@ export function PublicFooter() {
 
         </div>
 
+        {/* ── GOVERNMENT RECOGNITIONS & ACCREDITATIONS SECTION ── */}
+        <div className="pt-8 pb-8 border-t border-slate-200/90">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+            
+            {/* Left Header / Trust statement */}
+            <div className="flex items-center gap-3.5 text-center sm:text-left">
+              <div className="w-11 h-11 rounded-2xl bg-purple-50 border border-purple-200/80 text-purple-700 flex items-center justify-center shrink-0 shadow-2xs">
+                <ShieldCheck className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h4 className="font-bold text-xs uppercase tracking-wider text-slate-900 font-sans">
+                  Government Recognized &amp; Certified Institution
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Accredited by national &amp; international bodies for excellence in cybersecurity education.
+                </p>
+              </div>
+            </div>
+
+            {/* Logo Badge Cards: DPIIT, ISO, MSME */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 w-full lg:w-auto">
+              
+              {/* DPIIT Logo Card */}
+              <div
+                className="group flex items-center gap-3 px-4 py-2.5 bg-slate-50/80 hover:bg-white rounded-2xl border border-slate-200/90 hover:border-purple-300 shadow-2xs hover:shadow-xs transition-all"
+                title="Department for Promotion of Industry and Internal Trade, Ministry of Commerce & Industry, Govt. of India"
+              >
+                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+                  <Image
+                    src={getCloudinaryAssetUrl('/images/DPIIT.svg')}
+                    alt="DPIIT - Department for Promotion of Industry and Internal Trade, Govt. of India"
+                    fill
+                    unoptimized
+                    className="object-contain group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-900 leading-tight">DPIIT</p>
+                  <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Govt. of India Recognized</p>
+                </div>
+              </div>
+
+              {/* ISO 9001:2015 Logo Card */}
+              <div
+                className="group flex items-center gap-3 px-4 py-2.5 bg-slate-50/80 hover:bg-white rounded-2xl border border-slate-200/90 hover:border-purple-300 shadow-2xs hover:shadow-xs transition-all"
+                title="ISO 9001:2015 Certified Quality Management System"
+              >
+                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+                  <Image
+                    src={getCloudinaryAssetUrl('/images/ISO.svg')}
+                    alt="ISO 9001:2015 Certified"
+                    fill
+                    unoptimized
+                    className="object-contain group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-900 leading-tight">ISO 9001:2015</p>
+                  <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Certified Organization</p>
+                </div>
+              </div>
+
+              {/* MSME Logo Card */}
+              <div
+                className="group flex items-center gap-3 px-4 py-2.5 bg-slate-50/80 hover:bg-white rounded-2xl border border-slate-200/90 hover:border-purple-300 shadow-2xs hover:shadow-xs transition-all"
+                title="Ministry of Micro, Small & Medium Enterprises, Govt. of India"
+              >
+                <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+                  <Image
+                    src={getCloudinaryAssetUrl('/images/MSME.svg')}
+                    alt="MSME Registered - Govt. of India"
+                    fill
+                    unoptimized
+                    className="object-contain group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-bold text-slate-900 leading-tight">MSME</p>
+                  <p className="text-[10px] text-slate-500 leading-tight mt-0.5">Govt. of India Registered</p>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
         {/* ── TOP LEGAL LINKS ROW (Exactly As Requested in Reference Image) ── */}
-        <div className="pt-8 pb-5 border-t border-slate-200">
+        <div className="pt-6 pb-5 border-t border-slate-200">
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2.5 text-xs text-slate-600">
             <Link
               href="/privacy-policy"
