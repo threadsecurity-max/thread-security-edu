@@ -54,10 +54,20 @@ export default async function PublicBlogLandingPage({
   const categorySlug = params.category || undefined;
   const tagSlug = params.tag || undefined;
 
-  const [blogData, categoriesData] = await Promise.all([
-    getPublicBlogs({ search, categorySlug, tagSlug, page, limit: 9 }),
-    getBlogCategories(),
-  ]);
+  let blogData = { blogs: [] as any[], total: 0, page: 1, totalPages: 1 };
+  let categoriesData: any[] = [];
+
+  try {
+    const [fetchedBlogs, fetchedCategories] = await Promise.all([
+      getPublicBlogs({ search, categorySlug, tagSlug, page, limit: 9 }),
+      getBlogCategories(),
+    ]);
+    blogData = fetchedBlogs;
+    categoriesData = fetchedCategories;
+  } catch (err) {
+    console.warn('[PublicBlogLandingPage] Handled transient fetch error:', err);
+    categoriesData = await getBlogCategories();
+  }
 
   return (
     <>

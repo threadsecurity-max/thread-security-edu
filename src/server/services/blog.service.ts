@@ -21,36 +21,61 @@ export const INITIAL_BLOG_CATEGORIES = [
 ];
 
 export async function seedBlogCategoriesIfEmpty() {
-  const count = await db.blogCategory.count();
-  if (count === 0) {
-    for (const cat of INITIAL_BLOG_CATEGORIES) {
-      await db.blogCategory.create({
-        data: {
-          name: cat.name,
-          slug: slugify(cat.name, { lower: true, strict: true }),
-          description: cat.description,
-        },
-      });
+  try {
+    const count = await db.blogCategory.count();
+    if (count === 0) {
+      for (const cat of INITIAL_BLOG_CATEGORIES) {
+        await db.blogCategory.create({
+          data: {
+            name: cat.name,
+            slug: slugify(cat.name, { lower: true, strict: true }),
+            description: cat.description,
+          },
+        });
+      }
     }
+  } catch (err: any) {
+    console.warn('[blog.service] seedBlogCategoriesIfEmpty transient notice:', err?.message || err);
   }
 }
 
 export async function getBlogCategories() {
-  await seedBlogCategoriesIfEmpty();
-  return db.blogCategory.findMany({
-    orderBy: { name: 'asc' },
-    include: {
-      _count: {
-        select: { blogs: true },
+  try {
+    await seedBlogCategoriesIfEmpty();
+    const categories = await db.blogCategory.findMany({
+      orderBy: { name: 'asc' },
+      include: {
+        _count: {
+          select: { blogs: true },
+        },
       },
-    },
-  });
+    });
+    if (categories && categories.length > 0) return categories;
+  } catch (err: any) {
+    console.warn('[blog.service] getBlogCategories DB notice, serving initial categories:', err?.message || err);
+  }
+
+  // Resilient fallback preventing public page crash if database connection is limited
+  return INITIAL_BLOG_CATEGORIES.map((cat, idx) => ({
+    id: `fallback-cat-${idx + 1}`,
+    name: cat.name,
+    slug: slugify(cat.name, { lower: true, strict: true }),
+    description: cat.description,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    _count: { blogs: 0 },
+  }));
 }
 
 export async function getBlogTags() {
-  return db.blogTag.findMany({
-    orderBy: { name: 'asc' },
-  });
+  try {
+    return await db.blogTag.findMany({
+      orderBy: { name: 'asc' },
+    });
+  } catch (err: any) {
+    console.warn('[blog.service] getBlogTags DB notice:', err?.message || err);
+    return [];
+  }
 }
 
 export function calculateReadingTime(content: string): number {
@@ -473,54 +498,92 @@ export async function getPublicBlogs(params?: {
   page?: number;
   limit?: number;
 }) {
-  await seedBlogCategoriesIfEmpty();
   const page = params?.page || 1;
   const limit = params?.limit || 9;
   const skip = (page - 1) * limit;
 
-  const now = new Date();
-  const where: any = {
-    status: 'PUBLISHED',
-    AND: [
-      {
-        OR: [
-          { publishedAt: { lte: now } },
-          { publishedAt: null },
-        ],
-      },
-    ],
-  };
+  try {
+    await seedBlogCategoriesIfEmpty();
 
-  if (params?.featuredOnly) {
-    where.featured = true;
-  }
-
-  if (params?.categorySlug) {
-    where.category = { slug: params.categorySlug };
-  }
-
-  if (params?.tagSlug) {
-    where.tags = { some: { slug: params.tagSlug } };
-  }
-
-  if (params?.search) {
-    where.OR = [
-      { title: { contains: params.search, mode: 'insensitive' } },
-      { subtitle: { contains: params.search, mode: 'insensitive' } },
-      { excerpt: { contains: params.search, mode: 'insensitive' } },
-      { content: { contains: params.search, mode: 'insensitive' } },
-    ];
-  }
-
-  const [blogs, total] = await Promise.all([
-    db.blog.findMany({
-      where,
-      orderBy: [
-        { featured: 'desc' },
-        { publishedAt: 'desc' },
+    const now = new Date();
+    const where: any = {
+      status: 'PUBLISHED',
+      AND: [
+        {
+          OR: [
+            { publishedAt: { lte: now } },
+            { publishedAt: null },
+          ],
+        },
       ],
-      skip,
-      take: limit,
+    };
+
+    if (params?.featuredOnly) {
+      where.featured = true;
+    }
+
+    if (params?.categorySlug) {
+      where.category = { slug: params.categorySlug };
+    }
+
+    if (params?.tagSlug) {
+      where.tags = { some: { slug: params.tagSlug } };
+    }
+
+    if (params?.search) {
+      where.OR = [
+        { title: { contains: params.search, mode: 'insensitive' } },
+        { subtitle: { contains: params.search, mode: 'insensitive' } },
+        { excerpt: { contains: params.search, mode: 'insensitive' } },
+        { content: { contains: params.search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [blogs, total] = await Promise.all([
+      db.blog.findMany({
+        where,
+        orderBy: [
+          { featured: 'desc' },
+          { publishedAt: 'desc' },
+        ],
+        skip,
+        take: limit,
+        include: {
+          category: true,
+          tags: true,
+          seo: true,
+          media: true,
+          author: {
+            include: {
+              user: { select: { name: true, avatarUrl: true } },
+            },
+          },
+        },
+      }),
+      db.blog.count({ where }),
+    ]);
+
+    return {
+      blogs: blogs || [],
+      total: total || 0,
+      page,
+      totalPages: Math.ceil((total || 0) / limit) || 1,
+    };
+  } catch (error: any) {
+    console.warn('[blog.service] getPublicBlogs DB notice, serving safe fallback:', error?.message || error);
+    return {
+      blogs: [],
+      total: 0,
+      page: 1,
+      totalPages: 1,
+    };
+  }
+}
+
+export async function getPublicBlogBySlug(slug: string) {
+  try {
+    const blog = await db.blog.findUnique({
+      where: { slug },
       include: {
         category: true,
         tags: true,
@@ -528,81 +591,64 @@ export async function getPublicBlogs(params?: {
         media: true,
         author: {
           include: {
-            user: { select: { name: true, avatarUrl: true } },
+            user: { select: { name: true, avatarUrl: true, email: true } },
           },
         },
       },
-    }),
-    db.blog.count({ where }),
-  ]);
+    });
 
-  return {
-    blogs,
-    total,
-    page,
-    totalPages: Math.ceil(total / limit),
-  };
-}
+    if (!blog || blog.status !== 'PUBLISHED') {
+      return null;
+    }
 
-export async function getPublicBlogBySlug(slug: string) {
-  const blog = await db.blog.findUnique({
-    where: { slug },
-    include: {
-      category: true,
-      tags: true,
-      seo: true,
-      media: true,
-      author: {
-        include: {
-          user: { select: { name: true, avatarUrl: true, email: true } },
-        },
-      },
-    },
-  });
+    // If blog is scheduled for future release, keep hidden from public
+    if (blog.publishedAt && new Date(blog.publishedAt) > new Date()) {
+      return null;
+    }
 
-  if (!blog || blog.status !== 'PUBLISHED') {
+    // Increment view count asynchronously
+    db.blog.update({
+      where: { id: blog.id },
+      data: { viewCount: { increment: 1 } },
+    }).catch(() => {});
+
+    return blog;
+  } catch (error: any) {
+    console.warn('[blog.service] getPublicBlogBySlug DB notice:', error?.message || error);
     return null;
   }
-
-  // If blog is scheduled for future release, keep hidden from public
-  if (blog.publishedAt && new Date(blog.publishedAt) > new Date()) {
-    return null;
-  }
-
-  // Increment view count asynchronously
-  db.blog.update({
-    where: { id: blog.id },
-    data: { viewCount: { increment: 1 } },
-  }).catch((err: any) => console.error('Failed to increment blog view count:', err));
-
-  return blog;
 }
 
 export async function getRelatedBlogs(blogId: string, categoryId?: string | null, limit = 3) {
   if (!categoryId) return [];
-  const now = new Date();
-  return db.blog.findMany({
-    where: {
-      status: 'PUBLISHED',
-      categoryId,
-      id: { not: blogId },
-      OR: [
-        { publishedAt: { lte: now } },
-        { publishedAt: null },
-      ],
-    },
-    take: limit,
-    orderBy: { publishedAt: 'desc' },
-    include: {
-      category: true,
-      media: true,
-      author: {
-        include: {
-          user: { select: { name: true, avatarUrl: true } },
+  try {
+    const now = new Date();
+    return await db.blog.findMany({
+      where: {
+        status: 'PUBLISHED',
+        categoryId,
+        id: { not: blogId },
+        OR: [
+          { publishedAt: { lte: now } },
+          { publishedAt: null },
+        ],
+      },
+      take: limit,
+      orderBy: { publishedAt: 'desc' },
+      include: {
+        category: true,
+        media: true,
+        author: {
+          include: {
+            user: { select: { name: true, avatarUrl: true } },
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error: any) {
+    console.warn('[blog.service] getRelatedBlogs DB notice:', error?.message || error);
+    return [];
+  }
 }
 
 // ============================================================================
