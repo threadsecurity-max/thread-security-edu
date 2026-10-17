@@ -20,7 +20,10 @@ export const INITIAL_BLOG_CATEGORIES = [
   { name: 'Technology', description: 'General tech developments, hardware, and emerging trends.' },
 ];
 
+let hasAttemptedCategorySeed = false;
+
 export async function seedBlogCategoriesIfEmpty() {
+  if (hasAttemptedCategorySeed) return;
   try {
     const count = await db.blogCategory.count();
     if (count === 0) {
@@ -34,6 +37,7 @@ export async function seedBlogCategoriesIfEmpty() {
         });
       }
     }
+    hasAttemptedCategorySeed = true;
   } catch (err: any) {
     console.warn('[blog.service] seedBlogCategoriesIfEmpty transient notice:', err?.message || err);
   }
