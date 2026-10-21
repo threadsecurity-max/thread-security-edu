@@ -19,6 +19,11 @@ import {
   LogOut,
   Lock,
   Sparkles,
+  ChevronDown,
+  Shield,
+  Brain,
+  Clock,
+  ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogoutButton } from '@/components/navigation/LogoutButton';
@@ -29,11 +34,15 @@ interface MobileNavDrawerProps {
 
 export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [coursesExpanded, setCoursesExpanded] = useState(false);
+  const [internshipExpanded, setInternshipExpanded] = useState(false);
   const pathname = usePathname();
 
   // Close drawer on route change
   useEffect(() => {
     setIsOpen(false);
+    setCoursesExpanded(false);
+    setInternshipExpanded(false);
   }, [pathname]);
 
   // Lock body scroll when drawer is open and listen for Escape key
@@ -115,14 +124,205 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                     Core Navigation
                   </div>
 
-                  <Link
-                    href="/courses"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 active:bg-neutral-200 transition-colors"
-                  >
-                    <BookOpen className="w-5 h-5 text-black" />
-                    <span>Featured Courses</span>
-                  </Link>
+                  {/* Courses Accordion */}
+                  <div className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/50">
+                    <button
+                      onClick={() => setCoursesExpanded((prev) => !prev)}
+                      className="w-full flex items-center justify-between px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 transition-colors"
+                      aria-expanded={coursesExpanded}
+                    >
+                      <div className="flex items-center gap-3">
+                        <BookOpen className="w-5 h-5 text-blue-600" />
+                        <span>Courses (Cyber & AI)</span>
+                      </div>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          coursesExpanded ? 'rotate-180 text-blue-600' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {coursesExpanded && (
+                      <div className="px-3 pb-3 pt-1 space-y-3 bg-white border-t border-slate-100">
+                        {/* Cyber Track */}
+                        <div>
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-blue-600 uppercase tracking-wider mb-1.5 px-2">
+                            <Shield className="w-3 h-3" />
+                            <span>Cybersecurity Courses</span>
+                          </div>
+                          <div className="space-y-1">
+                            <Link
+                              href="/courses/cyber-security-course"
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              <span>Professional Cyber Security</span>
+                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                            </Link>
+                            <Link
+                              href="/courses/web-application-security-vapt"
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              <span>Web Security & VAPT</span>
+                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                            </Link>
+                            <Link
+                              href="/courses/soc-blue-team-operations"
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              <span>SOC Blue Team Operations</span>
+                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                            </Link>
+                            <Link
+                              href="/courses/active-directory-exploitation"
+                              onClick={() => setIsOpen(false)}
+                              className="block px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              Active Directory & Red Teaming
+                            </Link>
+                          </div>
+                        </div>
+
+                        {/* AI Track */}
+                        <div>
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-blue-600 uppercase tracking-wider mb-1.5 px-2">
+                            <Brain className="w-3 h-3" />
+                            <span>AI & LLM Courses</span>
+                          </div>
+                          <div className="space-y-1">
+                            <Link
+                              href="/courses/ai-security-llm-redteaming"
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              <span>AI Security & LLM Red Teaming</span>
+                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                            </Link>
+                            <Link
+                              href="/courses/agentic-ai-engineering"
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              <span>Agentic AI Engineering</span>
+                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                            </Link>
+                            <Link
+                              href="/courses/rag-vulnerability-analysis"
+                              onClick={() => setIsOpen(false)}
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              <span>RAG Architecture Security</span>
+                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                            </Link>
+                            <Link
+                              href="/courses/data-science-ml-security"
+                              onClick={() => setIsOpen(false)}
+                              className="block px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                            >
+                              Data Science & ML Pipeline
+                            </Link>
+                          </div>
+                        </div>
+
+                        <Link
+                          href="/courses"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        >
+                          <span>Explore All 16+ Masterclasses</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Internship & Training Accordion */}
+                  <div className="rounded-xl overflow-hidden border border-slate-100 bg-slate-50/50">
+                    <button
+                      onClick={() => setInternshipExpanded((prev) => !prev)}
+                      className="w-full flex items-center justify-between px-3 py-3 rounded-xl font-bold text-sm text-neutral-800 hover:bg-neutral-100 transition-colors"
+                      aria-expanded={internshipExpanded}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Briefcase className="w-5 h-5 text-blue-600" />
+                        <span>Internship & Training</span>
+                      </div>
+                      <ChevronDown
+                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                          internshipExpanded ? 'rotate-180 text-blue-600' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {internshipExpanded && (
+                      <div className="px-3 pb-3 pt-1 space-y-2 bg-white border-t border-slate-100">
+                        <Link
+                          href="/internship-training?duration=45-days"
+                          onClick={() => setIsOpen(false)}
+                          className="group block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+                        >
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600">
+                              45 Days Training
+                            </span>
+                            <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">
+                              Trending
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            Summer / Winter practical labs & university project letter.
+                          </p>
+                        </Link>
+
+                        <Link
+                          href="/internship-training?duration=3-months"
+                          onClick={() => setIsOpen(false)}
+                          className="group block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+                        >
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600">
+                              3 Months Internship
+                            </span>
+                            <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">
+                              Trending
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            Mid-semester practical training in Cyber Defense & AI.
+                          </p>
+                        </Link>
+
+                        <Link
+                          href="/internship-training?duration=6-months"
+                          onClick={() => setIsOpen(false)}
+                          className="group block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+                        >
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600">
+                              6 Months Industrial Training
+                            </span>
+                            <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">
+                              Trending
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            Enterprise capstone & 100% placement support.
+                          </p>
+                        </Link>
+
+                        <Link
+                          href="/internship-training"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        >
+                          <span>View Full Training Overview</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
 
                   <Link
                     href="/#curriculum-roadmap"

@@ -12,6 +12,7 @@
     "prisma:db:push": "prisma db push",
     "prisma:seed": "tsx prisma/seed.ts",
     "package:hostinger": "node scripts/prepare-hostinger-bundle.cjs",
+    "package:minor-project": "node scripts/package-minor-project.cjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "graphify": "python scripts/build_graphify.py"

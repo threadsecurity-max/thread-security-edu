@@ -6,7 +6,6 @@ import { HowWeConductCourses } from '@/components/courses/HowWeConductCourses';
 import { MethodologySection } from '@/components/courses/MethodologySection';
 import { LearningRoute } from '@/components/courses/LearningRoute';
 import { CourseCatalogue, CourseItem } from '@/components/courses/CourseCatalogue';
-import { MentorsSection } from '@/components/courses/MentorsSection';
 import { CourseCTA } from '@/components/courses/CourseCTA';
 
 const DEFAULT_COURSES: CourseItem[] = [
@@ -331,10 +330,7 @@ export function CoursesSplitClient({ initialCourses }: CoursesSplitClientProps) 
         onTrackChange={setActiveTrackFilter}
       />
 
-      {/* 6. Mentors */}
-      <MentorsSection />
-
-      {/* 7. Final CTA */}
+      {/* 6. Final CTA */}
       <CourseCTA />
 
     </div>

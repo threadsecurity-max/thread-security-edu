@@ -566,38 +566,7 @@ export default async function CourseDetailPage({
           </div>
         </section>
 
-        {/* Section 4: Lead Mentor Faculty */}
-        <section aria-labelledby="mentor-heading" className="space-y-6 text-left">
-          <div>
-            <h2 id="mentor-heading" className="text-2xl sm:text-3xl font-black uppercase text-white">
-              Faculty & Lead Instructor
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Direct weekly instruction, live office hours, and code-review feedback.
-            </p>
-          </div>
-
-          <div className="p-8 rounded-3xl bg-[#0B101B] border border-slate-800 flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-700 flex items-center justify-center text-white text-xl font-black shrink-0">
-              {course.mentor.name.split(' ').map((n: string) => n[0]).join('')}
-            </div>
-
-            <div className="space-y-1 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-xl font-bold text-white">{course.mentor.name}</h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[11px] font-mono">
-                  {course.mentor.company}
-                </span>
-              </div>
-              <p className="text-xs font-mono text-slate-400">{course.mentor.role}</p>
-              <p className="text-xs sm:text-sm text-slate-300 pt-1 leading-relaxed">
-                {course.mentor.bio}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 5: Course FAQs */}
+        {/* Section 4: Course FAQs */}
         <section aria-labelledby="faq-heading" className="space-y-6 text-left">
           <div>
             <h2 id="faq-heading" className="text-2xl sm:text-3xl font-black uppercase text-white">

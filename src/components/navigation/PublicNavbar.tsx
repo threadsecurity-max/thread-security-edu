@@ -16,18 +16,11 @@ import {
   Sparkles,
   Phone,
 } from 'lucide-react';
+import { CoursesMegaMenu } from '@/components/navigation/CoursesMegaMenu';
+import { InternshipDropdown } from '@/components/navigation/InternshipDropdown';
 import { MoreDropdown } from '@/components/navigation/MoreDropdown';
 import { LogoutButton } from '@/components/navigation/LogoutButton';
 import { MobileNavDrawer } from '@/components/navigation/MobileNavDrawer';
-
-const navItems = [
-  { name: 'Courses', url: '/courses', icon: 'BookOpen' },
-  { name: 'Curriculum', url: '/#curriculum-roadmap', icon: 'Layers' },
-  { name: 'Projects', url: '/#projects', icon: 'BookOpen' },
-  // { name: 'Placements', url: '/placements', icon: 'Briefcase' },
-  { name: 'Workshops', url: '/workshops', icon: 'Sparkles' },  
-  { name: 'Contact Us', url: '/contact', icon: 'Phone' },
-];
 
 export async function PublicNavbar() {
   const session = await getSession();
@@ -49,19 +42,36 @@ export async function PublicNavbar() {
           </span>
         </Link>
 
-        {/* Navigation Links with Clean Basic Links & Dropdown */}
-        <div className="hidden lg:flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.url}
-              href={item.url}
-              className="text-sm font-medium text-slate-600 hover:text-black transition-colors"
-            >
-              {item.name}
-            </Link>
-          ))}
+        {/* Navigation Links with Mega Menu & Dropdowns */}
+        <nav className="hidden lg:flex items-center gap-6 h-full" aria-label="Main Navigation">
+          <Link
+            href="/"
+            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+          >
+            Home
+          </Link>
+          <CoursesMegaMenu />
+          <InternshipDropdown />
+          <Link
+            href="/#curriculum-roadmap"
+            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+          >
+            Curriculum
+          </Link>
+          <Link
+            href="/workshops"
+            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+          >
+            Workshops
+          </Link>
+          <Link
+            href="/contact"
+            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+          >
+            Contact Us
+          </Link>
           <MoreDropdown />
-        </div>
+        </nav>
 
         {/* Action Buttons & Mobile Menu */}
         <div className="flex items-center gap-2 sm:gap-3">
