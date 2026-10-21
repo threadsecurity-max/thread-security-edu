@@ -144,82 +144,82 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
 
                     {coursesExpanded && (
                       <div className="px-3 pb-3 pt-1 space-y-3 bg-white border-t border-slate-100">
-                        {/* Cyber Track */}
+                        {/* Cyber Track - Lime Themed */}
                         <div>
-                          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-blue-600 uppercase tracking-wider mb-1.5 px-2">
-                            <Shield className="w-3 h-3" />
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-lime-600 uppercase tracking-wider mb-1.5 px-2">
+                            <Shield className="w-3.5 h-3.5 text-lime-500" />
                             <span>Cybersecurity Courses</span>
                           </div>
                           <div className="space-y-1">
                             <Link
                               href="/courses/cyber-security-course"
                               onClick={() => setIsOpen(false)}
-                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-lime-700 hover:bg-lime-50/70 rounded-lg"
                             >
                               <span>Professional Cyber Security</span>
-                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                              <span className="text-[9px] font-extrabold text-black bg-lime-400 px-1.5 py-0.2 rounded-full">Trending</span>
                             </Link>
                             <Link
                               href="/courses/web-application-security-vapt"
                               onClick={() => setIsOpen(false)}
-                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-lime-700 hover:bg-lime-50/70 rounded-lg"
                             >
                               <span>Web Security & VAPT</span>
-                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                              <span className="text-[9px] font-extrabold text-black bg-lime-400 px-1.5 py-0.2 rounded-full">Trending</span>
                             </Link>
                             <Link
-                              href="/courses/soc-blue-team-operations"
+                              href="/courses/cloud-security-devsecops"
                               onClick={() => setIsOpen(false)}
-                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-lime-700 hover:bg-lime-50/70 rounded-lg"
                             >
-                              <span>SOC Blue Team Operations</span>
-                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                              <span>Cloud DevSecOps & Hardening</span>
+                              <span className="text-[9px] font-extrabold text-black bg-lime-400 px-1.5 py-0.2 rounded-full">Trending</span>
                             </Link>
                             <Link
                               href="/courses/active-directory-exploitation"
                               onClick={() => setIsOpen(false)}
-                              className="block px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="block px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-lime-700 hover:bg-lime-50/70 rounded-lg"
                             >
                               Active Directory & Red Teaming
                             </Link>
                           </div>
                         </div>
 
-                        {/* AI Track */}
+                        {/* AI Track - Violet Themed */}
                         <div>
-                          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-blue-600 uppercase tracking-wider mb-1.5 px-2">
-                            <Brain className="w-3 h-3" />
+                          <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-violet-600 uppercase tracking-wider mb-1.5 px-2">
+                            <Brain className="w-3.5 h-3.5 text-violet-500" />
                             <span>AI & LLM Courses</span>
                           </div>
                           <div className="space-y-1">
                             <Link
                               href="/courses/ai-security-llm-redteaming"
                               onClick={() => setIsOpen(false)}
-                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-violet-700 hover:bg-violet-50/70 rounded-lg"
                             >
                               <span>AI Security & LLM Red Teaming</span>
-                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                              <span className="text-[9px] font-extrabold text-white bg-violet-600 px-1.5 py-0.2 rounded-full">Trending</span>
                             </Link>
                             <Link
                               href="/courses/agentic-ai-engineering"
                               onClick={() => setIsOpen(false)}
-                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-violet-700 hover:bg-violet-50/70 rounded-lg"
                             >
                               <span>Agentic AI Engineering</span>
-                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                              <span className="text-[9px] font-extrabold text-white bg-violet-600 px-1.5 py-0.2 rounded-full">Trending</span>
                             </Link>
                             <Link
                               href="/courses/rag-vulnerability-analysis"
                               onClick={() => setIsOpen(false)}
-                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="flex items-center justify-between px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-violet-700 hover:bg-violet-50/70 rounded-lg"
                             >
                               <span>RAG Architecture Security</span>
-                              <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">Trending</span>
+                              <span className="text-[9px] font-extrabold text-white bg-violet-600 px-1.5 py-0.2 rounded-full">Trending</span>
                             </Link>
                             <Link
                               href="/courses/data-science-ml-security"
                               onClick={() => setIsOpen(false)}
-                              className="block px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 hover:bg-blue-50/50 rounded-lg"
+                              className="block px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:text-violet-700 hover:bg-violet-50/70 rounded-lg"
                             >
                               Data Science & ML Pipeline
                             </Link>
@@ -229,10 +229,10 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                         <Link
                           href="/courses"
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
                         >
                           <span>Explore All 16+ Masterclasses</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3.5 h-3.5 text-violet-600" />
                         </Link>
                       </div>
                     )}
@@ -246,12 +246,12 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                       aria-expanded={internshipExpanded}
                     >
                       <div className="flex items-center gap-3">
-                        <Briefcase className="w-5 h-5 text-blue-600" />
+                        <Briefcase className="w-5 h-5 text-lime-600" />
                         <span>Internship & Training</span>
                       </div>
                       <ChevronDown
                         className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                          internshipExpanded ? 'rotate-180 text-blue-600' : ''
+                          internshipExpanded ? 'rotate-180 text-violet-600' : ''
                         }`}
                       />
                     </button>
@@ -264,10 +264,10 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                           className="group block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
                         >
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-lime-700">
                               45 Days Training
                             </span>
-                            <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">
+                            <span className="text-[9px] font-extrabold text-black bg-lime-400 px-1.5 py-0.2 rounded-full">
                               Trending
                             </span>
                           </div>
@@ -282,10 +282,10 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                           className="group block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
                         >
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-violet-600">
                               3 Months Internship
                             </span>
-                            <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">
+                            <span className="text-[9px] font-extrabold text-white bg-violet-600 px-1.5 py-0.2 rounded-full">
                               Trending
                             </span>
                           </div>
@@ -300,10 +300,10 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                           className="group block p-2.5 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
                         >
                           <div className="flex items-center justify-between mb-0.5">
-                            <span className="text-xs font-bold text-slate-900 group-hover:text-blue-600">
+                            <span className="text-xs font-bold text-slate-900 group-hover:text-violet-600">
                               6 Months Industrial Training
                             </span>
-                            <span className="text-[9px] font-bold text-white bg-blue-600 px-1.5 py-0.2 rounded-full">
+                            <span className="text-[9px] font-extrabold text-black bg-gradient-to-r from-lime-400 to-violet-600 px-1.5 py-0.2 rounded-full">
                               Trending
                             </span>
                           </div>
@@ -315,10 +315,10 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                         <Link
                           href="/internship-training"
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
                         >
                           <span>View Full Training Overview</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
+                          <ArrowRight className="w-3.5 h-3.5 text-lime-600" />
                         </Link>
                       </div>
                     )}
