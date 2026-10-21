@@ -30,6 +30,45 @@ import { getSiteUrl } from '@/lib/seo/siteUrl';
 
 const APP_URL = getSiteUrl();
 
+async function getDbCourseMetaSafe(slug: string) {
+  try {
+    const query = prisma.course.findUnique({
+      where: { slug },
+      select: { title: true, subtitle: true, description: true, category: true },
+    });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), 1200)
+    );
+    return (await Promise.race([query, timeout])) as any;
+  } catch {
+    return null;
+  }
+}
+
+async function getDbCourseSafe(slug: string) {
+  try {
+    const query = prisma.course.findUnique({
+      where: { slug },
+      include: {
+        modules: {
+          include: { lessons: true },
+          orderBy: { orderIndex: 'asc' },
+        },
+        labs: true,
+        assessments: {
+          include: { questions: true },
+        },
+      },
+    });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), 1200)
+    );
+    return (await Promise.race([query, timeout])) as any;
+  } catch {
+    return null;
+  }
+}
+
 // ── DYNAMIC SEO METADATA ──
 export async function generateMetadata({
   params,
@@ -38,16 +77,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const fallback = getMasterCourseBySlug(slug);
-
-  let dbCourse: any = null;
-  try {
-    dbCourse = await prisma.course.findUnique({
-      where: { slug },
-      select: { title: true, subtitle: true, description: true, category: true },
-    });
-  } catch (err) {
-    // Database transient error handled gracefully
-  }
+  const dbCourse = await getDbCourseMetaSafe(slug);
 
   const course = dbCourse || fallback;
 
@@ -125,25 +155,7 @@ export default async function CourseDetailPage({
   const { slug } = await params;
   const fallback = getMasterCourseBySlug(slug);
 
-  let dbCourse: any = null;
-  try {
-    dbCourse = await prisma.course.findUnique({
-      where: { slug },
-      include: {
-        mentor: { include: { user: true } },
-        modules: {
-          include: { lessons: true },
-          orderBy: { orderIndex: 'asc' },
-        },
-        labs: true,
-        assessments: {
-          include: { questions: true },
-        },
-      },
-    });
-  } catch (error) {
-    console.error('[CourseDetailPage] DB lookup transient error:', error);
-  }
+  const dbCourse = await getDbCourseSafe(slug);
 
   // Combine DB data with rich Master Registry fallback
   if (!dbCourse && !fallback) {

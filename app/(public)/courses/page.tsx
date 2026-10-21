@@ -67,18 +67,20 @@ export default async function PublicCourseCataloguePage() {
   let courses: any[] = [];
 
   try {
-    const fetchedCourses = await prisma.course.findMany({
+    const query = prisma.course.findMany({
       where: { status: 'PUBLISHED' },
       include: {
-        mentor: { include: { user: true } },
         modules: true,
         labs: true,
       },
       orderBy: { createdAt: 'desc' },
     });
-    courses = fetchedCourses;
-  } catch (error) {
-    console.error('[PublicCourseCataloguePage] Database query transient error:', error);
+    const timeout = new Promise<any[]>((_, reject) =>
+      setTimeout(() => reject(new Error('TIMEOUT')), 1200)
+    );
+    courses = await Promise.race([query, timeout]);
+  } catch {
+    // Graceful fallback to rich static MASTER_COURSES registry
   }
 
   const courseListItems = MASTER_COURSES.map((c) => ({
