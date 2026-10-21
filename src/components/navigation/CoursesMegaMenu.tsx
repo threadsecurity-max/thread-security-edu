@@ -288,10 +288,13 @@ export function CoursesMegaMenu() {
         <div
           role="region"
           aria-labelledby="courses-mega-menu-trigger"
-          className="fixed left-0 right-0 top-[4.25rem] w-screen px-4 sm:px-8 lg:px-12 z-50 pointer-events-none transition-all duration-200"
+          className="fixed left-0 right-0 top-[4.25rem] w-screen px-4 sm:px-8 lg:px-12 z-[100] pointer-events-none"
         >
           <div className="max-w-[1400px] mx-auto pointer-events-auto">
-            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-200 animate-in fade-in-0 slide-in-from-top-2">
+            <div
+              style={{ backgroundColor: '#ffffff' }}
+              className="rounded-2xl border border-slate-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] overflow-hidden"
+            >
               
               {/* 4 Specialized Columns strictly for Cybersecurity and AI */}
               <div className="p-6 sm:p-8 lg:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">

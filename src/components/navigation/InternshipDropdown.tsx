@@ -123,12 +123,15 @@ export function InternshipDropdown() {
         <div
           role="region"
           aria-labelledby="internship-dropdown-trigger"
-          className="absolute top-full left-0 pt-2 w-[340px] sm:w-[400px] z-50 pointer-events-auto"
+          className="absolute top-full left-0 pt-2 w-[340px] sm:w-[400px] z-[100] pointer-events-auto"
         >
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_20px_50px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.06)] overflow-hidden transition-all duration-200 animate-in fade-in-0 slide-in-from-top-2">
+          <div
+            style={{ backgroundColor: '#ffffff', opacity: 1 }}
+            className="bg-white rounded-2xl border border-slate-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] overflow-hidden"
+          >
             
             {/* Header info */}
-            <div className="bg-gradient-to-r from-blue-50/80 via-slate-50 to-white px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
+            <div className="bg-slate-50 px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Briefcase className="w-4 h-4 text-blue-600" />
                 <span className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider">
@@ -141,7 +144,7 @@ export function InternshipDropdown() {
             </div>
 
             {/* Program Items */}
-            <div className="p-3 space-y-1.5">
+            <div className="p-3 space-y-1.5 bg-white">
               {TRAINING_PROGRAMS.map((program, idx) => (
                 <Link
                   key={idx}
