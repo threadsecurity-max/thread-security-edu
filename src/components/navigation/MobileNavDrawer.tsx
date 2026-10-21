@@ -132,12 +132,12 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                       aria-expanded={coursesExpanded}
                     >
                       <div className="flex items-center gap-3">
-                        <BookOpen className="w-5 h-5 text-blue-600" />
+                        <BookOpen className="w-5 h-5 text-lime-600" />
                         <span>Courses (Cyber & AI)</span>
                       </div>
                       <ChevronDown
                         className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                          coursesExpanded ? 'rotate-180 text-blue-600' : ''
+                          coursesExpanded ? 'rotate-180 text-lime-600' : ''
                         }`}
                       />
                     </button>

@@ -46,7 +46,7 @@ export async function PublicNavbar() {
         <nav className="hidden lg:flex items-center gap-6 h-full" aria-label="Main Navigation">
           <Link
             href="/"
-            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-slate-700 hover:text-black transition-colors"
           >
             Home
           </Link>
@@ -54,19 +54,19 @@ export async function PublicNavbar() {
           <InternshipDropdown />
           <Link
             href="/#curriculum-roadmap"
-            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-slate-700 hover:text-black transition-colors"
           >
             Curriculum
           </Link>
           <Link
             href="/workshops"
-            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-slate-700 hover:text-black transition-colors"
           >
             Workshops
           </Link>
           <Link
             href="/contact"
-            className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-slate-700 hover:text-black transition-colors"
           >
             Contact Us
           </Link>
