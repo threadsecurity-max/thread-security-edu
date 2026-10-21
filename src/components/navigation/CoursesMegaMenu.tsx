@@ -7,20 +7,9 @@ import {
   ChevronDown,
   Shield,
   ShieldAlert,
-  Terminal,
-  Cpu,
   Brain,
-  Bot,
   Lock,
   ArrowRight,
-  Sparkles,
-  Server,
-  Network,
-  Bug,
-  FileCode2,
-  Database,
-  Radio,
-  Eye,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -28,23 +17,28 @@ interface CourseLinkItem {
   title: string;
   href: string;
   isTrending?: boolean;
-  isNew?: boolean;
 }
 
 interface CourseCategoryColumn {
   title: string;
+  theme: 'cyber' | 'ai';
   icon: any;
-  accentColor: string;
-  badgeBg: string;
+  headerColor: string;
+  borderColor: string;
+  badgeClass: string;
+  hoverClass: string;
   courses: CourseLinkItem[];
 }
 
 const COURSES_DATA: CourseCategoryColumn[] = [
   {
-    title: 'CYBER SECURITY & OFFENSE',
+    title: 'CYBER SECURITY & DEFENSE',
+    theme: 'cyber',
     icon: ShieldAlert,
-    accentColor: 'text-blue-600',
-    badgeBg: 'bg-blue-600',
+    headerColor: 'text-lime-600',
+    borderColor: 'border-lime-200/80',
+    badgeClass: 'bg-lime-400 text-black font-extrabold',
+    hoverClass: 'hover:text-lime-700 hover:bg-lime-50/80',
     courses: [
       {
         title: 'Cyber Security Masterclass',
@@ -62,6 +56,11 @@ const COURSES_DATA: CourseCategoryColumn[] = [
         isTrending: true,
       },
       {
+        title: 'Cloud DevSecOps & AWS Hardening',
+        href: '/courses/cloud-security-devsecops',
+        isTrending: true,
+      },
+      {
         title: 'Active Directory & Red Teaming',
         href: '/courses/active-directory-exploitation',
       },
@@ -70,38 +69,12 @@ const COURSES_DATA: CourseCategoryColumn[] = [
         href: '/courses/mobile-application-penetration-testing',
       },
       {
-        title: 'API Security & Microservices',
+        title: 'API Security & Microservices Exploitation',
         href: '/courses/api-security-microservices-exploitation',
-      },
-      {
-        title: 'Linux for Ethical Hackers',
-        href: '/courses/cyber-security-course',
       },
       {
         title: 'Bug Bounty Hunting Program',
         href: '/courses/cyber-security-course',
-        isTrending: true,
-      },
-    ],
-  },
-  {
-    title: 'SOC & CLOUD DEFENSE',
-    icon: Shield,
-    accentColor: 'text-blue-600',
-    badgeBg: 'bg-blue-600',
-    courses: [
-      {
-        title: 'SOC Operations & Threat Hunting',
-        href: '/courses/soc-blue-team-operations',
-        isTrending: true,
-      },
-      {
-        title: 'Cloud DevSecOps & AWS Hardening',
-        href: '/courses/cloud-security-devsecops',
-      },
-      {
-        title: 'Splunk SIEM Enterprise Defense',
-        href: '/courses/soc-blue-team-operations',
         isTrending: true,
       },
       {
@@ -109,28 +82,19 @@ const COURSES_DATA: CourseCategoryColumn[] = [
         href: '/courses/binary-exploitation-reverse-engineering',
       },
       {
-        title: 'Industrial OT / ICS & SCADA Defense',
-        href: '/courses/ot-ics-critical-infrastructure-security',
-      },
-      {
-        title: 'Malware Analysis & Incident Triage',
+        title: 'Linux for Ethical Hackers & Forensics',
         href: '/courses/cyber-security-course',
-      },
-      {
-        title: 'Network Packet Forensics (Wireshark)',
-        href: '/courses/soc-blue-team-operations',
-      },
-      {
-        title: 'Cryptographic TS-ID Security',
-        href: '/verify-certificate',
       },
     ],
   },
   {
     title: 'ARTIFICIAL INTELLIGENCE & AGENTS',
+    theme: 'ai',
     icon: Brain,
-    accentColor: 'text-blue-600',
-    badgeBg: 'bg-blue-600',
+    headerColor: 'text-violet-600',
+    borderColor: 'border-violet-100',
+    badgeClass: 'bg-violet-600 text-white font-extrabold',
+    hoverClass: 'hover:text-violet-700 hover:bg-violet-50/80',
     courses: [
       {
         title: 'Artificial Intelligence Masterclass',
@@ -138,7 +102,7 @@ const COURSES_DATA: CourseCategoryColumn[] = [
         isTrending: true,
       },
       {
-        title: 'Agentic AI Engineering & Systems',
+        title: 'Agentic AI Engineering & Production',
         href: '/courses/agentic-ai-engineering',
         isTrending: true,
       },
@@ -171,9 +135,12 @@ const COURSES_DATA: CourseCategoryColumn[] = [
   },
   {
     title: 'AI SECURITY & GOVERNANCE',
+    theme: 'ai',
     icon: Lock,
-    accentColor: 'text-blue-600',
-    badgeBg: 'bg-blue-600',
+    headerColor: 'text-violet-600',
+    borderColor: 'border-violet-100',
+    badgeClass: 'bg-violet-600 text-white font-extrabold',
+    hoverClass: 'hover:text-violet-700 hover:bg-violet-50/80',
     courses: [
       {
         title: 'AI Security & LLM Red Teaming',
@@ -207,7 +174,7 @@ const COURSES_DATA: CourseCategoryColumn[] = [
         href: '/courses/data-science-ml-security',
       },
       {
-        title: 'AI Safety & Dual-LLM Guardrails',
+        title: 'AI Safety & Dual-LLM Moderation',
         href: '/courses/enterprise-ai-governance-guardrails',
       },
     ],
@@ -256,14 +223,14 @@ export function CoursesMegaMenu() {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Trigger Button with Active Indicator Line matching Reference */}
+      {/* Trigger Button with Dual Lime & Violet Active Indicator Line */}
       <div className="relative py-2">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
           className={`flex items-center gap-1 text-sm font-semibold transition-colors duration-200 cursor-pointer focus:outline-none ${
             isOpen || isCoursesActive
-              ? 'text-blue-600 font-bold'
-              : 'text-slate-700 hover:text-blue-600'
+              ? 'text-slate-900 font-bold'
+              : 'text-slate-700 hover:text-black'
           }`}
           aria-haspopup="true"
           aria-expanded={isOpen}
@@ -272,14 +239,14 @@ export function CoursesMegaMenu() {
           <span>Courses</span>
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${
-              isOpen ? 'rotate-180 text-blue-600' : 'text-slate-500'
+              isOpen ? 'rotate-180 text-violet-600' : 'text-slate-500'
             }`}
           />
         </button>
 
-        {/* Active Underline matching reference screenshot */}
+        {/* Active Underline: Lime for Cyber + Violet for AI */}
         {(isOpen || isCoursesActive) && (
-          <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-blue-600 rounded-full transition-all duration-200" />
+          <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-lime-400 via-lime-500 to-violet-600 rounded-full transition-all duration-200" />
         )}
       </div>
 
@@ -290,21 +257,21 @@ export function CoursesMegaMenu() {
           aria-labelledby="courses-mega-menu-trigger"
           className="fixed left-0 right-0 top-[4.25rem] w-screen px-4 sm:px-8 lg:px-12 z-[100] pointer-events-none"
         >
-          <div className="max-w-[1400px] mx-auto pointer-events-auto">
+          <div className="max-w-[1320px] mx-auto pointer-events-auto">
             <div
               style={{ backgroundColor: '#ffffff' }}
-              className="rounded-2xl border border-slate-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] overflow-hidden"
+              className="bg-white rounded-2xl border border-slate-200 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.25)] overflow-hidden"
             >
               
-              {/* 4 Specialized Columns strictly for Cybersecurity and AI */}
-              <div className="p-6 sm:p-8 lg:p-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+              {/* 3 Specialized Columns: Cyber in Lime, AI in Violet (SOC removed) */}
+              <div className="p-6 sm:p-8 lg:p-10 grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
                 {COURSES_DATA.map((col, idx) => (
                   <div key={idx} className="space-y-4">
                     
-                    {/* Column Heading in Bold Blue Uppercase matching screenshot */}
-                    <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5">
-                      <col.icon className="w-4 h-4 text-blue-600 shrink-0" />
-                      <h3 className="text-xs sm:text-[13px] font-extrabold text-blue-600 tracking-wider uppercase font-mono">
+                    {/* Column Heading */}
+                    <div className={`flex items-center gap-2 border-b ${col.borderColor} pb-2.5`}>
+                      <col.icon className={`w-4 h-4 ${col.headerColor} shrink-0`} />
+                      <h3 className={`text-xs sm:text-[13px] font-extrabold ${col.headerColor} tracking-wider uppercase font-mono`}>
                         {col.title}
                       </h3>
                     </div>
@@ -316,14 +283,14 @@ export function CoursesMegaMenu() {
                           <Link
                             href={course.href}
                             onClick={() => setIsOpen(false)}
-                            className="group flex items-center justify-between gap-2 py-1.5 px-2 rounded-lg text-[13px] text-slate-700 hover:text-blue-600 hover:bg-blue-50/60 font-medium transition-all duration-150"
+                            className={`group flex items-center justify-between gap-2 py-1.5 px-2 rounded-lg text-[13px] text-slate-700 ${col.hoverClass} font-medium transition-all duration-150`}
                           >
                             <span className="truncate group-hover:translate-x-0.5 transition-transform duration-150">
                               {course.title}
                             </span>
 
                             {course.isTrending && (
-                              <span className="shrink-0 text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full shadow-xs tracking-tight">
+                              <span className={`shrink-0 text-[10px] ${col.badgeClass} px-2 py-0.5 rounded-full shadow-xs tracking-tight`}>
                                 Trending
                               </span>
                             )}
@@ -340,16 +307,14 @@ export function CoursesMegaMenu() {
               <div className="bg-slate-50 border-t border-slate-100 px-6 sm:px-10 py-3.5 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-6 text-xs text-slate-600">
                   <span className="flex items-center gap-1.5 font-medium">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-lime-600 shrink-0" />
+                    <span className="text-slate-800 font-semibold">Cybersecurity:</span>
                     <span>100% Practical Sandboxed Cloud Labs</span>
                   </span>
                   <span className="hidden sm:flex items-center gap-1.5 font-medium">
-                    <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                    <span>Dual Track: Offensive Security & Defensive AI</span>
-                  </span>
-                  <span className="hidden md:flex items-center gap-1.5 font-medium">
-                    <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0" />
-                    <span>Verifiable Cryptographic TS-ID</span>
+                    <CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0" />
+                    <span className="text-slate-800 font-semibold">Artificial Intelligence:</span>
+                    <span>Agentic AI & LLM Red Teaming</span>
                   </span>
                 </div>
 
@@ -357,7 +322,7 @@ export function CoursesMegaMenu() {
                   <Link
                     href="/courses?track=cyber"
                     onClick={() => setIsOpen(false)}
-                    className="text-slate-700 hover:text-blue-600 transition-colors"
+                    className="text-lime-700 hover:text-lime-800 transition-colors"
                   >
                     Cybersecurity Track
                   </Link>
@@ -365,15 +330,15 @@ export function CoursesMegaMenu() {
                   <Link
                     href="/courses?track=ai"
                     onClick={() => setIsOpen(false)}
-                    className="text-slate-700 hover:text-blue-600 transition-colors"
+                    className="text-violet-600 hover:text-violet-700 transition-colors"
                   >
-                    AI Track
+                    AI Systems Track
                   </Link>
                   <span className="text-slate-300">|</span>
                   <Link
                     href="/courses"
                     onClick={() => setIsOpen(false)}
-                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors"
+                    className="inline-flex items-center gap-1 text-slate-900 hover:text-violet-600 transition-colors font-extrabold"
                   >
                     <span>View All 16+ Masterclasses</span>
                     <ArrowRight className="w-3.5 h-3.5" />
