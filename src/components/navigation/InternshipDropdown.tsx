@@ -97,8 +97,8 @@ export function InternshipDropdown() {
           onClick={() => setIsOpen((prev) => !prev)}
           className={`flex items-center gap-1 text-sm font-semibold transition-colors duration-200 cursor-pointer focus:outline-none ${
             isOpen || isTrainingActive
-              ? 'text-blue-600 font-bold'
-              : 'text-slate-700 hover:text-blue-600'
+              ? 'text-slate-900 font-bold'
+              : 'text-slate-700 hover:text-black'
           }`}
           aria-haspopup="true"
           aria-expanded={isOpen}
@@ -107,14 +107,14 @@ export function InternshipDropdown() {
           <span>Internship & Training</span>
           <ChevronDown
             className={`w-3.5 h-3.5 transition-transform duration-200 ${
-              isOpen ? 'rotate-180 text-blue-600' : 'text-slate-500'
+              isOpen ? 'rotate-180 text-violet-600' : 'text-slate-500'
             }`}
           />
         </button>
 
-        {/* Active Underline matching reference screenshot */}
+        {/* Active Underline matching Lime for Cyber and Violet for AI */}
         {(isOpen || isTrainingActive) && (
-          <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-blue-600 rounded-full transition-all duration-200" />
+          <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-gradient-to-r from-lime-400 via-lime-500 to-violet-600 rounded-full transition-all duration-200" />
         )}
       </div>
 
@@ -133,12 +133,12 @@ export function InternshipDropdown() {
             {/* Header info */}
             <div className="bg-slate-50 px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-blue-600" />
+                <Briefcase className="w-4 h-4 text-lime-600" />
                 <span className="text-xs font-mono font-bold text-slate-800 uppercase tracking-wider">
                   Industrial Training
                 </span>
               </div>
-              <span className="text-[10px] font-mono font-bold text-blue-600 bg-blue-100/70 border border-blue-200/60 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-mono font-bold text-slate-900 bg-lime-100 border border-lime-300/80 px-2 py-0.5 rounded-full">
                 UGC / AICTE Aligned
               </span>
             </div>
@@ -153,11 +153,17 @@ export function InternshipDropdown() {
                   className="group block p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all duration-150"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-[13px] font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                    <span className="text-[13px] font-bold text-slate-900 group-hover:text-violet-600 transition-colors">
                       {program.title}
                     </span>
                     {program.isTrending && (
-                      <span className="text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full shadow-xs tracking-tight shrink-0">
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-xs tracking-tight shrink-0 ${
+                        idx === 0
+                          ? 'bg-lime-400 text-black'
+                          : idx === 1
+                          ? 'bg-violet-600 text-white'
+                          : 'bg-gradient-to-r from-lime-400 to-violet-600 text-black'
+                      }`}>
                         Trending
                       </span>
                     )}
@@ -169,11 +175,11 @@ export function InternshipDropdown() {
 
                   <div className="flex items-center gap-3 text-[11px] font-mono text-slate-400">
                     <span className="flex items-center gap-1 text-slate-600 font-semibold">
-                      <Clock className="w-3 h-3 text-blue-600" />
+                      <Clock className="w-3 h-3 text-lime-600" />
                       <span>{program.durationLabel}</span>
                     </span>
                     <span>•</span>
-                    <span className="text-emerald-700 font-medium">
+                    <span className="text-slate-700 font-medium">
                       {program.highlight}
                     </span>
                   </div>
@@ -186,10 +192,10 @@ export function InternshipDropdown() {
               <Link
                 href="/internship-training"
                 onClick={() => setIsOpen(false)}
-                className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
                 <span>View All Training & Internship Details</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight className="w-3.5 h-3.5 text-lime-400" />
               </Link>
             </div>
 
