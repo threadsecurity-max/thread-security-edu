@@ -57,9 +57,12 @@ export default async function PublicBlogLandingPage({
   let blogData = { blogs: [] as any[], total: 0, page: 1, totalPages: 1 };
   let categoriesData: any[] = [];
 
+  const isFiltered = Boolean(search || categorySlug || tagSlug);
+  const fetchLimit = 60;
+
   try {
     const [fetchedBlogs, fetchedCategories] = await Promise.all([
-      getPublicBlogs({ search, categorySlug, tagSlug, page, limit: 9 }),
+      getPublicBlogs({ search, categorySlug, tagSlug, page, limit: fetchLimit }),
       getBlogCategories(),
     ]);
     blogData = fetchedBlogs;
@@ -69,6 +72,24 @@ export default async function PublicBlogLandingPage({
     categoriesData = await getBlogCategories();
   }
 
+  const collectionJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Cybersecurity & AI Research Publications | Thread Security Education',
+    description: 'Categorized technical perspectives, vulnerability research, and career roadmaps.',
+    url: `${APP_URL}/blog`,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: blogData.blogs.slice(0, 25).map((b, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        url: `${APP_URL}/blog/${b.slug}`,
+        name: b.title,
+        description: b.excerpt || b.subtitle,
+      })),
+    },
+  };
+
   return (
     <>
       <BreadcrumbJsonLd
@@ -76,6 +97,10 @@ export default async function PublicBlogLandingPage({
           { name: 'Home', url: '/' },
           { name: 'Blog', url: '/blog' },
         ]}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
       />
       <PublicBlogLandingClient
         initialBlogs={blogData.blogs}

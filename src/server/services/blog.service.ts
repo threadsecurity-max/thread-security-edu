@@ -8,13 +8,12 @@ const db = prisma as any;
 export const INITIAL_BLOG_CATEGORIES = [
   { name: 'Cybersecurity', description: 'Threat intelligence, network security, red teaming, and SOC operations.' },
   { name: 'Artificial Intelligence', description: 'AI, LLMs, machine learning in security, and AI threat detection.' },
-  { name: 'Web Development', description: 'Modern frontend, backend, fullstack architectures, and web security.' },
+  { name: 'Career Guidance', description: 'Career pathways, certifications, interview prep, and industry guidance.' },
   { name: 'Cloud', description: 'AWS, GCP, Azure security, cloud-native architectures, and Kubernetes.' },
   { name: 'DevSecOps', description: 'CI/CD security, automation, infrastructure as code, and compliance.' },
   { name: 'Threat Intelligence', description: 'Malware analysis, threat hunting, and indicators of compromise.' },
   { name: 'Ethical Hacking', description: 'Penetration testing, bug bounty, vulnerability assessment, and exploits.' },
   { name: 'Programming', description: 'Python, Rust, Go, TypeScript, and security tool engineering.' },
-  { name: 'Career', description: 'Career pathways, certifications, interview prep, and industry guidance.' },
   { name: 'Industry Insights', description: 'Cybersecurity market trends, regulatory shifts, and news.' },
   { name: 'Research', description: 'Original vulnerability research, whitepapers, and case studies.' },
   { name: 'Technology', description: 'General tech developments, hardware, and emerging trends.' },
@@ -47,6 +46,12 @@ export async function getBlogCategories() {
   try {
     await seedBlogCategoriesIfEmpty();
     const categories = await db.blogCategory.findMany({
+      where: {
+        NOT: [
+          { slug: 'web-development' },
+          { name: { contains: 'Web Development', mode: 'insensitive' } },
+        ],
+      },
       orderBy: { name: 'asc' },
       include: {
         _count: {
@@ -527,20 +532,84 @@ export async function getPublicBlogs(params?: {
     }
 
     if (params?.categorySlug) {
-      where.category = { slug: params.categorySlug };
+      if (params.categorySlug === 'career' || params.categorySlug === 'career-guidance') {
+        where.category = { slug: { in: ['career', 'career-guidance'] } };
+      } else {
+        where.category = { slug: params.categorySlug };
+      }
     }
 
     if (params?.tagSlug) {
       where.tags = { some: { slug: params.tagSlug } };
     }
 
+    const isAiQuery = (q: string) => {
+      const lower = q.toLowerCase().trim();
+      return (
+        lower === 'ai' ||
+        lower === 'a.i.' ||
+        lower === 'artificial intelligence' ||
+        lower === 'artificial' ||
+        lower === 'llm' ||
+        lower === 'llms' ||
+        lower === 'genai' ||
+        lower === 'generative ai' ||
+        lower === 'deepfake' ||
+        lower === 'gpt'
+      );
+    };
+
     if (params?.search) {
-      where.OR = [
-        { title: { contains: params.search, mode: 'insensitive' } },
-        { subtitle: { contains: params.search, mode: 'insensitive' } },
-        { excerpt: { contains: params.search, mode: 'insensitive' } },
-        { content: { contains: params.search, mode: 'insensitive' } },
-      ];
+      const q = params.search.trim();
+      if (isAiQuery(q)) {
+        where.OR = [
+          // 1. Category matches
+          { category: { slug: { in: ['artificial-intelligence', 'ai'] } } },
+          { category: { name: { contains: 'Artificial Intelligence', mode: 'insensitive' } } },
+          // 2. Tag matches
+          { tags: { some: { name: { contains: 'AI', mode: 'insensitive' } } } },
+          { tags: { some: { slug: { in: ['ai', 'artificial-intelligence', 'llm', 'machine-learning'] } } } },
+          // 3. Title keyword matches
+          { title: { contains: ' AI ', mode: 'insensitive' } },
+          { title: { startsWith: 'AI ', mode: 'insensitive' } },
+          { title: { endsWith: ' AI', mode: 'insensitive' } },
+          { title: { contains: 'AI:', mode: 'insensitive' } },
+          { title: { contains: 'AI-', mode: 'insensitive' } },
+          { title: { contains: 'Artificial Intelligence', mode: 'insensitive' } },
+          { title: { contains: 'LLM', mode: 'insensitive' } },
+          { title: { contains: 'GPT', mode: 'insensitive' } },
+          { title: { contains: 'DeepFake', mode: 'insensitive' } },
+          { title: { contains: 'Prompt', mode: 'insensitive' } },
+          { title: { contains: 'Agent', mode: 'insensitive' } },
+          { title: { contains: 'Neural', mode: 'insensitive' } },
+          // 4. Subtitle & Excerpt matches
+          { subtitle: { contains: 'Artificial Intelligence', mode: 'insensitive' } },
+          { subtitle: { contains: ' AI ', mode: 'insensitive' } },
+          { subtitle: { contains: 'LLM', mode: 'insensitive' } },
+          { excerpt: { contains: 'Artificial Intelligence', mode: 'insensitive' } },
+          { excerpt: { contains: ' AI ', mode: 'insensitive' } },
+          // 5. Content (Whole-phrase / safe matching to prevent matching 'fail', 'train', 'remain', 'domain')
+          { content: { contains: 'Artificial Intelligence', mode: 'insensitive' } },
+          { content: { contains: 'Large Language Model', mode: 'insensitive' } },
+          { content: { contains: ' LLM ', mode: 'insensitive' } },
+          { content: { contains: ' AI ', mode: 'insensitive' } },
+        ];
+      } else {
+        const isShortTerm = q.length <= 3;
+        where.OR = [
+          { title: { contains: q, mode: 'insensitive' } },
+          { subtitle: { contains: q, mode: 'insensitive' } },
+          { excerpt: { contains: q, mode: 'insensitive' } },
+          { category: { name: { contains: q, mode: 'insensitive' } } },
+          { category: { slug: { contains: q, mode: 'insensitive' } } },
+          { tags: { some: { name: { contains: q, mode: 'insensitive' } } } },
+          { tags: { some: { slug: { contains: q, mode: 'insensitive' } } } },
+          { seo: { focusKeyword: { contains: q, mode: 'insensitive' } } },
+          ...(!isShortTerm
+            ? [{ content: { contains: q, mode: 'insensitive' } }]
+            : [{ content: { contains: ` ${q} `, mode: 'insensitive' } }]),
+        ];
+      }
     }
 
     const [blogs, total] = await Promise.all([
@@ -566,6 +635,22 @@ export async function getPublicBlogs(params?: {
       }),
       db.blog.count({ where }),
     ]);
+
+    // Re-rank results if search query is active to guarantee core topic articles rank on top
+    if (params?.search && isAiQuery(params.search) && Array.isArray(blogs)) {
+      blogs.sort((a: any, b: any) => {
+        const aIsAiCat = a.category?.slug === 'artificial-intelligence' ? 3 : 0;
+        const bIsAiCat = b.category?.slug === 'artificial-intelligence' ? 3 : 0;
+        const aTitleAi = /\b(ai|artificial intelligence|llm|gpt|machine learning)\b/i.test(a.title || '') ? 2 : 0;
+        const bTitleAi = /\b(ai|artificial intelligence|llm|gpt|machine learning)\b/i.test(b.title || '') ? 2 : 0;
+        const aScore = aIsAiCat + aTitleAi;
+        const bScore = bIsAiCat + bTitleAi;
+        if (bScore !== aScore) return bScore - aScore;
+        const aDate = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+        const bDate = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        return bDate - aDate;
+      });
+    }
 
     return {
       blogs: blogs || [],

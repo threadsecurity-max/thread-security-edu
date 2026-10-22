@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import ImageExtension from '@tiptap/extension-image';
 import LinkExtension from '@tiptap/extension-link';
@@ -11,6 +12,10 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
+import { CustomTextStyle, CustomHighlight } from './customExtensions';
+import { TypingRibbon } from './TypingRibbon';
+import { ContentBlocksPalette } from './ContentBlocksPalette';
+import { ShortcutsHelpBar } from './ShortcutsHelpBar';
 import {
   Bold,
   Italic,
@@ -74,6 +79,8 @@ export function BlogEditor({
         },
       }),
       Underline,
+      CustomTextStyle,
+      CustomHighlight,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -266,18 +273,43 @@ export function BlogEditor({
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="w-full bg-[#0c0c0e] border border-white/15 rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all">
-        {/* Hidden file input for inline images */}
-        <input
-          ref={inlineFileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleInlineImageUpload}
-          className="hidden"
-        />
+      <div className="w-full space-y-3">
+        {/* Live Typing Shortcuts Ribbon & Markdown Cheatsheet */}
+        <ShortcutsHelpBar />
 
-        {/* Toolbar Header */}
-        <div className="flex flex-wrap items-center gap-1.5 p-2.5 bg-[#141416] border-b border-white/10 sticky top-0 z-20 text-white select-none backdrop-blur-md">
+        {/* Click-to-Type Structure Tools Palette */}
+        <ContentBlocksPalette editor={editor} />
+
+        {/* Floating Typing Ribbon (Bubble Menu on Text Selection while typing) */}
+        {editor && (
+          <BubbleMenu
+            editor={editor}
+            pluginKey="typingRibbonBubbleMenu"
+            updateDelay={50}
+            shouldShow={({ editor: currentEditor, from, to }) => {
+              return from !== to && !currentEditor.isActive('image');
+            }}
+          >
+            <TypingRibbon editor={editor} isFloating={true} />
+          </BubbleMenu>
+        )}
+
+        {/* Main Editor Surface Card */}
+        <div className="w-full bg-[#0c0c0e] border border-white/15 rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all">
+          {/* Docked Typing Ribbon (Font family, size, A^/Av, format painter, styles, comments, colors, lists) */}
+          <TypingRibbon editor={editor} isFloating={false} />
+
+          {/* Hidden file input for inline images */}
+          <input
+            ref={inlineFileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleInlineImageUpload}
+            className="hidden"
+          />
+
+          {/* Secondary Specialized Formatting & Tools Header */}
+          <div className="flex flex-wrap items-center gap-1.5 p-2 bg-[#141416] border-b border-white/10 sticky top-0 z-20 text-white select-none backdrop-blur-md">
           {/* Basic Text Formatting */}
           <div className="flex items-center gap-0.5 bg-black/40 p-1 rounded-xl border border-white/5">
             <Tooltip>
@@ -973,6 +1005,7 @@ export function BlogEditor({
         <div className="bg-[#09090b] min-h-[480px] cursor-text" onClick={() => editor.chain().focus()}>
           <EditorContent editor={editor} />
         </div>
+      </div>
       </div>
     </TooltipProvider>
   );

@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
+import { formatDate } from '@/lib/utils/formatters';
 
 interface AdminBlogDashboardClientProps {
   initialData: {
@@ -634,7 +635,7 @@ export function AdminBlogDashboardClient({
                         {b.publishedAt ? (
                           <div>
                             <span className={new Date(b.publishedAt) > new Date() ? 'text-sky-400 font-bold' : 'text-slate-400'}>
-                              {new Date(b.publishedAt).toLocaleDateString()}
+                              {formatDate(b.publishedAt)}
                             </span>
                             {new Date(b.publishedAt) > new Date() && (
                               <span className="block text-[10px] text-sky-400 font-mono">

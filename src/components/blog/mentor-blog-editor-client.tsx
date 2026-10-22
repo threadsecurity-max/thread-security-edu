@@ -21,6 +21,8 @@ import {
   Calendar,
   Check,
   X,
+  Cpu,
+  Edit3,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +39,8 @@ import { ImageUploader } from '@/components/blog/editor/ImageUploader';
 import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
 import { getBlogCoverImageUrl } from '@/lib/blog/coverImageHelper';
 import { AuthorCredentialsCard } from '@/components/blog/editor/AuthorCredentialsCard';
+import { AutomatedAIStudio } from '@/components/blog/editor/AutomatedAIStudio';
+import { formatDate } from '@/lib/utils/formatters';
 
 function FieldHelp({
   title,
@@ -125,7 +129,36 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(initialCover);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
-  const [previewTab, setPreviewTab] = useState<'editor' | 'preview'>('editor');
+  const [previewTab, setPreviewTab] = useState<'editor' | 'automated' | 'preview'>('editor');
+
+  const handleApplyAutofill = (data: {
+    title: string;
+    subtitle: string;
+    excerpt: string;
+    content: string;
+    altText?: string;
+    imageCaption?: string;
+    categoryId?: string;
+    tags?: string[];
+    authorBio?: string;
+    linkedin?: string;
+    medium?: string;
+    twitter?: string;
+    github?: string;
+    focusKeyword?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+  }) => {
+    if (data.title) setTitle(data.title);
+    if (data.subtitle) setSubtitle(data.subtitle);
+    if (data.excerpt) setExcerpt(data.excerpt);
+    if (data.content) setContent(data.content);
+    if (data.categoryId) setCategoryId(data.categoryId);
+    if (data.tags && data.tags.length > 0) setTags(data.tags);
+    if (data.metaTitle) setMetaTitle(data.metaTitle);
+    if (data.metaDescription) setMetaDescription(data.metaDescription);
+    if (data.focusKeyword) setFocusKeyword(data.focusKeyword);
+  };
   const [publishStatus, setPublishStatus] = useState(initialBlog.status || 'DRAFT');
   const [publishedAt, setPublishedAt] = useState<string | null>(
     initialBlog.publishedAt ? new Date(initialBlog.publishedAt).toISOString() : null
@@ -481,24 +514,38 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
               <button
                 type="button"
                 onClick={() => setPreviewTab('editor')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   previewTab === 'editor'
                     ? 'bg-[#C6FF34] text-black shadow-md'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
-                Write & Format
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Manual Studio</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewTab('automated')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  previewTab === 'automated'
+                    ? 'bg-[#C6FF34] text-black shadow-md'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <Cpu className="w-3.5 h-3.5" />
+                <span>Automated AI Studio</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPreviewTab('preview')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                   previewTab === 'preview'
                     ? 'bg-[#C6FF34] text-black shadow-md'
                     : 'text-slate-300 hover:text-white'
                 }`}
               >
-                <Eye className="w-3.5 h-3.5 inline mr-1" /> Live Preview
+                <Eye className="w-3.5 h-3.5" />
+                <span>Live Preview</span>
               </button>
             </div>
 
@@ -546,6 +593,49 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
                 </Button>
               </Link>
             )}
+          </div>
+        </div>
+
+        {/* Studio Workflow Quick Switcher & Accessibility Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-black/80 via-[#14141c] to-black/80 border border-white/15 text-xs font-mono flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-[#C6FF34]/15 border border-[#C6FF34]/30 flex items-center justify-center text-[#C6FF34] shrink-0 font-bold">
+              ⚡
+            </div>
+            <div>
+              <span className="text-white font-bold block text-sm">
+                Choose Authoring Workflow:
+              </span>
+              <span className="text-slate-400 text-[11px]">
+                Craft manually with interactive typing ribbon, font tools &amp; click-to-type structure blocks, or generate with DeepSeek AI prompt &amp; 1-click script runner.
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setPreviewTab('editor')}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                previewTab === 'editor'
+                  ? 'bg-[#C6FF34] text-black border-[#C6FF34] shadow-md shadow-[#C6FF34]/20'
+                  : 'bg-black/60 text-slate-300 border-white/15 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>✍️ Manual Studio</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewTab('automated')}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                previewTab === 'automated'
+                  ? 'bg-[#C6FF34] text-black border-[#C6FF34] shadow-md shadow-[#C6FF34]/20'
+                  : 'bg-black/60 text-slate-300 border-white/15 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <Cpu className="w-3.5 h-3.5" />
+              <span>⚡ Automated AI Studio</span>
+            </button>
           </div>
         </div>
 
@@ -756,8 +846,20 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
           </div>
         )}
 
-        {/* Main Workspace split into Editor vs Preview */}
-      {previewTab === 'preview' ? (
+        {/* Main Workspace split into Automated AI Studio vs Manual Editor vs Preview */}
+        {previewTab === 'automated' ? (
+          <AutomatedAIStudio
+            currentTitle={title}
+            currentSubtitle={subtitle}
+            currentContent={content}
+            currentMetaTitle={metaTitle}
+            currentMetaDescription={metaDescription}
+            currentFocusKeyword={focusKeyword}
+            categories={categories}
+            onApplyAutofill={handleApplyAutofill}
+            onSwitchToManual={() => setPreviewTab('editor')}
+          />
+        ) : previewTab === 'preview' ? (
         <div className="bg-[#0c0c0c] border border-white/10 rounded-2xl p-8 max-w-4xl mx-auto space-y-6 text-white shadow-2xl">
           <div className="space-y-2 text-center pb-6 border-b border-white/10">
             <Badge className="bg-[#C6FF34] text-black font-mono font-bold uppercase">
@@ -768,7 +870,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
             <div className="flex items-center justify-center gap-3 pt-3 text-xs font-mono text-slate-400">
               <span>By {user.name}</span>
               <span>·</span>
-              <span>{new Date().toLocaleDateString()}</span>
+              <span>{formatDate(new Date())}</span>
             </div>
           </div>
 

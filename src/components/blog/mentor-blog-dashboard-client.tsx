@@ -293,7 +293,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                             Scheduled
                           </span>
                           <span className="block text-[10px] text-slate-500 font-mono">
-                            {new Date(b.publishedAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            {new Date(b.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       ) : (

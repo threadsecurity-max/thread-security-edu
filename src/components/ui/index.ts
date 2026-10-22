@@ -5,6 +5,9 @@ export * from './dialog';
 export * from './input';
 export * from './progress';
 export * from './textarea';
+export * from './tooltip';
+export * from './popover';
 export * from './PixelSwap';
 export * from './ScrollFloat';
 export * from './flip-words';
+

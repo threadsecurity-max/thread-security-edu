@@ -24,6 +24,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { BlogCoverImage } from '@/components/blog/BlogCoverImage';
+import { formatDate } from '@/lib/utils/formatters';
 
 function processContentHeadings(content: string) {
   if (!content) return content;
@@ -130,29 +131,90 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
   const shareUrl = typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : '';
   const shareTitle = encodeURIComponent(blog.title);
 
-  // Dynamic Course Lead Generation Mapping
+  // Dynamic & Contextual Course Recommendation Mapping
   const categoryName = (blog.category?.name || '').toLowerCase();
-  const courseCta =
-    categoryName.includes('soc') || categoryName.includes('threat')
-      ? {
-          title: 'Certified SOC Analyst & Incident Response Masterclass',
-          desc: 'Gain 100+ hours of hands-on security operations center telemetry, Splunk, Elastic, and incident triaging with guaranteed career assistance.',
-          slug: 'cyber-security-course',
-          tag: 'FLAGSHIP INDUSTRY ACCREDITED',
-        }
-      : categoryName.includes('hack') || categoryName.includes('pen') || categoryName.includes('red')
-      ? {
-          title: 'Practical Ethical Hacking & Penetration Testing Track',
-          desc: 'Train with active red-team operators on network exploitation, privilege escalation, web vulnerabilities, and adversary emulation.',
-          slug: 'cyber-security-course',
-          tag: 'OFFENSIVE SECURITY',
-        }
-      : {
-          title: 'End-to-End Cybersecurity Defense & Cloud Security Accelerator',
-          desc: 'Master the technical pipeline from network packet analysis to enterprise Kubernetes security and SIEM detection engineering.',
-          slug: 'cyber-security-course',
-          tag: 'INDUSTRY CERTIFIED CAREER TRACK',
-        };
+  const blogTitleLower = (blog.title || '').toLowerCase();
+  const blogTagsLower = (blog.tags || []).map((t: any) => (t.name || '').toLowerCase());
+
+  const isAI =
+    categoryName.includes('ai') ||
+    categoryName.includes('artificial') ||
+    blogTitleLower.includes('ai') ||
+    blogTitleLower.includes('llm') ||
+    blogTitleLower.includes('prompt') ||
+    blogTitleLower.includes('agent') ||
+    blogTitleLower.includes('deepfake') ||
+    blogTitleLower.includes('voice cloning') ||
+    blogTagsLower.some((t: string) => t.includes('ai') || t.includes('llm'));
+
+  const isSOC =
+    categoryName.includes('soc') ||
+    categoryName.includes('threat') ||
+    blogTitleLower.includes('soc') ||
+    blogTitleLower.includes('threat') ||
+    blogTitleLower.includes('siem') ||
+    blogTitleLower.includes('incident response') ||
+    blogTitleLower.includes('ransomware') ||
+    blogTitleLower.includes('zero-day') ||
+    blogTitleLower.includes('telemetry') ||
+    blogTagsLower.some((t: string) => t.includes('soc') || t.includes('siem') || t.includes('threat'));
+
+  const isCareer =
+    categoryName.includes('career') ||
+    blogTitleLower.includes('career') ||
+    blogTitleLower.includes('roadmap') ||
+    blogTitleLower.includes('intern') ||
+    blogTitleLower.includes('job') ||
+    blogTitleLower.includes('portfolio') ||
+    blogTitleLower.includes('interview') ||
+    blogTitleLower.includes('courses in jalandhar') ||
+    blogTagsLower.some((t: string) => t.includes('career') || t.includes('intern'));
+
+  const isVAPT =
+    categoryName.includes('hack') ||
+    categoryName.includes('pen') ||
+    categoryName.includes('red') ||
+    blogTitleLower.includes('hack') ||
+    blogTitleLower.includes('exploit') ||
+    blogTitleLower.includes('vulnerability') ||
+    blogTitleLower.includes('bug bounty') ||
+    blogTitleLower.includes('api') ||
+    blogTagsLower.some((t: string) => t.includes('vapt') || t.includes('hack'));
+
+  const courseCta = isAI
+    ? {
+        title: 'AI Security & LLM Red Teaming Masterclass',
+        desc: 'Learn to identify and mitigate prompt injections, jailbreaks, data poisoning, and model theft in production AI systems with sandboxed exercises.',
+        slug: 'ai-security-llm-redteaming',
+        tag: 'CUTTING-EDGE AI TRACK',
+      }
+    : isSOC
+    ? {
+        title: 'SOC Operations & Threat Hunting (Blue Team Masterclass)',
+        desc: 'Build real-world telemetry rules, triage alerts across enterprise Splunk & Wazuh SIEMs, and execute MITRE ATT&CK incident response playbooks.',
+        slug: 'soc-blue-team-operations',
+        tag: 'DEFENSIVE SECURITY & SOC',
+      }
+    : isCareer
+    ? {
+        title: 'Cybersecurity Career Accelerator & Industrial Internship Track',
+        desc: 'Launch your cybersecurity career with structured 45-day summer training or 6-month industrial internship, 1-on-1 mentorship, and 100% placement support.',
+        slug: 'cyber-security-course',
+        tag: '100% PLACEMENT ACCELERATOR',
+      }
+    : isVAPT
+    ? {
+        title: 'Web Application Security & VAPT Masterclass',
+        desc: 'Train on network exploitation, Burp Suite Pro workflows, privilege escalation, web vulnerabilities, and adversary emulation drills.',
+        slug: 'web-application-security-vapt',
+        tag: 'OFFENSIVE RED TEAM',
+      }
+    : {
+        title: 'Professional Cyber Security Course & Industrial Training (Ethical Hacking, VAPT & SOC)',
+        desc: 'Dual specialization in offensive ethical hacking and defensive SOC operations with 80+ sandboxed cloud labs and global certification prep.',
+        slug: 'cyber-security-course',
+        tag: 'FLAGSHIP ACCREDITED PROGRAM',
+      };
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-[#C6FF34] selection:text-black">
@@ -220,7 +282,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
 
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-slate-400" />
-              <span>{blog.publishedAt ? new Date(blog.publishedAt).toLocaleDateString() : 'Published Recent'}</span>
+              <span>{blog.publishedAt ? formatDate(blog.publishedAt) : 'Published Recent'}</span>
             </div>
 
             <div className="flex items-center gap-1.5">
