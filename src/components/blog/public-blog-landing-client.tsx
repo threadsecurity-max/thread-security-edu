@@ -468,8 +468,8 @@ export function PublicBlogLandingClient({
                 value={search}
                 onFocus={() => setIsSearchWidgetOpen(true)}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search cybersecurity research, AI detection, SOC workflows, threat models..."
-                className="w-full pl-12 pr-44 h-12 md:h-14 rounded-2xl bg-[#101014] border-white/15 text-white placeholder:text-slate-500 font-mono text-sm focus:border-[#C6FF34] shadow-2xl"
+                placeholder="Search research, AI threat models, SOC workflows..."
+                className="w-full pl-12 pr-28 sm:pr-[255px] h-12 md:h-14 rounded-2xl bg-[#101014] border-white/15 text-white placeholder:text-slate-500 font-mono text-sm focus:border-[#C6FF34] shadow-2xl"
               />
 
               <div className="absolute right-2 flex items-center gap-1.5 z-10">
@@ -477,10 +477,10 @@ export function PublicBlogLandingClient({
                   type="button"
                   variant="ghost"
                   onClick={() => setIsSearchWidgetOpen(!isSearchWidgetOpen)}
-                  className={`h-10 px-3 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border ${
+                  className={`h-10 px-3 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border shadow-sm ${
                     isSearchWidgetOpen
-                      ? 'bg-[#C6FF34]/15 text-[#C6FF34] border-[#C6FF34]/40'
-                      : 'text-slate-300 hover:text-[#C6FF34] hover:bg-white/10 border-white/10'
+                      ? 'bg-[#182613] text-[#C6FF34] border-[#C6FF34]/50 shadow-[0_0_15px_rgba(198,255,52,0.15)]'
+                      : 'bg-[#16161d] text-slate-300 hover:text-[#C6FF34] hover:bg-[#1f1f28] border-white/15'
                   }`}
                   title="Toggle 11 Category Search Widgets"
                 >
