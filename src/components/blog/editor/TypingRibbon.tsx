@@ -6,6 +6,8 @@ import {
   Bold,
   Italic,
   Underline as UnderlineIcon,
+  Link as LinkIcon,
+  Unlink,
   Paintbrush,
   MessageSquarePlus,
   Highlighter,
@@ -87,6 +89,16 @@ export function TypingRibbon({ editor, isFloating = false }: TypingRibbonProps) 
   const [stylesMenuOpen, setStylesMenuOpen] = useState(false);
   const [highlightMenuOpen, setHighlightMenuOpen] = useState(false);
   const [colorMenuOpen, setColorMenuOpen] = useState(false);
+  const [linkMenuOpen, setLinkMenuOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+
+  // Sync linkUrl when popover opens or link status changes
+  useEffect(() => {
+    if (linkMenuOpen) {
+      const href = editor.getAttributes('link')?.href || '';
+      setLinkUrl(href);
+    }
+  }, [linkMenuOpen, editor]);
 
   // Read current active styles from editor
   const textAttrs = editor.getAttributes('customTextStyle') || {};
@@ -196,6 +208,34 @@ export function TypingRibbon({ editor, isFloating = false }: TypingRibbonProps) 
         ` <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-[#C6FF34]/20 border border-[#C6FF34]/40 text-[#C6FF34]" title="Reviewer Comment">💬 ${comment}</span> `
       )
       .run();
+  };
+
+  // Hyperlink handlers
+  const handleApplyLink = () => {
+    const trimmed = linkUrl.trim();
+    if (!trimmed || trimmed === 'https://' || trimmed === 'http://') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      setLinkMenuOpen(false);
+      return;
+    }
+    let finalUrl = trimmed;
+    if (
+      !/^https?:\/\//i.test(finalUrl) &&
+      !finalUrl.startsWith('/') &&
+      !finalUrl.startsWith('#') &&
+      !finalUrl.startsWith('mailto:')
+    ) {
+      finalUrl = `https://${finalUrl}`;
+    }
+    const cleanUrl = finalUrl.replace(/["'<>\\]/g, '');
+    editor.chain().focus().extendMarkRange('link').setLink({ href: cleanUrl }).run();
+    setLinkMenuOpen(false);
+  };
+
+  const handleRemoveLink = () => {
+    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    setLinkUrl('');
+    setLinkMenuOpen(false);
   };
 
   return (
@@ -518,7 +558,89 @@ export function TypingRibbon({ editor, isFloating = false }: TypingRibbonProps) 
         <UnderlineIcon className="w-3.5 h-3.5" />
       </button>
 
-      {/* 11. Highlight Color Picker (Pen with yellow marker bar) */}
+      {/* 11. Hyperlink (Link) Button & Popover */}
+      <Popover open={linkMenuOpen} onOpenChange={setLinkMenuOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={`h-7 w-7 rounded-lg text-xs transition-all flex items-center justify-center ${
+              editor.isActive('link')
+                ? 'bg-[#C6FF34] text-black shadow-md font-bold'
+                : 'text-slate-200 hover:text-white hover:bg-white/10'
+            }`}
+            title={editor.isActive('link') ? 'Edit / Remove Hyperlink (Ctrl+K)' : 'Insert Hyperlink (Ctrl+K)'}
+          >
+            <LinkIcon className="w-3.5 h-3.5" />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          sideOffset={8}
+          className="w-72 p-3 bg-[#18181c] border border-white/20 rounded-xl shadow-2xl space-y-2.5 z-50 text-xs"
+        >
+          <div className="flex items-center justify-between text-[10px] font-mono uppercase text-slate-400 font-bold border-b border-white/10 pb-1.5">
+            <span className="flex items-center gap-1.5 text-[#C6FF34]">
+              <LinkIcon className="w-3 h-3 text-[#C6FF34]" />
+              {editor.isActive('link') ? 'Edit Hyperlink' : 'Insert Hyperlink'}
+            </span>
+            {editor.isActive('link') && (
+              <span className="text-emerald-400 font-bold">Active</span>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-mono text-slate-400 block">Link Destination (URL):</label>
+            <input
+              type="text"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleApplyLink();
+                }
+              }}
+              placeholder="https://example.com or /courses/..."
+              className="w-full px-2.5 py-1.5 rounded-lg bg-black/60 border border-white/15 text-white font-mono text-xs focus:border-[#C6FF34] focus:outline-none"
+              autoFocus
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-2 pt-1">
+            {editor.isActive('link') ? (
+              <button
+                type="button"
+                onClick={handleRemoveLink}
+                className="px-2 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[11px] font-mono flex items-center gap-1 transition-colors"
+              >
+                <Unlink className="w-3 h-3" />
+                <span>Remove</span>
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setLinkMenuOpen(false)}
+                className="px-2.5 py-1 rounded-lg text-slate-400 hover:text-white text-[11px] font-mono transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyLink}
+                className="px-3 py-1 rounded-lg bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-[11px] shadow-sm transition-colors cursor-pointer"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+
+      {/* 12. Highlight Color Picker (Pen with yellow marker bar) */}
       <Popover open={highlightMenuOpen} onOpenChange={setHighlightMenuOpen}>
         <PopoverTrigger asChild>
           <button
