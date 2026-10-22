@@ -17,29 +17,6 @@ import { TypingRibbon } from './TypingRibbon';
 import { ContentBlocksPalette } from './ContentBlocksPalette';
 import { ShortcutsHelpBar } from './ShortcutsHelpBar';
 import {
-  Bold,
-  Italic,
-  Underline as UnderlineIcon,
-  Strikethrough,
-  Heading1,
-  Heading2,
-  Heading3,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  List,
-  ListOrdered,
-  Quote,
-  Undo,
-  Redo,
-  Link as LinkIcon,
-  Image as ImageIcon,
-  Upload,
-  Code2,
-  Loader2,
-  HelpCircle,
-  Sparkles,
   Table as TableIcon,
   Plus,
   Trash2,
@@ -47,12 +24,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { useEffect, useRef, useState } from 'react';
 
 interface BlogEditorProps {
@@ -134,20 +106,6 @@ export function BlogEditor({
       </div>
     );
   }
-
-  const setLink = () => {
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter link URL (e.g. https://threadsecurity.in):', previousUrl || 'https://');
-    if (url === null) return;
-    const trimmed = url.trim();
-    if (trimmed === '' || trimmed === 'https://') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run();
-      return;
-    }
-    // Clean link URL to prevent unclosed quotes or illegal characters from breaking JSON payloads
-    const cleanUrl = trimmed.replace(/["'<>\\]/g, '');
-    editor.chain().focus().extendMarkRange('link').setLink({ href: cleanUrl }).run();
-  };
 
   const addImageByUrl = () => {
     const url = window.prompt('Enter Image URL (Direct CDN or HTTPS URL):');
@@ -286,8 +244,20 @@ export function BlogEditor({
             editor={editor}
             pluginKey="typingRibbonBubbleMenu"
             updateDelay={50}
+            options={{
+              strategy: 'fixed',
+              placement: 'top-start',
+              offset: 8,
+              shift: {
+                padding: 16,
+              },
+              flip: {
+                fallbackPlacements: ['bottom-start', 'top-end', 'bottom-end'],
+                padding: 16,
+              },
+            }}
             shouldShow={({ editor: currentEditor, from, to }) => {
-              return from !== to && !currentEditor.isActive('image');
+              return from !== to && !currentEditor.isActive('image') && !currentEditor.isActive('table');
             }}
           >
             <TypingRibbon editor={editor} isFloating={true} />
@@ -296,8 +266,16 @@ export function BlogEditor({
 
         {/* Main Editor Surface Card */}
         <div className="w-full bg-[#0c0c0e] border border-white/15 rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all">
-          {/* Docked Typing Ribbon (Font family, size, A^/Av, format painter, styles, comments, colors, lists) */}
-          <TypingRibbon editor={editor} isFloating={false} />
+          {/* Unified Sticky Master Typing Ribbon */}
+          <div className="sticky top-0 z-30">
+            <TypingRibbon
+              editor={editor}
+              isFloating={false}
+              onUploadImage={() => inlineFileInputRef.current?.click()}
+              onAddImageUrl={addImageByUrl}
+              isUploadingImage={isUploadingImage}
+            />
+          </div>
 
           {/* Hidden file input for inline images */}
           <input
@@ -307,521 +285,6 @@ export function BlogEditor({
             onChange={handleInlineImageUpload}
             className="hidden"
           />
-
-          {/* Secondary Specialized Formatting & Tools Header */}
-          <div className="flex flex-wrap items-center gap-1.5 p-2 bg-[#141416] border-b border-white/10 sticky top-0 z-20 text-white select-none backdrop-blur-md">
-          {/* Basic Text Formatting */}
-          <div className="flex items-center gap-0.5 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-all ${
-                    editor.isActive('bold')
-                      ? 'bg-[#C6FF34] text-black font-bold shadow-md shadow-[#C6FF34]/20'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Bold className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Bold (Ctrl+B)</p>
-                <p className="text-[11px] text-slate-400">Emphasize key terms or metrics</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-all ${
-                    editor.isActive('italic')
-                      ? 'bg-[#C6FF34] text-black font-bold shadow-md shadow-[#C6FF34]/20'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Italic className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Italic (Ctrl+I)</p>
-                <p className="text-[11px] text-slate-400">Latin terms, book titles, or nuances</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleUnderline().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-all ${
-                    editor.isActive('underline')
-                      ? 'bg-[#C6FF34] text-black font-bold shadow-md shadow-[#C6FF34]/20'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <UnderlineIcon className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Underline (Ctrl+U)</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleStrike().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-all ${
-                    editor.isActive('strike')
-                      ? 'bg-[#C6FF34] text-black font-bold shadow-md shadow-[#C6FF34]/20'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Strikethrough className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Strikethrough</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-white/10 mx-0.5" />
-
-          {/* Headings Hierarchy (H1, H2, H3) — Color Coded & High Contrast */}
-          <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                  className={`h-8 px-2.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
-                    editor.isActive('heading', { level: 1 })
-                      ? 'bg-[#C6FF34] text-black shadow-md shadow-[#C6FF34]/30 ring-1 ring-[#C6FF34]'
-                      : 'text-slate-200 hover:text-white hover:bg-white/10 border border-[#C6FF34]/20'
-                  }`}
-                >
-                  <span className="w-2 h-2 rounded-full bg-[#C6FF34] shrink-0" />
-                  <Heading1 className="w-3.5 h-3.5" /> H1
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="space-y-1">
-                <p className="font-bold text-[#C6FF34] flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[#C6FF34]" /> Heading 1 — Major Topic Divider
-                </p>
-                <p className="text-[11px] text-slate-300">
-                  Use for main subject breaks (e.g. <span className="text-white italic">"1. Threat Landscape Overview"</span>).
-                </p>
-                <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-[#C6FF34]" /> Best practice: 2–4 per article for clear Google outline structure.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                  className={`h-8 px-2.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
-                    editor.isActive('heading', { level: 2 })
-                      ? 'bg-sky-400 text-black shadow-md shadow-sky-400/30 ring-1 ring-sky-400'
-                      : 'text-slate-200 hover:text-white hover:bg-white/10 border border-sky-400/20'
-                  }`}
-                >
-                  <span className="w-2 h-2 rounded-full bg-sky-400 shrink-0" />
-                  <Heading2 className="w-3.5 h-3.5" /> H2
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="space-y-1">
-                <p className="font-bold text-sky-400 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-sky-400" /> Heading 2 — Sub-section Header
-                </p>
-                <p className="text-[11px] text-slate-300">
-                  Nest under H1 to break down specific themes (e.g. <span className="text-white italic">"Attack Vectors"</span>, <span className="text-white italic">"Detection Mechanisms"</span>).
-                </p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-                  className={`h-8 px-2.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
-                    editor.isActive('heading', { level: 3 })
-                      ? 'bg-purple-400 text-black shadow-md shadow-purple-400/30 ring-1 ring-purple-400'
-                      : 'text-slate-200 hover:text-white hover:bg-white/10 border border-purple-400/20'
-                  }`}
-                >
-                  <span className="w-2 h-2 rounded-full bg-purple-400 shrink-0" />
-                  <Heading3 className="w-3.5 h-3.5" /> H3
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="space-y-1">
-                <p className="font-bold text-purple-400 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-purple-400" /> Heading 3 — Detail & Deep-Dive
-                </p>
-                <p className="text-[11px] text-slate-300">
-                  Nest under H2 for granular items (e.g. <span className="text-white italic">"CVE-2024-XXXX Walkthrough"</span>, <span className="text-white italic">"Tool Comparison Table"</span>).
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-white/10 mx-0.5" />
-
-          {/* Text Alignment */}
-          <div className="flex items-center gap-0.5 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive({ textAlign: 'left' })
-                      ? 'bg-white text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <AlignLeft className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Align Left (Default)</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive({ textAlign: 'center' })
-                      ? 'bg-white text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <AlignCenter className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Align Center</p>
-                <p className="text-[11px] text-slate-400">Best for figures, callouts & section dividers</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive({ textAlign: 'right' })
-                      ? 'bg-white text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <AlignRight className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Align Right</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive({ textAlign: 'justify' })
-                      ? 'bg-white text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <AlignJustify className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Full Justify</p>
-                <p className="text-[11px] text-slate-400">Even margins across both edges</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-white/10 mx-0.5" />
-
-          {/* Lists & Quotes */}
-          <div className="flex items-center gap-0.5 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleBulletList().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive('bulletList')
-                      ? 'bg-white text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Bullet List</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive('orderedList')
-                      ? 'bg-white text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <ListOrdered className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Numbered List</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleBlockquote().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive('blockquote')
-                      ? 'bg-[#C6FF34] text-black font-bold shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Quote className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Blockquote Highlight</p>
-                <p className="text-[11px] text-slate-400">Callouts, expert quotes, key takeaways</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive('codeBlock')
-                      ? 'bg-[#C6FF34] text-black font-bold shadow-sm'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <Code2 className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Code Block Surface</p>
-                <p className="text-[11px] text-slate-400">Terminal snippets, Python, Bash commands</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-white/10 mx-0.5" />
-
-          {/* Links & Cloudinary Upload */}
-          <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={setLink}
-                  className={`h-8 w-8 p-0 rounded-lg transition-colors ${
-                    editor.isActive('link')
-                      ? 'bg-[#C6FF34] text-black font-bold'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <LinkIcon className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Insert / Edit Hyperlink</p>
-                <p className="text-[11px] text-slate-400">Add external references or internal course links</p>
-              </TooltipContent>
-            </Tooltip>
-
-            {/* Direct Device Upload to Cloudinary CDN */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => inlineFileInputRef.current?.click()}
-                  disabled={isUploadingImage}
-                  className="h-8 px-2.5 rounded-lg text-xs font-mono font-bold text-slate-200 hover:text-[#C6FF34] hover:bg-white/10 flex items-center gap-1.5 bg-[#C6FF34]/10 border border-[#C6FF34]/20"
-                >
-                  {isUploadingImage ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C6FF34]" />
-                  ) : (
-                    <Upload className="w-3.5 h-3.5 text-[#C6FF34]" />
-                  )}
-                  <span>Upload Image</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold text-[#C6FF34]">Inline Article Image Upload</p>
-                <p className="text-[11px] text-slate-300">Uploads directly to Cloudinary CDN with WebP/AVIF auto-compression</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={addImageByUrl}
-                  className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
-                >
-                  <ImageIcon className="w-3.5 h-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Insert Image via External URL</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-white/10 mx-0.5" />
-
-          {/* Table Insertion & Controls */}
-          <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    if (editor.isActive('table')) {
-                      editor.chain().focus().deleteTable().run();
-                    } else {
-                      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-                    }
-                  }}
-                  className={`h-8 px-2.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
-                    editor.isActive('table')
-                      ? 'bg-[#C6FF34] text-black shadow-md shadow-[#C6FF34]/20'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <TableIcon className="w-4 h-4" />
-                  <span className="hidden sm:inline">{editor.isActive('table') ? 'Table Active' : 'Insert Table'}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">{editor.isActive('table') ? 'Table Active (Click to remove)' : 'Insert 3×3 Research Table'}</p>
-                <p className="text-[11px] text-slate-400">Comparison matrices, CVE mappings, benchmark stats</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <div className="w-px h-5 bg-white/10 mx-0.5" />
-
-          {/* Undo / Redo */}
-          <div className="flex items-center gap-0.5 bg-black/40 p-1 rounded-xl border border-white/5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().undo().run()}
-                  disabled={!editor.can().undo()}
-                  className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
-                >
-                  <Undo className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Undo (Ctrl+Z)</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => editor.chain().focus().redo().run()}
-                  disabled={!editor.can().redo()}
-                  className="h-8 w-8 p-0 rounded-lg text-slate-400 hover:text-white disabled:opacity-30"
-                >
-                  <Redo className="w-4 h-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-bold">Redo (Ctrl+Y)</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          {/* Uploading Status Indicator */}
-          {isUploadingImage && (
-            <div className="ml-auto flex items-center gap-1.5 text-xs font-mono text-[#C6FF34] bg-[#C6FF34]/15 px-3 py-1 rounded-xl border border-[#C6FF34]/30 animate-pulse">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              <span>Optimizing (WebP/AVIF) & Uploading...</span>
-            </div>
-          )}
-        </div>
 
         {/* Dynamic Table Manipulation Toolbar (Visible when cursor is inside any table cell) */}
         {editor.isActive('table') && (

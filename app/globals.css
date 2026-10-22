@@ -146,6 +146,31 @@
   scroll-margin-top: 5.5rem !important;
 }
 
+/* Ensure nested marks and spans inside headings inherit the heading sizing */
+.ProseMirror h1 span,
+.tiptap h1 span,
+.prose h1 span {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+.ProseMirror h2 span,
+.tiptap h2 span,
+.prose h2 span {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
+.ProseMirror h3 span,
+.tiptap h3 span,
+.prose h3 span {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  line-height: inherit !important;
+}
+
 /* Paragraphs & Text */
 .tiptap p,
 .prose p {
