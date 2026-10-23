@@ -1,4 +1,4 @@
-import { MASTER_COURSES } from '@/lib/courses/courseRegistry';
+import { MASTER_COURSES, getCourseSeoMeta } from '@/lib/courses/courseRegistry';
 import { prisma } from '@/server/database/prisma';
 
 export interface SeoAuditResult {
@@ -27,8 +27,9 @@ export async function runFullSiteSeoAudit(): Promise<{
   // 1. Audit Master Courses
   for (const course of MASTER_COURSES) {
     const url = `/courses/${course.slug}`;
-    const metaTitle = `${course.title} | Thread Security Education`;
-    const metaDesc = course.subtitle || course.description;
+    const seo = getCourseSeoMeta(course);
+    const metaTitle = course.metaTitle || seo.metaTitle;
+    const metaDesc = course.metaDescription || seo.metaDescription;
     
     const warnings: string[] = [];
     let score = 100;

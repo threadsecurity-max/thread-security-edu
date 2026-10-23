@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { prisma } from '@/server/database/prisma';
-import { getMasterCourseBySlug, MASTER_COURSES } from '@/lib/courses/courseRegistry';
+import { getMasterCourseBySlug, MASTER_COURSES, getCourseSeoMeta } from '@/lib/courses/courseRegistry';
 import { BreadcrumbJsonLd, CourseJsonLd } from '@/components/seo/JsonLd';
 import {
   ShieldCheck,
@@ -88,8 +88,9 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${course.title} | Thread Security Education`;
-  const description = course.description || course.subtitle;
+  const seo = getCourseSeoMeta(course);
+  const title = course.metaTitle || seo.metaTitle;
+  const description = course.metaDescription || seo.metaDescription;
   const canonicalUrl = `${APP_URL}/courses/${slug}`;
 
   const keywords = [
@@ -117,7 +118,9 @@ export async function generateMetadata({
   ];
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
     keywords,
     alternates: {
@@ -134,7 +137,7 @@ export async function generateMetadata({
           url: `${APP_URL}/images/og-thread-security-education.png`,
           width: 1200,
           height: 630,
-          alt: `${course.title} — Thread Security Education`,
+          alt: `${title} — Thread Security Education`,
         },
       ],
     },

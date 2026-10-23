@@ -29,6 +29,8 @@ export interface MasterCourseData {
   title: string;
   subtitle: string;
   description: string;
+  metaTitle?: string;
+  metaDescription?: string;
   track: 'cyber' | 'ai';
   category: string;
   level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
@@ -50,7 +52,127 @@ export interface MasterCourseData {
   faqs: CourseFaq[];
 }
 
-export const MASTER_COURSES: MasterCourseData[] = [
+export interface CourseSeoMeta {
+  metaTitle: string;
+  metaDescription: string;
+}
+
+export const COURSE_SEO_METADATA: Record<string, CourseSeoMeta> = {
+  'cyber-security-course': {
+    metaTitle: 'Cyber Security Course & Training | Thread Security',
+    metaDescription: 'Master Ethical Hacking, VAPT, SOC & Cloud Security with 100% hands-on sandboxed labs, global cert prep, and placement support at Thread Security.',
+  },
+  'web-application-security-vapt': {
+    metaTitle: 'Web Application Security & VAPT | Thread Security',
+    metaDescription: 'Master web pentesting, OWASP Top 10, Burp Suite Pro, business logic flaws, and secure code review with real-world sandboxed penetration labs.',
+  },
+  'soc-blue-team-operations': {
+    metaTitle: 'SOC Operations & Threat Hunting | Thread Security',
+    metaDescription: 'Master SIEM analytics, Wazuh, Splunk, threat hunting, incident response, and MITRE ATT&CK defensive operations with enterprise blue team labs.',
+  },
+  'cloud-security-devsecops': {
+    metaTitle: 'Cloud DevSecOps & Infra Hardening | Thread Security',
+    metaDescription: 'Master AWS, GCP & Azure cloud security posture, CI/CD pipeline defense, Terraform IaC scanning, Kubernetes hardening, and DevSecOps compliance.',
+  },
+  'active-directory-exploitation': {
+    metaTitle: 'Active Directory Attack Paths | Thread Security',
+    metaDescription: 'Master enterprise AD exploitation, Kerberos ticket attacks, BloodHound graph analysis, privilege escalation, and domain forest defense strategies.',
+  },
+  'mobile-application-penetration-testing': {
+    metaTitle: 'Mobile App Penetration Testing | Thread Security',
+    metaDescription: 'Master iOS and Android app security testing, Frida dynamic instrumentation, APK reverse engineering, and OWASP Mobile Top 10 vulnerabilities.',
+  },
+  'api-security-microservices-exploitation': {
+    metaTitle: 'API Security & Microservices | Thread Security',
+    metaDescription: 'Master REST, GraphQL and gRPC security testing, BOLA/BFLA exploits, OAuth2 token analysis, and microservices security posture hardening.',
+  },
+  'binary-exploitation-reverse-engineering': {
+    metaTitle: 'Binary Exploitation & Reversing | Thread Security',
+    metaDescription: 'Master x86/x64 assembly, Ghidra disassembly, buffer overflows, ROP chain development, stack protection bypasses, and practical exploit analysis.',
+  },
+  'ot-ics-critical-infrastructure-security': {
+    metaTitle: 'OT & ICS Infrastructure Security | Thread Security',
+    metaDescription: 'Master industrial control systems security, SCADA architectures, Modbus/DNP3 protocols, Purdue model defense, and air-gapped critical infra security.',
+  },
+  'ai-security-llm-redteaming': {
+    metaTitle: 'AI Security & LLM Red Teaming | Thread Security',
+    metaDescription: 'Master LLM prompt injection, adversarial jailbreaks, model guardrails, OWASP Top 10 for LLMs, and enterprise AI safety auditing in live labs.',
+  },
+  'agentic-ai-engineering': {
+    metaTitle: 'Agentic AI Systems Engineering | Thread Security',
+    metaDescription: 'Build multi-agent workflows, tool-use architectures, autonomous evaluation pipelines, and production-grade resilient agentic AI systems at scale.',
+  },
+  'data-science-ml-security': {
+    metaTitle: 'Data Science & ML Pipeline Defense | Thread Security',
+    metaDescription: 'Secure data ingestion pipelines, defend ML models against poisoning, protect training datasets, and implement robust MLOps security controls.',
+  },
+  'rag-vulnerability-analysis': {
+    metaTitle: 'RAG Security & Vector DB Defense | Thread Security',
+    metaDescription: 'Audit Retrieval-Augmented Generation architectures, detect vector database poisoning, prevent context injection, and secure semantic embeddings.',
+  },
+  'enterprise-ai-governance-guardrails': {
+    metaTitle: 'Enterprise AI Governance & Safety | Thread Security',
+    metaDescription: 'Implement NVIDIA NeMo Guardrails, programmable content filters, compliance policies, and enterprise AI governance frameworks for LLM deployments.',
+  },
+  'computer-vision-multimodal-threat-intel': {
+    metaTitle: 'Computer Vision & Multimodal Security | Thread Security',
+    metaDescription: 'Defend computer vision models and multimodal AI systems against adversarial patches, perceptual perturbations, and cross-modal jailbreak vectors.',
+  },
+  'model-inversion-extraction-defense': {
+    metaTitle: 'Model Inversion & Extraction Defense | Thread Security',
+    metaDescription: 'Master defenses against model inversion, membership inference, parameter stealing, and weight extraction attacks using differential privacy.',
+  },
+  'edge-ai-quantization-hardware-tuning': {
+    metaTitle: 'Edge AI & Model Quantization | Thread Security',
+    metaDescription: 'Master INT8/FP4 quantization, TensorRT acceleration, ONNX runtime tuning, and secure deployment of high-throughput AI models on edge hardware.',
+  },
+};
+
+export function getCourseSeoMeta(course: {
+  slug?: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+}): CourseSeoMeta {
+  if (course.metaTitle && course.metaDescription) {
+    return {
+      metaTitle: course.metaTitle,
+      metaDescription: course.metaDescription,
+    };
+  }
+
+  if (course.slug && COURSE_SEO_METADATA[course.slug]) {
+    return COURSE_SEO_METADATA[course.slug];
+  }
+
+  // Fallback: Clean and fit within optimal Google SERP length (30-65 chars)
+  let cleanedTitle = course.title.replace(/\s*\([^)]*\)/g, '').trim();
+  const suffix = ' | Thread Security';
+  const maxBaseLen = 60 - suffix.length;
+  if (cleanedTitle.length > maxBaseLen) {
+    cleanedTitle = cleanedTitle.substring(0, maxBaseLen).trim();
+  }
+  const fallbackTitle = `${cleanedTitle}${suffix}`;
+
+  let fallbackDesc = course.subtitle || course.description || '';
+  if (fallbackDesc.length > 155) {
+    fallbackDesc = fallbackDesc.substring(0, 152).trim() + '...';
+  } else if (fallbackDesc.length < 80) {
+    fallbackDesc = `${fallbackDesc} Practical hands-on training with expert mentorship and labs at Thread Security.`;
+    if (fallbackDesc.length > 155) {
+      fallbackDesc = fallbackDesc.substring(0, 152).trim() + '...';
+    }
+  }
+
+  return {
+    metaTitle: fallbackTitle,
+    metaDescription: fallbackDesc,
+  };
+}
+
+const RAW_MASTER_COURSES: MasterCourseData[] = [
   // ── FLAGSHIP COMPREHENSIVE CYBERSECURITY PROGRAM ──
   {
     id: 'flagship-cyber-1',
@@ -982,6 +1104,15 @@ export const MASTER_COURSES: MasterCourseData[] = [
     ],
   },
 ];
+
+export const MASTER_COURSES: MasterCourseData[] = RAW_MASTER_COURSES.map((c) => {
+  const seo = getCourseSeoMeta(c);
+  return {
+    ...c,
+    metaTitle: c.metaTitle || seo.metaTitle,
+    metaDescription: c.metaDescription || seo.metaDescription,
+  };
+});
 
 export function getMasterCourseBySlug(slug: string): MasterCourseData | undefined {
   return MASTER_COURSES.find((c) => c.slug === slug);
