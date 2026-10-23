@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search') || undefined;
     const status = searchParams.get('status') || undefined;
     const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '10', 10);
+    const limit = parseInt(searchParams.get('limit') || '50', 10);
 
     const result = await getMentorBlogs(session.userId, { search, status, page, limit });
     return NextResponse.json(result);

@@ -263,34 +263,87 @@ export async function createBlogDraft(authorUserId: string, title?: string) {
   return blog;
 }
 
-export async function getMentorBlogs(authorUserId: string, options?: { search?: string; status?: string; page?: number; limit?: number }) {
-  const mentor = await db.mentorProfile.findUnique({
+export async function getMentorBlogs(
+  authorUserId: string,
+  options?: { search?: string; status?: string; page?: number; limit?: number }
+) {
+  let mentor = await db.mentorProfile.findUnique({
     where: { userId: authorUserId },
   });
 
   if (!mentor) {
-    return { blogs: [], total: 0, page: 1, totalPages: 0 };
+    const user = await db.user.findUnique({ where: { id: authorUserId } });
+    if (user && (user.role === 'MENTOR' || user.role === 'SUPER_ADMIN' || user.role === 'ACADEMIC_ADMIN')) {
+      mentor = await db.mentorProfile.create({
+        data: {
+          userId: user.id,
+          title: 'Security Mentor',
+          company: 'Thread Security',
+          bio: 'Cybersecurity Instructor & Content Author',
+          expertise: 'Threat Intelligence, SOC & Web Security',
+        },
+      });
+    }
   }
 
-  const page = options?.page || 1;
-  const limit = options?.limit || 10;
+  if (!mentor) {
+    return {
+      blogs: [],
+      total: 0,
+      page: 1,
+      totalPages: 0,
+      metrics: { total: 0, published: 0, scheduled: 0, draft: 0, review: 0, totalViews: 0 },
+    };
+  }
+
+  const page = Math.max(1, options?.page || 1);
+  const limit = Math.max(1, Math.min(100, options?.limit || 50));
   const skip = (page - 1) * limit;
 
+  const now = new Date();
   const where: any = { authorId: mentor.id };
 
   if (options?.status && options.status !== 'ALL') {
-    where.status = options.status;
+    if (options.status === 'SCHEDULED') {
+      where.status = 'PUBLISHED';
+      where.publishedAt = { gt: now };
+    } else if (options.status === 'PUBLISHED') {
+      where.status = 'PUBLISHED';
+      where.OR = [
+        { publishedAt: { lte: now } },
+        { publishedAt: null },
+      ];
+    } else {
+      where.status = options.status;
+    }
   }
 
   if (options?.search) {
-    where.OR = [
-      { title: { contains: options.search, mode: 'insensitive' } },
-      { subtitle: { contains: options.search, mode: 'insensitive' } },
-      { excerpt: { contains: options.search, mode: 'insensitive' } },
+    const q = options.search.trim();
+    where.AND = [
+      ...(where.AND || []),
+      {
+        OR: [
+          { title: { contains: q, mode: 'insensitive' } },
+          { subtitle: { contains: q, mode: 'insensitive' } },
+          { excerpt: { contains: q, mode: 'insensitive' } },
+          { category: { name: { contains: q, mode: 'insensitive' } } },
+          { tags: { some: { name: { contains: q, mode: 'insensitive' } } } },
+        ],
+      },
     ];
   }
 
-  const [blogs, total] = await Promise.all([
+  const [
+    blogs,
+    totalFiltered,
+    totalAll,
+    publishedCount,
+    scheduledCount,
+    draftCount,
+    reviewCount,
+    viewsAggregation,
+  ] = await Promise.all([
     db.blog.findMany({
       where,
       orderBy: { updatedAt: 'desc' },
@@ -298,22 +351,53 @@ export async function getMentorBlogs(authorUserId: string, options?: { search?: 
       take: limit,
       include: {
         category: true,
+        tags: true,
         seo: true,
+        media: true,
         author: {
           include: {
-            user: { select: { name: true, avatarUrl: true } },
+            user: { select: { id: true, name: true, avatarUrl: true, email: true } },
           },
         },
       },
     }),
     db.blog.count({ where }),
+    db.blog.count({ where: { authorId: mentor.id } }),
+    db.blog.count({
+      where: {
+        authorId: mentor.id,
+        status: 'PUBLISHED',
+        OR: [{ publishedAt: { lte: now } }, { publishedAt: null }],
+      },
+    }),
+    db.blog.count({
+      where: {
+        authorId: mentor.id,
+        status: 'PUBLISHED',
+        publishedAt: { gt: now },
+      },
+    }),
+    db.blog.count({ where: { authorId: mentor.id, status: 'DRAFT' } }),
+    db.blog.count({ where: { authorId: mentor.id, status: 'REVIEW' } }),
+    db.blog.aggregate({
+      where: { authorId: mentor.id },
+      _sum: { viewCount: true },
+    }),
   ]);
 
   return {
-    blogs,
-    total,
+    blogs: blogs || [],
+    total: totalFiltered || 0,
     page,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil((totalFiltered || 0) / limit) || 1,
+    metrics: {
+      total: totalAll || 0,
+      published: publishedCount || 0,
+      scheduled: scheduledCount || 0,
+      draft: draftCount || 0,
+      review: reviewCount || 0,
+      totalViews: viewsAggregation?._sum?.viewCount || 0,
+    },
   };
 }
 

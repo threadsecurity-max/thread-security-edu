@@ -40,11 +40,20 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
+  const [metrics, setMetrics] = useState({
+    total: 0,
+    published: 0,
+    scheduled: 0,
+    draft: 0,
+    review: 0,
+    totalViews: 0,
+  });
+
   const fetchBlogs = async () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/mentor/blogs?search=${encodeURIComponent(search)}&status=${statusFilter === 'SCHEDULED' ? 'ALL' : statusFilter}`
+        `/api/mentor/blogs?search=${encodeURIComponent(search)}&status=${statusFilter}&limit=100`
       );
       const text = await res.text();
       let data: any = {};
@@ -54,14 +63,10 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
         console.error('Non-JSON response fetching mentor blogs:', text);
       }
       if (res.ok) {
-        let loadedBlogs = data.blogs || [];
-        if (statusFilter === 'SCHEDULED') {
-          const now = Date.now();
-          loadedBlogs = loadedBlogs.filter(
-            (b: any) => b.status === 'PUBLISHED' && b.publishedAt && new Date(b.publishedAt).getTime() > now
-          );
+        setBlogs(data.blogs || []);
+        if (data.metrics) {
+          setMetrics(data.metrics);
         }
-        setBlogs(loadedBlogs);
       }
     } catch (err) {
       console.error('Failed to load blogs:', err);
@@ -98,24 +103,13 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
     try {
       const res = await fetch(`/api/mentor/blogs/${blogId}`, { method: 'DELETE' });
       if (res.ok) {
-        setBlogs(blogs.filter((b) => b.id !== blogId));
+        setBlogs((prev) => prev.filter((b) => b.id !== blogId));
+        fetchBlogs();
       }
     } catch (err) {
       console.error('Error deleting blog:', err);
     }
   };
-
-  // Metrics
-  const now = Date.now();
-  const totalCount = blogs.length;
-  const scheduledCount = blogs.filter(
-    (b) => b.status === 'PUBLISHED' && b.publishedAt && new Date(b.publishedAt).getTime() > now
-  ).length;
-  const publishedCount = blogs.filter(
-    (b) => b.status === 'PUBLISHED' && (!b.publishedAt || new Date(b.publishedAt).getTime() <= now)
-  ).length;
-  const draftCount = blogs.filter((b) => b.status === 'DRAFT').length;
-  const reviewCount = blogs.filter((b) => b.status === 'REVIEW').length;
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto text-slate-900 font-sans">
@@ -151,41 +145,84 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
         </Button>
       </div>
 
-      {/* Metrics Row (5 Cards) */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-1">
+      {/* Metrics Row (Interactive 6 Cards) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('ALL')}
+          className={`p-4 rounded-2xl bg-white border text-left transition-all cursor-pointer shadow-xs hover:border-slate-400 ${
+            statusFilter === 'ALL' ? 'ring-2 ring-violet-500 border-violet-500 bg-violet-50/20' : 'border-slate-200'
+          }`}
+        >
           <span className="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
-            <BookOpen className="w-3.5 h-3.5 text-slate-400" /> Total Articles
+            <BookOpen className="w-3.5 h-3.5 text-slate-400" /> Total
           </span>
-          <p className="text-2xl font-bold text-slate-900">{totalCount}</p>
-        </div>
+          <p className="text-2xl font-bold text-slate-900 mt-1">{metrics.total}</p>
+          <span className="text-[10px] text-slate-400 font-mono">All articles</span>
+        </button>
 
-        <div className="p-5 rounded-2xl bg-white border border-emerald-200 shadow-sm space-y-1">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('PUBLISHED')}
+          className={`p-4 rounded-2xl bg-white border text-left transition-all cursor-pointer shadow-xs hover:border-emerald-400 ${
+            statusFilter === 'PUBLISHED' ? 'ring-2 ring-emerald-500 border-emerald-500 bg-emerald-50/20' : 'border-emerald-200'
+          }`}
+        >
           <span className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Published Live
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" /> Published
           </span>
-          <p className="text-2xl font-bold text-emerald-700">{publishedCount}</p>
-        </div>
+          <p className="text-2xl font-bold text-emerald-700 mt-1">{metrics.published}</p>
+          <span className="text-[10px] text-emerald-600/80 font-mono">Live on site</span>
+        </button>
 
-        <div className="p-5 rounded-2xl bg-white border border-violet-200 shadow-sm space-y-1">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('SCHEDULED')}
+          className={`p-4 rounded-2xl bg-white border text-left transition-all cursor-pointer shadow-xs hover:border-violet-400 ${
+            statusFilter === 'SCHEDULED' ? 'ring-2 ring-violet-500 border-violet-500 bg-violet-50/20' : 'border-violet-200'
+          }`}
+        >
           <span className="text-xs font-semibold text-violet-800 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-violet-600" /> Scheduled Releases
+            <Clock className="w-3.5 h-3.5 text-violet-600" /> Scheduled
           </span>
-          <p className="text-2xl font-bold text-violet-700">{scheduledCount}</p>
-        </div>
+          <p className="text-2xl font-bold text-violet-700 mt-1">{metrics.scheduled}</p>
+          <span className="text-[10px] text-violet-600/80 font-mono">Timed release</span>
+        </button>
 
-        <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-sm space-y-1">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('DRAFT')}
+          className={`p-4 rounded-2xl bg-white border text-left transition-all cursor-pointer shadow-xs hover:border-amber-400 ${
+            statusFilter === 'DRAFT' ? 'ring-2 ring-amber-500 border-amber-500 bg-amber-50/20' : 'border-amber-200'
+          }`}
+        >
           <span className="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-amber-600" /> Working Drafts
+            <Clock className="w-3.5 h-3.5 text-amber-600" /> Drafts
           </span>
-          <p className="text-2xl font-bold text-amber-700">{draftCount}</p>
-        </div>
+          <p className="text-2xl font-bold text-amber-700 mt-1">{metrics.draft}</p>
+          <span className="text-[10px] text-amber-600/80 font-mono">In progress</span>
+        </button>
 
-        <div className="p-5 rounded-2xl bg-white border border-sky-200 shadow-sm space-y-1 col-span-2 lg:col-span-1">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('REVIEW')}
+          className={`p-4 rounded-2xl bg-white border text-left transition-all cursor-pointer shadow-xs hover:border-sky-400 ${
+            statusFilter === 'REVIEW' ? 'ring-2 ring-sky-500 border-sky-500 bg-sky-50/20' : 'border-sky-200'
+          }`}
+        >
           <span className="text-xs font-semibold text-sky-800 flex items-center gap-1.5">
-            <FolderCheck className="w-3.5 h-3.5 text-sky-600" /> Under Review
+            <FolderCheck className="w-3.5 h-3.5 text-sky-600" /> In Review
           </span>
-          <p className="text-2xl font-bold text-sky-700">{reviewCount}</p>
+          <p className="text-2xl font-bold text-sky-700 mt-1">{metrics.review}</p>
+          <span className="text-[10px] text-sky-600/80 font-mono">Admin queue</span>
+        </button>
+
+        <div className="p-4 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-xs flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+            <Eye className="w-3.5 h-3.5 text-[#C6FF34]" /> Total Reads
+          </span>
+          <p className="text-2xl font-bold text-white mt-1">{(metrics.totalViews || 0).toLocaleString()}</p>
+          <span className="text-[10px] text-[#C6FF34] font-mono">Reader impact</span>
         </div>
       </div>
 
