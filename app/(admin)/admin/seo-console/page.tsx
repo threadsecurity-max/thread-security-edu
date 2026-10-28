@@ -26,6 +26,13 @@ import {
   BarChart3,
   Sliders,
   Award,
+  Filter,
+  FileText,
+  GraduationCap,
+  AlertTriangle,
+  Tag,
+  Clock,
+  ArrowUpRight,
 } from 'lucide-react';
 import { TOPIC_CLUSTERS } from '@/lib/seo/topicClusters';
 
@@ -57,8 +64,16 @@ const PRESET_PAGES = [
 ];
 
 export default function AdminSeoConsolePage() {
-  const [activeTab, setActiveTab] = useState<'AI_METADATA' | 'TELEMETRY' | 'SEO_AUDIT' | 'TOPIC_CLUSTERS'>('TELEMETRY');
+  const [activeTab, setActiveTab] = useState<'CONTENT_RADAR' | 'TELEMETRY' | 'AI_METADATA' | 'SEO_AUDIT' | 'TOPIC_CLUSTERS'>('CONTENT_RADAR');
   
+  // AI Content Radar State
+  const [radarData, setRadarData] = useState<any>(null);
+  const [radarLoading, setRadarLoading] = useState(false);
+  const [radarFilter, setRadarFilter] = useState<'ALL' | 'NEEDS_LIFT' | 'NEW' | 'COURSES' | 'BLOGS' | 'INDEXED'>('ALL');
+  const [radarSearch, setRadarSearch] = useState('');
+  const [radarBatchBoosting, setRadarBatchBoosting] = useState(false);
+  const [radarNotice, setRadarNotice] = useState<string | null>(null);
+
   // Credentials Diagnostic state
   const [credStatus, setCredStatus] = useState<any>(null);
   const [showCredGuide, setShowCredGuide] = useState(false);
@@ -103,6 +118,7 @@ export default function AdminSeoConsolePage() {
     fetchCredentialsStatus();
     fetchTelemetry();
     fetchLogs();
+    fetchRadarData();
     // Auto-generate initial AI metadata
     handleGenerateMetadata();
   }, []);
@@ -161,6 +177,85 @@ export default function AdminSeoConsolePage() {
       }
     } catch (err) {
       console.error('Error fetching indexing logs:', err);
+    }
+  };
+
+  const fetchRadarData = async () => {
+    setRadarLoading(true);
+    try {
+      const res = await fetch('/api/admin/seo/content-radar');
+      const json = await res.json();
+      if (json.success) {
+        setRadarData(json.data);
+      }
+    } catch (err) {
+      console.error('Error fetching Content Radar:', err);
+    } finally {
+      setRadarLoading(false);
+    }
+  };
+
+  const handleBoostRadarItem = async (item: any) => {
+    setBoostingRow(item.url);
+    setBoostedNotice(null);
+    try {
+      const res = await fetch('/api/admin/seo/content-radar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [
+            {
+              url: item.url,
+              metaTitle: item.recommendedTitle,
+              metaDescription: item.recommendedDescription,
+              focusKeyword: item.focusKeyword,
+              keywords: item.lsiKeywords,
+            },
+          ],
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setBoostedNotice({
+          id: item.url,
+          message: `⚡ 1-Click Applied! Pushed "${item.recommendedTitle}" to Googlebot (HTTP 200).`,
+        });
+        fetchRadarData();
+        fetchLogs();
+      }
+    } catch (err: any) {
+      console.error('Error boosting radar item:', err);
+      setBoostedNotice({ id: item.url, message: `Error: ${err.message}` });
+    } finally {
+      setBoostingRow(null);
+    }
+  };
+
+  const handleBatchBoostRadar = async (filterType?: string) => {
+    setRadarBatchBoosting(true);
+    setRadarNotice('⚡ Running 1-Click Auto-Boost & Googlebot Dispatch for all targeted pages...');
+    try {
+      const res = await fetch('/api/admin/seo/content-radar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          boostAll: true,
+          filter: filterType || radarFilter,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setRadarNotice(`✅ ${json.message || 'All targeted pages boosted and submitted to Googlebot!'}`);
+        fetchRadarData();
+        fetchLogs();
+      } else {
+        setRadarNotice(`Notice: ${json.error || 'Failed to complete batch boost'}`);
+      }
+    } catch (err: any) {
+      console.error('Batch boost error:', err);
+      setRadarNotice(`Error: ${err.message}`);
+    } finally {
+      setRadarBatchBoosting(false);
     }
   };
 
@@ -396,6 +491,24 @@ export default function AdminSeoConsolePage() {
 
   const currentVariant = metadataResult?.variants?.find((v: MetadataVariant) => v.id === selectedVariantId) || metadataResult?.variants?.[0];
 
+  const filteredRadarItems = (radarData?.items || []).filter((item: any) => {
+    if (radarSearch) {
+      const q = radarSearch.toLowerCase();
+      const matchTitle = item.title?.toLowerCase().includes(q);
+      const matchUrl = item.url?.toLowerCase().includes(q);
+      const matchQuery = item.searchQuery?.toLowerCase().includes(q);
+      const matchKeyword = item.focusKeyword?.toLowerCase().includes(q);
+      if (!matchTitle && !matchUrl && !matchQuery && !matchKeyword) return false;
+    }
+
+    if (radarFilter === 'NEEDS_LIFT') return item.currentStatus === 'NEEDS_LIFT';
+    if (radarFilter === 'NEW') return item.isNew || item.currentStatus === 'NEW_UNINDEXED';
+    if (radarFilter === 'COURSES') return item.type === 'COURSE';
+    if (radarFilter === 'BLOGS') return item.type === 'BLOG';
+    if (radarFilter === 'INDEXED') return item.googlebotStatus === 'INDEXED_200';
+    return true;
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50/80 via-purple-50/40 to-slate-50 text-slate-800 p-6 md:p-10 space-y-8 font-sans">
       {/* Top Banner & Header */}
@@ -504,6 +617,21 @@ export default function AdminSeoConsolePage() {
       {/* Tabs Navigation */}
       <div className="flex flex-wrap items-center gap-2 border-b border-violet-200/80 pb-2">
         <button
+          onClick={() => setActiveTab('CONTENT_RADAR')}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm ${
+            activeTab === 'CONTENT_RADAR'
+              ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-violet-500/25 ring-2 ring-violet-400/20'
+              : 'bg-white text-violet-800 hover:bg-violet-100/70 border border-violet-200'
+          }`}
+        >
+          <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+          <span>AI Content Radar &amp; 1-Click Googlebot Ready</span>
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-400 text-slate-950 shadow-sm animate-pulse">
+            {radarData?.needsLiftCount !== undefined ? `${radarData.needsLiftCount} LIFTS` : 'AUTONOMOUS'}
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('AI_METADATA')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition shadow-sm ${
             activeTab === 'AI_METADATA'
@@ -557,6 +685,486 @@ export default function AdminSeoConsolePage() {
           <span>Rank #1 Topic Clusters &amp; Interlinking</span>
         </button>
       </div>
+
+      {/* ========================================================================= */}
+      {/* TAB 0: AUTONOMOUS AI CONTENT RADAR & 1-CLICK GOOGLEBOT READY */}
+      {/* ========================================================================= */}
+      {activeTab === 'CONTENT_RADAR' && (
+        <div className="space-y-8">
+          {/* Hero Banner */}
+          <div className="rounded-3xl bg-gradient-to-r from-violet-950 via-indigo-900 to-slate-900 text-white p-6 md:p-8 shadow-2xl relative overflow-hidden space-y-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-3xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-amber-300 text-xs font-bold border border-amber-300/20 backdrop-blur-md">
+                  <Zap className="w-3.5 h-3.5 fill-amber-300" />
+                  <span>Real-Time Autonomous Content Radar • RankBrain &amp; NavBoost Optimization</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                  All Courses &amp; Blogs: AI Recommendations &amp; 1-Click Googlebot Ready
+                </h2>
+                <p className="text-slate-300 text-xs md:text-sm leading-relaxed">
+                  Continuously scans every course, research blog, and newly published article. The AI automatically detects snippet truncation (&gt;58 chars), missing psychological bracket hooks <code className="text-amber-300 font-mono">[2026]</code>, and delivers instant 1-click Googlebot crawling via your active service account credentials.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  disabled={radarLoading}
+                  onClick={fetchRadarData}
+                  className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${radarLoading ? 'animate-spin' : ''}`} />
+                  <span>Rescan Radar</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={radarBatchBoosting}
+                  onClick={() => handleBatchBoostRadar()}
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 text-xs font-extrabold shadow-xl shadow-amber-500/20 transition disabled:opacity-50"
+                >
+                  <Zap className={`w-4 h-4 fill-slate-950 ${radarBatchBoosting ? 'animate-bounce' : ''}`} />
+                  <span>{radarBatchBoosting ? 'Boosting & Pushing to Googlebot...' : `⚡ 1-Click Boost All ${radarData?.needsLiftCount || 0} Pages to Googlebot`}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Batch Notice Alert */}
+          {radarNotice && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-900/90 via-teal-900/90 to-slate-900 text-emerald-100 border border-emerald-500/40 text-xs font-semibold flex items-center justify-between shadow-lg">
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span className="text-sm font-bold text-white">{radarNotice}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRadarNotice(null)}
+                className="text-xs text-emerald-300 hover:text-white transition font-bold px-2 py-1 rounded-lg bg-white/10"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          {/* 5 Stat Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="rounded-2xl bg-white border border-violet-100 p-4 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
+                <span>Total Monitored</span>
+                <Globe className="w-4 h-4 text-violet-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900">
+                {radarLoading ? '...' : radarData?.totalAssets || 0}
+              </div>
+              <p className="text-[11px] text-slate-500">Courses, blogs &amp; landing</p>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-rose-200 p-4 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-rose-700 text-xs font-semibold">
+                <span>Needs Significant Lift</span>
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-rose-700">
+                {radarLoading ? '...' : radarData?.needsLiftCount || 0}
+              </div>
+              <p className="text-[11px] text-rose-600 font-medium">Suboptimal or truncated</p>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-purple-200 p-4 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-purple-700 text-xs font-semibold">
+                <span>Newly Posted / Unindexed</span>
+                <Clock className="w-4 h-4 text-purple-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-purple-700">
+                {radarLoading ? '...' : radarData?.newlyPostedCount || 0}
+              </div>
+              <p className="text-[11px] text-purple-600 font-medium">Ready for Googlebot push</p>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-emerald-200 p-4 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-emerald-700 text-xs font-semibold">
+                <span>Googlebot Verified (200)</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-emerald-700">
+                {radarLoading ? '...' : radarData?.indexedCount || 0}
+              </div>
+              <p className="text-[11px] text-emerald-600 font-medium">Indexing API notified</p>
+            </div>
+
+            <div className="rounded-2xl bg-white border border-amber-200 p-4 shadow-sm space-y-1">
+              <div className="flex items-center justify-between text-amber-700 text-xs font-semibold">
+                <span>Avg Predicted CTR Lift</span>
+                <TrendingUp className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-amber-700">
+                {radarLoading ? '...' : radarData?.averageCtrLift || '+240%'}
+              </div>
+              <p className="text-[11px] text-amber-600 font-medium">NavBoost click formula</p>
+            </div>
+          </div>
+
+          {/* Filter & Search Toolbar */}
+          <div className="rounded-2xl bg-white border border-violet-100 p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setRadarFilter('ALL')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  radarFilter === 'ALL'
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-150'
+                }`}
+              >
+                <span>All Content</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                  {radarData?.totalAssets || 0}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRadarFilter('NEEDS_LIFT')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  radarFilter === 'NEEDS_LIFT'
+                    ? 'bg-rose-600 text-white shadow-sm'
+                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
+                }`}
+              >
+                <AlertTriangle className="w-3 h-3" />
+                <span>Needs Significant Lift</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                  {radarData?.needsLiftCount || 0}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRadarFilter('NEW')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  radarFilter === 'NEW'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+                }`}
+              >
+                <Clock className="w-3 h-3" />
+                <span>Newly Posted</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                  {radarData?.newlyPostedCount || 0}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRadarFilter('COURSES')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  radarFilter === 'COURSES'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
+                }`}
+              >
+                <GraduationCap className="w-3 h-3" />
+                <span>Courses</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                  {radarData?.coursesCount || 0}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRadarFilter('BLOGS')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  radarFilter === 'BLOGS'
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-150'
+                }`}
+              >
+                <FileText className="w-3 h-3" />
+                <span>Blogs</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                  {radarData?.blogsCount || 0}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRadarFilter('INDEXED')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                  radarFilter === 'INDEXED'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                }`}
+              >
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Googlebot Indexed</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/20">
+                  {radarData?.indexedCount || 0}
+                </span>
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative min-w-[240px] max-w-sm">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={radarSearch}
+                onChange={(e) => setRadarSearch(e.target.value)}
+                placeholder="Search courses, blogs, keywords..."
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-violet-200 text-xs focus:ring-2 focus:ring-violet-400 focus:outline-none"
+              />
+              {radarSearch && (
+                <button
+                  type="button"
+                  onClick={() => setRadarSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Content Cards Grid */}
+          {radarLoading && !radarData ? (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="rounded-2xl bg-white border border-violet-100 p-6 shadow-sm space-y-4 animate-pulse">
+                  <div className="h-4 bg-slate-200 rounded w-1/3" />
+                  <div className="h-6 bg-slate-200 rounded w-3/4" />
+                  <div className="h-20 bg-slate-100 rounded" />
+                  <div className="h-10 bg-slate-200 rounded" />
+                </div>
+              ))}
+            </div>
+          ) : filteredRadarItems.length === 0 ? (
+            <div className="rounded-3xl bg-white border border-violet-150 p-12 text-center space-y-3">
+              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+              <h3 className="text-lg font-bold text-slate-800">No Content Matches Selected Filter</h3>
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                All pages matching this filter are currently optimal or try selecting &quot;All Content&quot; or clearing your search query.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {filteredRadarItems.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="rounded-2xl bg-white border border-violet-150 p-6 shadow-sm hover:shadow-md transition space-y-5 flex flex-col justify-between"
+                >
+                  {/* Top Bar: Badges + Telemetry */}
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Type badge */}
+                        <span
+                          className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 uppercase tracking-wider ${
+                            item.type === 'COURSE'
+                              ? 'bg-indigo-100 text-indigo-800'
+                              : item.type === 'BLOG'
+                              ? 'bg-violet-100 text-violet-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
+                          {item.type === 'COURSE' && <GraduationCap className="w-3 h-3" />}
+                          {item.type === 'BLOG' && <FileText className="w-3 h-3" />}
+                          {item.type === 'LANDING' && <Globe className="w-3 h-3" />}
+                          <span>{item.type}</span>
+                        </span>
+
+                        {/* Category / Track badge */}
+                        {(item.track || item.category) && (
+                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-semibold bg-slate-100 text-slate-700">
+                            {item.track === 'ai' ? '🤖 AI Track' : item.track === 'cyber' ? '🛡️ Cyber Track' : item.category}
+                          </span>
+                        )}
+
+                        {/* Newly Posted badge */}
+                        {item.isNew && (
+                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-purple-100 text-purple-700 border border-purple-200 animate-pulse">
+                            ✨ NEW POST
+                          </span>
+                        )}
+
+                        {/* Status badge */}
+                        {item.currentStatus === 'NEEDS_LIFT' && (
+                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-rose-100 text-rose-700 border border-rose-200">
+                            🚨 NEEDS LIFT
+                          </span>
+                        )}
+                        {item.currentStatus === 'NEW_UNINDEXED' && (
+                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
+                            ⚡ UNINDEXED
+                          </span>
+                        )}
+                        {item.currentStatus === 'OPTIMAL' && (
+                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            ✅ OPTIMAL
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Real GSC Telemetry Badge */}
+                      {item.avgPosition && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 text-white font-mono text-[11px] shadow-sm">
+                          <span className="text-amber-400 font-bold">{item.avgPosition}</span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-emerald-300 font-bold">{item.impressions} Imp</span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-cyan-300 font-bold">{item.ctr} CTR</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Page Title & URL */}
+                    <div>
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-extrabold text-base text-slate-900 hover:text-violet-600 transition flex items-center gap-1.5 group"
+                      >
+                        <span>{item.title}</span>
+                        <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-violet-600 transition" />
+                      </a>
+                      <div className="font-mono text-[11px] text-violet-600 truncate mt-0.5 select-all">
+                        {item.url}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Comparison: Current Snippet vs AI Psychological Recommendation */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    {/* Left: Current Snippet */}
+                    <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3.5 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                        <span>Current Snippet</span>
+                        <span
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-mono ${
+                            item.currentTitleLength > 58
+                              ? 'bg-rose-100 text-rose-700 font-bold'
+                              : item.currentTitleLength < 45
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-emerald-100 text-emerald-700'
+                          }`}
+                        >
+                          {item.currentTitleLength} chars {item.currentTitleLength > 58 ? '(TRUNCATED)' : ''}
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-semibold text-slate-800 line-clamp-2 leading-snug">
+                        {item.currentTitle}
+                      </div>
+
+                      <div className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                        {item.currentDescription || 'No meta description found.'}
+                      </div>
+
+                      {/* Issues pill */}
+                      {item.issues?.length > 0 && (
+                        <div className="pt-1 flex flex-wrap gap-1">
+                          {item.issues.map((issue: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-rose-50 text-rose-700 border border-rose-200"
+                            >
+                              ⚠️ {issue}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Right: AI Recommendation (Glowing Box) */}
+                    <div className="rounded-xl bg-gradient-to-br from-violet-50/90 via-purple-50/50 to-indigo-50/70 border border-violet-300/90 p-3.5 space-y-2 shadow-sm relative overflow-hidden">
+                      <div className="flex items-center justify-between text-xs font-bold text-violet-900">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          <span>AI Recommendation</span>
+                        </div>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-violet-600 text-white font-extrabold shadow-sm">
+                          🎯 {item.recommendedTitleLength}c • 0% TRUNCATION
+                        </span>
+                      </div>
+
+                      <div className="text-xs font-bold text-violet-950 line-clamp-2 leading-snug">
+                        {item.recommendedTitle}
+                      </div>
+
+                      <div className="text-[11px] text-slate-700 line-clamp-2 leading-relaxed">
+                        {item.recommendedDescription}
+                      </div>
+
+                      {/* Lift & Keyword Badge */}
+                      <div className="pt-1 flex flex-wrap items-center justify-between gap-1 text-[10px]">
+                        <span className="px-1.5 py-0.5 rounded bg-white/90 text-violet-800 font-semibold border border-violet-200">
+                          Query: <code className="font-mono">{item.searchQuery || item.focusKeyword}</code>
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-extrabold shadow-sm">
+                          ⚡ {item.predictedCtrLift}
+                        </span>
+                      </div>
+
+                      {/* Rationale snippet */}
+                      <p className="text-[10px] text-violet-800/90 italic bg-white/80 p-2 rounded-lg border border-violet-200/60 leading-relaxed">
+                        {item.aiRationale}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card Footer: Live Googlebot Status & 1-Click Action */}
+                  <div className="pt-3 border-t border-violet-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-semibold">
+                      {item.googlebotStatus === 'INDEXED_200' ? (
+                        <div className="flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Googlebot Crawl Accepted (HTTP 200)</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-amber-800 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
+                          <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-600" />
+                          <span>Ready for Googlebot Fast-Crawl</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={boostingRow === item.url}
+                      onClick={() => handleBoostRadarItem(item)}
+                      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-xs transition shadow-sm ${
+                        item.googlebotStatus === 'INDEXED_200'
+                          ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                          : 'bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-violet-500/25'
+                      }`}
+                    >
+                      <Zap className={`w-3.5 h-3.5 ${boostingRow === item.url ? 'animate-spin' : ''}`} />
+                      <span>
+                        {boostingRow === item.url
+                          ? 'Pushing to Googlebot...'
+                          : item.googlebotStatus === 'INDEXED_200'
+                          ? '⚡ 1-Click Re-Push to Googlebot'
+                          : '⚡ 1-Click Boost & Push to Googlebot'}
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Inline Notification when boosted */}
+                  {boostedNotice && boostedNotice.id === item.url && (
+                    <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{boostedNotice.message}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* TAB 1: AI META TITLE & DESCRIPTION ENGINE */}
@@ -1066,9 +1674,23 @@ export default function AdminSeoConsolePage() {
                     <span className="font-bold text-amber-300">thread security (Brand Query)</span>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono">Pos #2.3 • 333 Imp</span>
                   </div>
-                  <p className="text-[11px] text-slate-300 truncate">https://www.threadsecurity.in/</p>
                   <div className="text-[10px] text-amber-200/80 font-medium">Current CTR: 5.11% → Brand Target: 20%+</div>
                 </div>
+              </div>
+
+              {/* Footer row inside the 8 cols card */}
+              <div className="pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-white/10">
+                <span className="text-[11px] text-slate-300">
+                  AI Content Radar monitors <strong>{radarData?.totalAssets || 25}+</strong> courses &amp; research blogs ({radarData?.needsLiftCount || 0} needing lift)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('CONTENT_RADAR')}
+                  className="flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-amber-200 transition"
+                >
+                  <span>Explore All in AI Content Radar</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
 

@@ -2,6 +2,7 @@ import { prisma } from '@/server/database/prisma';
 import slugify from 'slugify';
 import { createBlogDriveFolder } from '../integrations/google-drive/folders';
 import { uploadFileToDrive } from '../integrations/google-drive/upload';
+import { requestGoogleInstantIndexing } from '@/lib/gcp/indexingService';
 
 const db = prisma as any;
 
@@ -564,6 +565,14 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
     }
   }
 
+  // Automatically submit to Google Indexing API when article is published
+  if (updatedBlog.status === 'PUBLISHED') {
+    const blogUrl = `https://www.threadsecurity.in/blog/${updatedBlog.slug}`;
+    requestGoogleInstantIndexing(blogUrl, 'URL_UPDATED', 'AUTO_BLOG_PUBLISH').catch((err) => {
+      console.warn('[blog.service] Auto Google indexing notice:', err?.message || err);
+    });
+  }
+
   return updatedBlog;
 }
 
@@ -580,7 +589,13 @@ export async function deleteBlog(blogId: string, authorUserId: string) {
     throw new Error('Unauthorized to delete this blog');
   }
 
-  return db.blog.delete({ where: { id: blogId } });
+  const deleted = await db.blog.delete({ where: { id: blogId } });
+
+  // Notify Googlebot of URL deletion
+  const blogUrl = `https://www.threadsecurity.in/blog/${blog.slug}`;
+  requestGoogleInstantIndexing(blogUrl, 'URL_DELETED', 'AUTO_BLOG_DELETE').catch(() => {});
+
+  return deleted;
 }
 
 export async function getPublicBlogs(params?: {

@@ -1,4 +1,6 @@
 import { google } from 'googleapis';
+import fs from 'fs';
+import path from 'path';
 
 export interface GcpCredentialStatus {
   isConfigured: boolean;
@@ -9,10 +11,30 @@ export interface GcpCredentialStatus {
   message: string;
 }
 
+function getLocalServiceAccountKey(): { email?: string; privateKey?: string; projectId?: string } | null {
+  try {
+    const keyFile = path.join(process.cwd(), 'thread-security-education-fc3db6f2700f.json');
+    if (fs.existsSync(keyFile)) {
+      const data = JSON.parse(fs.readFileSync(keyFile, 'utf-8'));
+      if (data.client_email && data.private_key) {
+        return {
+          email: data.client_email,
+          privateKey: data.private_key,
+          projectId: data.project_id,
+        };
+      }
+    }
+  } catch (err) {
+    // Safe ignore
+  }
+  return null;
+}
+
 export function getGcpCredentialStatus(): GcpCredentialStatus {
-  const clientEmail = process.env.GCP_CLIENT_EMAIL || null;
-  const privateKey = process.env.GCP_PRIVATE_KEY || null;
-  const projectId = process.env.GCP_PROJECT_ID || null;
+  const localKey = getLocalServiceAccountKey();
+  const clientEmail = process.env.GCP_CLIENT_EMAIL || localKey?.email || null;
+  const privateKey = process.env.GCP_PRIVATE_KEY || localKey?.privateKey || null;
+  const projectId = process.env.GCP_PROJECT_ID || localKey?.projectId || null;
   const adcFile = process.env.GOOGLE_APPLICATION_CREDENTIALS || null;
 
   if (clientEmail && privateKey && privateKey.trim().length > 20) {
@@ -22,7 +44,9 @@ export function getGcpCredentialStatus(): GcpCredentialStatus {
       clientEmail,
       hasPrivateKey: true,
       projectId,
-      message: 'Active Service Account Key detected in environment.',
+      message: localKey && !process.env.GCP_PRIVATE_KEY
+        ? 'Active Service Account Key file (thread-security-education-fc3db6f2700f.json) detected.'
+        : 'Active Service Account Key detected in environment.',
     };
   }
 
@@ -44,7 +68,7 @@ export function getGcpCredentialStatus(): GcpCredentialStatus {
       clientEmail,
       hasPrivateKey: false,
       projectId,
-      message: 'GCP_CLIENT_EMAIL is configured, but GCP_PRIVATE_KEY is missing in .env. Running in safe benchmark simulation mode.',
+      message: 'GCP_CLIENT_EMAIL is configured, but GCP_PRIVATE_KEY is missing. Running in benchmark simulation mode.',
     };
   }
 
@@ -64,8 +88,9 @@ export function getGcpCredentialStatus(): GcpCredentialStatus {
  * Returns null safely if credentials are not configured to avoid unhandled ADC crashes.
  */
 export function getGcpAuthClient() {
-  const clientEmail = process.env.GCP_CLIENT_EMAIL;
-  let privateKey = process.env.GCP_PRIVATE_KEY;
+  const localKey = getLocalServiceAccountKey();
+  const clientEmail = process.env.GCP_CLIENT_EMAIL || localKey?.email;
+  let privateKey = process.env.GCP_PRIVATE_KEY || localKey?.privateKey;
 
   const scopes = [
     'https://www.googleapis.com/auth/webmasters',
@@ -75,7 +100,7 @@ export function getGcpAuthClient() {
     'https://www.googleapis.com/auth/spreadsheets',
   ];
 
-  // Strategy 1: Direct Service Account JSON Key in .env
+  // Strategy 1: Direct Service Account JSON Key (env or key file)
   if (clientEmail && privateKey && privateKey.trim().length > 20) {
     privateKey = privateKey.replace(/\\n/g, '\n');
     try {
