@@ -28,8 +28,8 @@ function getSessionFromRequest(request: NextRequest): UserSession | null {
 }
 
 export async function middleware(request: NextRequest) {
-  const host = request.headers.get('host') || '';
-
+  const rawHost = request.headers.get('x-forwarded-host') || request.headers.get('host') || '';
+  const host = rawHost.split(':')[0].toLowerCase();
   const { pathname } = request.nextUrl;
 
   // Canonical Domain Enforcement: Redirect apex threadsecurity.in to www.threadsecurity.in

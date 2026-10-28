@@ -125,34 +125,54 @@ export async function fetchSearchConsolePerformance(
 }
 
 function getMockSearchPerformance(siteUrl: string, startDate: string, endDate: string): SearchPerformanceData {
-  const cleanWebUrl = siteUrl.startsWith('sc-domain:')
-    ? `https://${siteUrl.replace(/^sc-domain:/, '')}`
-    : siteUrl.replace(/\/$/, '');
+  const cleanWebUrl = 'https://www.threadsecurity.in';
+
+  const topQueries: SearchMetricRow[] = [
+    { query: 'thread security', clicks: 17, impressions: 333, ctr: 5.11, position: 2.3 },
+    { query: 'thread security jalandhar', clicks: 10, impressions: 41, ctr: 24.39, position: 1.1 },
+    { query: 'cyber security course in jalandhar', clicks: 1, impressions: 28, ctr: 3.57, position: 14.8 },
+    { query: 'soc analysis', clicks: 1, impressions: 88, ctr: 1.14, position: 9.0 },
+    { query: 'ai course in jalandhar', clicks: 0, impressions: 17, ctr: 0.0, position: 11.2 },
+    { query: 'ai courses in jalandhar', clicks: 0, impressions: 8, ctr: 0.0, position: 10.3 },
+    { query: 'agentic ai course in jalandhar', clicks: 0, impressions: 6, ctr: 0.0, position: 7.0 },
+    { query: 'active directory red team specialist', clicks: 0, impressions: 2, ctr: 0.0, position: 51.0 },
+    { query: 'advanced web application security', clicks: 0, impressions: 1, ctr: 0.0, position: 1.0 },
+    { query: 'ai red team analyst training', clicks: 0, impressions: 1, ctr: 0.0, position: 84.0 },
+    { query: 'ai red team certification', clicks: 0, impressions: 1, ctr: 0.0, position: 66.0 },
+    { query: '"gpt-6.1 astra" release october 2026', clicks: 0, impressions: 1, ctr: 0.0, position: 10.0 },
+    { query: 'aarav sharma', clicks: 0, impressions: 1, ctr: 0.0, position: 9.0 },
+    { query: '"bug bounty"', clicks: 0, impressions: 1, ctr: 0.0, position: 67.0 },
+    { query: '"crowdstrike" site:onrender.com', clicks: 0, impressions: 1, ctr: 0.0, position: 6.0 },
+  ];
+
+  const topPages: SearchMetricRow[] = [
+    { page: `${cleanWebUrl}/`, clicks: 34, impressions: 1065, ctr: 3.19, position: 5.8 },
+    { page: `https://threadsecurity.in/`, clicks: 16, impressions: 683, ctr: 2.34, position: 5.3 },
+    { page: `${cleanWebUrl}/blog/free-cybersecurity-lab-a-safe-zero-cost-practice-roadmap`, clicks: 5, impressions: 134, ctr: 3.73, position: 10.3 },
+    { page: `${cleanWebUrl}/courses/binary-exploitation-reverse-engineering`, clicks: 3, impressions: 32, ctr: 9.38, position: 7.0 },
+    { page: `${cleanWebUrl}/blog/why-openai-scrapped-gpt-61-astra-the-safety-story-behind-the-cancelled-launch`, clicks: 2, impressions: 38, ctr: 5.26, position: 6.7 },
+    { page: `${cleanWebUrl}/contact`, clicks: 2, impressions: 80, ctr: 2.50, position: 16.2 },
+    { page: `https://threadsecurity.in/contact`, clicks: 1, impressions: 82, ctr: 1.22, position: 6.5 },
+    { page: `${cleanWebUrl}/blog/cybersecurity-courses-in-jalandhar-or-thread-security-education`, clicks: 1, impressions: 64, ctr: 1.56, position: 5.6 },
+    { page: `${cleanWebUrl}/blog/soc-analysis-a-complete-guide-to-modern-security-operations`, clicks: 1, impressions: 156, ctr: 0.64, position: 7.6 },
+    { page: `${cleanWebUrl}/blog/upi-scam-prevention-why-warnings-fail-and-what-works`, clicks: 1, impressions: 83, ctr: 1.20, position: 6.2 },
+  ];
+
+  const totalClicks = topPages.reduce((acc, curr) => acc + curr.clicks, 0);
+  const totalImpressions = topPages.reduce((acc, curr) => acc + curr.impressions, 0);
+  const avgCtr = totalImpressions > 0 ? parseFloat(((totalClicks / totalImpressions) * 100).toFixed(2)) : 0;
+  const avgPosition = parseFloat((topPages.reduce((acc, curr) => acc + curr.position, 0) / topPages.length).toFixed(1));
 
   return {
     siteUrl,
     startDate,
     endDate,
-    totalClicks: 14850,
-    totalImpressions: 284200,
-    avgCtr: 5.22,
-    avgPosition: 8.4,
-    topQueries: [
-      { query: 'cyber threat defense certification', clicks: 3420, impressions: 42100, ctr: 8.12, position: 2.1 },
-      { query: 'soc analyst 2.0 course online', clicks: 2890, impressions: 38900, ctr: 7.43, position: 3.4 },
-      { query: 'red team offensive operations lab', clicks: 2150, impressions: 31200, ctr: 6.89, position: 4.8 },
-      { query: 'practical penetration testing masterclass', clicks: 1840, impressions: 29800, ctr: 6.17, position: 5.2 },
-      { query: 'cloud security engineering architecture', clicks: 1420, impressions: 24500, ctr: 5.80, position: 6.9 },
-      { query: 'malware reverse engineering course', clicks: 1120, impressions: 19400, ctr: 5.77, position: 7.5 },
-      { query: 'thread security education certificate', clicks: 980, impressions: 12400, ctr: 7.90, position: 1.8 },
-    ],
-    topPages: [
-      { page: `${cleanWebUrl}/courses/cyber-threat-defense`, clicks: 4890, impressions: 72000, ctr: 6.79, position: 3.1 },
-      { page: `${cleanWebUrl}/courses/soc-analyst-mastery`, clicks: 3620, impressions: 58000, ctr: 6.24, position: 4.0 },
-      { page: `${cleanWebUrl}/courses/red-team-ops`, clicks: 2840, impressions: 46000, ctr: 6.17, position: 4.9 },
-      { page: `${cleanWebUrl}/blog`, clicks: 1980, impressions: 39000, ctr: 5.07, position: 8.2 },
-      { page: `${cleanWebUrl}/workshops`, clicks: 1520, impressions: 31000, ctr: 4.90, position: 9.1 },
-    ],
+    totalClicks,
+    totalImpressions,
+    avgCtr,
+    avgPosition,
+    topQueries,
+    topPages,
     isMockData: true,
   };
 }

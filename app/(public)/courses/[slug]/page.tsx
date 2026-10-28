@@ -69,6 +69,8 @@ async function getDbCourseSafe(slug: string) {
   }
 }
 
+import { getPageSeoOverride } from '@/lib/seo/pageSeoStore';
+
 // ── DYNAMIC SEO METADATA ──
 export async function generateMetadata({
   params,
@@ -89,8 +91,9 @@ export async function generateMetadata({
   }
 
   const seo = getCourseSeoMeta(course);
-  const title = course.metaTitle || seo.metaTitle;
-  const description = course.metaDescription || seo.metaDescription;
+  const override = getPageSeoOverride(`/courses/${slug}`) || getPageSeoOverride(`https://www.threadsecurity.in/courses/${slug}`);
+  const title = override?.metaTitle || course.metaTitle || seo.metaTitle;
+  const description = override?.metaDescription || course.metaDescription || seo.metaDescription;
   const canonicalUrl = `${APP_URL}/courses/${slug}`;
 
   const keywords = [

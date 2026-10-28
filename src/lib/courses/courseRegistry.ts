@@ -87,20 +87,20 @@ export const COURSE_SEO_METADATA: Record<string, CourseSeoMeta> = {
     metaDescription: 'Master REST, GraphQL and gRPC security testing, BOLA/BFLA exploits, OAuth2 token analysis, and microservices security posture hardening.',
   },
   'binary-exploitation-reverse-engineering': {
-    metaTitle: 'Binary Exploitation & Reversing | Thread Security',
-    metaDescription: 'Master x86/x64 assembly, Ghidra disassembly, buffer overflows, ROP chain development, stack protection bypasses, and practical exploit analysis.',
+    metaTitle: 'Binary Exploitation & Reverse Engineering [2026 Labs]',
+    metaDescription: 'Master x86/x64 assembly, Ghidra disassembly, buffer overflows, ROP chain development & exploit analysis in live virtual labs. Enroll at Thread Security.',
   },
   'ot-ics-critical-infrastructure-security': {
     metaTitle: 'OT & ICS Infrastructure Security | Thread Security',
     metaDescription: 'Master industrial control systems security, SCADA architectures, Modbus/DNP3 protocols, Purdue model defense, and air-gapped critical infra security.',
   },
   'ai-security-llm-redteaming': {
-    metaTitle: 'AI Security & LLM Red Teaming | Thread Security',
-    metaDescription: 'Master LLM prompt injection, adversarial jailbreaks, model guardrails, OWASP Top 10 for LLMs, and enterprise AI safety auditing in live labs.',
+    metaTitle: 'AI Red Team & LLM Security Course [2026] | Thread Security',
+    metaDescription: 'Master LLM prompt injection, model guardrails, OWASP Top 10 for AI & adversarial jailbreaking in live red teaming labs. Earn verified certificate!',
   },
   'agentic-ai-engineering': {
-    metaTitle: 'Agentic AI Systems Engineering | Thread Security',
-    metaDescription: 'Build multi-agent workflows, tool-use architectures, autonomous evaluation pipelines, and production-grade resilient agentic AI systems at scale.',
+    metaTitle: 'Agentic AI Course & Systems [2026 Labs] | Thread Security',
+    metaDescription: 'Build multi-agent workflows, autonomous LLM tools, memory architectures & AI safety in live sandboxed labs. Enroll today at Thread Security!',
   },
   'data-science-ml-security': {
     metaTitle: 'Data Science & ML Pipeline Defense | Thread Security',

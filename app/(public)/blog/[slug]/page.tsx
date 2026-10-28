@@ -8,6 +8,7 @@ import { ArticleJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd';
 import { getBlogCoverImageUrl } from '@/lib/blog/coverImageHelper';
 
 import { getSiteUrl } from '@/lib/seo/siteUrl';
+import { getPageSeoOverride } from '@/lib/seo/pageSeoStore';
 
 const APP_URL = getSiteUrl();
 
@@ -26,8 +27,9 @@ export async function generateMetadata({
     };
   }
 
-  const metaTitle = blog.seo?.metaTitle || `${blog.title} | TSE Research Blog`;
-  const metaDesc = blog.seo?.metaDescription || blog.excerpt || blog.subtitle || '';
+  const override = getPageSeoOverride(`/blog/${slug}`) || getPageSeoOverride(`https://www.threadsecurity.in/blog/${slug}`);
+  const metaTitle = override?.metaTitle || blog.seo?.metaTitle || `${blog.title} | TSE Research Blog`;
+  const metaDesc = override?.metaDescription || blog.seo?.metaDescription || blog.excerpt || blog.subtitle || '';
   const coverMedia = blog.media?.find((m: any) => m.id === blog.coverImageId) || blog.media?.[0];
   const ogImage = coverMedia?.url || blog.seo?.ogImage || undefined;
   const canonicalUrl = blog.seo?.canonicalUrl || `${APP_URL}/blog/${slug}`;

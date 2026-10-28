@@ -19,7 +19,38 @@ import { StudentReviewsSection } from '@/components/sections/landing/StudentRevi
 import { CyberTrainingDirectorySection } from '@/components/sections/landing/CyberTrainingDirectorySection';
 import { TechnologiesExposureSection } from '@/components/sections/landing/TechnologiesExposureSection';
 
+import type { Metadata } from 'next';
+import { getPageSeoOverride } from '@/lib/seo/pageSeoStore';
+
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const override = getPageSeoOverride('/');
+  const title = override?.metaTitle || 'Thread Security | #1 Cyber & AI Training Institute';
+  const description =
+    override?.metaDescription ||
+    'Master hands-on Ethical Hacking, SOC & AI Security in Jalandhar. 100% practical cloud labs, verified TS-ID certification & placement support. Enroll today!';
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: 'https://www.threadsecurity.in',
+    },
+    openGraph: {
+      title,
+      description,
+      url: 'https://www.threadsecurity.in',
+      siteName: 'Thread Security Education',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
 
 const HOMEPAGE_FAQS = [
   {
