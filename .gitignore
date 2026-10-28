@@ -54,6 +54,7 @@ coverage/
 
 # Logs & Temporary Files
 logs/
+scratch/
 *.log
 *.tmp
 *.bak

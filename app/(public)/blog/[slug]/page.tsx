@@ -9,6 +9,7 @@ import { getBlogCoverImageUrl } from '@/lib/blog/coverImageHelper';
 
 import { getSiteUrl } from '@/lib/seo/siteUrl';
 import { getPageSeoOverride } from '@/lib/seo/pageSeoStore';
+import { getRelatedContent } from '@/lib/vector/upstashVectorService';
 
 const APP_URL = getSiteUrl();
 
@@ -80,6 +81,16 @@ export default async function PublicBlogArticlePage({
   }
 
   const related = await getRelatedBlogs(blog.id, blog.categoryId, 3);
+  let semanticCourses: any[] = [];
+  try {
+    semanticCourses = await getRelatedContent({
+      textOrQuery: `${blog.title} ${blog.excerpt || ''}`,
+      filterType: 'COURSE',
+      limit: 2,
+    });
+  } catch (err) {
+    console.warn('[Blog Page] Vector related courses notice:', err);
+  }
   const coverUrl = getBlogCoverImageUrl(blog);
   const ogImage = coverUrl || blog.seo?.ogImage || undefined;
 
@@ -144,6 +155,65 @@ export default async function PublicBlogArticlePage({
       </nav>
 
       <PublicBlogArticleClient blog={blog} relatedBlogs={related} />
+
+      {semanticCourses && semanticCourses.length > 0 && (
+        <section className="bg-black/95 border-t border-white/10 py-12 px-4 sm:px-6">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#C6FF34]/10 text-[#C6FF34] text-[10px] font-extrabold uppercase tracking-wider border border-[#C6FF34]/20">
+                  <span>⚡ AI Semantic Career Path</span>
+                </div>
+                <h3 className="text-xl md:text-2xl font-extrabold text-white">
+                  Advance Your Career: Hands-On Industry Courses
+                </h3>
+              </div>
+              <Link
+                href="/courses"
+                className="text-xs text-[#C6FF34] hover:underline font-bold inline-flex items-center gap-1 self-start sm:self-auto"
+              >
+                <span>Explore All 17+ Master Courses</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {semanticCourses.map((c: any) => (
+                <Link
+                  key={c.id}
+                  href={`/courses/${c.metadata.slug}`}
+                  className="rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#C6FF34]/60 p-5 transition-all group flex flex-col justify-between space-y-3 hover:bg-white/[0.06]"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/10 text-slate-200 uppercase tracking-wider">
+                        {c.metadata.track === 'ai' ? '🤖 AI Track' : '🛡️ Cyber Track'}
+                      </span>
+                      <span className="text-xs text-[#C6FF34] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                        <span>Syllabus &amp; Labs</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+
+                    <h4 className="text-base font-bold text-white group-hover:text-[#C6FF34] transition">
+                      {c.metadata.title}
+                    </h4>
+
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      {c.metadata.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>100% Practical Sandboxed Labs</span>
+                    <span className="text-emerald-400 font-semibold">TS-ID Verified</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </>
   );
 }

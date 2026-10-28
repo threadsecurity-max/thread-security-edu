@@ -27,6 +27,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 import { getSiteUrl } from '@/lib/seo/siteUrl';
+import { getRelatedContent } from '@/lib/vector/upstashVectorService';
 
 const APP_URL = getSiteUrl();
 
@@ -200,6 +201,17 @@ export default async function CourseDetailPage({
       { q: 'What credential do I receive upon completion?', a: 'You receive a cryptographically signed TSE TS-ID credential with a publicly verifiable URL.' },
     ],
   };
+
+  let relatedArticles: any[] = [];
+  try {
+    relatedArticles = await getRelatedContent({
+      textOrQuery: `${course.title} ${course.description}`,
+      filterType: 'BLOG',
+      limit: 2,
+    });
+  } catch (err) {
+    console.warn('[Course Page] Vector related articles notice:', err);
+  }
 
   const isCyber = course.track === 'cyber';
 
@@ -612,6 +624,64 @@ export default async function CourseDetailPage({
             ))}
           </div>
         </section>
+
+        {/* Semantic Related Technical Articles Section */}
+        {relatedArticles && relatedArticles.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 text-[10px] font-extrabold uppercase tracking-wider border border-cyan-400/20 mb-1">
+                  <span>⚡ AI Semantic Research Match</span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black uppercase text-white">
+                  Technical Deep-Dives &amp; Field Guides
+                </h2>
+              </div>
+              <Link
+                href="/blog"
+                className="text-xs text-cyan-400 hover:underline font-bold inline-flex items-center gap-1 self-start sm:self-auto"
+              >
+                <span>Browse Research Blog</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {relatedArticles.map((art: any) => (
+                <Link
+                  key={art.id}
+                  href={`/blog/${art.metadata.slug}`}
+                  className="p-6 rounded-3xl bg-[#0B101B] border border-slate-800 hover:border-cyan-400/50 transition-all group flex flex-col justify-between space-y-4 hover:bg-[#0e1524]"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 uppercase tracking-wider">
+                        {art.metadata.category || 'Research'}
+                      </span>
+                      <span className="text-xs text-cyan-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                        <span>Read Guide</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition">
+                      {art.metadata.title}
+                    </h3>
+
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      {art.metadata.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Thread Security Research</span>
+                    <span className="text-cyan-400 font-semibold">Free Technical Guide</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Section 6: Bottom CTA Banner */}
         <section

@@ -3,6 +3,7 @@ import slugify from 'slugify';
 import { createBlogDriveFolder } from '../integrations/google-drive/folders';
 import { uploadFileToDrive } from '../integrations/google-drive/upload';
 import { requestGoogleInstantIndexing } from '@/lib/gcp/indexingService';
+import { indexBlogToVector } from '@/lib/vector/upstashVectorService';
 
 const db = prisma as any;
 
@@ -570,6 +571,11 @@ export async function updateBlog(blogId: string, authorUserId: string, data: {
     const blogUrl = `https://www.threadsecurity.in/blog/${updatedBlog.slug}`;
     requestGoogleInstantIndexing(blogUrl, 'URL_UPDATED', 'AUTO_BLOG_PUBLISH').catch((err) => {
       console.warn('[blog.service] Auto Google indexing notice:', err?.message || err);
+    });
+
+    // Automatically index article to Upstash Vector for semantic search & internal linking
+    indexBlogToVector(updatedBlog).catch((err) => {
+      console.warn('[blog.service] Auto Upstash vector indexing notice:', err?.message || err);
     });
   }
 

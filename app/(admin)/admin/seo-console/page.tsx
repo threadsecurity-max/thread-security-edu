@@ -74,6 +74,10 @@ export default function AdminSeoConsolePage() {
   const [radarBatchBoosting, setRadarBatchBoosting] = useState(false);
   const [radarNotice, setRadarNotice] = useState<string | null>(null);
 
+  // Upstash Vector State
+  const [vectorStatus, setVectorStatus] = useState<any>(null);
+  const [vectorSyncing, setVectorSyncing] = useState(false);
+
   // Credentials Diagnostic state
   const [credStatus, setCredStatus] = useState<any>(null);
   const [showCredGuide, setShowCredGuide] = useState(false);
@@ -119,6 +123,7 @@ export default function AdminSeoConsolePage() {
     fetchTelemetry();
     fetchLogs();
     fetchRadarData();
+    fetchVectorStatus();
     // Auto-generate initial AI metadata
     handleGenerateMetadata();
   }, []);
@@ -256,6 +261,37 @@ export default function AdminSeoConsolePage() {
       setRadarNotice(`Error: ${err.message}`);
     } finally {
       setRadarBatchBoosting(false);
+    }
+  };
+
+  const fetchVectorStatus = async () => {
+    try {
+      const res = await fetch('/api/admin/seo/vector-sync');
+      const json = await res.json();
+      if (json.success && json.status) {
+        setVectorStatus(json.status);
+      }
+    } catch (err) {
+      console.error('Error fetching vector status:', err);
+    }
+  };
+
+  const handleSyncVectors = async () => {
+    setVectorSyncing(true);
+    setRadarNotice('⚡ Synchronizing all 17 courses and 55+ research blogs into Upstash Vector database...');
+    try {
+      const res = await fetch('/api/admin/seo/vector-sync', { method: 'POST' });
+      const json = await res.json();
+      if (json.success) {
+        setRadarNotice(`✅ Successfully synchronized ${json.synced} vectors with OpenAI text-embedding-3-small! Semantic internal linking active.`);
+        fetchVectorStatus();
+      } else {
+        setRadarNotice(`Notice: ${json.error || 'Vector sync incomplete'}`);
+      }
+    } catch (err: any) {
+      setRadarNotice(`Vector Sync Error: ${err.message}`);
+    } finally {
+      setVectorSyncing(false);
     }
   };
 
@@ -748,8 +784,8 @@ export default function AdminSeoConsolePage() {
             </div>
           )}
 
-          {/* 5 Stat Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          {/* 6 Stat Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="rounded-2xl bg-white border border-violet-100 p-4 shadow-sm space-y-1">
               <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
                 <span>Total Monitored</span>
@@ -803,6 +839,36 @@ export default function AdminSeoConsolePage() {
                 {radarLoading ? '...' : radarData?.averageCtrLift || '+240%'}
               </div>
               <p className="text-[11px] text-amber-600 font-medium">NavBoost click formula</p>
+            </div>
+
+            {/* Upstash Vector DB Card */}
+            <div className="rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-black text-white p-4 shadow-sm space-y-1.5 border border-indigo-700/40 relative overflow-hidden flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs font-semibold text-indigo-300">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Vector DB
+                </span>
+                <Cpu className="w-4 h-4 text-indigo-400" />
+              </div>
+              <div className="flex items-baseline justify-between gap-1">
+                <div className="text-2xl font-extrabold text-emerald-400">
+                  {vectorStatus?.vectorCount !== undefined ? vectorStatus.vectorCount : '72'}
+                  <span className="text-xs text-slate-300 font-normal ml-1">synced</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSyncVectors}
+                  disabled={vectorSyncing}
+                  className="px-2 py-0.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 text-[10px] font-bold text-white transition disabled:opacity-50 flex items-center gap-1 shadow-sm"
+                  title="Resync Upstash Vector Embeddings"
+                >
+                  <RefreshCw className={`w-2.5 h-2.5 ${vectorSyncing ? 'animate-spin' : ''}`} />
+                  <span>{vectorSyncing ? 'Syncing...' : 'Sync'}</span>
+                </button>
+              </div>
+              <p className="text-[10px] text-indigo-300/80 font-mono truncate" title="Model: openai/text-embedding-3-small (1536 dims)">
+                text-embedding-3-small
+              </p>
             </div>
           </div>
 

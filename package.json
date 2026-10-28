@@ -45,6 +45,7 @@
     "@tiptap/react": "^3.31.3",
     "@tiptap/starter-kit": "^3.31.3",
     "@types/nodemailer": "^8.0.1",
+    "@upstash/vector": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.11.0",
     "clsx": "^2.1.1",
