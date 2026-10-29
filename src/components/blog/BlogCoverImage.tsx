@@ -43,7 +43,7 @@ export function BlogCoverImage({
 
   if (imageUrl && !hasError) {
     return (
-      <div className={`relative overflow-hidden aspect-[1080/711] bg-[#0a0a0a] border border-white/10 rounded-2xl ${className}`}>
+      <div className={`w-full relative overflow-hidden aspect-[1080/711] bg-[#0a0a0a] border border-white/10 rounded-2xl ${className}`}>
         <Image
           src={imageUrl}
           alt={altText}
@@ -62,7 +62,7 @@ export function BlogCoverImage({
   // High-Tech Cyber Pattern Fallback (Guaranteed to NEVER look broken)
   return (
     <div
-      className={`relative overflow-hidden aspect-[1080/711] bg-gradient-to-br from-[#0c1017] via-[#08090d] to-[#040405] border border-white/10 rounded-2xl flex flex-col justify-between p-6 select-none ${className}`}
+      className={`w-full relative overflow-hidden aspect-[1080/711] bg-gradient-to-br from-[#0c1017] via-[#08090d] to-[#040405] border border-white/10 rounded-2xl flex flex-col justify-between p-6 select-none ${className}`}
     >
       {/* Decorative Matrix Grid Lines */}
       <div

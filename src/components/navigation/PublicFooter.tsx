@@ -85,7 +85,7 @@ export function PublicFooter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* ── STREAMLINED NEWSLETTER / UPDATES BANNER ── */}
-        <div className="relative p-6 sm:p-8 rounded-3xl bg-slate-50 border border-slate-200/90 flex flex-col lg:flex-row items-center justify-between gap-6 mb-16 shadow-xs">
+        <div className="relative p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200/90 flex flex-col lg:flex-row items-center justify-between gap-6 mb-16 shadow-xs">
           <div className="flex items-center gap-4 w-full lg:w-auto">
             <div className="w-12 h-12 rounded-2xl bg-purple-100 border border-purple-200 text-purple-700 flex items-center justify-center shrink-0 shadow-xs">
               <Mail className="w-5 h-5" />
@@ -107,7 +107,7 @@ export function PublicFooter() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-white border border-slate-300 focus:border-purple-600 text-slate-900 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-purple-600/20 min-w-[260px] w-full transition-all placeholder:text-slate-400 font-sans shadow-xs"
+              className="bg-white border border-slate-300 focus:border-purple-600 text-slate-900 rounded-xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-purple-600/20 min-w-0 sm:min-w-[260px] w-full transition-all placeholder:text-slate-400 font-sans shadow-xs"
             />
             <button
               type="submit"

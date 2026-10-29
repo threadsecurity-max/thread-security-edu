@@ -119,16 +119,16 @@ export default async function PublicBlogArticlePage({
       />
 
       {/* Visible Breadcrumb Bar */}
-      <nav aria-label="Breadcrumb" className="bg-[#0a0a0a] border-b border-white/10 py-3">
+      <nav aria-label="Breadcrumb" className="bg-[#0a0a0a] border-b border-white/10 py-2.5 sm:py-3">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <ol className="flex items-center gap-2 text-xs font-sans text-slate-400 overflow-x-auto whitespace-nowrap">
-            <li>
+          <ol className="flex items-center gap-1.5 sm:gap-2 text-xs font-sans text-slate-400 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <li className="shrink-0">
               <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
             </li>
             <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-            <li>
+            <li className="shrink-0">
               <Link href="/blog" className="hover:text-white transition-colors">
                 Blog
               </Link>
@@ -136,7 +136,7 @@ export default async function PublicBlogArticlePage({
             {blog.category && (
               <>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                <li>
+                <li className="shrink-0">
                   <Link
                     href={`/blog?category=${blog.category.slug}`}
                     className="text-[#C6FF34] hover:underline"
@@ -147,7 +147,7 @@ export default async function PublicBlogArticlePage({
               </>
             )}
             <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-            <li className="text-white font-medium truncate max-w-xs sm:max-w-md" aria-current="page">
+            <li className="text-white font-medium truncate max-w-[160px] sm:max-w-xs md:max-w-md shrink-0" aria-current="page">
               {blog.title}
             </li>
           </ol>
@@ -157,20 +157,20 @@ export default async function PublicBlogArticlePage({
       <PublicBlogArticleClient blog={blog} relatedBlogs={related} />
 
       {semanticCourses && semanticCourses.length > 0 && (
-        <section className="bg-black/95 border-t border-white/10 py-12 px-4 sm:px-6">
+        <section className="bg-black/95 border-t border-white/10 py-8 sm:py-12 px-4 sm:px-6">
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="space-y-1">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#C6FF34]/10 text-[#C6FF34] text-[10px] font-extrabold uppercase tracking-wider border border-[#C6FF34]/20">
                   <span>⚡ AI Semantic Career Path</span>
                 </div>
-                <h3 className="text-xl md:text-2xl font-extrabold text-white">
+                <h3 className="text-xl md:text-2xl font-extrabold text-white break-words">
                   Advance Your Career: Hands-On Industry Courses
                 </h3>
               </div>
               <Link
                 href="/courses"
-                className="text-xs text-[#C6FF34] hover:underline font-bold inline-flex items-center gap-1 self-start sm:self-auto"
+                className="text-xs text-[#C6FF34] hover:underline font-bold inline-flex items-center gap-1 self-start sm:self-auto shrink-0"
               >
                 <span>Explore All 17+ Master Courses</span>
                 <ChevronRight className="w-4 h-4" />
@@ -182,31 +182,31 @@ export default async function PublicBlogArticlePage({
                 <Link
                   key={c.id}
                   href={`/courses/${c.metadata.slug}`}
-                  className="rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#C6FF34]/60 p-5 transition-all group flex flex-col justify-between space-y-3 hover:bg-white/[0.06]"
+                  className="rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#C6FF34]/60 p-4 sm:p-5 transition-all group flex flex-col justify-between space-y-3 hover:bg-white/[0.06] min-w-0"
                 >
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/10 text-slate-200 uppercase tracking-wider">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/10 text-slate-200 uppercase tracking-wider shrink-0">
                         {c.metadata.track === 'ai' ? '🤖 AI Track' : '🛡️ Cyber Track'}
                       </span>
-                      <span className="text-xs text-[#C6FF34] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                      <span className="text-xs text-[#C6FF34] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1 shrink-0">
                         <span>Syllabus &amp; Labs</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
 
-                    <h4 className="text-base font-bold text-white group-hover:text-[#C6FF34] transition">
+                    <h4 className="text-base font-bold text-white group-hover:text-[#C6FF34] transition break-words">
                       {c.metadata.title}
                     </h4>
 
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-words">
                       {c.metadata.description}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>100% Practical Sandboxed Labs</span>
-                    <span className="text-emerald-400 font-semibold">TS-ID Verified</span>
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-500 gap-2">
+                    <span className="truncate">100% Practical Sandboxed Labs</span>
+                    <span className="text-emerald-400 font-semibold shrink-0">TS-ID Verified</span>
                   </div>
                 </Link>
               ))}

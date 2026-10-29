@@ -16,7 +16,7 @@ const STORAGE_FILE = path.join(process.cwd(), 'src', 'data', 'seo-overrides.json
 let inMemoryStore: Record<string, PageSeoOverride> = {
   '/': {
     url: '/',
-    metaTitle: 'Thread Security | #1 Cyber & AI Training Institute',
+    metaTitle: 'Thread Security [2026] | #1 Cyber & AI Training Institute',
     metaDescription: 'Master hands-on Ethical Hacking, SOC & AI Security in Jalandhar. 100% practical cloud labs, verified TS-ID certification & placement support. Enroll today!',
     focusKeyword: 'thread security',
     keywords: ['thread security', 'cyber security training', 'soc analyst course', 'jalandhar'],
@@ -24,10 +24,10 @@ let inMemoryStore: Record<string, PageSeoOverride> = {
   },
   '/contact': {
     url: '/contact',
-    metaTitle: 'Contact Thread Security | Jalandhar Cyber & AI Institute',
-    metaDescription: 'Connect with Thread Security Education admissions, cyber range mentors, and corporate training teams in Jalandhar. Request syllabus & fee details.',
+    metaTitle: 'Contact Thread Security [2026] | Cyber Training Jalandhar',
+    metaDescription: 'Connect with Thread Security admissions, cyber range mentors, and training teams in Jalandhar. Request 2026 syllabus, batch dates & fee structure.',
     focusKeyword: 'contact thread security',
-    keywords: ['contact thread security', 'thread security jalandhar phone', 'cyber security institute jalandhar address'],
+    keywords: ['contact thread security', 'thread security jalandhar phone', 'cyber security training jalandhar', 'cyber security institute jalandhar address'],
     updatedAt: new Date().toISOString(),
   },
   '/courses/binary-exploitation-reverse-engineering': {

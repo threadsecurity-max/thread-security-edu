@@ -327,18 +327,18 @@ export async function getContentRadarSummary(): Promise<ContentRadarSummary> {
     {
       url: 'https://www.threadsecurity.in/contact',
       slug: 'contact',
-      title: 'Contact Thread Security | Cybersecurity Training Jalandhar',
+      title: 'Contact Thread Security [2026] | Cyber Training Jalandhar',
       type: 'LANDING' as const,
       category: 'Admissions',
       defaultTitle: 'Contact Thread Security - Cyber Security & AI Education Institute in Jalandhar',
       defaultDesc: 'Contact Thread Security for cybersecurity training, ethical hacking courses, fees and admission details.',
       aiRec: {
-        title: 'Contact Thread Security | Cybersecurity Training Jalandhar',
-        description: 'Connect with Thread Security Education admissions, cyber range mentors, and corporate training teams in Jalandhar. Request syllabus & fee details.',
+        title: 'Contact Thread Security [2026] | Cyber Training Jalandhar',
+        description: 'Connect with Thread Security admissions, cyber range mentors, and training teams in Jalandhar. Request 2026 syllabus, batch dates & fee structure.',
         keyword: 'contact thread security',
-        lsi: ['thread security jalandhar phone', 'cyber course admission', 'institute address'],
+        lsi: ['thread security jalandhar phone', 'cyber security training jalandhar', 'institute address'],
         lift: '+190% CTR Lift',
-        rationale: 'Reduces title from 77 to 56 characters, eliminating mobile SERP truncation.',
+        rationale: 'Includes [2026] bracket hook, targets Jalandhar local query (Pos #5.6), and maintains optimal 57-char mobile bound.',
       },
     },
   ];

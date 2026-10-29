@@ -11,10 +11,10 @@ import { getPageSeoOverride } from '@/lib/seo/pageSeoStore';
 
 export async function generateMetadata(): Promise<Metadata> {
   const override = getPageSeoOverride('/contact');
-  const title = override?.metaTitle || 'Contact Thread Security | Jalandhar Cyber & AI Institute';
+  const title = override?.metaTitle || 'Contact Thread Security [2026] | Cyber Training Jalandhar';
   const description =
     override?.metaDescription ||
-    'Connect with Thread Security Education admissions, cyber range mentors, and corporate training teams in Jalandhar. Request syllabus & fee details.';
+    'Connect with Thread Security admissions, cyber range mentors, and training teams in Jalandhar. Request 2026 syllabus, batch dates & fee structure.';
 
   return {
     title,

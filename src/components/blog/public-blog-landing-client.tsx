@@ -443,41 +443,41 @@ export function PublicBlogLandingClient({
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-[#C6FF34] selection:text-black font-sans">
       {/* Editorial Header Banner */}
-      <section className="relative py-16 md:py-24 border-b border-white/10 overflow-hidden bg-gradient-to-b from-[#0a0a0e] via-[#07070a] to-[#050505]">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[#C6FF34]/5 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative py-12 sm:py-16 md:py-24 border-b border-white/10 overflow-hidden bg-gradient-to-b from-[#0a0a0e] via-[#07070a] to-[#050505]">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[min(800px,100vw)] h-[350px] bg-[#C6FF34]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 md:px-8 text-center space-y-6 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-[#C6FF34] shadow-lg">
-            <Sparkles className="w-3.5 h-3.5 text-[#C6FF34]" />
-            THREAD SECURITY RESEARCH &amp; FACULTY PERSPECTIVES
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 text-center space-y-4 sm:space-y-6 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-xs font-mono text-[#C6FF34] shadow-lg max-w-full">
+            <Sparkles className="w-3.5 h-3.5 text-[#C6FF34] shrink-0" />
+            <span className="truncate">THREAD SECURITY RESEARCH &amp; FACULTY PERSPECTIVES</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto font-serif leading-tight">
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white max-w-4xl mx-auto font-serif leading-tight break-words">
             Cybersecurity &amp; AI Research Hub
           </h1>
 
-          <p className="text-base md:text-lg text-slate-300 font-sans max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base md:text-lg text-slate-300 font-sans max-w-2xl mx-auto leading-relaxed px-2">
             Technical perspectives, threat telemetry, AI vulnerability analysis, and industry career blueprints authored by Thread Security practitioners.
           </p>
 
           {/* Search Bar with 11 Category Search Widgets */}
-          <form onSubmit={handleSearchSubmit} className="max-w-3xl mx-auto pt-4 relative">
-            <div className="relative flex items-center">
-              <Search className="w-5 h-5 absolute left-4 text-slate-400 pointer-events-none z-10" />
+          <form onSubmit={handleSearchSubmit} className="max-w-3xl mx-auto pt-2 sm:pt-4 relative w-full">
+            <div className="relative flex items-center w-full">
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 absolute left-3.5 sm:left-4 text-slate-400 pointer-events-none z-10" />
               <Input
                 value={search}
                 onFocus={() => setIsSearchWidgetOpen(true)}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search research, AI threat models, SOC workflows..."
-                className="w-full pl-12 pr-28 sm:pr-[255px] h-12 md:h-14 rounded-2xl bg-[#101014] border-white/15 text-white placeholder:text-slate-500 font-mono text-sm focus:border-[#C6FF34] shadow-2xl"
+                placeholder="Search research, AI models, SOC..."
+                className="w-full pl-9 sm:pl-12 pr-24 sm:pr-[230px] h-11 sm:h-12 md:h-14 rounded-2xl bg-[#101014] border-white/15 text-white placeholder:text-slate-500 font-mono text-xs sm:text-sm focus:border-[#C6FF34] shadow-2xl"
               />
 
-              <div className="absolute right-2 flex items-center gap-1.5 z-10">
+              <div className="absolute right-1.5 sm:right-2 flex items-center gap-1 sm:gap-1.5 z-10">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => setIsSearchWidgetOpen(!isSearchWidgetOpen)}
-                  className={`h-10 px-3 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 border shadow-sm ${
+                  className={`h-8 sm:h-10 px-2 sm:px-3 rounded-xl text-[11px] sm:text-xs font-mono font-bold transition-all flex items-center gap-1 sm:gap-1.5 border shadow-sm ${
                     isSearchWidgetOpen
                       ? 'bg-[#182613] text-[#C6FF34] border-[#C6FF34]/50 shadow-[0_0_15px_rgba(198,255,52,0.15)]'
                       : 'bg-[#16161d] text-slate-300 hover:text-[#C6FF34] hover:bg-[#1f1f28] border-white/15'
@@ -490,7 +490,7 @@ export function PublicBlogLandingClient({
 
                 <Button
                   type="submit"
-                  className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-10 px-4 md:px-5 rounded-xl cursor-pointer shadow-md shadow-[#C6FF34]/20"
+                  className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-8 sm:h-10 px-3 sm:px-5 rounded-xl cursor-pointer shadow-md shadow-[#C6FF34]/20"
                 >
                   Search
                 </Button>
@@ -498,14 +498,14 @@ export function PublicBlogLandingClient({
             </div>
 
             {/* Quick Helper Trigger Line */}
-            <div className="pt-2 flex items-center justify-between text-xs font-mono text-slate-400 px-2">
+            <div className="pt-2 flex items-center justify-between text-xs font-mono text-slate-400 px-2 gap-2">
               <button
                 type="button"
                 onClick={() => setIsSearchWidgetOpen(!isSearchWidgetOpen)}
-                className="hover:text-[#C6FF34] transition-colors flex items-center gap-1.5 text-[11px]"
+                className="hover:text-[#C6FF34] transition-colors flex items-center gap-1.5 text-[11px] truncate"
               >
-                <Zap className="w-3.5 h-3.5 text-[#C6FF34]" />
-                <span>{isSearchWidgetOpen ? 'Hide Category Search Widgets ▲' : 'Open 11 Category Search Widgets ▼'}</span>
+                <Zap className="w-3.5 h-3.5 text-[#C6FF34] shrink-0" />
+                <span className="truncate">{isSearchWidgetOpen ? 'Hide Category Search Widgets ▲' : 'Open 11 Category Search Widgets ▼'}</span>
               </button>
               {search && (
                 <button
@@ -515,7 +515,7 @@ export function PublicBlogLandingClient({
                     setIsSearchWidgetOpen(false);
                     router.push('/blog');
                   }}
-                  className="text-slate-500 hover:text-white text-[11px]"
+                  className="text-slate-500 hover:text-white text-[11px] shrink-0"
                 >
                   Clear search ×
                 </button>
@@ -524,18 +524,19 @@ export function PublicBlogLandingClient({
 
             {/* Interactive 11 Category Search Widgets Dropdown / Explorer */}
             {isSearchWidgetOpen && (
-              <div className="mt-3 p-5 md:p-6 bg-[#0c0c10]/98 border border-white/20 rounded-3xl shadow-2xl backdrop-blur-2xl text-left space-y-5 animate-in fade-in-0 zoom-in-95 duration-150 relative z-30">
+              <div className="mt-3 p-4 sm:p-5 md:p-6 bg-[#0c0c10]/98 border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl backdrop-blur-2xl text-left space-y-4 sm:space-y-5 animate-in fade-in-0 zoom-in-95 duration-150 relative z-30">
                 {/* Header & Quick Topic Chips */}
-                <div className="space-y-3 pb-4 border-b border-white/10">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#C6FF34] flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-[#C6FF34]" />
-                      Explore 11 Technical Specialization Domains
+                <div className="space-y-2.5 pb-3 border-b border-white/10">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#C6FF34] flex items-center gap-1.5 truncate">
+                      <Sparkles className="w-3.5 h-3.5 text-[#C6FF34] shrink-0" />
+                      <span className="truncate">Explore 11 Specialization Domains</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setIsSearchWidgetOpen(false)}
-                      className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+                      className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors shrink-0"
+                      aria-label="Close widgets"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -568,15 +569,15 @@ export function PublicBlogLandingClient({
                 {/* Instant Live Search Results (When typing) */}
                 {search.trim().length > 0 && instantSearchResults.length > 0 && (
                   <div className="p-3 bg-black/60 border border-[#C6FF34]/30 rounded-2xl space-y-2">
-                    <div className="flex items-center justify-between text-xs font-mono text-slate-300">
-                      <span className="text-[#C6FF34] font-bold">
+                    <div className="flex items-center justify-between text-xs font-mono text-slate-300 gap-2">
+                      <span className="text-[#C6FF34] font-bold truncate">
                         Live Matches for &ldquo;{search}&rdquo; ({instantSearchResults.length} previewed)
                       </span>
                       <button
                         type="submit"
-                        className="text-[10px] text-sky-400 hover:underline font-bold"
+                        className="text-[10px] text-sky-400 hover:underline font-bold shrink-0"
                       >
-                        Press Enter to View All Results →
+                        Press Enter to View All →
                       </button>
                     </div>
                     <div className="divide-y divide-white/10">
@@ -585,7 +586,7 @@ export function PublicBlogLandingClient({
                           key={item.id}
                           href={`/blog/${item.slug}`}
                           onClick={() => setIsSearchWidgetOpen(false)}
-                          className="py-2 flex items-center justify-between gap-3 group hover:bg-white/5 px-2 rounded-lg transition-colors"
+                          className="py-2 flex items-center justify-between gap-3 group hover:bg-white/5 px-2 rounded-lg transition-colors min-w-0"
                         >
                           <div className="flex items-center gap-2.5 flex-1 min-w-0">
                             <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-white/10 text-[#C6FF34] shrink-0">
@@ -605,7 +606,7 @@ export function PublicBlogLandingClient({
                 )}
 
                 {/* 11 Category Widgets Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
                   {CATEGORY_WIDGETS.map((widget) => {
                     const Icon = widget.icon;
                     const catObj = categories.find(
@@ -629,7 +630,7 @@ export function PublicBlogLandingClient({
                             handleCategorySelect(widget.slug);
                           }
                         }}
-                        className={`p-3.5 rounded-2xl bg-black/40 border transition-all text-left flex flex-col justify-between group cursor-pointer ${
+                        className={`p-3 sm:p-3.5 rounded-2xl bg-black/40 border transition-all text-left flex flex-col justify-between group cursor-pointer ${
                           isSelected
                             ? 'border-[#C6FF34] ring-1 ring-[#C6FF34]/50 bg-[#C6FF34]/5'
                             : 'border-white/10 hover:border-white/25 hover:bg-white/[0.04]'
@@ -667,107 +668,109 @@ export function PublicBlogLandingClient({
             )}
           </form>
 
-          {/* Dynamic Domain Category Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-6">
-            {/* All Topics */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveDomainTab('all');
-                handleCategorySelect('');
-              }}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeDomainTab === 'all' && !currentCategory && !currentSearch
-                  ? 'bg-white text-black shadow-lg shadow-white/10 scale-105'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>All Topics ({initialBlogs.length})</span>
-            </button>
+          {/* Dynamic Domain Category Pills (Smooth Horizontal Swiping on Mobile, Centered Wrap on Desktop) */}
+          <div className="w-full max-w-5xl mx-auto pt-4 sm:pt-6">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-2 px-2 sm:px-0 sm:flex-wrap sm:justify-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {/* All Topics */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveDomainTab('all');
+                  handleCategorySelect('');
+                }}
+                className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                  activeDomainTab === 'all' && !currentCategory && !currentSearch
+                    ? 'bg-white text-black shadow-lg shadow-white/10 scale-105'
+                    : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>All Topics ({initialBlogs.length})</span>
+              </button>
 
-            {/* Popular & Trending */}
-            <button
-              type="button"
-              onClick={() => setActiveDomainTab('popular')}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeDomainTab === 'popular'
-                  ? 'bg-[#C6FF34] text-black shadow-lg shadow-[#C6FF34]/20 scale-105'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
-              }`}
-            >
-              <Flame className="w-3.5 h-3.5 text-amber-400" />
-              <span>Popular &amp; Trending ({popularBlogs.length})</span>
-            </button>
+              {/* Popular & Trending */}
+              <button
+                type="button"
+                onClick={() => setActiveDomainTab('popular')}
+                className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                  activeDomainTab === 'popular'
+                    ? 'bg-[#C6FF34] text-black shadow-lg shadow-[#C6FF34]/20 scale-105'
+                    : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 text-amber-400" />
+                <span>Popular &amp; Trending ({popularBlogs.length})</span>
+              </button>
 
-            {/* Cybersecurity Related */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveDomainTab('cybersecurity');
-                if (currentCategory && currentCategory !== 'cybersecurity') handleCategorySelect('cybersecurity', 'cybersecurity');
-              }}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeDomainTab === 'cybersecurity'
-                  ? 'bg-sky-400 text-black shadow-lg shadow-sky-400/20 scale-105'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
-              }`}
-            >
-              <Shield className="w-3.5 h-3.5 text-sky-400" />
-              <span>Cybersecurity Related ({cyberBlogs.length})</span>
-            </button>
+              {/* Cybersecurity Related */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveDomainTab('cybersecurity');
+                  if (currentCategory && currentCategory !== 'cybersecurity') handleCategorySelect('cybersecurity', 'cybersecurity');
+                }}
+                className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                  activeDomainTab === 'cybersecurity'
+                    ? 'bg-sky-400 text-black shadow-lg shadow-sky-400/20 scale-105'
+                    : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5 text-sky-400" />
+                <span>Cybersecurity ({cyberBlogs.length})</span>
+              </button>
 
-            {/* Artificial Intelligence Related */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveDomainTab('ai');
-                handleQuickSearch('ai');
-              }}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeDomainTab === 'ai' || currentSearch === 'ai' || currentCategory === 'artificial-intelligence'
-                  ? 'bg-purple-400 text-black shadow-lg shadow-purple-400/20 scale-105'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
-              }`}
-            >
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              <span>Artificial Intelligence ({aiBlogs.length})</span>
-            </button>
+              {/* Artificial Intelligence Related */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveDomainTab('ai');
+                  handleQuickSearch('ai');
+                }}
+                className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                  activeDomainTab === 'ai' || currentSearch === 'ai' || currentCategory === 'artificial-intelligence'
+                    ? 'bg-purple-400 text-black shadow-lg shadow-purple-400/20 scale-105'
+                    : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <Cpu className="w-3.5 h-3.5 text-purple-400" />
+                <span>AI Security ({aiBlogs.length})</span>
+              </button>
 
-            {/* Career Guidance */}
-            <button
-              type="button"
-              onClick={() => {
-                setActiveDomainTab('career');
-                if (currentCategory && currentCategory !== 'career-guidance' && currentCategory !== 'career') {
-                  handleCategorySelect('career-guidance', 'career');
-                }
-              }}
-              className={`px-4 py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                activeDomainTab === 'career' || currentCategory === 'career-guidance' || currentCategory === 'career'
-                  ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-400/20 scale-105'
-                  : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Career Guidance ({careerBlogs.length})</span>
-            </button>
+              {/* Career Guidance */}
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveDomainTab('career');
+                  if (currentCategory && currentCategory !== 'career-guidance' && currentCategory !== 'career') {
+                    handleCategorySelect('career-guidance', 'career');
+                  }
+                }}
+                className={`shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                  activeDomainTab === 'career' || currentCategory === 'career-guidance' || currentCategory === 'career'
+                    ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-400/20 scale-105'
+                    : 'bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Career Guidance ({careerBlogs.length})</span>
+              </button>
 
-            {/* Toggle 11 Category Widgets Drawer */}
-            <button
-              type="button"
-              onClick={() => setIsSearchWidgetOpen(!isSearchWidgetOpen)}
-              className="px-4 py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 bg-[#C6FF34]/10 text-[#C6FF34] hover:bg-[#C6FF34]/20 border border-[#C6FF34]/30"
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>11 Search Widgets {isSearchWidgetOpen ? '▲' : '▼'}</span>
-            </button>
+              {/* Toggle 11 Category Widgets Drawer */}
+              <button
+                type="button"
+                onClick={() => setIsSearchWidgetOpen(!isSearchWidgetOpen)}
+                className="shrink-0 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 bg-[#C6FF34]/10 text-[#C6FF34] hover:bg-[#C6FF34]/20 border border-[#C6FF34]/30 whitespace-nowrap"
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>11 Search Widgets {isSearchWidgetOpen ? '▲' : '▼'}</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16 space-y-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-10 sm:py-12 md:py-16 space-y-12 sm:space-y-16">
         {initialBlogs.length === 0 ? (
           <div className="p-16 text-center bg-[#0c0c0c] border border-white/10 rounded-3xl space-y-4">
             <BookOpen className="w-12 h-12 text-slate-600 mx-auto" />
@@ -786,12 +789,12 @@ export function PublicBlogLandingClient({
         ) : (
           <>
             {/* Dynamic Relevant Featured Course Showcase Card */}
-            <section className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-[#12160d] via-[#0d0d12] to-[#0a0a0e] border border-[#C6FF34]/30 shadow-2xl relative overflow-hidden group">
+            <section className="p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#12160d] via-[#0d0d12] to-[#0a0a0e] border border-[#C6FF34]/30 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-80 h-80 bg-[#C6FF34]/10 rounded-full blur-3xl pointer-events-none group-hover:bg-[#C6FF34]/15 transition-all" />
 
-              <div className="relative space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
+              <div className="relative space-y-4 sm:space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge className="bg-[#C6FF34] text-black font-mono font-black text-[10px] tracking-wider uppercase">
                       {activeCourse.badge}
                     </Badge>
@@ -799,21 +802,21 @@ export function PublicBlogLandingClient({
                       {activeCourse.trackName}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-4 text-xs font-mono text-slate-300">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs font-mono text-slate-300">
                     <span className="flex items-center gap-1.5 text-[#C6FF34]">
-                      <Clock className="w-4 h-4" /> {activeCourse.durationHours} Hours Practical
+                      <Clock className="w-4 h-4 shrink-0" /> {activeCourse.durationHours} Hours Practical
                     </span>
                     <span className="flex items-center gap-1.5 text-sky-400">
-                      <Terminal className="w-4 h-4" /> {activeCourse.labsCount}+ Live Labs
+                      <Terminal className="w-4 h-4 shrink-0" /> {activeCourse.labsCount}+ Live Labs
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-xl md:text-3xl font-extrabold font-serif text-white leading-snug">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-serif text-white leading-snug break-words">
                     {activeCourse.title}
                   </h3>
-                  <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-3xl font-sans">
+                  <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-3xl font-sans break-words">
                     {activeCourse.subtitle}
                   </p>
                 </div>
@@ -846,16 +849,16 @@ export function PublicBlogLandingClient({
                 </div>
 
                 {/* Action CTA Links */}
-                <div className="pt-3 flex flex-wrap items-center gap-3 border-t border-white/10">
-                  <Link href={`/courses/${activeCourse.slug}`}>
-                    <Button className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-10 px-5 rounded-xl shadow-lg shadow-[#C6FF34]/20 cursor-pointer">
+                <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 border-t border-white/10">
+                  <Link href={`/courses/${activeCourse.slug}`} className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-10 px-5 rounded-xl shadow-lg shadow-[#C6FF34]/20 cursor-pointer justify-center">
                       Explore Masterclass Curriculum <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </Link>
-                  <Link href="/courses">
+                  <Link href="/courses" className="w-full sm:w-auto">
                     <Button
                       variant="ghost"
-                      className="text-slate-300 hover:text-white font-mono text-xs h-10 border border-white/10 rounded-xl"
+                      className="w-full sm:w-auto text-slate-300 hover:text-white font-mono text-xs h-10 border border-white/10 rounded-xl justify-center"
                     >
                       View All 17+ Academic Tracks
                     </Button>
@@ -905,16 +908,16 @@ export function PublicBlogLandingClient({
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {initialBlogs.map((b) => (
                     <article
                       key={b.id}
-                      className="bg-[#0a0a0d] border border-white/10 hover:border-[#C6FF34]/40 rounded-2xl p-5 space-y-4 flex flex-col justify-between group transition-all shadow-xl"
+                      className="bg-[#0a0a0d] border border-white/10 hover:border-[#C6FF34]/40 rounded-2xl p-4 sm:p-5 space-y-3 sm:space-y-4 flex flex-col justify-between group transition-all shadow-xl min-w-0"
                     >
                       <div className="space-y-3">
                         <BlogCoverImage
                           blog={b}
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                         <div className="flex items-center justify-between text-xs font-mono">
                           <Badge className="bg-white/10 text-[#C6FF34] font-bold border-none text-[10px]">
@@ -924,18 +927,18 @@ export function PublicBlogLandingClient({
                         </div>
 
                         <Link href={`/blog/${b.slug}`}>
-                          <h3 className="text-lg font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug">
+                          <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug line-clamp-2 break-words">
                             {b.title}
                           </h3>
                         </Link>
-                        <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed font-sans">
+                        <p className="text-xs text-slate-400 line-clamp-2 sm:line-clamp-3 leading-relaxed font-sans break-words">
                           {b.excerpt || b.subtitle}
                         </p>
                       </div>
 
-                      <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                        <span className="text-slate-400">{b.author?.user?.name || 'Faculty Mentor'}</span>
-                        <Link href={`/blog/${b.slug}`} className="text-[#C6FF34] font-bold flex items-center gap-1 hover:underline">
+                      <div className="pt-3 sm:pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono gap-2">
+                        <span className="text-slate-400 text-[11px] truncate max-w-[140px]">{b.author?.user?.name || 'Faculty Mentor'}</span>
+                        <Link href={`/blog/${b.slug}`} className="text-[#C6FF34] font-bold flex items-center gap-1 hover:underline shrink-0">
                           Read Article <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
@@ -945,17 +948,17 @@ export function PublicBlogLandingClient({
               </section>
             ) : (
               /* Categorized Showcase (Showcase by Domain Sections) */
-              <div className="space-y-20">
+              <div className="space-y-16 sm:space-y-20">
                 {/* 1. Hero Magazine Spotlight & Latest Posts Rail */}
                 {featuredBlog && (
-                  <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
                     {/* Primary Hero Spotlight */}
-                    <article className="lg:col-span-7 space-y-4 bg-[#0a0a0e] border border-white/15 rounded-3xl p-6 md:p-8 hover:border-[#C6FF34]/40 transition-all group shadow-2xl">
-                      <div className="flex items-center justify-between">
+                    <article className="lg:col-span-7 space-y-4 bg-[#0a0a0e] border border-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 hover:border-[#C6FF34]/40 transition-all group shadow-2xl min-w-0">
+                      <div className="flex items-center justify-between gap-2">
                         <Badge className="bg-[#C6FF34] text-black font-mono font-bold text-[10px] uppercase tracking-wider">
                           FEATURED PUBLICATION
                         </Badge>
-                        <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
+                        <span className="text-xs font-mono text-slate-400 flex items-center gap-1 shrink-0">
                           <Clock className="w-3.5 h-3.5 text-[#C6FF34]" />
                           {featuredBlog.readingTime || 5} min read
                         </span>
@@ -973,30 +976,30 @@ export function PublicBlogLandingClient({
                         </Badge>
 
                         <Link href={`/blog/${featuredBlog.slug}`}>
-                          <h2 className="text-2xl md:text-3xl font-extrabold font-serif text-white group-hover:text-[#C6FF34] transition-colors leading-tight">
+                          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-serif text-white group-hover:text-[#C6FF34] transition-colors leading-tight break-words">
                             {featuredBlog.title}
                           </h2>
                         </Link>
 
-                        <p className="text-sm text-slate-300 line-clamp-3 leading-relaxed font-sans">
+                        <p className="text-sm text-slate-300 line-clamp-3 leading-relaxed font-sans break-words">
                           {featuredBlog.excerpt || featuredBlog.subtitle}
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold font-mono">
+                      <div className="flex items-center justify-between pt-4 border-t border-white/10 gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold font-mono shrink-0">
                             {featuredBlog.author?.user?.name?.[0] || 'M'}
                           </div>
-                          <div>
-                            <p className="text-xs font-mono font-bold text-white">{featuredBlog.author?.user?.name || 'Faculty Mentor'}</p>
+                          <div className="min-w-0">
+                            <p className="text-xs font-mono font-bold text-white truncate">{featuredBlog.author?.user?.name || 'Faculty Mentor'}</p>
                             <p className="text-[10px] font-mono text-slate-400">
                               {featuredBlog.publishedAt ? formatDate(featuredBlog.publishedAt) : 'Recent'}
                             </p>
                           </div>
                         </div>
 
-                        <Link href={`/blog/${featuredBlog.slug}`}>
+                        <Link href={`/blog/${featuredBlog.slug}`} className="shrink-0">
                           <Button variant="ghost" size="sm" className="text-xs font-mono text-[#C6FF34] hover:text-[#b2eb2a] p-0 flex items-center gap-1">
                             Read Full Article <ArrowRight className="w-4 h-4" />
                           </Button>
@@ -1005,39 +1008,39 @@ export function PublicBlogLandingClient({
                     </article>
 
                     {/* Popular Topics Rail */}
-                    <div className="lg:col-span-5 bg-[#0a0a0d] border border-white/15 rounded-3xl p-6 space-y-5 shadow-2xl flex flex-col justify-between">
+                    <div className="lg:col-span-5 bg-[#0a0a0d] border border-white/15 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-2xl flex flex-col justify-between min-w-0">
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                          <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                            <Flame className="w-4 h-4 text-amber-400" /> POPULAR &amp; TRENDING READS
+                        <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
+                          <h2 className="text-xs sm:text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2 truncate">
+                            <Flame className="w-4 h-4 text-amber-400 shrink-0" /> POPULAR &amp; TRENDING READS
                           </h2>
-                          <span className="text-[10px] font-mono text-[#C6FF34] uppercase font-bold">TOP PICKS</span>
+                          <span className="text-[10px] font-mono text-[#C6FF34] uppercase font-bold shrink-0">TOP PICKS</span>
                         </div>
 
                         <div className="divide-y divide-white/10">
                           {popularBlogs.slice(0, 4).map((post) => (
-                            <article key={post.id} className="py-3.5 first:pt-1 last:pb-0 flex items-start justify-between gap-4 group">
-                              <div className="flex-1 space-y-1">
-                                <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
-                                  <span className="text-[#C6FF34] font-bold uppercase">{post.category?.name || 'Research'}</span>
+                            <article key={post.id} className="py-3 first:pt-1 last:pb-0 flex items-start justify-between gap-3 sm:gap-4 group min-w-0">
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                                  <span className="text-[#C6FF34] font-bold uppercase truncate max-w-[120px]">{post.category?.name || 'Research'}</span>
                                   <span>·</span>
-                                  <span>{post.readingTime || 4}m read</span>
+                                  <span className="shrink-0">{post.readingTime || 4}m read</span>
                                 </div>
 
                                 <Link href={`/blog/${post.slug}`}>
-                                  <h3 className="text-sm font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug line-clamp-2">
+                                  <h3 className="text-xs sm:text-sm font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug line-clamp-2 break-words">
                                     {post.title}
                                   </h3>
                                 </Link>
 
-                                <p className="text-[10px] font-mono text-slate-500 pt-0.5">
+                                <p className="text-[10px] font-mono text-slate-500 pt-0.5 truncate">
                                   By {post.author?.user?.name || 'Mentor'} · {post.publishedAt ? formatDate(post.publishedAt) : 'Recent'}
                                 </p>
                               </div>
 
                               <Link
                                 href={`/blog/${post.slug}`}
-                                className="shrink-0 w-24 aspect-[1080/711] overflow-hidden rounded-xl border border-white/10 group-hover:border-[#C6FF34]/50 transition-colors"
+                                className="shrink-0 w-20 sm:w-24 aspect-[1080/711] overflow-hidden rounded-xl border border-white/10 group-hover:border-[#C6FF34]/50 transition-colors"
                               >
                                 <BlogCoverImage blog={post} className="w-full h-full object-cover" hoverZoom />
                               </Link>
@@ -1046,10 +1049,10 @@ export function PublicBlogLandingClient({
                         </div>
                       </div>
 
-                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                        <span>Curated by Lead Security Researchers</span>
-                        <Link href="/courses" className="text-[#C6FF34] hover:underline flex items-center gap-1 font-bold">
-                          Explore Masterclasses →
+                      <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400 gap-2">
+                        <span className="truncate">Curated by Lead Security Researchers</span>
+                        <Link href="/courses" className="text-[#C6FF34] hover:underline flex items-center gap-1 font-bold shrink-0">
+                          Explore Tracks →
                         </Link>
                       </div>
                     </div>
@@ -1058,17 +1061,17 @@ export function PublicBlogLandingClient({
 
                 {/* 2. Section: 🛡️ Cybersecurity Related */}
                 {cyberBlogs.length > 0 && (
-                  <section id="cybersecurity" className="space-y-6 pt-6 border-t border-white/10">
+                  <section id="cybersecurity" className="space-y-4 sm:space-y-6 pt-6 border-t border-white/10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1 rounded-md bg-sky-500/20 text-sky-400">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="p-1 rounded-md bg-sky-500/20 text-sky-400 shrink-0">
                             <Shield className="w-4 h-4" />
                           </span>
-                          <h2 className="text-2xl font-black font-serif text-white">
+                          <h2 className="text-xl sm:text-2xl font-black font-serif text-white break-words">
                             Cybersecurity &amp; Defensive Engineering
                           </h2>
-                          <Badge className="bg-sky-500/20 text-sky-300 font-mono text-[10px]">
+                          <Badge className="bg-sky-500/20 text-sky-300 font-mono text-[10px] shrink-0">
                             {cyberBlogs.length} Articles
                           </Badge>
                         </div>
@@ -1079,22 +1082,22 @@ export function PublicBlogLandingClient({
 
                       <Link
                         href="/blog?category=cybersecurity"
-                        className="text-xs font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 font-bold"
+                        className="text-xs font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1 font-bold shrink-0 self-start sm:self-auto"
                       >
-                        View Cybersecurity Track <ChevronRight className="w-4 h-4" />
+                        View Track <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {cyberBlogs.slice(0, 6).map((b) => (
                         <article
                           key={b.id}
-                          className="bg-[#09090d] border border-white/10 hover:border-sky-400/40 rounded-2xl p-5 space-y-4 flex flex-col justify-between group transition-all shadow-xl"
+                          className="bg-[#09090d] border border-white/10 hover:border-sky-400/40 rounded-2xl p-4 sm:p-5 space-y-3 sm:space-y-4 flex flex-col justify-between group transition-all shadow-xl min-w-0"
                         >
                           <div className="space-y-3">
                             <BlogCoverImage
                               blog={b}
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             />
                             <div className="flex items-center justify-between text-xs font-mono">
                               <Badge className="bg-sky-500/15 text-sky-300 font-bold border-none text-[10px]">
@@ -1104,19 +1107,19 @@ export function PublicBlogLandingClient({
                             </div>
 
                             <Link href={`/blog/${b.slug}`}>
-                              <h3 className="text-base font-bold text-white group-hover:text-sky-400 transition-colors leading-snug line-clamp-2">
+                              <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-sky-400 transition-colors leading-snug line-clamp-2 break-words">
                                 {b.title}
                               </h3>
                             </Link>
 
-                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans">
+                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans break-words">
                               {b.excerpt || b.subtitle}
                             </p>
                           </div>
 
-                          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                            <span className="text-slate-400 text-[11px]">{b.author?.user?.name || 'Faculty Lead'}</span>
-                            <Link href={`/blog/${b.slug}`} className="text-sky-400 font-bold flex items-center gap-1 hover:underline">
+                          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono gap-2">
+                            <span className="text-slate-400 text-[11px] truncate max-w-[140px]">{b.author?.user?.name || 'Faculty Lead'}</span>
+                            <Link href={`/blog/${b.slug}`} className="text-sky-400 font-bold flex items-center gap-1 hover:underline shrink-0">
                               Read <ArrowRight className="w-3 h-3" />
                             </Link>
                           </div>
@@ -1128,17 +1131,17 @@ export function PublicBlogLandingClient({
 
                 {/* 3. Section: 🤖 Artificial Intelligence Related */}
                 {aiBlogs.length > 0 && (
-                  <section id="ai" className="space-y-6 pt-6 border-t border-white/10">
+                  <section id="ai" className="space-y-4 sm:space-y-6 pt-6 border-t border-white/10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1 rounded-md bg-purple-500/20 text-purple-400">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="p-1 rounded-md bg-purple-500/20 text-purple-400 shrink-0">
                             <Cpu className="w-4 h-4" />
                           </span>
-                          <h2 className="text-2xl font-black font-serif text-white">
+                          <h2 className="text-xl sm:text-2xl font-black font-serif text-white break-words">
                             Artificial Intelligence &amp; Emerging Threat Horizons
                           </h2>
-                          <Badge className="bg-purple-500/20 text-purple-300 font-mono text-[10px]">
+                          <Badge className="bg-purple-500/20 text-purple-300 font-mono text-[10px] shrink-0">
                             {aiBlogs.length} Articles
                           </Badge>
                         </div>
@@ -1149,22 +1152,22 @@ export function PublicBlogLandingClient({
 
                       <Link
                         href="/blog?category=artificial-intelligence"
-                        className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 font-bold"
+                        className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1 font-bold shrink-0 self-start sm:self-auto"
                       >
-                        View AI Security Track <ChevronRight className="w-4 h-4" />
+                        View Track <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {aiBlogs.slice(0, 6).map((b) => (
                         <article
                           key={b.id}
-                          className="bg-[#09090d] border border-white/10 hover:border-purple-400/40 rounded-2xl p-5 space-y-4 flex flex-col justify-between group transition-all shadow-xl"
+                          className="bg-[#09090d] border border-white/10 hover:border-purple-400/40 rounded-2xl p-4 sm:p-5 space-y-3 sm:space-y-4 flex flex-col justify-between group transition-all shadow-xl min-w-0"
                         >
                           <div className="space-y-3">
                             <BlogCoverImage
                               blog={b}
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             />
                             <div className="flex items-center justify-between text-xs font-mono">
                               <Badge className="bg-purple-500/15 text-purple-300 font-bold border-none text-[10px]">
@@ -1174,19 +1177,19 @@ export function PublicBlogLandingClient({
                             </div>
 
                             <Link href={`/blog/${b.slug}`}>
-                              <h3 className="text-base font-bold text-white group-hover:text-purple-400 transition-colors leading-snug line-clamp-2">
+                              <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-purple-400 transition-colors leading-snug line-clamp-2 break-words">
                                 {b.title}
                               </h3>
                             </Link>
 
-                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans">
+                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans break-words">
                               {b.excerpt || b.subtitle}
                             </p>
                           </div>
 
-                          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                            <span className="text-slate-400 text-[11px]">{b.author?.user?.name || 'AI Researcher'}</span>
-                            <Link href={`/blog/${b.slug}`} className="text-purple-400 font-bold flex items-center gap-1 hover:underline">
+                          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono gap-2">
+                            <span className="text-slate-400 text-[11px] truncate max-w-[140px]">{b.author?.user?.name || 'AI Researcher'}</span>
+                            <Link href={`/blog/${b.slug}`} className="text-purple-400 font-bold flex items-center gap-1 hover:underline shrink-0">
                               Read <ArrowRight className="w-3 h-3" />
                             </Link>
                           </div>
@@ -1198,17 +1201,17 @@ export function PublicBlogLandingClient({
 
                 {/* 4. Section: 🚀 Career Guidance & Pathways */}
                 {careerBlogs.length > 0 && (
-                  <section id="career" className="space-y-6 pt-6 border-t border-white/10">
+                  <section id="career" className="space-y-4 sm:space-y-6 pt-6 border-t border-white/10">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-400">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-400 shrink-0">
                             <Compass className="w-4 h-4" />
                           </span>
-                          <h2 className="text-2xl font-black font-serif text-white">
+                          <h2 className="text-xl sm:text-2xl font-black font-serif text-white break-words">
                             Career Guidance, Roadmaps &amp; Placement Strategies
                           </h2>
-                          <Badge className="bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">
+                          <Badge className="bg-emerald-500/20 text-emerald-300 font-mono text-[10px] shrink-0">
                             {careerBlogs.length} Articles
                           </Badge>
                         </div>
@@ -1219,22 +1222,22 @@ export function PublicBlogLandingClient({
 
                       <Link
                         href="/blog?category=career"
-                        className="text-xs font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold"
+                        className="text-xs font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold shrink-0 self-start sm:self-auto"
                       >
-                        View Career Blueprints <ChevronRight className="w-4 h-4" />
+                        View Blueprints <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {careerBlogs.slice(0, 6).map((b) => (
                         <article
                           key={b.id}
-                          className="bg-[#09090d] border border-white/10 hover:border-emerald-400/40 rounded-2xl p-5 space-y-4 flex flex-col justify-between group transition-all shadow-xl"
+                          className="bg-[#09090d] border border-white/10 hover:border-emerald-400/40 rounded-2xl p-4 sm:p-5 space-y-3 sm:space-y-4 flex flex-col justify-between group transition-all shadow-xl min-w-0"
                         >
                           <div className="space-y-3">
                             <BlogCoverImage
                               blog={b}
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                             />
                             <div className="flex items-center justify-between text-xs font-mono">
                               <Badge className="bg-emerald-500/15 text-emerald-300 font-bold border-none text-[10px]">
@@ -1244,19 +1247,19 @@ export function PublicBlogLandingClient({
                             </div>
 
                             <Link href={`/blog/${b.slug}`}>
-                              <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2">
+                              <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug line-clamp-2 break-words">
                                 {b.title}
                               </h3>
                             </Link>
 
-                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans">
+                            <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed font-sans break-words">
                               {b.excerpt || b.subtitle}
                             </p>
                           </div>
 
-                          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
-                            <span className="text-slate-400 text-[11px]">{b.author?.user?.name || 'Career Mentor'}</span>
-                            <Link href={`/blog/${b.slug}`} className="text-emerald-400 font-bold flex items-center gap-1 hover:underline">
+                          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono gap-2">
+                            <span className="text-slate-400 text-[11px] truncate max-w-[140px]">{b.author?.user?.name || 'Career Mentor'}</span>
+                            <Link href={`/blog/${b.slug}`} className="text-emerald-400 font-bold flex items-center gap-1 hover:underline shrink-0">
                               Read <ArrowRight className="w-3 h-3" />
                             </Link>
                           </div>

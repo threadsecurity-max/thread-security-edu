@@ -31,19 +31,19 @@ export async function PublicNavbar() {
         {/* Brand Logo */}
         <Link
           href="/"
-          className="flex items-center gap-2 shrink-0"
+          className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0"
           title="Thread Security Education"
         >
-          <span className="font-bold tracking-wider text-base sm:text-lg text-black uppercase">
+          <span className="font-bold tracking-wider text-sm sm:text-base md:text-lg text-black uppercase truncate">
             THREAD SECURITY
           </span>
-          <span className="text-[11px] bg-lime-100 border border-lime-200/60 px-2 py-0.5 rounded-sm uppercase font-semibold tracking-widest text-black">
+          <span className="hidden min-[380px]:inline-block text-[10px] sm:text-[11px] bg-lime-100 border border-lime-200/60 px-1.5 sm:px-2 py-0.5 rounded-sm uppercase font-semibold tracking-wider text-black shrink-0">
             EDUCATION
           </span>
         </Link>
 
         {/* Navigation Links with Mega Menu & Dropdowns */}
-        <nav className="hidden lg:flex items-center gap-6 h-full" aria-label="Main Navigation">
+        <nav className="hidden lg:flex items-center gap-3.5 xl:gap-6 h-full" aria-label="Main Navigation">
           <Link
             href="/"
             className="text-sm font-semibold text-slate-700 hover:text-black transition-colors"

@@ -46,6 +46,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
   const [copied, setCopied] = useState(false);
   const [toc, setToc] = useState<{ id: string; text: string; level: number }[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState<string>('');
+  const [isMobileTocOpen, setIsMobileTocOpen] = useState(false);
 
   const processedContent = useMemo(() => processContentHeadings(blog.content), [blog.content]);
 
@@ -218,14 +219,14 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-[#C6FF34] selection:text-black">
-      {/* Top Header / Breadcrumb */}
-      <div className="border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between text-xs font-mono">
-          <Link href="/blog" className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+      {/* Top Header / Breadcrumb Sticky Dock (Aligned below fixed navbar) */}
+      <div className="border-b border-white/10 bg-[#0a0a0a]/95 backdrop-blur-md sticky top-[4.25rem] z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between text-xs font-mono gap-2">
+          <Link href="/blog" className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors shrink-0">
             <ArrowLeft className="w-4 h-4" /> Back to Blogs
           </Link>
-          <span className="text-slate-500 hidden md:inline truncate max-w-xs">{blog.title}</span>
-          <Button size="sm" variant="ghost" onClick={handleCopyLink} className="h-7 text-xs font-mono text-[#C6FF34]">
+          <span className="text-slate-500 hidden md:inline truncate max-w-xs xl:max-w-md">{blog.title}</span>
+          <Button size="sm" variant="ghost" onClick={handleCopyLink} className="h-7 px-2.5 text-xs font-mono text-[#C6FF34] shrink-0">
             {copied ? <Check className="w-3.5 h-3.5 mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
             {copied ? 'Copied' : 'Share'}
           </Button>
@@ -233,26 +234,26 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
       </div>
 
       {/* Hero Section */}
-      <header className="py-12 md:py-16 border-b border-white/10 bg-gradient-to-b from-[#0c0c0c] to-[#050505]">
-        <div className="max-w-4xl mx-auto px-4 md:px-8 space-y-6 text-center">
+      <header className="py-8 sm:py-12 md:py-16 border-b border-white/10 bg-gradient-to-b from-[#0c0c0c] to-[#050505]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 space-y-4 sm:space-y-6 text-center">
           <Badge className="bg-[#C6FF34] text-black font-mono font-bold text-xs uppercase tracking-wider">
             {blog.category?.name || 'CYBERSECURITY RESEARCH'}
           </Badge>
 
-          <h1 className="text-3xl md:text-5xl font-black font-serif text-white leading-tight tracking-tight">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-serif text-white leading-tight tracking-tight break-words px-2">
             {blog.title}
           </h1>
 
           {blog.subtitle && (
-            <p className="text-lg md:text-xl text-slate-300 font-serif italic max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-slate-300 font-serif italic max-w-3xl mx-auto leading-relaxed px-2 break-words">
               {blog.subtitle}
             </p>
           )}
 
           {/* Author & Metadata Bar */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs font-mono text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-3 sm:pt-4 text-xs font-mono text-slate-400">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold font-mono text-white overflow-hidden shrink-0">
+              <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-xs font-bold font-mono text-white overflow-hidden shrink-0">
                 {blog.author?.user?.avatarUrl ? (
                   <img src={blog.author.user.avatarUrl} alt={blog.author.user.name} className="w-full h-full object-cover" />
                 ) : (
@@ -260,14 +261,14 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                 )}
               </div>
               <div className="text-left">
-                <p className="font-bold text-white flex items-center gap-1.5">
-                  {blog.author?.user?.name || 'Faculty Lead'}
+                <p className="font-bold text-white flex items-center gap-1.5 truncate">
+                  <span>{blog.author?.user?.name || 'Faculty Lead'}</span>
                   {blog.author?.linkedinUrl && (
                     <a
                       href={blog.author.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#0077b5] hover:text-[#00a0dc] transition-colors inline-block"
+                      className="text-[#0077b5] hover:text-[#00a0dc] transition-colors inline-block shrink-0"
                       title="Contact on LinkedIn"
                     >
                       <Linkedin className="w-3.5 h-3.5" />
@@ -281,12 +282,12 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
             <div className="h-4 w-px bg-white/10 hidden md:block" />
 
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-slate-400" />
+              <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
               <span>{blog.publishedAt ? formatDate(blog.publishedAt) : 'Published Recent'}</span>
             </div>
 
             <div className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-[#C6FF34]" />
+              <Clock className="w-4 h-4 text-[#C6FF34] shrink-0" />
               <span>{blog.readingTime || 5} min read</span>
             </div>
           </div>
@@ -294,36 +295,36 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
       </header>
 
       {/* Main Content Layout: Desktop 2-Column */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-12 md:py-16">
         {/* Featured Hero Cover Image */}
-        <div className="max-w-4xl mx-auto mb-12 shadow-2xl">
+        <div className="max-w-4xl mx-auto mb-8 sm:mb-12 shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden">
           <BlogCoverImage
             blog={blog}
             priority
             sizes="(max-width: 1024px) 100vw, 896px"
-            className="rounded-3xl"
+            className="rounded-2xl sm:rounded-3xl"
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-12 items-start">
           {/* Table of Contents Sticky Sidebar */}
-          <aside className="lg:col-span-3 hidden lg:block sticky top-20 space-y-6 bg-[#0a0a0a] border border-white/10 rounded-2xl p-5 shadow-xl font-mono">
+          <aside className="lg:col-span-4 xl:col-span-3 hidden lg:block sticky top-[5.25rem] space-y-6 bg-[#0a0a0a] border border-white/10 rounded-2xl p-4 xl:p-5 shadow-xl font-mono min-w-0">
             <div className="flex items-center gap-2 pb-3 border-b border-white/10 text-xs font-bold text-white uppercase tracking-wider">
-              <List className="w-4 h-4 text-[#C6FF34]" /> TABLE OF CONTENTS
+              <List className="w-4 h-4 text-[#C6FF34] shrink-0" /> TABLE OF CONTENTS
             </div>
 
             {toc.length === 0 ? (
               <p className="text-[11px] text-slate-500 italic">No section headings found.</p>
             ) : (
-              <nav className="space-y-1 text-xs">
+              <nav className="space-y-1 text-xs max-h-[calc(100vh-14rem)] overflow-y-auto pr-1 sidebar-scroll">
                 {toc.map((item) => {
                   const isActive = activeHeadingId === item.id;
                   return (
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      className={`group flex items-start gap-2.5 transition-all rounded-lg py-1.5 px-2 ${
-                        item.level === 2 ? 'ml-3 text-[11px]' : item.level === 3 ? 'ml-6 text-[10px]' : 'font-semibold'
+                      className={`group flex items-start gap-2 transition-all rounded-lg py-1.5 px-2 ${
+                        item.level === 2 ? 'ml-2.5 text-[11px]' : item.level === 3 ? 'ml-5 text-[10px]' : 'font-semibold'
                       } ${
                         isActive
                           ? 'text-[#C6FF34] font-bold bg-[#C6FF34]/10 shadow-sm'
@@ -370,6 +371,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                   target="_blank"
                   rel="noreferrer"
                   className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                  aria-label="Share on LinkedIn"
                 >
                   <Linkedin className="w-4 h-4" />
                 </a>
@@ -378,6 +380,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                   target="_blank"
                   rel="noreferrer"
                   className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                  aria-label="Share on Twitter"
                 >
                   <Twitter className="w-4 h-4" />
                 </a>
@@ -386,6 +389,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                   target="_blank"
                   rel="noreferrer"
                   className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                  aria-label="Share on WhatsApp"
                 >
                   <MessageCircle className="w-4 h-4" />
                 </a>
@@ -393,6 +397,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                   type="button"
                   onClick={handleCopyLink}
                   className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                  aria-label="Copy article link"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
@@ -401,41 +406,55 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
           </aside>
 
           {/* Article Structured Content */}
-          <article className="lg:col-span-9 space-y-8 max-w-3xl mx-auto lg:mx-0">
-            {/* Mobile Collapsible TOC */}
+          <article className="lg:col-span-8 xl:col-span-9 space-y-8 max-w-3xl mx-auto lg:mx-0 w-full min-w-0">
+            {/* Mobile Collapsible TOC Accordion */}
             {toc.length > 0 && (
-              <div className="lg:hidden p-4 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-3 font-mono text-xs">
-                <span className="font-bold text-[#C6FF34] flex items-center gap-2">
-                  <List className="w-4 h-4" /> TABLE OF CONTENTS
-                </span>
-                <div className="space-y-1.5 pl-2">
-                  {toc.map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className={`flex items-center gap-2 truncate transition-colors py-1 ${
-                        item.level === 2 ? 'pl-3 text-[11px]' : item.level === 3 ? 'pl-5 text-[10px]' : 'font-semibold'
-                      } ${
-                        activeHeadingId === item.id ? 'text-[#C6FF34] font-bold' : 'text-slate-300 hover:text-white'
-                      }`}
-                    >
-                      <span className={`w-1.5 h-1.5 rounded-full ${activeHeadingId === item.id ? 'bg-[#C6FF34]' : 'bg-slate-500'}`} />
-                      <span className="truncate">{item.text}</span>
-                    </a>
-                  ))}
-                </div>
+              <div className="lg:hidden p-3.5 sm:p-4 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-2.5 font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileTocOpen(!isMobileTocOpen)}
+                  className="w-full flex items-center justify-between text-[#C6FF34] font-bold py-1 cursor-pointer"
+                  aria-expanded={isMobileTocOpen}
+                >
+                  <span className="flex items-center gap-2">
+                    <List className="w-4 h-4 text-[#C6FF34]" /> TABLE OF CONTENTS ({toc.length})
+                  </span>
+                  <span className="text-[11px] text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/10">
+                    {isMobileTocOpen ? 'Hide ▲' : 'Show ▼'}
+                  </span>
+                </button>
+
+                {isMobileTocOpen && (
+                  <div className="space-y-1.5 pl-2 pt-2 border-t border-white/10 max-h-64 overflow-y-auto">
+                    {toc.map((item) => (
+                      <a
+                        key={item.id}
+                        href={`#${item.id}`}
+                        onClick={() => setIsMobileTocOpen(false)}
+                        className={`flex items-center gap-2 truncate transition-colors py-1 ${
+                          item.level === 2 ? 'pl-3 text-[11px]' : item.level === 3 ? 'pl-5 text-[10px]' : 'font-semibold'
+                        } ${
+                          activeHeadingId === item.id ? 'text-[#C6FF34] font-bold' : 'text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${activeHeadingId === item.id ? 'bg-[#C6FF34]' : 'bg-slate-500'}`} />
+                        <span className="truncate">{item.text}</span>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {/* Structured Rich HTML Render */}
             <div
-              className="tiptap prose prose-invert max-w-none text-slate-200 text-base md:text-lg leading-relaxed font-sans prose-headings:font-serif prose-headings:text-white prose-a:text-[#C6FF34] prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded"
+              className="tiptap prose prose-invert max-w-none text-slate-200 text-base md:text-lg leading-relaxed font-sans prose-headings:font-serif prose-headings:text-white prose-a:text-[#C6FF34] prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded break-words overflow-hidden"
               dangerouslySetInnerHTML={{ __html: processedContent || '<p>No content written yet.</p>' }}
             />
 
             {/* Tags */}
             {blog.tags && blog.tags.length > 0 && (
-              <div className="pt-8 border-t border-white/10 space-y-2 font-mono">
+              <div className="pt-6 sm:pt-8 border-t border-white/10 space-y-2 font-mono">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">ARTICLE TOPICS</span>
                 <div className="flex flex-wrap gap-2">
                   {blog.tags.map((tag: any) => (
@@ -448,7 +467,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
             )}
 
             {/* High-Converting Course Lead Generation CTA Banner */}
-            <div className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-[#12160d] via-[#0d0d0f] to-[#0a0a0a] border border-[#C6FF34]/30 shadow-2xl relative overflow-hidden group">
+            <div className="mt-8 sm:mt-12 p-5 sm:p-8 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-[#12160d] via-[#0d0d0f] to-[#0a0a0a] border border-[#C6FF34]/30 shadow-2xl relative overflow-hidden group">
               <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#C6FF34]/10 rounded-full blur-3xl pointer-events-none group-hover:bg-[#C6FF34]/20 transition-all" />
               <div className="relative space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -456,27 +475,27 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                     {courseCta.tag}
                   </Badge>
                   <div className="flex items-center gap-1.5 text-xs font-mono text-[#C6FF34]">
-                    <Award className="w-4 h-4" />
+                    <Award className="w-4 h-4 shrink-0" />
                     <span>100% Practical Defense Labs</span>
                   </div>
                 </div>
 
-                <h3 className="text-xl md:text-2xl font-black font-serif text-white leading-snug">
+                <h3 className="text-xl md:text-2xl font-black font-serif text-white leading-snug break-words">
                   {courseCta.title}
                 </h3>
 
-                <p className="text-sm text-slate-300 leading-relaxed max-w-2xl font-sans">
+                <p className="text-sm text-slate-300 leading-relaxed max-w-2xl font-sans break-words">
                   {courseCta.desc}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4 pt-2">
-                  <Link href={`/courses/${courseCta.slug}`}>
-                    <Button className="bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-10 px-6 rounded-xl shadow-lg shadow-[#C6FF34]/20">
-                      Explore Syllabus & Enroll <ChevronRight className="w-4 h-4 ml-1" />
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                  <Link href={`/courses/${courseCta.slug}`} className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto bg-[#C6FF34] text-black hover:bg-[#b2eb2a] font-mono font-bold text-xs h-10 px-6 rounded-xl shadow-lg shadow-[#C6FF34]/20 justify-center">
+                      Explore Syllabus &amp; Enroll <ChevronRight className="w-4 h-4 ml-1" />
                     </Button>
                   </Link>
-                  <Link href="/courses">
-                    <Button variant="ghost" className="text-slate-300 hover:text-white font-mono text-xs h-10">
+                  <Link href="/courses" className="w-full sm:w-auto">
+                    <Button variant="ghost" className="w-full sm:w-auto text-slate-300 hover:text-white font-mono text-xs h-10 border border-white/10 rounded-xl justify-center">
                       Browse All TSE Tracks
                     </Button>
                   </Link>
@@ -485,35 +504,35 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
             </div>
 
             {/* Author E-E-A-T Verified Profile Card */}
-            <div className="mt-8 p-6 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-4 font-mono shadow-xl">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-14 h-14 rounded-2xl bg-[#141414] border border-white/20 flex items-center justify-center text-lg font-bold text-white overflow-hidden shrink-0 shadow-md">
+            <div className="mt-8 p-4 sm:p-6 rounded-2xl bg-[#0a0a0a] border border-white/10 space-y-4 font-mono shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-white/10">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 sm:w-14 h-12 sm:h-14 rounded-2xl bg-[#141414] border border-white/20 flex items-center justify-center text-lg font-bold text-white overflow-hidden shrink-0 shadow-md">
                     {blog.author?.user?.avatarUrl ? (
                       <img src={blog.author.user.avatarUrl} alt={blog.author.user.name} className="w-full h-full object-cover" />
                     ) : (
                       blog.author?.user?.name?.[0] || 'M'
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-base font-bold text-white font-sans">{blog.author?.user?.name || 'TSE Security Mentor'}</h4>
-                      <span className="flex items-center gap-1 text-[10px] text-[#C6FF34] bg-[#C6FF34]/15 px-2 py-0.5 rounded-full border border-[#C6FF34]/30 font-bold">
-                        <ShieldCheck className="w-3 h-3" /> VERIFIED FACULTY
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-sm sm:text-base font-bold text-white font-sans truncate">{blog.author?.user?.name || 'TSE Security Mentor'}</h4>
+                      <span className="flex items-center gap-1 text-[10px] text-[#C6FF34] bg-[#C6FF34]/15 px-2 py-0.5 rounded-full border border-[#C6FF34]/30 font-bold shrink-0">
+                        <ShieldCheck className="w-3 h-3" /> VERIFIED
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-400 truncate">
                       {blog.author?.title || 'Senior Cybersecurity Mentor'} · {blog.author?.company || 'Thread Security'}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-500">Academic Verified · E-E-A-T Indexed</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[10px] sm:text-[11px] text-slate-500">Academic Verified · E-E-A-T</span>
                 </div>
               </div>
 
-              {/* Sanitized Author Bio - Guaranteed to NEVER show Unified User Directory boilerplate */}
-              <p className="text-xs text-slate-300 font-sans leading-relaxed">
+              {/* Sanitized Author Bio */}
+              <p className="text-xs text-slate-300 font-sans leading-relaxed break-words">
                 {(() => {
                   const rawBio = blog.author?.bio || '';
                   if (!rawBio || rawBio.includes('Unified User Directory') || rawBio.trim() === 'Faculty mentor profile.') {
@@ -524,14 +543,14 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
               </p>
 
               {blog.author?.expertise && (
-                <div className="pt-1 text-[11px] text-slate-400">
+                <div className="pt-1 text-[11px] text-slate-400 break-words">
                   <strong className="text-slate-300">Specializations:</strong> {blog.author.expertise}
                 </div>
               )}
 
-              {/* Author Creds & Contact Links (LinkedIn, Medium, Twitter/X, GitHub) */}
-              <div className="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2.5">
-                <span className="text-[10px] font-bold uppercase text-slate-400 mr-1">CONNECT WITH AUTHOR:</span>
+              {/* Author Creds & Contact Links */}
+              <div className="pt-3 border-t border-white/10 flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-bold uppercase text-slate-400 mr-1 shrink-0">CONNECT:</span>
 
                 {blog.author?.linkedinUrl ? (
                   <a
@@ -541,7 +560,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0077b5]/15 hover:bg-[#0077b5]/25 border border-[#0077b5]/30 text-white transition-all text-xs font-bold"
                   >
                     <Linkedin className="w-3.5 h-3.5 text-[#0077b5]" />
-                    Connect on LinkedIn
+                    LinkedIn
                     <ExternalLink className="w-3 h-3 text-slate-400" />
                   </a>
                 ) : (
@@ -552,7 +571,7 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border border-[#0077b5]/20 text-slate-300 transition-all text-xs"
                   >
                     <Linkedin className="w-3.5 h-3.5 text-[#0077b5]" />
-                    Faculty LinkedIn
+                    LinkedIn
                   </a>
                 )}
 
@@ -600,32 +619,32 @@ export function PublicBlogArticleClient({ blog, relatedBlogs }: PublicBlogArticl
 
         {/* Related Articles Section */}
         {relatedBlogs && relatedBlogs.length > 0 && (
-          <section className="mt-20 pt-12 border-t border-white/10 space-y-8">
-            <div className="flex items-center justify-between">
-              <h3 className="text-2xl font-bold font-serif text-white">Related Research & Articles</h3>
-              <Link href="/blog" className="text-xs font-mono text-[#C6FF34] hover:underline flex items-center gap-1">
+          <section className="mt-12 sm:mt-16 md:mt-20 pt-8 sm:pt-12 border-t border-white/10 space-y-6 sm:space-y-8">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-xl sm:text-2xl font-bold font-serif text-white">Related Research &amp; Articles</h3>
+              <Link href="/blog" className="text-xs font-mono text-[#C6FF34] hover:underline flex items-center gap-1 shrink-0">
                 View All <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {relatedBlogs.map((rel) => (
                 <div
                   key={rel.id}
-                  className="bg-[#0a0a0a] border border-white/10 hover:border-white/20 rounded-2xl p-5 space-y-3 flex flex-col justify-between group transition-all"
+                  className="bg-[#0a0a0a] border border-white/10 hover:border-white/20 rounded-2xl p-4 sm:p-5 space-y-3 flex flex-col justify-between group transition-all min-w-0"
                 >
                   <div className="space-y-3">
                     <BlogCoverImage blog={rel} className="rounded-xl aspect-[16/9]" />
                     <span className="text-[10px] font-mono text-[#C6FF34] font-bold uppercase">{rel.category?.name || 'Research'}</span>
                     <Link href={`/blog/${rel.slug}`}>
-                      <h4 className="text-base font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug">
+                      <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-[#C6FF34] transition-colors leading-snug line-clamp-2 break-words">
                         {rel.title}
                       </h4>
                     </Link>
-                    <p className="text-xs text-slate-400 line-clamp-2">{rel.excerpt || rel.subtitle}</p>
+                    <p className="text-xs text-slate-400 line-clamp-2 break-words">{rel.excerpt || rel.subtitle}</p>
                   </div>
 
-                  <p className="text-[10px] font-mono text-slate-500 pt-2 border-t border-white/10">
+                  <p className="text-[10px] font-mono text-slate-500 pt-2 border-t border-white/10 truncate">
                     By {rel.author?.user?.name || 'Mentor'}
                   </p>
                 </div>
