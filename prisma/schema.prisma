@@ -121,6 +121,8 @@ model User {
   employeeAttendances   EmployeeAttendance[]        @relation("EmployeeAttendanceRecords")
   markedAttendances     EmployeeAttendance[]        @relation("AttendanceMarker")
   attendanceAuditLogs   EmployeeAttendanceAuditLog[] @relation("AuditModifier")
+  rosterEntries         DailyAttendanceRoster[]     @relation("RosterEmployees")
+  publishedRosters      DailyAttendanceRoster[]     @relation("RosterPublishers")
 
   @@index([email])
 }
@@ -1409,20 +1411,35 @@ model DelegationEdge {
 // ─────────────────────────────────────────────────────────────────────────────
 
 model EmployeeProfile {
-  id           String             @id @default(cuid())
-  userId       String             @unique
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employeeId   String             @unique // e.g. TSE-EMP-103
-  department   String             @default("Academics & Faculty")
-  designation  String             @default("Faculty Member")
-  joiningDate  DateTime           @default(now())
-  status       String             @default("ACTIVE") // ACTIVE, ON_LEAVE, PROBATION, INACTIVE
-  phone        String?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id                  String             @id @default(cuid())
+  userId              String             @unique
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId          String             @unique // e.g. TSE-EMP-103
+  department          String             @default("Academics & Faculty")
+  designation         String             @default("Faculty Member")
+  joiningDate         DateTime           @default(now())
+  status              String             @default("ACTIVE") // ACTIVE, ON_LEAVE, PROBATION, INACTIVE
+  attendanceEligible  Boolean            @default(true)
+  phone               String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
 
   @@index([employeeId])
   @@index([department])
+}
+
+model DailyAttendanceRoster {
+  id              String   @id @default(cuid())
+  attendanceDate  DateTime // Normalized to UTC midnight (YYYY-MM-DDT00:00:00.000Z)
+  employeeId      String
+  employee        User     @relation("RosterEmployees", fields: [employeeId], references: [id], onDelete: Cascade)
+  publishedById   String
+  publishedBy     User     @relation("RosterPublishers", fields: [publishedById], references: [id], onDelete: Cascade)
+  publishedAt     DateTime @default(now())
+
+  @@unique([attendanceDate, employeeId])
+  @@index([attendanceDate])
+  @@index([employeeId])
 }
 
 enum EmployeeAttendanceStatus {

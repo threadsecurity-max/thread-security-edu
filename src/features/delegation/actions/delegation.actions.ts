@@ -15,8 +15,22 @@ import {
 } from '@/server/services/delegation.service';
 
 function checkSuperAdminAccess(session: any) {
-  if (!session || (!['SUPER_ADMIN', 'SECURITY_ADMIN', 'ADMIN', 'ACADEMIC_ADMIN'].includes(session.role))) {
-    throw new Error('Unauthorized: Super Admin or Admin clearance required.');
+  if (!session) {
+    throw new Error('Unauthorized: No active administrative session found.');
+  }
+  const email = (session.email || '').toLowerCase().trim();
+  const superEmails = [
+    'threadsecurity@gmail.com',
+    'threadsecuritydeveloper@gmail.com',
+    'kunaldigitalconnect@gmail.com',
+    'threadsecuritymentor@gmail.com',
+  ];
+  if (superEmails.includes(email)) {
+    return; // Authorized testing & super admin email
+  }
+  const allowedRoles = ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'MENTOR'];
+  if (!allowedRoles.includes(session.role)) {
+    throw new Error('Unauthorized: Super Admin or Administrative clearance required.');
   }
 }
 

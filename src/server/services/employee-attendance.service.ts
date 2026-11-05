@@ -32,6 +32,7 @@ export function formatDateKey(date: Date): string {
  *
  * Credits:
  * - Present = 1
+ * - WFH = 1
  * - Half Day = 0.5
  * - Absent = 0
  * - Approved Leave = Excluded from working-day denominator
@@ -53,6 +54,130 @@ export function calculateAttendancePercentage(counts: {
   const percentage = totalWorkingDays > 0 ? Math.round((credits / totalWorkingDays) * 1000) / 10 : 100;
 
   return { credits, totalWorkingDays, percentage };
+}
+
+export interface AttendanceWindowInfo {
+  isOpen: boolean;
+  isPastDeadline: boolean;
+  isBeforeOpen: boolean;
+  isToday: boolean;
+  targetDateKey: string;
+  todayIstDateKey: string;
+  openTimeLabel: string;
+  closeTimeLabel: string;
+  serverTimeIst: string;
+  remainingMinutes: number;
+  remainingTimeFormatted: string;
+  status: 'OPEN' | 'LOCKED' | 'ROSTER_NOT_PUBLISHED' | 'BEFORE_WINDOW';
+  message: string;
+}
+
+/**
+ * Authoritative Server-Side 12-Hour Daily Attendance Window Calculator
+ * Timezone: Asia/Kolkata (IST, UTC+05:30)
+ * Window: 09:00 AM to 09:00 PM IST (Strictly 12 Hours)
+ */
+export function getAttendanceWindowStatus(targetDateInput?: string | Date): AttendanceWindowInfo {
+  const now = new Date();
+
+  // Convert current server time to Asia/Kolkata
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const parts = formatter.formatToParts(now);
+  const partMap: Record<string, string> = {};
+  parts.forEach((p) => { partMap[p.type] = p.value; });
+
+  const todayIstDateKey = `${partMap.year}-${partMap.month}-${partMap.day}`;
+  const istHour = parseInt(partMap.hour, 10);
+  const istMinute = parseInt(partMap.minute, 10);
+  const istMinutesSinceMidnight = istHour * 60 + istMinute;
+
+  // Window bounds in minutes since midnight IST:
+  // 09:00 AM IST = 540 minutes
+  // 09:00 PM IST = 1260 minutes (21:00)
+  const OPEN_MINUTES = 540;
+  const CLOSE_MINUTES = 1260;
+
+  // Format 12-hour server time
+  const hour12 = istHour % 12 || 12;
+  const ampm = istHour >= 12 ? 'PM' : 'AM';
+  const serverTimeIst = `${String(hour12).padStart(2, '0')}:${String(istMinute).padStart(2, '0')} ${ampm} IST`;
+
+  // Parse target date
+  let targetDateKey = todayIstDateKey;
+  if (targetDateInput) {
+    const d = typeof targetDateInput === 'string' ? new Date(targetDateInput) : targetDateInput;
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    targetDateKey = `${y}-${m}-${day}`;
+  }
+
+  const isToday = targetDateKey === todayIstDateKey;
+  const isPastDay = targetDateKey < todayIstDateKey;
+  const isFutureDay = targetDateKey > todayIstDateKey;
+
+  const isBeforeOpen = isToday && istMinutesSinceMidnight < OPEN_MINUTES;
+  const isPastDeadline = isPastDay || (isToday && istMinutesSinceMidnight >= CLOSE_MINUTES);
+  const isOpen = isToday && istMinutesSinceMidnight >= OPEN_MINUTES && istMinutesSinceMidnight < CLOSE_MINUTES;
+
+  let remainingMinutes = 0;
+  let remainingTimeFormatted = '';
+  let status: 'OPEN' | 'LOCKED' | 'ROSTER_NOT_PUBLISHED' | 'BEFORE_WINDOW' = 'LOCKED';
+  let message = '';
+
+  if (isPastDay) {
+    status = 'LOCKED';
+    remainingTimeFormatted = 'Historical attendance locked';
+    message = 'Attendance for this date is closed and read-only. Only Super Admin has historical rectification authority.';
+  } else if (isFutureDay) {
+    status = 'LOCKED';
+    remainingTimeFormatted = 'Future date locked';
+    message = 'Daily attendance cannot be marked for future dates.';
+  } else if (isBeforeOpen) {
+    status = 'BEFORE_WINDOW';
+    const minsUntilOpen = OPEN_MINUTES - istMinutesSinceMidnight;
+    const hrs = Math.floor(minsUntilOpen / 60);
+    const mins = minsUntilOpen % 60;
+    remainingTimeFormatted = `Opens in ${hrs}h ${mins}m (09:00 AM IST)`;
+    message = `Attendance window opens today at 09:00 AM IST. Current server time: ${serverTimeIst}.`;
+  } else if (isOpen) {
+    status = 'OPEN';
+    remainingMinutes = CLOSE_MINUTES - istMinutesSinceMidnight;
+    const hrs = Math.floor(remainingMinutes / 60);
+    const mins = remainingMinutes % 60;
+    remainingTimeFormatted = `${hrs}h ${mins}m remaining (Closes at 09:00 PM IST)`;
+    message = `Attendance window is OPEN until 09:00 PM IST. You may update and finalize attendance records.`;
+  } else {
+    status = 'LOCKED';
+    remainingTimeFormatted = 'Daily 12-hour window closed at 09:00 PM IST';
+    message = `Daily editing deadline reached (09:00 PM IST). Attendance is now locked. Only Super Admin can rectify records.`;
+  }
+
+  return {
+    isOpen,
+    isPastDeadline,
+    isBeforeOpen,
+    isToday,
+    targetDateKey,
+    todayIstDateKey,
+    openTimeLabel: '09:00 AM IST',
+    closeTimeLabel: '09:00 PM IST',
+    serverTimeIst,
+    remainingMinutes,
+    remainingTimeFormatted,
+    status,
+    message,
+  };
 }
 
 /**
@@ -96,6 +221,7 @@ export async function syncEmployeeProfilesService() {
         department: dept,
         designation: desig,
         status: 'ACTIVE',
+        attendanceEligible: true,
       },
     });
   }
@@ -180,6 +306,8 @@ export async function getEmployeeDirectoryService(filters?: {
       designation: emp.employeeProfile?.designation || 'Faculty Member',
       joiningDate: emp.employeeProfile?.joiningDate?.toISOString() || new Date().toISOString(),
       status: emp.employeeProfile?.status || 'ACTIVE',
+      attendanceEligible: emp.employeeProfile?.attendanceEligible ?? true,
+      phone: emp.employeeProfile?.phone || null,
       totalRecords: records.length,
       presentDays: present,
       wfhDays: wfh,
@@ -195,14 +323,52 @@ export async function getEmployeeDirectoryService(filters?: {
 }
 
 /**
- * 2. GET Daily Attendance for a given date
+ * 2. GET Daily Attendance for a given date with Roster & 12-Hour Window Check
  */
-export async function getDailyAttendanceService(dateInput: string | Date, department?: string) {
+export async function getDailyAttendanceService(
+  dateInput: string | Date,
+  department?: string,
+  caller?: { userId?: string; email?: string; role?: string }
+) {
   await syncEmployeeProfilesService();
   const targetDate = normalizeAttendanceDate(dateInput);
+  const windowInfo = getAttendanceWindowStatus(targetDate);
+  const isSuperAdmin = caller ? isSuperAdminAttendanceUser(caller) : false;
+
+  // 1. Fetch Daily Roster snapshot for this date
+  const rosterEntries = await db.dailyAttendanceRoster.findMany({
+    where: { attendanceDate: targetDate },
+    include: {
+      publishedBy: { select: { id: true, name: true, email: true } },
+    },
+  });
+
+  const isRosterPublished = rosterEntries.length > 0;
+  const publishedEmployeeIds = new Set(rosterEntries.map((r: any) => r.employeeId));
+  const publishedMetadata = isRosterPublished
+    ? {
+        publishedAt: rosterEntries[0].publishedAt.toISOString(),
+        publishedBy: rosterEntries[0].publishedBy?.name || rosterEntries[0].publishedBy?.email || 'Super Admin',
+      }
+    : null;
+
+  // If Attendance Manager (Akshay) views and roster is not published yet:
+  if (!isSuperAdmin && !isRosterPublished) {
+    windowInfo.status = 'ROSTER_NOT_PUBLISHED';
+    windowInfo.message = 'Super Admin has not published the attendance roster for this date yet. Attendance cannot be captured until the roster is published.';
+  }
 
   // Fetch all operational employees
-  const directory = await getEmployeeDirectoryService(department && department !== 'ALL' ? { department } : undefined);
+  let directory = await getEmployeeDirectoryService(department && department !== 'ALL' ? { department } : undefined);
+
+  // If Attendance Manager views: ONLY show employees included in the published roster
+  if (!isSuperAdmin) {
+    if (!isRosterPublished) {
+      directory = [];
+    } else {
+      directory = directory.filter((emp) => publishedEmployeeIds.has(emp.id));
+    }
+  }
 
   // Fetch attendance records for this date
   const records = await db.employeeAttendance.findMany({
@@ -228,6 +394,7 @@ export async function getDailyAttendanceService(dateInput: string | Date, depart
       remarks: existing?.remarks || '',
       isMarked: Boolean(existing),
       isFinalized: existing?.isFinalized ?? false,
+      inRoster: publishedEmployeeIds.has(emp.id),
       markedBy: existing?.markedBy || null,
       submittedAt: existing?.submittedAt ? existing.submittedAt.toISOString() : null,
       updatedAt: existing?.updatedAt ? existing.updatedAt.toISOString() : null,
@@ -254,6 +421,9 @@ export async function getDailyAttendanceService(dateInput: string | Date, depart
     date: formatDateKey(targetDate),
     targetDateIso: targetDate.toISOString(),
     isFinalized,
+    isRosterPublished,
+    publishedMetadata,
+    windowInfo,
     totalEmployees: directory.length,
     markedCount,
     presentCount,
@@ -269,8 +439,12 @@ export async function getDailyAttendanceService(dateInput: string | Date, depart
 
 /**
  * 3. POST / Capture Daily Attendance
- * Enforces strict locking: Once finalized, Attendance Manager CANNOT overwrite.
- * Only Super Admin (threadsecurity@gmail.com) can update finalized records.
+ * STRICT RULES:
+ * - 12-Hour daily attendance window: 09:00 AM to 09:00 PM IST
+ * - Akshay Kumar can update multiple times during the open window for today.
+ * - At 09:00 PM IST or on past/future dates, the server automatically rejects updates from Akshay.
+ * - Akshay can only mark employees who exist in the published DailyAttendanceRoster.
+ * - Only Super Admin (threadsecurity@gmail.com) can update finalized or historical records.
  */
 export async function captureDailyAttendanceService(params: {
   date: string | Date;
@@ -286,28 +460,50 @@ export async function captureDailyAttendanceService(params: {
   const targetDate = normalizeAttendanceDate(params.date);
   const isFinalized = params.isFinalized ?? true;
 
-  // 1. Check if attendance for this date is already finalized
-  const existingRecords = await db.employeeAttendance.findMany({
-    where: { attendanceDate: targetDate },
-    select: { id: true, isFinalized: true },
+  const isSuperAdmin = isSuperAdminAttendanceUser({
+    userId: params.markedById,
+    email: params.markedByEmail,
   });
 
-  const isAlreadyFinalized = existingRecords.some((r: any) => r.isFinalized);
+  const windowInfo = getAttendanceWindowStatus(targetDate);
 
-  if (isAlreadyFinalized) {
-    const isSuperAdmin = isSuperAdminAttendanceUser({
-      userId: params.markedById,
-      email: params.markedByEmail,
+  // STRICT SERVER-SIDE TIME WINDOW & ROSTER ENFORCEMENT FOR ATTENDANCE MANAGER (AKSHAY KUMAR)
+  if (!isSuperAdmin) {
+    if (!windowInfo.isToday) {
+      throw new Error(
+        `Forbidden: Attendance Manager can only capture attendance for the current working day (${windowInfo.todayIstDateKey}). Past and future dates cannot be modified.`
+      );
+    }
+
+    if (!windowInfo.isOpen) {
+      throw new Error(
+        `Forbidden: Daily attendance window is strictly 09:00 AM to 09:00 PM IST. Attendance editing is currently closed. ${windowInfo.message}`
+      );
+    }
+
+    // ROSTER MEMBERSHIP VALIDATION FOR ATTENDANCE MANAGER
+    const rosterEntries = await db.dailyAttendanceRoster.findMany({
+      where: { attendanceDate: targetDate },
+      select: { employeeId: true },
     });
 
-    if (!isSuperAdmin) {
+    if (rosterEntries.length === 0) {
       throw new Error(
-        'Forbidden: Attendance for this date has already been finalized and locked. Only Super Admin has rectification authority.'
+        'Forbidden: Daily attendance roster has not been published by Super Admin for this date. Attendance cannot be submitted.'
       );
+    }
+
+    const rosterSet = new Set(rosterEntries.map((r: any) => r.employeeId));
+    for (const rec of params.records) {
+      if (!rosterSet.has(rec.employeeId)) {
+        throw new Error(
+          `Forbidden: Employee ID ${rec.employeeId} is not in the Super Admin published roster for this date.`
+        );
+      }
     }
   }
 
-  // 2. Perform atomic batch upsert inside transaction
+  // Perform atomic batch upsert inside transaction
   const upsertOps = params.records.map((rec) => {
     return db.employeeAttendance.upsert({
       where: {
@@ -342,6 +538,7 @@ export async function captureDailyAttendanceService(params: {
     count: params.records.length,
     date: formatDateKey(targetDate),
     isFinalized,
+    windowInfo,
   };
 }
 
@@ -518,7 +715,9 @@ export async function getEmployeeAttendanceProfileService(
  * Validates superAdminEmail === 'threadsecurity@gmail.com' and creates immutable audit log.
  */
 export async function rectifyAttendanceRecordService(params: {
-  attendanceId: string;
+  attendanceId?: string;
+  employeeId?: string;
+  date?: string | Date;
   newStatus: EmployeeAttendanceStatus;
   remarks: string;
   superAdminId: string;
@@ -539,12 +738,52 @@ export async function rectifyAttendanceRecordService(params: {
     throw new Error('Mandatory correction remarks/reason must be provided for audit tracking.');
   }
 
-  const existing = await db.employeeAttendance.findUnique({
-    where: { id: params.attendanceId },
-    include: {
-      employee: { select: { id: true, name: true, email: true } },
-    },
-  });
+  let existing: any = null;
+  if (params.attendanceId) {
+    existing = await db.employeeAttendance.findUnique({
+      where: { id: params.attendanceId },
+      include: {
+        employee: { select: { id: true, name: true, email: true } },
+      },
+    });
+  } else if (params.employeeId && params.date) {
+    const targetDate = normalizeAttendanceDate(params.date);
+    existing = await db.employeeAttendance.findUnique({
+      where: {
+        employeeId_attendanceDate: {
+          employeeId: params.employeeId,
+          attendanceDate: targetDate,
+        },
+      },
+      include: {
+        employee: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    if (!existing) {
+      // Create initial record then rectify
+      const emp = await prisma.user.findUnique({
+        where: { id: params.employeeId },
+        select: { id: true, name: true, email: true },
+      });
+      if (!emp) throw new Error('Target employee not found in database.');
+
+      existing = await db.employeeAttendance.create({
+        data: {
+          employeeId: emp.id,
+          attendanceDate: targetDate,
+          status: 'ABSENT',
+          remarks: 'Unmarked historical record',
+          markedById: params.superAdminId,
+          isFinalized: true,
+          submittedAt: new Date(),
+        },
+        include: {
+          employee: { select: { id: true, name: true, email: true } },
+        },
+      });
+    }
+  }
 
   if (!existing) {
     throw new Error('Target attendance record not found in database.');
@@ -827,5 +1066,318 @@ export async function getMonthlyAttendanceReportService(year: number, month: num
     totalEmployees: directory.length,
     rows: employeeRows,
   };
+}
+
+/**
+ * 9. POST / Publish Daily Attendance Roster (Super Admin Only)
+ * Creates a date-specific snapshot in DailyAttendanceRoster.
+ * Akshay Kumar can only view and capture attendance for employees included in this published snapshot.
+ */
+export async function publishDailyRosterService(params: {
+  attendanceDate: string | Date;
+  employeeIds: string[];
+  publisherId: string;
+  publisherEmail: string;
+}) {
+  const isAuthorized = isSuperAdminAttendanceUser({
+    userId: params.publisherId,
+    email: params.publisherEmail,
+  });
+
+  if (!isAuthorized) {
+    throw new Error(
+      `Forbidden: Only Super Admin (${SUPER_ADMIN_ATTENDANCE_EMAIL}) has authority to publish daily rosters.`
+    );
+  }
+
+  const targetDate = normalizeAttendanceDate(params.attendanceDate);
+
+  if (!Array.isArray(params.employeeIds) || params.employeeIds.length === 0) {
+    throw new Error('Please select at least one employee to include in the daily roster.');
+  }
+
+  const uniqueEmployeeIds = Array.from(new Set(params.employeeIds));
+
+  // Perform transactional upserts for the snapshot
+  const ops = uniqueEmployeeIds.map((empId) =>
+    db.dailyAttendanceRoster.upsert({
+      where: {
+        attendanceDate_employeeId: {
+          attendanceDate: targetDate,
+          employeeId: empId,
+        },
+      },
+      create: {
+        attendanceDate: targetDate,
+        employeeId: empId,
+        publishedById: params.publisherId,
+        publishedAt: new Date(),
+      },
+      update: {
+        publishedById: params.publisherId,
+        publishedAt: new Date(),
+      },
+    })
+  );
+
+  await prisma.$transaction(ops);
+
+  return {
+    success: true,
+    count: uniqueEmployeeIds.length,
+    date: formatDateKey(targetDate),
+    publishedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * 10. GET Daily Attendance Roster for a Date
+ */
+export async function getDailyRosterService(dateInput: string | Date) {
+  const targetDate = normalizeAttendanceDate(dateInput);
+
+  const entries = await db.dailyAttendanceRoster.findMany({
+    where: { attendanceDate: targetDate },
+    include: {
+      employee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          employeeProfile: true,
+        },
+      },
+      publishedBy: {
+        select: { id: true, name: true, email: true },
+      },
+    },
+    orderBy: { publishedAt: 'desc' },
+  });
+
+  const isPublished = entries.length > 0;
+  const publishedAt = isPublished ? entries[0].publishedAt.toISOString() : null;
+  const publishedBy = isPublished ? (entries[0].publishedBy?.name || entries[0].publishedBy?.email) : null;
+
+  return {
+    date: formatDateKey(targetDate),
+    isPublished,
+    publishedAt,
+    publishedBy,
+    totalCount: entries.length,
+    employeeIds: entries.map((e: any) => e.employeeId),
+    entries: entries.map((e: any) => ({
+      id: e.id,
+      employeeId: e.employeeId,
+      name: e.employee?.name || 'Unnamed',
+      email: e.employee?.email || '',
+      department: e.employee?.employeeProfile?.department || 'Academics & Faculty',
+      designation: e.employee?.employeeProfile?.designation || 'Faculty Member',
+      status: e.employee?.employeeProfile?.status || 'ACTIVE',
+      attendanceEligible: e.employee?.employeeProfile?.attendanceEligible ?? true,
+    })),
+  };
+}
+
+/**
+ * 11. POST / Create Employee Record (Super Admin Only)
+ */
+export async function createEmployeeRecordService(params: {
+  employeeId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  department: string;
+  designation: string;
+  joiningDate?: string | Date;
+  status?: string;
+  attendanceEligible?: boolean;
+  linkUserId?: string;
+  adminId: string;
+  adminEmail: string;
+}) {
+  const isAuthorized = isSuperAdminAttendanceUser({
+    userId: params.adminId,
+    email: params.adminEmail,
+  });
+
+  if (!isAuthorized) {
+    throw new Error('Forbidden: Only Super Admin can register employees.');
+  }
+
+  const cleanEmployeeId = params.employeeId.trim().toUpperCase();
+  const cleanName = params.name.trim();
+
+  // Check unique employeeId
+  const existingProfile = await db.employeeProfile.findUnique({
+    where: { employeeId: cleanEmployeeId },
+  });
+
+  if (existingProfile) {
+    throw new Error(`An employee with ID "${cleanEmployeeId}" already exists.`);
+  }
+
+  let targetUserId = params.linkUserId;
+
+  if (targetUserId) {
+    const userProfile = await db.employeeProfile.findUnique({
+      where: { userId: targetUserId },
+    });
+    if (userProfile) {
+      throw new Error('Selected account is already linked to another employee profile.');
+    }
+  } else {
+    const cleanEmail = params.email?.trim().toLowerCase();
+    if (cleanEmail) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email: cleanEmail },
+      });
+      if (existingUser) {
+        targetUserId = existingUser.id;
+      }
+    }
+
+    if (!targetUserId) {
+      const generatedEmail = cleanEmail || `employee.${cleanEmployeeId.toLowerCase().replace(/[^a-z0-9]/g, '')}@threadsecurity.org`;
+      const newUser = await prisma.user.create({
+        data: {
+          name: cleanName,
+          email: generatedEmail,
+          role: 'STAFF_JUNIOR',
+          isDashboardAccessGranted: false,
+          passwordHash: 'MFA_OTP_ONLY',
+          isActive: true,
+        },
+      });
+      targetUserId = newUser.id;
+    }
+  }
+
+  const createdProfile = await db.employeeProfile.create({
+    data: {
+      userId: targetUserId,
+      employeeId: cleanEmployeeId,
+      department: params.department.trim(),
+      designation: params.designation.trim(),
+      joiningDate: params.joiningDate ? new Date(params.joiningDate) : new Date(),
+      status: params.status || 'ACTIVE',
+      attendanceEligible: params.attendanceEligible ?? true,
+      phone: params.phone?.trim() || null,
+    },
+    include: {
+      user: { select: { id: true, name: true, email: true, role: true } },
+    },
+  });
+
+  return createdProfile;
+}
+
+/**
+ * 12. PATCH / Update Employee Record (Super Admin Only)
+ */
+export async function updateEmployeeRecordService(params: {
+  employeeId: string;
+  name?: string;
+  department?: string;
+  designation?: string;
+  status?: string;
+  attendanceEligible?: boolean;
+  phone?: string;
+  adminId: string;
+  adminEmail: string;
+}) {
+  const isAuthorized = isSuperAdminAttendanceUser({
+    userId: params.adminId,
+    email: params.adminEmail,
+  });
+
+  if (!isAuthorized) {
+    throw new Error('Forbidden: Only Super Admin can modify employee records.');
+  }
+
+  const profile = await db.employeeProfile.findUnique({
+    where: { employeeId: params.employeeId },
+    include: { user: true },
+  });
+
+  if (!profile) {
+    throw new Error(`Employee with ID ${params.employeeId} not found.`);
+  }
+
+  if (params.name?.trim() && profile.userId) {
+    await prisma.user.update({
+      where: { id: profile.userId },
+      data: { name: params.name.trim() },
+    });
+  }
+
+  const updatedProfile = await db.employeeProfile.update({
+    where: { employeeId: params.employeeId },
+    data: {
+      ...(params.department ? { department: params.department.trim() } : {}),
+      ...(params.designation ? { designation: params.designation.trim() } : {}),
+      ...(params.status ? { status: params.status } : {}),
+      ...(typeof params.attendanceEligible === 'boolean' ? { attendanceEligible: params.attendanceEligible } : {}),
+      ...(params.phone !== undefined ? { phone: params.phone?.trim() || null } : {}),
+    },
+    include: {
+      user: { select: { id: true, name: true, email: true, role: true } },
+    },
+  });
+
+  return updatedProfile;
+}
+
+/**
+ * 13. Toggle Employee Status (Activate/Deactivate)
+ * Never deletes historical attendance records.
+ */
+export async function toggleEmployeeStatusService(
+  employeeId: string,
+  newStatus: 'ACTIVE' | 'INACTIVE',
+  adminId: string,
+  adminEmail: string
+) {
+  const isAuthorized = isSuperAdminAttendanceUser({
+    userId: adminId,
+    email: adminEmail,
+  });
+
+  if (!isAuthorized) {
+    throw new Error('Forbidden: Only Super Admin can change employee activation status.');
+  }
+
+  const updated = await db.employeeProfile.update({
+    where: { employeeId },
+    data: { status: newStatus },
+  });
+
+  return updated;
+}
+
+/**
+ * 14. Toggle Employee Attendance Eligibility
+ */
+export async function toggleEmployeeEligibilityService(
+  employeeId: string,
+  eligible: boolean,
+  adminId: string,
+  adminEmail: string
+) {
+  const isAuthorized = isSuperAdminAttendanceUser({
+    userId: adminId,
+    email: adminEmail,
+  });
+
+  if (!isAuthorized) {
+    throw new Error('Forbidden: Only Super Admin can manage attendance eligibility.');
+  }
+
+  const updated = await db.employeeProfile.update({
+    where: { employeeId },
+    data: { attendanceEligible: eligible },
+  });
+
+  return updated;
 }
 

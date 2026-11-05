@@ -57,6 +57,9 @@ export interface EmployeeNode {
   email: string;
   role: string;
   avatarUrl?: string | null;
+  department?: string | null;
+  designation?: string | null;
+  employeeId?: string | null;
 }
 
 export interface DelegationMemberItem {
@@ -116,12 +119,31 @@ export function PrivilegeDelegationWorkspace({
   const fetchWorkspaceData = React.useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const data = await getDelegationWorkspaceAction();
-      if (data?.employees && data.employees.length > 0) {
-        setEmployees(data.employees);
+      let loaded = false;
+      try {
+        const data = await getDelegationWorkspaceAction();
+        if (data?.employees && data.employees.length > 0) {
+          setEmployees(data.employees);
+          loaded = true;
+        }
+        if (data?.teams) {
+          setTeams(data.teams as any);
+        }
+      } catch (actionErr) {
+        console.warn('[PrivilegeDelegation] Action fetch notice, attempting API route fallback:', actionErr);
       }
-      if (data?.teams) {
-        setTeams(data.teams as any);
+
+      if (!loaded) {
+        const res = await fetch('/api/admin/delegation/roster');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.employees && json.employees.length > 0) {
+            setEmployees(json.employees);
+          }
+          if (json.teams) {
+            setTeams(json.teams);
+          }
+        }
       }
     } catch (err) {
       console.warn('[PrivilegeDelegation] Background fetch notice:', err);
@@ -175,6 +197,16 @@ export function PrivilegeDelegationWorkspace({
     systemGrants: ['DOCKET', 'COMMUNICATIONS', 'ATTENDANCE'],
   });
 
+  const openCreateTeamModal = () => {
+    if (eligibleLeads.length > 0) {
+      setCreateTeamForm((prev) => ({
+        ...prev,
+        leadId: prev.leadId && eligibleLeads.some((l) => l.id === prev.leadId) ? prev.leadId : eligibleLeads[0].id,
+      }));
+    }
+    setCreateTeamOpen(true);
+  };
+
   // Keep createTeamForm.leadId populated
   React.useEffect(() => {
     if (eligibleLeads.length > 0) {
@@ -194,8 +226,9 @@ export function PrivilegeDelegationWorkspace({
   const availableMembers = React.useMemo(() => {
     if (!assignMemberModal) return [];
     const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
-    const existingMemberIds = new Set(assignMemberModal.members.map((m) => m.userId));
-    return list.filter((e) => e.id !== assignMemberModal.leadId && !existingMemberIds.has(e.id));
+    const existingMemberIds = new Set((assignMemberModal.members || []).map((m) => m.userId));
+    const unallocated = list.filter((e) => e.id !== assignMemberModal.leadId && !existingMemberIds.has(e.id));
+    return unallocated.length > 0 ? unallocated : list.filter((e) => e.id !== assignMemberModal.leadId);
   }, [assignMemberModal, employees, initialEmployees]);
 
   React.useEffect(() => {
@@ -510,7 +543,7 @@ export function PrivilegeDelegationWorkspace({
 
           <button
             type="button"
-            onClick={() => setCreateTeamOpen(true)}
+            onClick={openCreateTeamModal}
             className="px-4 py-2 rounded-xl bg-[#C6FF34] hover:bg-[#b2ea2c] text-black font-bold font-mono text-xs flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
@@ -567,7 +600,7 @@ export function PrivilegeDelegationWorkspace({
               </p>
             </div>
             <button
-              onClick={() => setCreateTeamOpen(true)}
+              onClick={openCreateTeamModal}
               className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs inline-flex items-center gap-2 cursor-pointer shadow-sm"
             >
               <Plus className="w-4 h-4" />
@@ -701,10 +734,13 @@ export function PrivilegeDelegationWorkspace({
                           type="button"
                           onClick={() => {
                             setAssignMemberModal(team);
+                            const existingIds = new Set((team.members || []).map((m) => m.userId));
+                            const candidates = employees.filter((e) => e.id !== team.leadId && !existingIds.has(e.id));
+                            const candidateId = candidates[0]?.id || employees.find((e) => e.id !== team.leadId)?.id || '';
                             setAssignMemberForm({
-                              userId: unassignedEmployees[0]?.id || '',
+                              userId: candidateId,
                               roleInTeam: 'JUNIOR',
-                              systemGrants: team.systemGrants.slice(0, 2),
+                              systemGrants: team.systemGrants && team.systemGrants.length > 0 ? team.systemGrants.slice(0, 3) : ['DOCKET', 'COMMUNICATIONS'],
                             });
                           }}
                           className="text-[11px] font-semibold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 cursor-pointer"
@@ -911,23 +947,37 @@ export function PrivilegeDelegationWorkspace({
             </div>
 
             <div>
-              <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Appoint Team Lead (Tier 2 Officer) *</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-slate-600 font-semibold text-[11px]">
+                  Appoint Team Lead (Tier 2 Officer) *
+                </label>
+                <div className="flex items-center gap-1.5 text-[10px]">
+                  <span className="text-slate-400 font-mono">
+                    {eligibleLeads.length} Candidates Available
+                  </span>
+                  {eligibleLeads.length === 0 && (
+                    <button
+                      type="button"
+                      onClick={fetchWorkspaceData}
+                      className="text-indigo-600 hover:text-indigo-800 font-semibold underline cursor-pointer"
+                    >
+                      Sync Roster
+                    </button>
+                  )}
+                </div>
+              </div>
               <select
                 required
                 value={createTeamForm.leadId}
                 onChange={(e) => setCreateTeamForm({ ...createTeamForm, leadId: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
               >
-                <option value="" disabled>-- Select Team Lead --</option>
-                {eligibleLeads.length === 0 ? (
-                  <option value="" disabled>No eligible team leads found (Click Sync Roster)</option>
-                ) : (
-                  eligibleLeads.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name || e.email} ({e.role})
-                    </option>
-                  ))
-                )}
+                <option value="">-- Choose Team Lead (Tier 2 Officer) --</option>
+                {eligibleLeads.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.name || e.email} ({e.role}){e.department ? ` • ${e.department}` : ''}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -993,23 +1043,26 @@ export function PrivilegeDelegationWorkspace({
 
             <form onSubmit={handleAssignMemberSubmit} className="space-y-4 pt-2">
               <div>
-                <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Select Employee *</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-600 font-semibold text-[11px]">
+                    Select Operational Employee to Assign *
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {availableMembers.length} Available Staff
+                  </span>
+                </div>
                 <select
                   required
                   value={assignMemberForm.userId}
                   onChange={(e) => setAssignMemberForm({ ...assignMemberForm, userId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
                 >
-                  <option value="" disabled>-- Select Staff Member --</option>
-                  {availableMembers.length === 0 ? (
-                    <option value="" disabled>No available staff members for this team</option>
-                  ) : (
-                    availableMembers.map((e) => (
-                      <option key={e.id} value={e.id}>
-                        {e.name || e.email} ({e.role})
-                      </option>
-                    ))
-                  )}
+                  <option value="">-- Choose Staff Member / Operational Associate --</option>
+                  {availableMembers.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.name || e.email} ({e.role}){e.department ? ` • ${e.department}` : ''}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -1023,35 +1076,39 @@ export function PrivilegeDelegationWorkspace({
                   <option value="JUNIOR">Junior Technical Associate (Tier 3)</option>
                   <option value="SPECIALIST">Domain Specialist</option>
                   <option value="OBSERVER">Observer / QA Trainee</option>
+                  <option value="LEAD">Co-Lead / Assistant Lead</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Subsystem Grants for this Member</label>
-                <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  {assignMemberModal.systemGrants.map((modId) => (
-                    <label key={modId} className="flex items-center gap-2 text-[11px] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={assignMemberForm.systemGrants.includes(modId)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setAssignMemberForm({
-                              ...assignMemberForm,
-                              systemGrants: [...assignMemberForm.systemGrants, modId],
-                            });
-                          } else {
-                            setAssignMemberForm({
-                              ...assignMemberForm,
-                              systemGrants: assignMemberForm.systemGrants.filter((id) => id !== modId),
-                            });
-                          }
-                        }}
-                        className="rounded text-indigo-600 focus:ring-indigo-500"
-                      />
-                      <span className="font-medium">{modId}</span>
-                    </label>
-                  ))}
+                <div className="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200 max-h-36 overflow-y-auto">
+                  {(assignMemberModal.systemGrants && assignMemberModal.systemGrants.length > 0 ? assignMemberModal.systemGrants : availableModules.map((m) => m.id)).map((modId) => {
+                    const modObj = availableModules.find((m) => m.id === modId);
+                    return (
+                      <label key={modId} className="flex items-center gap-2 text-[11px] cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={assignMemberForm.systemGrants.includes(modId)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setAssignMemberForm({
+                                ...assignMemberForm,
+                                systemGrants: [...assignMemberForm.systemGrants, modId],
+                              });
+                            } else {
+                              setAssignMemberForm({
+                                ...assignMemberForm,
+                                systemGrants: assignMemberForm.systemGrants.filter((id) => id !== modId),
+                              });
+                            }
+                          }}
+                          className="rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="font-medium text-slate-800">{modObj?.name || modId}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1230,7 +1287,7 @@ export function PrivilegeDelegationWorkspace({
                   onChange={(e) => setEdgeForm({ ...edgeForm, sourceUserId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
                 >
-                  {edgeModalTeam.members.map((m) => (
+                  {(edgeModalTeam.members || []).map((m) => (
                     <option key={m.userId} value={m.userId}>
                       {m.user?.name || m.user?.email} ({m.roleInTeam})
                     </option>
@@ -1246,7 +1303,7 @@ export function PrivilegeDelegationWorkspace({
                   onChange={(e) => setEdgeForm({ ...edgeForm, targetUserId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
                 >
-                  {edgeModalTeam.members.map((m) => (
+                  {(edgeModalTeam.members || []).map((m) => (
                     <option key={m.userId} value={m.userId}>
                       {m.user?.name || m.user?.email} ({m.roleInTeam})
                     </option>

@@ -15,7 +15,16 @@ export const revalidate = 0;
 export default async function AdminDelegationPage() {
   const user = await getCurrentUser();
 
-  if (!user || !isAdminRole(user.role)) {
+  const superEmails = [
+    'threadsecurity@gmail.com',
+    'threadsecuritydeveloper@gmail.com',
+    'kunaldigitalconnect@gmail.com',
+    'threadsecuritymentor@gmail.com',
+  ];
+
+  const isAuthorized = user && (superEmails.includes((user.email || '').toLowerCase()) || isAdminRole(user.role) || user.role === 'MENTOR');
+
+  if (!isAuthorized) {
     redirect('/login?error=UnauthorizedAccess');
   }
 

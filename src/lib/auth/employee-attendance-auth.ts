@@ -11,7 +11,7 @@ export const SUPER_ADMIN_ATTENDANCE_EMAIL = 'threadsecurity@gmail.com';
 export const ATTENDANCE_MANAGER_EMAIL = 'akshay.kumar@threadsecurity.org';
 
 export interface AttendanceAuthUser {
-  userId: string;
+  userId?: string | null;
   email?: string | null;
   role?: string | null;
   name?: string | null;

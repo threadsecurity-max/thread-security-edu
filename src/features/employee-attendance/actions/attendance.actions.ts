@@ -17,6 +17,13 @@ import {
   getAttendanceAuditHistoryService,
   getAttendanceAnalyticsOverviewService,
   getMonthlyAttendanceReportService,
+  getAttendanceWindowStatus,
+  publishDailyRosterService,
+  getDailyRosterService,
+  createEmployeeRecordService,
+  updateEmployeeRecordService,
+  toggleEmployeeStatusService,
+  toggleEmployeeEligibilityService,
 } from '@/server/services/employee-attendance.service';
 import { EmployeeAttendanceStatus } from '@prisma/client';
 
@@ -200,6 +207,178 @@ export async function getMonthlyAttendanceReportAction(year: number, month: numb
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch monthly report';
     return { success: false, error: msg, data: null };
+  }
+}
+
+/**
+ * 8. GET Authoritative Server-Side Attendance Window Status
+ */
+export async function getAttendanceWindowStatusAction(targetDate?: string) {
+  try {
+    const data = getAttendanceWindowStatus(targetDate);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to get window status';
+    return { success: false, error: msg, data: null };
+  }
+}
+
+/**
+ * 9. POST / Publish Daily Attendance Roster (Super Admin Only)
+ */
+export async function publishDailyRosterAction(params: {
+  attendanceDate: string;
+  employeeIds: string[];
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Only Super Admin can publish the daily attendance roster.' };
+    }
+
+    const result = await publishDailyRosterService({
+      attendanceDate: params.attendanceDate,
+      employeeIds: params.employeeIds,
+      publisherId: user.userId,
+      publisherEmail: user.email || '',
+    });
+
+    revalidatePath('/admin/employee-attendance');
+    revalidatePath('/admin/employee-attendance/capture');
+    revalidatePath('/admin/employee-attendance/roster');
+
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to publish roster';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * 10. GET Daily Attendance Roster
+ */
+export async function getDailyRosterAction(date: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !canAccessEmployeeAttendance(user)) {
+      return { success: false, error: 'Unauthorized.', data: null };
+    }
+
+    const data = await getDailyRosterService(date);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch roster';
+    return { success: false, error: msg, data: null };
+  }
+}
+
+/**
+ * 11. POST / Register New Employee (Super Admin Only)
+ */
+export async function createEmployeeAction(params: {
+  employeeId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  department: string;
+  designation: string;
+  joiningDate?: string;
+  status?: string;
+  attendanceEligible?: boolean;
+  linkUserId?: string;
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Only Super Admin can register employees.' };
+    }
+
+    const result = await createEmployeeRecordService({
+      ...params,
+      adminId: user.userId,
+      adminEmail: user.email || '',
+    });
+
+    revalidatePath('/admin/employee-attendance/directory');
+    revalidatePath('/admin/employee-attendance/roster');
+
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to register employee';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * 12. PATCH / Update Employee Record (Super Admin Only)
+ */
+export async function updateEmployeeAction(params: {
+  employeeId: string;
+  name?: string;
+  department?: string;
+  designation?: string;
+  status?: string;
+  attendanceEligible?: boolean;
+  phone?: string;
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Only Super Admin can modify employee records.' };
+    }
+
+    const result = await updateEmployeeRecordService({
+      ...params,
+      adminId: user.userId,
+      adminEmail: user.email || '',
+    });
+
+    revalidatePath('/admin/employee-attendance/directory');
+    revalidatePath('/admin/employee-attendance/roster');
+
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update employee';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * 13. PATCH / Toggle Employee Activation (Activate/Deactivate)
+ */
+export async function toggleEmployeeStatusAction(employeeId: string, status: 'ACTIVE' | 'INACTIVE') {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Only Super Admin can activate or deactivate employees.' };
+    }
+
+    const result = await toggleEmployeeStatusService(employeeId, status, user.userId, user.email || '');
+    revalidatePath('/admin/employee-attendance/directory');
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update employee status';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * 14. PATCH / Toggle Employee Attendance Eligibility
+ */
+export async function toggleEmployeeEligibilityAction(employeeId: string, eligible: boolean) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Only Super Admin can update attendance eligibility.' };
+    }
+
+    const result = await toggleEmployeeEligibilityService(employeeId, eligible, user.userId, user.email || '');
+    revalidatePath('/admin/employee-attendance/directory');
+    revalidatePath('/admin/employee-attendance/roster');
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to update eligibility';
+    return { success: false, error: msg };
   }
 }
 
