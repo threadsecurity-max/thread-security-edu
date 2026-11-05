@@ -117,6 +117,10 @@ model User {
   invoicesCreated StudentInvoice[] @relation("InvoiceCreator")
   ledTeams       DelegationTeam[]   @relation("TeamLead")
   teamMemberships DelegationMember[]
+  employeeProfile       EmployeeProfile?
+  employeeAttendances   EmployeeAttendance[]        @relation("EmployeeAttendanceRecords")
+  markedAttendances     EmployeeAttendance[]        @relation("AttendanceMarker")
+  attendanceAuditLogs   EmployeeAttendanceAuditLog[] @relation("AuditModifier")
 
   @@index([email])
 }
@@ -1399,6 +1403,73 @@ model DelegationEdge {
   @@index([sourceUserId])
   @@index([targetUserId])
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// EMPLOYEE ATTENDANCE MANAGEMENT SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+
+model EmployeeProfile {
+  id           String             @id @default(cuid())
+  userId       String             @unique
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId   String             @unique // e.g. TSE-EMP-103
+  department   String             @default("Academics & Faculty")
+  designation  String             @default("Faculty Member")
+  joiningDate  DateTime           @default(now())
+  status       String             @default("ACTIVE") // ACTIVE, ON_LEAVE, PROBATION, INACTIVE
+  phone        String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([employeeId])
+  @@index([department])
+}
+
+enum EmployeeAttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LEAVE
+  HOLIDAY
+}
+
+model EmployeeAttendance {
+  id              String                   @id @default(cuid())
+  employeeId      String
+  employee        User                     @relation("EmployeeAttendanceRecords", fields: [employeeId], references: [id], onDelete: Cascade)
+  attendanceDate  DateTime                 // Normalized to UTC midnight (YYYY-MM-DDT00:00:00.000Z)
+  status          EmployeeAttendanceStatus @default(PRESENT)
+  remarks         String?
+  markedById      String?
+  markedBy        User?                    @relation("AttendanceMarker", fields: [markedById], references: [id], onDelete: SetNull)
+  isFinalized     Boolean                  @default(true) // Locked for Attendance Manager once finalized
+  submittedAt     DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  auditLogs       EmployeeAttendanceAuditLog[]
+
+  @@unique([employeeId, attendanceDate])
+  @@index([attendanceDate])
+  @@index([employeeId])
+  @@index([status])
+}
+
+model EmployeeAttendanceAuditLog {
+  id             String                   @id @default(cuid())
+  attendanceId   String
+  attendance     EmployeeAttendance       @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+  previousStatus EmployeeAttendanceStatus
+  updatedStatus  EmployeeAttendanceStatus
+  reason         String                   @db.Text
+  modifiedById   String
+  modifiedBy     User                     @relation("AuditModifier", fields: [modifiedById], references: [id], onDelete: Cascade)
+  modifiedAt     DateTime                 @default(now())
+
+  @@index([attendanceId])
+  @@index([modifiedById])
+  @@index([modifiedAt])
+}
+
 
 
 

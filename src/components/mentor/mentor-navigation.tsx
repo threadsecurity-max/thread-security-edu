@@ -26,6 +26,7 @@ import {
   ExternalLink,
   ClipboardList,
   MessageSquare,
+  UserCheck,
 } from 'lucide-react';
 import { QuickCreateDropdown } from './QuickCreateModal';
 
@@ -101,6 +102,20 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
         { name: 'Notifications', href: '/mentor/notifications', icon: Bell, badgeCount: unreadNotificationsCount },
       ],
     },
+    ...(user.email?.toLowerCase() === 'akshay.kumar@threadsecurity.org' ||
+    user.email?.toLowerCase() === 'threadsecurity@gmail.com' ||
+    user.role === 'SUPER_ADMIN'
+      ? [
+          {
+            title: 'EMPLOYEE MANAGEMENT',
+            items: [
+              { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: UserCheck, badge: 'MANAGER' },
+              { name: 'Capture Attendance', href: '/admin/employee-attendance/capture', icon: Clock },
+              { name: 'Attendance Reports', href: '/admin/employee-attendance/reports', icon: ClipboardList },
+            ],
+          },
+        ]
+      : []),
   ];
 
   const isCurrentActive = (itemHref: string, exact?: boolean) => {

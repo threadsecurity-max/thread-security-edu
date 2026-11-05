@@ -32,6 +32,10 @@ import {
   UsersRound,
   ClipboardList,
   Receipt,
+  Clock,
+  History,
+  Edit3,
+  BarChart3,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -82,6 +86,23 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
     });
   };
 
+  const isSuperAdmin =
+    user.email?.trim().toLowerCase() === 'threadsecurity@gmail.com' ||
+    user.role?.toUpperCase() === 'SUPER_ADMIN';
+
+  const employeeAttendanceItems = [
+    { name: 'Employee Directory', href: '/admin/employee-attendance/directory', icon: UsersRound },
+    { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: Clock, badge: 'OPS' },
+    { name: 'Capture Attendance', href: '/admin/employee-attendance/capture', icon: UserCheck },
+    { name: 'Attendance Reports', href: '/admin/employee-attendance/reports', icon: BarChart3 },
+    ...(isSuperAdmin
+      ? [
+          { name: 'Attendance Corrections', href: '/admin/employee-attendance/corrections', icon: Edit3, badge: 'SUPER' },
+          { name: 'Audit History', href: '/admin/employee-attendance/audit', icon: History },
+        ]
+      : []),
+  ];
+
   const navGroups: NavGroup[] = [
     {
       title: 'Command Center',
@@ -90,6 +111,10 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
         { name: "Today's Docket", href: '/admin/docket', icon: ClipboardList, badge: 'DAILY' },
         { name: 'Announcements', href: '/admin/announcements', icon: Bell },
       ],
+    },
+    {
+      title: 'Employee Management',
+      items: employeeAttendanceItems,
     },
     {
       title: 'People & Accounts',

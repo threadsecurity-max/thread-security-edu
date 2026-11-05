@@ -13,9 +13,10 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession();
+  const isAttendanceManager = session?.email?.trim().toLowerCase() === 'akshay.kumar@threadsecurity.org';
 
-  // Unified role validation for admin portal
-  if (!session || !isAdminRole(session.role)) {
+  // Unified role validation for admin portal (allows Admins and designated Attendance Manager)
+  if (!session || (!isAdminRole(session.role) && !isAttendanceManager)) {
     redirect('/login?error=UnauthorizedAccess');
   }
 

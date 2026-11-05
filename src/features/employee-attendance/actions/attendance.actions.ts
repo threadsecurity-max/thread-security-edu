@@ -1,0 +1,204 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { getCurrentUser } from '@/lib/auth/session';
+import {
+  canAccessEmployeeAttendance,
+  canCaptureEmployeeAttendance,
+  canRectifyEmployeeAttendance,
+  isSuperAdminAttendanceUser,
+} from '@/lib/auth/employee-attendance-auth';
+import {
+  getDailyAttendanceService,
+  captureDailyAttendanceService,
+  getEmployeeDirectoryService,
+  getEmployeeAttendanceProfileService,
+  rectifyAttendanceRecordService,
+  getAttendanceAuditHistoryService,
+  getAttendanceAnalyticsOverviewService,
+  getMonthlyAttendanceReportService,
+} from '@/server/services/employee-attendance.service';
+import { EmployeeAttendanceStatus } from '@prisma/client';
+
+/**
+ * 1. GET Dashboard Overview Metrics & Daily Overview
+ */
+export async function getEmployeeAttendanceOverviewAction(dateInput?: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !canAccessEmployeeAttendance(user)) {
+      return { success: false, error: 'Unauthorized: Access restricted to authorized personnel.', data: null };
+    }
+
+    const data = await getAttendanceAnalyticsOverviewService(dateInput);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch overview metrics';
+    return { success: false, error: msg, data: null };
+  }
+}
+
+/**
+ * 2. GET Daily Attendance by Date & Department
+ */
+export async function getDailyAttendanceAction(date: string, department?: string) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !canAccessEmployeeAttendance(user)) {
+      return { success: false, error: 'Unauthorized: Access restricted.', data: null };
+    }
+
+    const data = await getDailyAttendanceService(date, department);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch daily attendance';
+    return { success: false, error: msg, data: null };
+  }
+}
+
+/**
+ * 3. POST / Capture Daily Attendance (Save Draft or Submit & Finalize)
+ * Attendance Manager (Akshay Kumar) & Super Admin can capture and submit.
+ * STRICT ENFORCEMENT: Once finalized, Attendance Manager CANNOT overwrite or rectify.
+ */
+export async function captureEmployeeAttendanceAction(params: {
+  date: string;
+  records: Array<{
+    employeeId: string;
+    status: EmployeeAttendanceStatus;
+    remarks?: string;
+  }>;
+  isFinalized?: boolean;
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !canCaptureEmployeeAttendance(user)) {
+      return { success: false, error: 'Unauthorized: Cannot capture employee attendance.' };
+    }
+
+    const result = await captureDailyAttendanceService({
+      date: params.date,
+      records: params.records,
+      markedById: user.userId,
+      markedByEmail: user.email || '',
+      isFinalized: params.isFinalized ?? true,
+    });
+
+    revalidatePath('/admin/employee-attendance');
+    revalidatePath('/admin/employee-attendance/capture');
+    revalidatePath('/admin/employee-attendance/directory');
+
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to submit attendance';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * 4. PATCH / Super Admin Exclusive Rectification Action
+ * STRICT BACKEND VALIDATION:
+ * Validates authenticated user is threadsecurity@gmail.com / SUPER_ADMIN.
+ * Non-super admin requests are strictly rejected with 403 Forbidden.
+ */
+export async function rectifyEmployeeAttendanceAction(params: {
+  attendanceId: string;
+  newStatus: EmployeeAttendanceStatus;
+  remarks: string;
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized: Session required.' };
+    }
+
+    if (!canRectifyEmployeeAttendance(user)) {
+      return {
+        success: false,
+        error: 'Forbidden: Only Super Admin (threadsecurity@gmail.com) has authority to rectify historical attendance.',
+      };
+    }
+
+    const result = await rectifyAttendanceRecordService({
+      attendanceId: params.attendanceId,
+      newStatus: params.newStatus,
+      remarks: params.remarks,
+      superAdminId: user.userId,
+      superAdminEmail: user.email || '',
+    });
+
+    revalidatePath('/admin/employee-attendance');
+    revalidatePath('/admin/employee-attendance/corrections');
+    revalidatePath('/admin/employee-attendance/audit');
+
+    return { success: true, data: result };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to rectify attendance record';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * 5. GET Individual Employee Attendance Profile & Monthly Calendar
+ */
+export async function getEmployeeAttendanceDetailAction(
+  employeeId: string,
+  year?: number,
+  month?: number
+) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !canAccessEmployeeAttendance(user)) {
+      // Allow employee to view their own profile if logged in
+      if (!user || user.userId !== employeeId) {
+        return { success: false, error: 'Unauthorized to view employee profile.', data: null };
+      }
+    }
+
+    const data = await getEmployeeAttendanceProfileService(employeeId, year, month);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch employee attendance detail';
+    return { success: false, error: msg, data: null };
+  }
+}
+
+/**
+ * 6. GET Audit History (Super Admin Only)
+ */
+export async function getAttendanceAuditHistoryAction(filters?: {
+  employeeId?: string;
+  take?: number;
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Audit history is restricted to Super Admin.', data: [] };
+    }
+
+    const data = await getAttendanceAuditHistoryService(filters);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch audit history';
+    return { success: false, error: msg, data: [] };
+  }
+}
+
+/**
+ * 7. GET Monthly Report for Analytics & Export
+ */
+export async function getMonthlyAttendanceReportAction(year: number, month: number) {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !canAccessEmployeeAttendance(user)) {
+      return { success: false, error: 'Unauthorized.', data: null };
+    }
+
+    const data = await getMonthlyAttendanceReportService(year, month);
+    return { success: true, data };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch monthly report';
+    return { success: false, error: msg, data: null };
+  }
+}
+
