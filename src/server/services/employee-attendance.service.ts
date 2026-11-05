@@ -59,45 +59,45 @@ export function calculateAttendancePercentage(counts: {
  * Ensures all non-student users have an EmployeeProfile record
  */
 export async function syncEmployeeProfilesService() {
-  const nonStudents = await prisma.user.findMany({
-    where: { role: { not: 'STUDENT' } },
-    include: { tsIdentity: true, mentorIdentity: true, mentorProfile: true, employeeProfile: true },
+  const missingProfiles = await prisma.user.findMany({
+    where: { role: { not: 'STUDENT' }, employeeProfile: null },
+    include: { tsIdentity: true, mentorIdentity: true, mentorProfile: true },
   });
 
-  for (const u of nonStudents) {
-    if (!u.employeeProfile) {
-      const empId =
-        u.tsIdentity?.tsId ||
-        u.mentorIdentity?.mentorId ||
-        `TSE-EMP-${u.id.slice(-4).toUpperCase()}`;
+  if (missingProfiles.length === 0) return;
 
-      let dept = 'Academics & Faculty';
-      let desig = u.mentorProfile?.title || 'Faculty Mentor';
+  for (const u of missingProfiles) {
+    const empId =
+      u.tsIdentity?.tsId ||
+      u.mentorIdentity?.mentorId ||
+      `TSE-EMP-${u.id.slice(-4).toUpperCase()}`;
 
-      if (u.role === 'SUPER_ADMIN') {
-        dept = 'Executive Management';
-        desig = 'Super Administrator';
-      } else if (u.role === 'SECURITY_ADMIN') {
-        dept = 'Cyber Operations & SOC';
-        desig = 'Security Operations Analyst';
-      } else if (u.role === 'STAFF_EXECUTIVE') {
-        dept = 'Academic Operations';
-        desig = 'Executive Staff Associate';
-      } else if (u.role === 'STAFF_JUNIOR') {
-        dept = 'Lab & Technical Support';
-        desig = 'Junior Technical Associate';
-      }
+    let dept = 'Academics & Faculty';
+    let desig = u.mentorProfile?.title || 'Faculty Mentor';
 
-      await db.employeeProfile.create({
-        data: {
-          userId: u.id,
-          employeeId: empId,
-          department: dept,
-          designation: desig,
-          status: 'ACTIVE',
-        },
-      });
+    if (u.role === 'SUPER_ADMIN') {
+      dept = 'Executive Management';
+      desig = 'Super Administrator';
+    } else if (u.role === 'SECURITY_ADMIN') {
+      dept = 'Cyber Operations & SOC';
+      desig = 'Security Operations Analyst';
+    } else if (u.role === 'STAFF_EXECUTIVE') {
+      dept = 'Academic Operations';
+      desig = 'Executive Staff Associate';
+    } else if (u.role === 'STAFF_JUNIOR') {
+      dept = 'Lab & Technical Support';
+      desig = 'Junior Technical Associate';
     }
+
+    await db.employeeProfile.create({
+      data: {
+        userId: u.id,
+        employeeId: empId,
+        department: dept,
+        designation: desig,
+        status: 'ACTIVE',
+      },
+    });
   }
 }
 
