@@ -39,6 +39,7 @@ export function formatDateKey(date: Date): string {
  */
 export function calculateAttendancePercentage(counts: {
   present: number;
+  wfh?: number;
   halfDay: number;
   absent: number;
 }): {
@@ -46,8 +47,9 @@ export function calculateAttendancePercentage(counts: {
   totalWorkingDays: number;
   percentage: number;
 } {
-  const credits = counts.present * 1 + counts.halfDay * 0.5;
-  const totalWorkingDays = counts.present + counts.halfDay + counts.absent;
+  const wfh = counts.wfh || 0;
+  const credits = counts.present * 1 + wfh * 1 + counts.halfDay * 0.5;
+  const totalWorkingDays = counts.present + wfh + counts.halfDay + counts.absent;
   const percentage = totalWorkingDays > 0 ? Math.round((credits / totalWorkingDays) * 1000) / 10 : 100;
 
   return { credits, totalWorkingDays, percentage };
@@ -153,6 +155,7 @@ export async function getEmployeeDirectoryService(filters?: {
   return employees.map((emp) => {
     const records = emp.employeeAttendances || [];
     const present = records.filter((r) => r.status === 'PRESENT').length;
+    const wfh = records.filter((r) => r.status === 'WFH').length;
     const halfDay = records.filter((r) => r.status === 'HALF_DAY').length;
     const absent = records.filter((r) => r.status === 'ABSENT').length;
     const leave = records.filter((r) => r.status === 'LEAVE').length;
@@ -160,6 +163,7 @@ export async function getEmployeeDirectoryService(filters?: {
 
     const { credits, totalWorkingDays, percentage } = calculateAttendancePercentage({
       present,
+      wfh,
       halfDay,
       absent,
     });
@@ -178,6 +182,7 @@ export async function getEmployeeDirectoryService(filters?: {
       status: emp.employeeProfile?.status || 'ACTIVE',
       totalRecords: records.length,
       presentDays: present,
+      wfhDays: wfh,
       halfDays: halfDay,
       absentDays: absent,
       leaveDays: leave,
@@ -232,6 +237,7 @@ export async function getDailyAttendanceService(dateInput: string | Date, depart
   const markedCount = items.filter((i) => i.isMarked).length;
   const isFinalized = records.length > 0 && records.some((r: any) => r.isFinalized);
   const presentCount = items.filter((i) => i.status === 'PRESENT' && i.isMarked).length;
+  const wfhCount = items.filter((i) => i.status === 'WFH' && i.isMarked).length;
   const absentCount = items.filter((i) => i.status === 'ABSENT' && i.isMarked).length;
   const halfDayCount = items.filter((i) => i.status === 'HALF_DAY' && i.isMarked).length;
   const leaveCount = items.filter((i) => i.status === 'LEAVE' && i.isMarked).length;
@@ -239,6 +245,7 @@ export async function getDailyAttendanceService(dateInput: string | Date, depart
 
   const { percentage } = calculateAttendancePercentage({
     present: presentCount,
+    wfh: wfhCount,
     halfDay: halfDayCount,
     absent: absentCount,
   });
@@ -250,6 +257,7 @@ export async function getDailyAttendanceService(dateInput: string | Date, depart
     totalEmployees: directory.length,
     markedCount,
     presentCount,
+    wfhCount,
     absentCount,
     halfDayCount,
     leaveCount,
@@ -377,6 +385,7 @@ export async function getEmployeeAttendanceProfileService(
 
   // Overall Statistics
   const overallPresent = allRecords.filter((r) => r.status === 'PRESENT').length;
+  const overallWFH = allRecords.filter((r) => r.status === 'WFH').length;
   const overallHalfDay = allRecords.filter((r) => r.status === 'HALF_DAY').length;
   const overallAbsent = allRecords.filter((r) => r.status === 'ABSENT').length;
   const overallLeave = allRecords.filter((r) => r.status === 'LEAVE').length;
@@ -384,6 +393,7 @@ export async function getEmployeeAttendanceProfileService(
 
   const overallStats = calculateAttendancePercentage({
     present: overallPresent,
+    wfh: overallWFH,
     halfDay: overallHalfDay,
     absent: overallAbsent,
   });
@@ -398,6 +408,7 @@ export async function getEmployeeAttendanceProfileService(
   });
 
   const monthPresent = monthRecords.filter((r) => r.status === 'PRESENT').length;
+  const monthWFH = monthRecords.filter((r) => r.status === 'WFH').length;
   const monthHalfDay = monthRecords.filter((r) => r.status === 'HALF_DAY').length;
   const monthAbsent = monthRecords.filter((r) => r.status === 'ABSENT').length;
   const monthLeave = monthRecords.filter((r) => r.status === 'LEAVE').length;
@@ -405,6 +416,7 @@ export async function getEmployeeAttendanceProfileService(
 
   const monthStats = calculateAttendancePercentage({
     present: monthPresent,
+    wfh: monthWFH,
     halfDay: monthHalfDay,
     absent: monthAbsent,
   });
@@ -450,6 +462,7 @@ export async function getEmployeeAttendanceProfileService(
     overall: {
       totalRecords: allRecords.length,
       presentDays: overallPresent,
+      wfhDays: overallWFH,
       halfDays: overallHalfDay,
       absentDays: overallAbsent,
       leaveDays: overallLeave,
@@ -463,6 +476,7 @@ export async function getEmployeeAttendanceProfileService(
       month: targetMonth,
       totalDaysMarked: monthRecords.length,
       presentDays: monthPresent,
+      wfhDays: monthWFH,
       halfDays: monthHalfDay,
       absentDays: monthAbsent,
       leaveDays: monthLeave,
@@ -643,6 +657,7 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
 
   const totalEmployees = directory.length;
   const presentToday = daily.presentCount;
+  const wfhToday = daily.wfhCount;
   const absentToday = daily.absentCount;
   const halfDayToday = daily.halfDayCount;
   const leaveToday = daily.leaveCount;
@@ -650,11 +665,11 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
   const overallPercentage = daily.overallPercentage;
 
   // Department breakdown
-  const deptMap: Record<string, { total: number; present: number; absent: number; halfDay: number }> = {};
+  const deptMap: Record<string, { total: number; present: number; wfh: number; absent: number; halfDay: number }> = {};
   directory.forEach((emp) => {
     const dept = emp.department || 'Academics & Faculty';
     if (!deptMap[dept]) {
-      deptMap[dept] = { total: 0, present: 0, absent: 0, halfDay: 0 };
+      deptMap[dept] = { total: 0, present: 0, wfh: 0, absent: 0, halfDay: 0 };
     }
     deptMap[dept].total += 1;
   });
@@ -663,6 +678,7 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
     const dept = item.employee.department || 'Academics & Faculty';
     if (deptMap[dept]) {
       if (item.status === 'PRESENT') deptMap[dept].present += 1;
+      if (item.status === 'WFH') deptMap[dept].wfh += 1;
       if (item.status === 'ABSENT') deptMap[dept].absent += 1;
       if (item.status === 'HALF_DAY') deptMap[dept].halfDay += 1;
     }
@@ -672,6 +688,7 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
     date: formatDateKey(targetDate),
     totalEmployees,
     presentToday,
+    wfhToday,
     absentToday,
     halfDayToday,
     leaveToday,
@@ -681,6 +698,7 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
     departmentBreakdown: Object.entries(deptMap).map(([department, data]) => {
       const { percentage } = calculateAttendancePercentage({
         present: data.present,
+        wfh: data.wfh,
         halfDay: data.halfDay,
         absent: data.absent,
       });
@@ -688,6 +706,7 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
         department,
         total: data.total,
         present: data.present,
+        wfh: data.wfh,
         absent: data.absent,
         halfDay: data.halfDay,
         percentage,
@@ -742,6 +761,7 @@ export async function getMonthlyAttendanceReportService(year: number, month: num
     const daysData: Record<number, string> = {};
 
     let present = 0;
+    let wfh = 0;
     let halfDay = 0;
     let absent = 0;
     let leave = 0;
@@ -754,6 +774,7 @@ export async function getMonthlyAttendanceReportService(year: number, month: num
       daysData[day] = status;
 
       if (status === 'PRESENT') present++;
+      if (status === 'WFH') wfh++;
       if (status === 'HALF_DAY') halfDay++;
       if (status === 'ABSENT') absent++;
       if (status === 'LEAVE') leave++;
@@ -762,6 +783,7 @@ export async function getMonthlyAttendanceReportService(year: number, month: num
 
     const { credits, totalWorkingDays, percentage } = calculateAttendancePercentage({
       present,
+      wfh,
       halfDay,
       absent,
     });
@@ -773,6 +795,7 @@ export async function getMonthlyAttendanceReportService(year: number, month: num
       department: emp.department,
       designation: emp.designation,
       present,
+      wfh,
       halfDay,
       absent,
       leave,

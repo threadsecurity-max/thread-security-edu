@@ -1427,6 +1427,7 @@ model EmployeeProfile {
 
 enum EmployeeAttendanceStatus {
   PRESENT
+  WFH
   ABSENT
   HALF_DAY
   LEAVE

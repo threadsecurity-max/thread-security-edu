@@ -22,6 +22,7 @@ import {
   FileSpreadsheet,
   RefreshCw,
   Sparkles,
+  Home,
 } from 'lucide-react';
 import {
   Dialog,
@@ -172,6 +173,12 @@ export function EmployeeAttendanceDashboardClient({
             <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Present (1.0)
           </span>
         );
+      case 'WFH':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
+            <Home className="w-3 h-3 text-cyan-600" /> WFH (1.0)
+          </span>
+        );
       case 'HALF_DAY':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
@@ -283,9 +290,9 @@ export function EmployeeAttendanceDashboardClient({
       </div>
 
       {/* Summary KPI Cards (Section 3 of prompt) */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
         {/* Total Employees */}
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl p-3.5 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 text-xs font-medium">
             <span>Total Staff</span>
             <Users className="w-4 h-4 text-slate-400" />
@@ -294,14 +301,14 @@ export function EmployeeAttendanceDashboardClient({
             {dailyData?.totalEmployees || 0}
           </div>
           <div className="text-[10px] text-slate-400 mt-1 font-mono">
-            {dailyData?.markedCount || 0} recorded for date
+            {dailyData?.markedCount || 0} recorded
           </div>
         </div>
 
         {/* Present Today */}
-        <div className="bg-white border border-emerald-200/80 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-emerald-50/30 to-transparent">
+        <div className="bg-white border border-emerald-200/80 rounded-2xl p-3.5 shadow-sm bg-gradient-to-br from-emerald-50/30 to-transparent">
           <div className="flex items-center justify-between text-emerald-800 text-xs font-semibold">
-            <span>Present</span>
+            <span>In-Office</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-700 mt-2">
@@ -312,22 +319,22 @@ export function EmployeeAttendanceDashboardClient({
           </div>
         </div>
 
-        {/* Absent Today */}
-        <div className="bg-white border border-rose-200/80 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-rose-50/30 to-transparent">
-          <div className="flex items-center justify-between text-rose-800 text-xs font-semibold">
-            <span>Absent</span>
-            <XCircle className="w-4 h-4 text-rose-600" />
+        {/* WFH Today */}
+        <div className="bg-white border border-cyan-200/80 rounded-2xl p-3.5 shadow-sm bg-gradient-to-br from-cyan-50/30 to-transparent">
+          <div className="flex items-center justify-between text-cyan-800 text-xs font-semibold">
+            <span>WFH</span>
+            <Home className="w-4 h-4 text-cyan-600" />
           </div>
-          <div className="text-2xl font-black text-rose-700 mt-2">
-            {dailyData?.absentCount || 0}
+          <div className="text-2xl font-black text-cyan-700 mt-2">
+            {dailyData?.wfhCount || 0}
           </div>
-          <div className="text-[10px] text-rose-600/80 mt-1 font-medium">
-            0 Credit (Non-excused)
+          <div className="text-[10px] text-cyan-600/80 mt-1 font-medium">
+            Remote 1.0 Day Credit
           </div>
         </div>
 
         {/* Half Day */}
-        <div className="bg-white border border-amber-200/80 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-amber-50/30 to-transparent">
+        <div className="bg-white border border-amber-200/80 rounded-2xl p-3.5 shadow-sm bg-gradient-to-br from-amber-50/30 to-transparent">
           <div className="flex items-center justify-between text-amber-800 text-xs font-semibold">
             <span>Half Day</span>
             <Clock className="w-4 h-4 text-amber-600" />
@@ -340,8 +347,22 @@ export function EmployeeAttendanceDashboardClient({
           </div>
         </div>
 
+        {/* Absent Today */}
+        <div className="bg-white border border-rose-200/80 rounded-2xl p-3.5 shadow-sm bg-gradient-to-br from-rose-50/30 to-transparent">
+          <div className="flex items-center justify-between text-rose-800 text-xs font-semibold">
+            <span>Absent</span>
+            <XCircle className="w-4 h-4 text-rose-600" />
+          </div>
+          <div className="text-2xl font-black text-rose-700 mt-2">
+            {dailyData?.absentCount || 0}
+          </div>
+          <div className="text-[10px] text-rose-600/80 mt-1 font-medium">
+            0 Credit (Non-excused)
+          </div>
+        </div>
+
         {/* On Leave */}
-        <div className="bg-white border border-blue-200/80 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-blue-50/30 to-transparent">
+        <div className="bg-white border border-blue-200/80 rounded-2xl p-3.5 shadow-sm bg-gradient-to-br from-blue-50/30 to-transparent">
           <div className="flex items-center justify-between text-blue-800 text-xs font-semibold">
             <span>On Leave</span>
             <Calendar className="w-4 h-4 text-blue-600" />
@@ -350,12 +371,12 @@ export function EmployeeAttendanceDashboardClient({
             {dailyData?.leaveCount || 0}
           </div>
           <div className="text-[10px] text-blue-600/80 mt-1 font-medium">
-            Approved (Excluded Denom)
+            Approved (Excluded)
           </div>
         </div>
 
         {/* Overall Percentage */}
-        <div className="bg-white border border-violet-200/80 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-violet-50/30 to-transparent">
+        <div className="bg-white border border-violet-200/80 rounded-2xl p-3.5 shadow-sm bg-gradient-to-br from-violet-50/30 to-transparent">
           <div className="flex items-center justify-between text-violet-800 text-xs font-semibold">
             <span>Attendance %</span>
             <BarChart3 className="w-4 h-4 text-violet-600" />
@@ -407,8 +428,9 @@ export function EmployeeAttendanceDashboardClient({
             >
               <option value="ALL">All Statuses</option>
               <option value="PRESENT">Present Only</option>
-              <option value="ABSENT">Absent Only</option>
+              <option value="WFH">WFH (Remote) Only</option>
               <option value="HALF_DAY">Half Day Only</option>
+              <option value="ABSENT">Absent Only</option>
               <option value="LEAVE">Leave Only</option>
               <option value="HOLIDAY">Holiday / Off</option>
               <option value="MARKED">Marked Only</option>
@@ -548,6 +570,7 @@ export function EmployeeAttendanceDashboardClient({
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-amber-500"
                 >
                   <option value="PRESENT">Present (1.0 Credit)</option>
+                  <option value="WFH">Work From Home (1.0 Credit)</option>
                   <option value="HALF_DAY">Half Day (0.5 Credit)</option>
                   <option value="ABSENT">Absent (0 Credit)</option>
                   <option value="LEAVE">Approved Leave (Excluded)</option>

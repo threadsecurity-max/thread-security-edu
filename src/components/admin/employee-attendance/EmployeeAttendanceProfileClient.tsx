@@ -20,6 +20,7 @@ import {
   Sparkles,
   Lock,
   History,
+  Home,
 } from 'lucide-react';
 import {
   Dialog,
@@ -49,6 +50,7 @@ interface EmployeeProfileData {
   overall: {
     totalRecords: number;
     presentDays: number;
+    wfhDays?: number;
     halfDays: number;
     absentDays: number;
     leaveDays: number;
@@ -62,6 +64,7 @@ interface EmployeeProfileData {
     month: number;
     totalDaysMarked: number;
     presentDays: number;
+    wfhDays?: number;
     halfDays: number;
     absentDays: number;
     leaveDays: number;
@@ -208,6 +211,12 @@ export function EmployeeAttendanceProfileClient({
             <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Present (1.0)
           </span>
         );
+      case 'WFH':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
+            <Home className="w-3 h-3 text-cyan-600" /> WFH (1.0)
+          </span>
+        );
       case 'HALF_DAY':
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
@@ -340,8 +349,8 @@ export function EmployeeAttendanceProfileClient({
               Formula Attribution
             </div>
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 leading-relaxed font-mono">
-              Credits = (Present × 1) + (HalfDay × 0.5)<br />
-              Working Days = Present + HalfDay + Absent<br />
+              Credits = (Present × 1) + (WFH × 1) + (HalfDay × 0.5)<br />
+              Working Days = Present + WFH + HalfDay + Absent<br />
               Attendance % = (Credits ÷ Working Days) × 100
             </div>
           </div>
@@ -386,6 +395,20 @@ export function EmployeeAttendanceProfileClient({
             </div>
             <div className="text-[10px] text-emerald-600/80 mt-1">
               Month: {data.monthly.presentDays} days
+            </div>
+          </div>
+
+          {/* WFH Days */}
+          <div className="bg-white border border-cyan-200/80 rounded-2xl p-4 shadow-sm bg-gradient-to-br from-cyan-50/30 to-transparent">
+            <div className="flex items-center justify-between text-cyan-800 text-xs font-semibold">
+              <span>WFH Days (1.0 Credit)</span>
+              <Home className="w-4 h-4 text-cyan-600" />
+            </div>
+            <div className="text-2xl font-black text-cyan-700 mt-2">
+              {data.overall.wfhDays || 0}
+            </div>
+            <div className="text-[10px] text-cyan-600/80 mt-1">
+              Month: {data.monthly.wfhDays || 0} days
             </div>
           </div>
 
@@ -475,6 +498,10 @@ export function EmployeeAttendanceProfileClient({
             <span>Present (1.0)</span>
           </div>
           <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-cyan-500 inline-block" />
+            <span>WFH (1.0)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-rose-500 inline-block" />
             <span>Absent (0.0)</span>
           </div>
@@ -523,6 +550,9 @@ export function EmployeeAttendanceProfileClient({
               if (record.status === 'PRESENT') {
                 dotColor = 'bg-emerald-500';
                 bgTint = 'bg-emerald-50/20 hover:bg-emerald-50/40 border-emerald-200/50';
+              } else if (record.status === 'WFH') {
+                dotColor = 'bg-cyan-500';
+                bgTint = 'bg-cyan-50/20 hover:bg-cyan-50/40 border-cyan-200/50';
               } else if (record.status === 'HALF_DAY') {
                 dotColor = 'bg-amber-500';
                 bgTint = 'bg-amber-50/20 hover:bg-amber-50/40 border-amber-200/50';
@@ -724,6 +754,7 @@ export function EmployeeAttendanceProfileClient({
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-amber-500"
                 >
                   <option value="PRESENT">Present (1.0 Credit)</option>
+                  <option value="WFH">Work From Home (1.0 Credit)</option>
                   <option value="HALF_DAY">Half Day (0.5 Credit)</option>
                   <option value="ABSENT">Absent (0 Credit)</option>
                   <option value="LEAVE">Approved Leave (Excluded)</option>

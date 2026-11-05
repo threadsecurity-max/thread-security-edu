@@ -248,6 +248,7 @@ export function SuperAdminCorrectionClient({
             className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 font-semibold focus:outline-none focus:border-amber-500"
           >
             <option value="PRESENT">Present (1.0 Credit)</option>
+            <option value="WFH">Work From Home (1.0 Credit)</option>
             <option value="HALF_DAY">Half Day (0.5 Credit)</option>
             <option value="ABSENT">Absent (0.0 Credit)</option>
             <option value="LEAVE">Approved Leave (Excluded from Denominator)</option>

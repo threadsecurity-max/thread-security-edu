@@ -27,6 +27,7 @@ interface AttendanceReportsClientProps {
       department: string;
       designation: string;
       present: number;
+      wfh?: number;
       halfDay: number;
       absent: number;
       leave: number;
@@ -70,6 +71,7 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
       'Department',
       'Designation',
       'Present Days',
+      'WFH Days',
       'Half Days',
       'Absent Days',
       'Leave Days',
@@ -88,6 +90,7 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
         `"${r.department}"`,
         `"${r.designation}"`,
         r.present,
+        r.wfh || 0,
         r.halfDay,
         r.absent,
         r.leave,
@@ -112,6 +115,8 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
     switch (status) {
       case 'PRESENT':
         return <span className="text-emerald-700 font-bold">P</span>;
+      case 'WFH':
+        return <span className="text-cyan-700 font-bold">W</span>;
       case 'HALF_DAY':
         return <span className="text-amber-700 font-bold">H</span>;
       case 'ABSENT':
@@ -210,6 +215,7 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
             </h2>
             <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-0.5">
               <span><b>P</b> = Present (1.0)</span>
+              <span><b>W</b> = WFH (1.0)</span>
               <span><b>H</b> = Half Day (0.5)</span>
               <span><b>A</b> = Absent (0.0)</span>
               <span><b>L</b> = Leave</span>
@@ -226,6 +232,7 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
                 <th className="py-2.5 px-2 text-center">ID</th>
                 <th className="py-2.5 px-2 text-center">%</th>
                 <th className="py-2.5 px-1.5 text-center text-emerald-700">P</th>
+                <th className="py-2.5 px-1.5 text-center text-cyan-700">W</th>
                 <th className="py-2.5 px-1.5 text-center text-amber-700">H</th>
                 <th className="py-2.5 px-1.5 text-center text-rose-700">A</th>
                 <th className="py-2.5 px-1.5 text-center text-blue-700">L</th>
@@ -241,7 +248,7 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
             <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
               {report.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={report.daysInMonth + 7} className="py-12 text-center text-slate-400 font-sans">
+                  <td colSpan={report.daysInMonth + 8} className="py-12 text-center text-slate-400 font-sans">
                     No employee records found.
                   </td>
                 </tr>
@@ -269,6 +276,7 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
                       </span>
                     </td>
                     <td className="py-2 px-1.5 text-center text-emerald-700 font-bold">{row.present}</td>
+                    <td className="py-2 px-1.5 text-center text-cyan-700 font-bold">{row.wfh || 0}</td>
                     <td className="py-2 px-1.5 text-center text-amber-700 font-bold">{row.halfDay}</td>
                     <td className="py-2 px-1.5 text-center text-rose-700 font-bold">{row.absent}</td>
                     <td className="py-2 px-1.5 text-center text-blue-700 font-bold">{row.leave}</td>

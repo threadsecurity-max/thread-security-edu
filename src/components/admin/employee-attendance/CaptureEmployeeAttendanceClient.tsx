@@ -180,6 +180,7 @@ export function CaptureEmployeeAttendanceClient({
   // Calculations for modal breakdown
   const summaryBreakdown = useMemo(() => {
     let present = 0;
+    let wfh = 0;
     let halfDay = 0;
     let absent = 0;
     let leave = 0;
@@ -188,19 +189,21 @@ export function CaptureEmployeeAttendanceClient({
     employees.forEach((emp) => {
       const s = attendanceMap[emp.id]?.status || 'PRESENT';
       if (s === 'PRESENT') present++;
+      if (s === 'WFH') wfh++;
       if (s === 'HALF_DAY') halfDay++;
       if (s === 'ABSENT') absent++;
       if (s === 'LEAVE') leave++;
       if (s === 'HOLIDAY') holiday++;
     });
 
-    const credits = present * 1 + halfDay * 0.5;
-    const workingDays = present + halfDay + absent;
+    const credits = present * 1 + wfh * 1 + halfDay * 0.5;
+    const workingDays = present + wfh + halfDay + absent;
     const percentage = workingDays > 0 ? Math.round((credits / workingDays) * 1000) / 10 : 100;
 
     return {
       total: employees.length,
       present,
+      wfh,
       halfDay,
       absent,
       leave,
@@ -433,6 +436,16 @@ export function CaptureEmployeeAttendanceClient({
               <span>Mark all - Present</span>
             </label>
 
+            <label className="flex items-center gap-1.5 cursor-pointer hover:text-cyan-700">
+              <input
+                type="radio"
+                name="bulkActionRadio"
+                onChange={() => handleBulkMark('WFH')}
+                className="text-cyan-600 focus:ring-cyan-500"
+              />
+              <span>Mark all - WFH</span>
+            </label>
+
             <label className="flex items-center gap-1.5 cursor-pointer hover:text-rose-700">
               <input
                 type="radio"
@@ -503,6 +516,7 @@ export function CaptureEmployeeAttendanceClient({
                 <th className="py-3 px-4">DEPARTMENT</th>
                 <th className="py-3 px-3">DESIGNATION</th>
                 <th className="py-3 px-3 text-center">PRESENT</th>
+                <th className="py-3 px-3 text-center">WFH</th>
                 <th className="py-3 px-3 text-center">ABSENT</th>
                 <th className="py-3 px-3 text-center">HALF DAY</th>
                 <th className="py-3 px-3 text-center">LEAVE</th>
@@ -513,7 +527,7 @@ export function CaptureEmployeeAttendanceClient({
             <tbody className="divide-y divide-slate-100 font-sans">
               {filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="py-12 text-center text-slate-400">
+                  <td colSpan={12} className="py-12 text-center text-slate-400">
                     <Users className="w-8 h-8 mx-auto mb-2 opacity-40" />
                     <p className="font-semibold text-xs text-slate-600">No employees found for this department or search query.</p>
                   </td>
@@ -529,6 +543,8 @@ export function CaptureEmployeeAttendanceClient({
                       className={`hover:bg-slate-50/70 transition-colors ${
                         state.status === 'ABSENT'
                           ? 'bg-rose-50/20'
+                          : state.status === 'WFH'
+                          ? 'bg-cyan-50/20'
                           : state.status === 'HALF_DAY'
                           ? 'bg-amber-50/20'
                           : state.status === 'LEAVE'
@@ -566,6 +582,18 @@ export function CaptureEmployeeAttendanceClient({
                           disabled={isLocked}
                           onChange={() => handleStatusChange(emp.id, 'PRESENT')}
                           className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer disabled:cursor-not-allowed"
+                        />
+                      </td>
+
+                      {/* WFH Radio */}
+                      <td className="py-3 px-3 text-center">
+                        <input
+                          type="radio"
+                          name={`status-${emp.id}`}
+                          checked={state.status === 'WFH'}
+                          disabled={isLocked}
+                          onChange={() => handleStatusChange(emp.id, 'WFH')}
+                          className="w-4 h-4 text-cyan-600 focus:ring-cyan-500 cursor-pointer disabled:cursor-not-allowed"
                         />
                       </td>
 
@@ -663,6 +691,11 @@ export function CaptureEmployeeAttendanceClient({
                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
                   <div className="text-[10px] text-emerald-700 font-semibold">Present (1.0 Credit)</div>
                   <div className="text-lg font-black text-emerald-800">{summaryBreakdown.present}</div>
+                </div>
+
+                <div className="p-3 bg-cyan-50 border border-cyan-200 rounded-xl">
+                  <div className="text-[10px] text-cyan-700 font-semibold">WFH (1.0 Credit)</div>
+                  <div className="text-lg font-black text-cyan-800">{summaryBreakdown.wfh}</div>
                 </div>
 
                 <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
