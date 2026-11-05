@@ -561,7 +561,14 @@ export function CaptureEmployeeAttendanceClient({
                         </span>
                       </td>
                       <td className="py-3 px-4 font-bold text-slate-900">
-                        {emp.name}
+                        <Link
+                          href={`/admin/employee-attendance/employees/${emp.id}`}
+                          className="hover:text-violet-600 hover:underline transition-colors"
+                          title="View day-to-day attendance records"
+                          target="_blank"
+                        >
+                          {emp.name}
+                        </Link>
                         <div className="text-[10px] text-slate-400 font-normal truncate max-w-[160px]">
                           {emp.email}
                         </div>

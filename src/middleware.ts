@@ -209,6 +209,22 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
       }
 
+      // Special Clearance: Employee Attendance Subsystem
+      // Authorized Attendance Manager (Akshay Kumar) & Admins can access /admin/employee-attendance*
+      if (pathname.startsWith('/admin/employee-attendance')) {
+        const email = (session.email || '').trim().toLowerCase();
+        const name = (session.name || '').trim().toLowerCase();
+        const isAttendanceManager =
+          email === 'akshay.kumar@threadsecurity.org' ||
+          email.includes('akshay') ||
+          name.includes('akshay kumar') ||
+          session.userId === 'cmv6l9la40000c9014xt46hcv';
+
+        if (isAttendanceManager) {
+          continue;
+        }
+      }
+
       const userRole = (session.role || 'GUEST').toUpperCase();
       if (!allowedRoles.includes(userRole)) {
         if (pathname.startsWith('/api')) {

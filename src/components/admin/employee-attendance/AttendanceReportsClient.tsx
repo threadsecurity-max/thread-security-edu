@@ -256,7 +256,14 @@ export function AttendanceReportsClient({ initialReport }: AttendanceReportsClie
                 report.rows.map((row) => (
                   <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-2.5 px-3 font-sans font-bold text-slate-900 sticky left-0 bg-white z-10 border-r border-slate-100 max-w-[160px] truncate">
-                      {row.name}
+                      <Link
+                        href={`/admin/employee-attendance/employees/${row.id}`}
+                        className="hover:text-violet-600 hover:underline transition-colors"
+                        title="View Day-to-Day Records"
+                        target="_blank"
+                      >
+                        {row.name}
+                      </Link>
                       <div className="text-[9px] text-slate-400 font-normal truncate">{row.department}</div>
                     </td>
                     <td className="py-2 px-2 text-center text-violet-700 font-bold text-[10px]">

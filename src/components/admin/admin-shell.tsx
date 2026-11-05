@@ -90,6 +90,12 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
     user.email?.trim().toLowerCase() === 'threadsecurity@gmail.com' ||
     user.role?.toUpperCase() === 'SUPER_ADMIN';
 
+  const isAttendanceManager =
+    user.email?.trim().toLowerCase() === 'akshay.kumar@threadsecurity.org' ||
+    user.email?.trim().toLowerCase().includes('akshay') ||
+    user.name?.toLowerCase().includes('akshay kumar') ||
+    user.userId === 'cmv6l9la40000c9014xt46hcv';
+
   const employeeAttendanceItems = [
     { name: 'Employee Directory', href: '/admin/employee-attendance/directory', icon: UsersRound },
     { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: Clock, badge: 'OPS' },
@@ -103,7 +109,33 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
       : []),
   ];
 
-  const navGroups: NavGroup[] = [
+  const attendanceManagerNavGroups: NavGroup[] = [
+    {
+      title: 'Attendance Management',
+      items: [
+        { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: Clock, badge: 'OPS' },
+        { name: 'Capture Attendance', href: '/admin/employee-attendance/capture', icon: UserCheck },
+        { name: 'Attendance Reports', href: '/admin/employee-attendance/reports', icon: BarChart3 },
+        { name: 'Employee Directory & Dossiers', href: '/admin/employee-attendance/directory', icon: UsersRound },
+      ],
+    },
+    {
+      title: 'Operations',
+      items: [
+        { name: "Today's Docket", href: '/admin/docket', icon: ClipboardList, badge: 'DAILY' },
+        { name: 'Faculty Messages', href: '/admin/messages', icon: MessageSquare },
+        { name: 'Announcements', href: '/admin/announcements', icon: Bell },
+      ],
+    },
+    {
+      title: 'Navigation',
+      items: [
+        { name: 'Faculty Workspace', href: '/mentor', icon: ShieldCheck, badge: 'WORKSPACE' },
+      ],
+    },
+  ];
+
+  const fullNavGroups: NavGroup[] = [
     {
       title: 'Command Center',
       items: [
@@ -161,6 +193,11 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
       ],
     },
   ];
+
+  const navGroups =
+    isAttendanceManager && !isSuperAdmin && user.role === 'MENTOR'
+      ? attendanceManagerNavGroups
+      : fullNavGroups;
 
   const isCurrentActive = (itemHref: string, exact?: boolean) => {
     if (exact) return pathname === itemHref;

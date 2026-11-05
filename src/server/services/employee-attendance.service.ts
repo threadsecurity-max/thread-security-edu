@@ -446,6 +446,26 @@ export async function getEmployeeAttendanceProfileService(
     };
   });
 
+  const directory = await getEmployeeDirectoryService();
+  const allEmployees = directory.map((emp) => ({
+    id: emp.id,
+    name: emp.name,
+    employeeId: emp.employeeId,
+    department: emp.department,
+    designation: emp.designation,
+  }));
+
+  const allHistory = allRecords.map((r) => ({
+    id: r.id,
+    date: formatDateKey(new Date(r.attendanceDate)),
+    status: r.status,
+    remarks: r.remarks,
+    isFinalized: r.isFinalized,
+    markedBy: r.markedBy?.name || r.markedBy?.email || 'System',
+    updatedAt: r.updatedAt.toISOString(),
+    auditLogsCount: (r.auditLogs || []).length,
+  }));
+
   return {
     employee: {
       id: user.id,
@@ -459,6 +479,8 @@ export async function getEmployeeAttendanceProfileService(
       joiningDate: user.employeeProfile?.joiningDate?.toISOString() || user.createdAt.toISOString(),
       status: user.employeeProfile?.status || 'ACTIVE',
     },
+    allEmployees,
+    allHistory,
     overall: {
       totalRecords: allRecords.length,
       presentDays: overallPresent,
@@ -486,16 +508,7 @@ export async function getEmployeeAttendanceProfileService(
       attendancePercentage: monthStats.percentage,
     },
     calendarMap,
-    recentHistory: allRecords.slice(0, 31).map((r) => ({
-      id: r.id,
-      date: formatDateKey(new Date(r.attendanceDate)),
-      status: r.status,
-      remarks: r.remarks,
-      isFinalized: r.isFinalized,
-      markedBy: r.markedBy?.name || r.markedBy?.email || 'System',
-      updatedAt: r.updatedAt.toISOString(),
-      auditLogsCount: (r.auditLogs || []).length,
-    })),
+    recentHistory: allHistory.slice(0, 31),
   };
 }
 

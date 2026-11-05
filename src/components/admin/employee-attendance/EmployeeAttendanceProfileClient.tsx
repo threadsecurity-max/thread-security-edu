@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Calendar,
   CheckCircle2,
@@ -21,6 +22,11 @@ import {
   Lock,
   History,
   Home,
+  Search,
+  Filter,
+  Download,
+  FileSpreadsheet,
+  RotateCcw,
 } from 'lucide-react';
 import {
   Dialog,
@@ -84,6 +90,23 @@ interface EmployeeProfileData {
       hasAuditLogs: boolean;
     }
   >;
+  allEmployees?: Array<{
+    id: string;
+    name: string;
+    employeeId: string;
+    department: string;
+    designation: string;
+  }>;
+  allHistory?: Array<{
+    id: string;
+    date: string;
+    status: EmployeeAttendanceStatus;
+    remarks?: string | null;
+    isFinalized: boolean;
+    markedBy: string;
+    updatedAt: string;
+    auditLogsCount: number;
+  }>;
   recentHistory: Array<{
     id: string;
     date: string;
@@ -108,10 +131,17 @@ export function EmployeeAttendanceProfileClient({
   };
   initialData: EmployeeProfileData;
 }) {
+  const router = useRouter();
   const [data, setData] = useState<EmployeeProfileData>(initialData);
   const [currentYear, setCurrentYear] = useState(initialData.monthly.year);
   const [currentMonth, setCurrentMonth] = useState(initialData.monthly.month); // 1-12
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null);
+
+  // Day-to-Day Records Table State
+  const [historySearchQuery, setHistorySearchQuery] = useState('');
+  const [historyStatusFilter, setHistoryStatusFilter] = useState('ALL');
+  const [historyDateFrom, setHistoryDateFrom] = useState('');
+  const [historyDateTo, setHistoryDateTo] = useState('');
 
   // Super Admin Rectification modal state
   const [rectifyModal, setRectifyModal] = useState<{
@@ -138,6 +168,81 @@ export function EmployeeAttendanceProfileClient({
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setNotice({ text, type });
     setTimeout(() => setNotice(null), 4000);
+  };
+
+  // Day-to-Day Records: Full records list
+  const fullRecordsList = useMemo(() => {
+    return data.allHistory && data.allHistory.length > 0 ? data.allHistory : data.recentHistory;
+  }, [data.allHistory, data.recentHistory]);
+
+  const filteredHistory = useMemo(() => {
+    return fullRecordsList.filter((item) => {
+      const q = historySearchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        item.date.includes(q) ||
+        (item.remarks && item.remarks.toLowerCase().includes(q)) ||
+        item.markedBy.toLowerCase().includes(q);
+
+      const matchesStatus = historyStatusFilter === 'ALL' || item.status === historyStatusFilter;
+      const matchesDateFrom = !historyDateFrom || item.date >= historyDateFrom;
+      const matchesDateTo = !historyDateTo || item.date <= historyDateTo;
+
+      return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo;
+    });
+  }, [fullRecordsList, historySearchQuery, historyStatusFilter, historyDateFrom, historyDateTo]);
+
+  // Export CSV for this particular employee's day-to-day attendance
+  const handleExportEmployeeCSV = () => {
+    const headers = [
+      'Date',
+      'Employee ID',
+      'Employee Name',
+      'Department',
+      'Designation',
+      'Status',
+      'Attendance Credits',
+      'Working Day',
+      'Finalized Lock',
+      'Marked By',
+      'Remarks',
+      'Audit Rectifications',
+    ];
+
+    const rows = filteredHistory.map((item) => {
+      let credits = '0.0';
+      let isWorking = 'Yes';
+      if (item.status === 'PRESENT' || item.status === 'WFH') credits = '1.0';
+      else if (item.status === 'HALF_DAY') credits = '0.5';
+      else if (item.status === 'LEAVE' || item.status === 'HOLIDAY') {
+        credits = '0.0';
+        isWorking = 'No (Excluded)';
+      }
+
+      return [
+        `"${item.date}"`,
+        `"${data.employee.employeeId}"`,
+        `"${data.employee.name}"`,
+        `"${data.employee.department}"`,
+        `"${data.employee.designation}"`,
+        `"${item.status}"`,
+        `"${credits}"`,
+        `"${isWorking}"`,
+        `"${item.isFinalized ? 'LOCKED_FINAL' : 'DRAFT'}"`,
+        `"${item.markedBy}"`,
+        `"${(item.remarks || '').replace(/"/g, '""')}"`,
+        item.auditLogsCount,
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${data.employee.employeeId}_${data.employee.name.replace(/\s+/g, '_')}_DayToDay_Register.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleMonthChange = (offset: number) => {
@@ -283,9 +388,32 @@ export function EmployeeAttendanceProfileClient({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {data.allEmployees && data.allEmployees.length > 0 && (
+            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden md:inline">
+                Switch Employee:
+              </span>
+              <select
+                value={data.employee.id}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    router.push(`/admin/employee-attendance/employees/${e.target.value}`);
+                  }
+                }}
+                className="bg-transparent text-xs font-semibold text-slate-800 focus:outline-none cursor-pointer max-w-[220px]"
+              >
+                {data.allEmployees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.name} ({emp.employeeId}) &bull; {emp.department}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <Link href={`/admin/employee-attendance/capture`}>
-            <button className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition-all shadow-sm">
+            <button className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer">
               Capture Today
             </button>
           </Link>
@@ -649,75 +777,232 @@ export function EmployeeAttendanceProfileClient({
         )}
       </div>
 
-      {/* Recent Attendance History Table */}
+      {/* ── DAY-TO-DAY ATTENDANCE RECORDS REGISTER (Complete Curated Ledger) ── */}
       <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-100">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-            Attendance History Register (Recent 31 Days)
-          </h2>
+        <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
+              <FileSpreadsheet className="w-4 h-4 text-violet-600" />
+              <span>Day-to-Day Attendance Records Register</span>
+            </h2>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Complete historical day-by-day record of {data.employee.name} with credit attribution and audit logs.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-bold text-slate-600 bg-white border border-slate-200 rounded-lg px-2.5 py-1">
+              Showing {filteredHistory.length} of {fullRecordsList.length} total records
+            </span>
+
+            <button
+              type="button"
+              onClick={handleExportEmployeeCSV}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export CSV</span>
+            </button>
+          </div>
         </div>
 
+        {/* Filter Controls Bar */}
+        <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+            {/* Search */}
+            <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search dates, remarks, or marked by..."
+                value={historySearchQuery}
+                onChange={(e) => setHistorySearchQuery(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-violet-500"
+              />
+            </div>
+
+            {/* Status Filter */}
+            <select
+              value={historyStatusFilter}
+              onChange={(e) => setHistoryStatusFilter(e.target.value)}
+              className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-violet-500"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="PRESENT">Present (1.0)</option>
+              <option value="WFH">WFH (1.0)</option>
+              <option value="HALF_DAY">Half Day (0.5)</option>
+              <option value="ABSENT">Absent (0.0)</option>
+              <option value="LEAVE">Leave (Excused)</option>
+              <option value="HOLIDAY">Holiday / Off</option>
+            </select>
+
+            {/* Date Range From / To */}
+            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+              <span className="text-[11px] font-semibold">From:</span>
+              <input
+                type="date"
+                value={historyDateFrom}
+                onChange={(e) => setHistoryDateFrom(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-800 focus:outline-none focus:border-violet-500"
+              />
+              <span className="text-[11px] font-semibold">To:</span>
+              <input
+                type="date"
+                value={historyDateTo}
+                onChange={(e) => setHistoryDateTo(e.target.value)}
+                className="bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 text-xs text-slate-800 focus:outline-none focus:border-violet-500"
+              />
+            </div>
+          </div>
+
+          {(historySearchQuery || historyStatusFilter !== 'ALL' || historyDateFrom || historyDateTo) && (
+            <button
+              type="button"
+              onClick={() => {
+                setHistorySearchQuery('');
+                setHistoryStatusFilter('ALL');
+                setHistoryDateFrom('');
+                setHistoryDateTo('');
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-600 bg-slate-100 hover:bg-slate-200 text-xs font-semibold transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Filters</span>
+            </button>
+          )}
+        </div>
+
+        {/* Day-to-Day Records Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 text-[11px] uppercase">
+            <thead className="bg-[#f0f3ff] text-slate-700 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Date</th>
-                <th className="py-3 px-4">Recorded Status</th>
-                <th className="py-3 px-4">Remarks</th>
-                <th className="py-3 px-4">Marked By</th>
-                <th className="py-3 px-4">Audit Status</th>
-                {isSuperAdmin && <th className="py-3 px-4 text-right">Rectification</th>}
+                <th className="py-3 px-3">SR.</th>
+                <th className="py-3 px-4">ATTENDANCE DATE</th>
+                <th className="py-3 px-4">RECORDED STATUS</th>
+                <th className="py-3 px-3 text-center">CREDIT</th>
+                <th className="py-3 px-3 text-center">WORKING DAY</th>
+                <th className="py-3 px-4">REMARKS / DUTY NOTES</th>
+                <th className="py-3 px-4">MARKED BY</th>
+                <th className="py-3 px-3 text-center">REGISTER LOCK</th>
+                <th className="py-3 px-4 text-center">AUDIT STATUS</th>
+                {isSuperAdmin && <th className="py-3 px-4 text-right">RECTIFY</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-sans">
-              {data.recentHistory.length === 0 ? (
+              {filteredHistory.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400">
-                    No historical attendance entries logged for this employee.
+                  <td colSpan={isSuperAdmin ? 10 : 9} className="py-12 text-center text-slate-400">
+                    <Calendar className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                    <p className="font-semibold text-xs text-slate-600">No attendance records found matching this filter query.</p>
                   </td>
                 </tr>
               ) : (
-                data.recentHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">{item.date}</td>
-                    <td className="py-3 px-4">{getStatusBadge(item.status)}</td>
-                    <td className="py-3 px-4 text-[11px] text-slate-600 max-w-[240px] truncate">
-                      {item.remarks || <span className="text-slate-300 italic">—</span>}
-                    </td>
-                    <td className="py-3 px-4 text-[11px] text-slate-500">{item.markedBy}</td>
-                    <td className="py-3 px-4">
-                      {item.auditLogsCount > 0 ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                          <History className="w-3 h-3 text-amber-600" /> {item.auditLogsCount} Rectification(s)
-                        </span>
-                      ) : (
-                        <span className="text-[10px] text-slate-400">Original Register</span>
-                      )}
-                    </td>
-                    {isSuperAdmin && (
-                      <td className="py-3 px-4 text-right">
-                        <button
-                          onClick={() => {
-                            setRectifyModal({
-                              attendanceId: item.id,
-                              date: item.date,
-                              currentStatus: item.status,
-                              currentRemarks: item.remarks || '',
-                            });
-                            setRectifyForm({
-                              newStatus: item.status,
-                              remarks: item.remarks || '',
-                            });
-                          }}
-                          className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors cursor-pointer"
-                          title="Rectify Record"
-                        >
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
+                filteredHistory.map((item, idx) => {
+                  let creditLabel = '0.0';
+                  let isWorking = true;
+                  if (item.status === 'PRESENT' || item.status === 'WFH') {
+                    creditLabel = '1.0';
+                  } else if (item.status === 'HALF_DAY') {
+                    creditLabel = '0.5';
+                  } else if (item.status === 'LEAVE' || item.status === 'HOLIDAY') {
+                    creditLabel = '—';
+                    isWorking = false;
+                  }
+
+                  const dateObj = new Date(item.date + 'T00:00:00Z');
+                  const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`hover:bg-slate-50/70 transition-colors ${
+                        item.status === 'ABSENT'
+                          ? 'bg-rose-50/15'
+                          : item.status === 'WFH'
+                          ? 'bg-cyan-50/15'
+                          : item.status === 'HALF_DAY'
+                          ? 'bg-amber-50/15'
+                          : item.status === 'LEAVE'
+                          ? 'bg-blue-50/15'
+                          : ''
+                      }`}
+                    >
+                      <td className="py-3 px-3 font-mono text-[11px] text-slate-400 font-medium">{idx + 1}</td>
+                      <td className="py-3 px-4 font-mono font-bold text-slate-900">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase bg-slate-100 px-1.5 py-0.5 rounded">
+                            {weekday}
+                          </span>
+                          <span>{item.date}</span>
+                        </div>
                       </td>
-                    )}
-                  </tr>
-                ))
+                      <td className="py-3 px-4">{getStatusBadge(item.status)}</td>
+                      <td className="py-3 px-3 text-center font-bold text-slate-800">{creditLabel}</td>
+                      <td className="py-3 px-3 text-center">
+                        {isWorking ? (
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            Active Day
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            Excluded
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-[11px] text-slate-700 max-w-[220px] truncate">
+                        {item.remarks ? (
+                          <span title={item.remarks}>{item.remarks}</span>
+                        ) : (
+                          <span className="text-slate-300 italic">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-[11px] text-slate-500 font-medium">{item.markedBy}</td>
+                      <td className="py-3 px-3 text-center">
+                        {item.isFinalized ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                            <Lock className="w-2.5 h-2.5 text-slate-500" /> Finalized
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            Draft
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {item.auditLogsCount > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            <History className="w-3 h-3 text-amber-600" /> {item.auditLogsCount} Rectification(s)
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-medium">Original Record</span>
+                        )}
+                      </td>
+                      {isSuperAdmin && (
+                        <td className="py-3 px-4 text-right">
+                          <button
+                            onClick={() => {
+                              setRectifyModal({
+                                attendanceId: item.id,
+                                date: item.date,
+                                currentStatus: item.status,
+                                currentRemarks: item.remarks || '',
+                              });
+                              setRectifyForm({
+                                newStatus: item.status,
+                                remarks: item.remarks || '',
+                              });
+                            }}
+                            className="p-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors cursor-pointer"
+                            title="Rectify Record"
+                          >
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -183,9 +183,9 @@ export function EmployeeDirectoryClient({
                     </td>
                     <td className="py-3 px-4 text-right">
                       <Link href={`/admin/employee-attendance/employees/${emp.id}`}>
-                        <button className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer">
-                          <span>View Dossier</span>
-                          <ExternalLink className="w-3 h-3 text-slate-500" />
+                        <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-semibold border border-violet-200 transition-colors cursor-pointer">
+                          <span>Day-to-Day Records</span>
+                          <ExternalLink className="w-3 h-3 text-violet-600" />
                         </button>
                       </Link>
                     </td>

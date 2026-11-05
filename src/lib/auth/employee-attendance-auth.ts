@@ -31,8 +31,17 @@ export function isSuperAdminAttendanceUser(user?: AttendanceAuthUser | null): bo
  * Checks if user is the authorized Attendance Manager (Akshay Kumar)
  */
 export function isAttendanceManagerUser(user?: AttendanceAuthUser | null): boolean {
-  if (!user || !user.email) return false;
-  return user.email.trim().toLowerCase() === ATTENDANCE_MANAGER_EMAIL.toLowerCase();
+  if (!user) return false;
+  const email = (user.email || '').trim().toLowerCase();
+  const name = (user.name || '').trim().toLowerCase();
+  const userId = user.userId || '';
+
+  return (
+    email === ATTENDANCE_MANAGER_EMAIL.toLowerCase() ||
+    email.includes('akshay') ||
+    name.includes('akshay kumar') ||
+    userId === 'cmv6l9la40000c9014xt46hcv'
+  );
 }
 
 /**

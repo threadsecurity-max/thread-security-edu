@@ -16,6 +16,7 @@ import {
   Network,
 } from 'lucide-react';
 import { getSession } from '@/lib/auth/session';
+import { isAttendanceManagerUser } from '@/lib/auth/employee-attendance-auth';
 import { getForgeModeStatusService } from '@/server/services/forge.service';
 import { redirect } from 'next/navigation';
 
@@ -23,6 +24,10 @@ export const revalidate = 0; // Live database query
 
 export default async function AdminDashboardOverviewPage() {
   const session = await getSession();
+  if (session && isAttendanceManagerUser(session) && session.role === 'MENTOR') {
+    redirect('/admin/employee-attendance');
+  }
+
   if (session?.role === 'SECURITY_ADMIN') {
     redirect('/admin/security-analyst');
   }

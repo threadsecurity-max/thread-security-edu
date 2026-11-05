@@ -505,10 +505,11 @@ export function EmployeeAttendanceDashboardClient({
                         <div className="inline-flex items-center gap-1.5">
                           <Link href={`/admin/employee-attendance/employees/${emp.id}`}>
                             <button
-                              title="View Individual Attendance Profile"
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer"
+                              title="View Day-to-Day Records"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-semibold border border-violet-200/70 transition-colors cursor-pointer"
                             >
-                              <ExternalLink className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Records</span>
+                              <ExternalLink className="w-3 h-3 text-violet-600" />
                             </button>
                           </Link>
 

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { prisma } from '@/server/database/prisma';
 import { getSession, isAdminRole } from '@/lib/auth/session';
+import { isAttendanceManagerUser } from '@/lib/auth/employee-attendance-auth';
 import { Sparkles, Globe, Activity } from 'lucide-react';
 import { BroadcastMessageModal } from '@/components/notifications/broadcast-modal';
 import { BroadcastNotificationBanner } from '@/components/notifications/broadcast-banner';
@@ -13,7 +14,7 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession();
-  const isAttendanceManager = session?.email?.trim().toLowerCase() === 'akshay.kumar@threadsecurity.org';
+  const isAttendanceManager = isAttendanceManagerUser(session);
 
   // Unified role validation for admin portal (allows Admins and designated Attendance Manager)
   if (!session || (!isAdminRole(session.role) && !isAttendanceManager)) {

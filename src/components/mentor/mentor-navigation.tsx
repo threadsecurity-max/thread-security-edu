@@ -27,6 +27,7 @@ import {
   ClipboardList,
   MessageSquare,
   UserCheck,
+  UsersRound,
 } from 'lucide-react';
 import { QuickCreateDropdown } from './QuickCreateModal';
 
@@ -103,6 +104,9 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
       ],
     },
     ...(user.email?.toLowerCase() === 'akshay.kumar@threadsecurity.org' ||
+    user.email?.toLowerCase().includes('akshay') ||
+    user.name?.toLowerCase().includes('akshay kumar') ||
+    user.userId === 'cmv6l9la40000c9014xt46hcv' ||
     user.email?.toLowerCase() === 'threadsecurity@gmail.com' ||
     user.role === 'SUPER_ADMIN'
       ? [
@@ -112,6 +116,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
               { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: UserCheck, badge: 'MANAGER' },
               { name: 'Capture Attendance', href: '/admin/employee-attendance/capture', icon: Clock },
               { name: 'Attendance Reports', href: '/admin/employee-attendance/reports', icon: ClipboardList },
+              { name: 'Employee Directory & Dossiers', href: '/admin/employee-attendance/directory', icon: UsersRound },
             ],
           },
         ]
