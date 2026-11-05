@@ -54,17 +54,17 @@ export default async function AdminDashboardOverviewPage() {
       sessions,
       liveForge,
     ] = await Promise.all([
-      prisma.user.count({ where: { role: { in: ['STUDENT', 'GUEST'] } } }),
-      prisma.user.count({ where: { role: { in: ['STUDENT', 'GUEST'] }, isDashboardAccessGranted: true } }),
-      prisma.mentorProfile.count(),
-      prisma.batch.count({ where: { status: 'ACTIVE' } }),
-      prisma.course.count(),
-      (prisma as any).workshop ? (prisma as any).workshop.count() : 0,
-      (prisma as any).attendanceCorrectionRequest ? (prisma as any).attendanceCorrectionRequest.count({ where: { status: 'PENDING' } }) : 0,
+      prisma.user.count({ where: { role: { in: ['STUDENT', 'GUEST'] } } }).catch(() => 0),
+      prisma.user.count({ where: { role: { in: ['STUDENT', 'GUEST'] }, isDashboardAccessGranted: true } }).catch(() => 0),
+      prisma.mentorProfile.count().catch(() => 0),
+      prisma.batch.count({ where: { status: 'ACTIVE' } }).catch(() => 0),
+      prisma.course.count().catch(() => 0),
+      (prisma as any).workshop ? (prisma as any).workshop.count().catch(() => 0) : 0,
+      (prisma as any).attendanceCorrectionRequest ? (prisma as any).attendanceCorrectionRequest.count({ where: { status: 'PENDING' } }).catch(() => 0) : 0,
       prisma.auditLog.findMany({
         orderBy: { createdAt: 'desc' },
         take: 6,
-      }),
+      }).catch(() => []),
       prisma.user.findMany({
         where: { role: { in: ['STUDENT', 'GUEST'] } },
         include: {
@@ -74,29 +74,29 @@ export default async function AdminDashboardOverviewPage() {
         },
         orderBy: { createdAt: 'desc' },
         take: 8,
-      }),
+      }).catch(() => []),
       prisma.batchSession.findMany({
         include: {
           batch: { include: { mentor: { include: { user: true } } } },
         },
         orderBy: { sessionDate: 'asc' },
         take: 5,
-      }),
-      getForgeModeStatusService(),
+      }).catch(() => []),
+      getForgeModeStatusService().catch(() => ({ isEnabled: false, updatedAt: '', updatedBy: 'system' })),
     ]);
 
-    totalStudents = studentsCount;
-    activeStudents = approvedCount;
-    pendingStudents = Math.max(0, studentsCount - approvedCount);
-    totalMentors = mentorsCount;
-    totalBatches = batchesCount;
-    totalCourses = coursesCount;
-    totalWorkshops = workshopsCount;
-    pendingCorrectionRequests = correctionsCount;
-    recentAuditLogs = audits;
-    studentsList = recentStudents;
-    upcomingSessions = sessions;
-    forgeStatus = liveForge;
+    totalStudents = studentsCount || 0;
+    activeStudents = approvedCount || 0;
+    pendingStudents = Math.max(0, totalStudents - activeStudents);
+    totalMentors = mentorsCount || 0;
+    totalBatches = batchesCount || 0;
+    totalCourses = coursesCount || 0;
+    totalWorkshops = workshopsCount || 0;
+    pendingCorrectionRequests = correctionsCount || 0;
+    recentAuditLogs = audits || [];
+    studentsList = recentStudents || [];
+    upcomingSessions = sessions || [];
+    forgeStatus = liveForge || { isEnabled: false };
   } catch (err) {
     console.error('Failed to query dashboard overview metrics:', err);
   }

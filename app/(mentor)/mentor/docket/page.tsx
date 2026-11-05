@@ -36,17 +36,17 @@ export default async function MentorDocketPage() {
     allItems = [];
   }
 
-  // Mentors (Tier 2) can delegate specific junior lab support tasks to Junior Staff (Tier 3)
+  // Mentors (Tier 2) can delegate specific junior lab support tasks to Junior Staff (Tier 3) or collaborate
   let assignableUsers: any[] = [];
   try {
     assignableUsers = await prisma.user.findMany({
       where: {
         role: {
-          in: ['STAFF_JUNIOR', 'STAFF_EXECUTIVE'],
+          in: ['STAFF_JUNIOR', 'STAFF_EXECUTIVE', 'MENTOR'],
         },
       },
       select: { id: true, name: true, email: true, role: true },
-      orderBy: { name: 'asc' },
+      orderBy: [{ role: 'asc' }, { name: 'asc' }],
     });
   } catch (err) {
     console.error('[MentorDocketPage] Failed to fetch assignable staff:', err);
@@ -57,8 +57,8 @@ export default async function MentorDocketPage() {
     <div className="p-4 sm:p-6 lg:p-8">
       <TodaysDocketClient
         currentUser={user}
-        initialItems={JSON.parse(JSON.stringify(allItems))}
-        assignableUsers={assignableUsers}
+        initialItems={JSON.parse(JSON.stringify(allItems || []))}
+        assignableUsers={JSON.parse(JSON.stringify(assignableUsers || []))}
         portalType="mentor"
       />
     </div>

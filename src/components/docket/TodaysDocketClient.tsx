@@ -82,16 +82,26 @@ export function TodaysDocketClient({
   const isMentor = currentUser.role.toUpperCase() === 'MENTOR';
 
   // Filter assignable users based on hierarchy:
-  // Super Admin can assign to Tier 2 (Mentor, Executive, Security Admin) and Tier 3 (Junior)
-  // Tier 2 can only assign to Tier 3 (Junior)
+  // In Admin portal or for Admin roles: Can assign to any operational staff or mentor
+  // In Mentor portal: Mentors can delegate tasks to Junior Staff and Executive Staff
   const allowedAssignees = React.useMemo(() => {
     const list = Array.isArray(assignableUsers) ? assignableUsers : [];
-    if (isSuperAdmin) return list;
-    if (isTier2) {
-      return list.filter((u) => u.role?.toUpperCase() === 'STAFF_JUNIOR');
+    if (list.length === 0) return [];
+
+    if (portalType === 'admin' || isSuperAdmin || currentUser.role?.toUpperCase().includes('ADMIN')) {
+      return list;
     }
-    return [];
-  }, [assignableUsers, isSuperAdmin, isTier2]);
+
+    if (isTier2 || isMentor) {
+      const juniorOrExec = list.filter((u) => {
+        const r = (u.role || '').toUpperCase();
+        return r === 'STAFF_JUNIOR' || r === 'STAFF_EXECUTIVE';
+      });
+      return juniorOrExec.length > 0 ? juniorOrExec : list;
+    }
+
+    return list;
+  }, [assignableUsers, portalType, isSuperAdmin, isTier2, isMentor, currentUser.role]);
 
   // Form states
   const [createForm, setCreateForm] = useState({

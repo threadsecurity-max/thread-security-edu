@@ -21,11 +21,12 @@ function createPrismaClient(): PrismaClient {
     if (
       msg.includes("Can't reach database server") ||
       msg.includes('planLimitReached') ||
-      msg.includes('does not exist in the current database')
+      msg.includes('does not exist in the current database') ||
+      msg.includes('Timed out fetching a new connection')
     ) {
       if (now - lastErrorNotice > 60000) {
         lastErrorNotice = now;
-        console.warn('⚠️  [Database Status]: Database connection unavailable or relation pending (serving resilient fallback data).');
+        console.warn('⚠️  [Database Status]: Database connection pool busy or relation pending (serving resilient fallback data).');
       }
     } else {
       console.warn('⚠️  [Prisma Notice]:', msg);

@@ -100,15 +100,28 @@ interface PrivilegeDelegationWorkspaceProps {
 }
 
 export function PrivilegeDelegationWorkspace({
-  initialEmployees,
-  initialTeams,
-  availableModules,
+  initialEmployees = [],
+  initialTeams = [],
+  availableModules = [],
 }: PrivilegeDelegationWorkspaceProps) {
   const [teams, setTeams] = useState<DelegationTeamItem[]>(initialTeams);
   const [employees, setEmployees] = useState<EmployeeNode[]>(initialEmployees);
   const [viewMode, setViewMode] = useState<'ARCHITECTURE' | 'OBSERVER'>('ARCHITECTURE');
   const [isPending, startTransition] = useTransition();
   const [notice, setNotice] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Sync state if initial props change
+  React.useEffect(() => {
+    if (initialEmployees && initialEmployees.length > 0) {
+      setEmployees(initialEmployees);
+    }
+  }, [initialEmployees]);
+
+  React.useEffect(() => {
+    if (initialTeams && initialTeams.length > 0) {
+      setTeams(initialTeams);
+    }
+  }, [initialTeams]);
 
   // Modals
   const [createTeamOpen, setCreateTeamOpen] = useState(false);
@@ -120,15 +133,34 @@ export function PrivilegeDelegationWorkspace({
   const [teamGrantsModal, setTeamGrantsModal] = useState<DelegationTeamItem | null>(null);
   const [edgeModalTeam, setEdgeModalTeam] = useState<DelegationTeamItem | null>(null);
 
+  // Eligible Team Leads (Mentors, Executives, Security Admins, Admins)
+  const eligibleLeads = React.useMemo(() => {
+    const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
+    const leads = list.filter((e) => {
+      const r = (e.role || '').toUpperCase();
+      return ['MENTOR', 'STAFF_EXECUTIVE', 'SECURITY_ADMIN', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'ADMIN'].includes(r);
+    });
+    return leads.length > 0 ? leads : list;
+  }, [employees, initialEmployees]);
+
   // Form states
   const [createTeamForm, setCreateTeamForm] = useState({
     name: '',
     code: '',
     description: '',
     color: '#6366f1',
-    leadId: employees.find((e) => e.role === 'MENTOR' || e.role === 'STAFF_EXECUTIVE')?.id || employees[0]?.id || '',
+    leadId: eligibleLeads[0]?.id || '',
     systemGrants: ['DOCKET', 'COMMUNICATIONS', 'ATTENDANCE'],
   });
+
+  // Keep createTeamForm.leadId populated
+  React.useEffect(() => {
+    if (eligibleLeads.length > 0) {
+      if (!createTeamForm.leadId || !eligibleLeads.some((l) => l.id === createTeamForm.leadId)) {
+        setCreateTeamForm((prev) => ({ ...prev, leadId: eligibleLeads[0].id }));
+      }
+    }
+  }, [eligibleLeads, createTeamForm.leadId]);
 
   const [assignMemberForm, setAssignMemberForm] = useState({
     userId: '',
@@ -136,12 +168,39 @@ export function PrivilegeDelegationWorkspace({
     systemGrants: ['DOCKET'],
   });
 
+  // Available staff members for assignment modal
+  const availableMembers = React.useMemo(() => {
+    if (!assignMemberModal) return [];
+    const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
+    return list.filter((e) => e.id !== assignMemberModal.leadId);
+  }, [assignMemberModal, employees, initialEmployees]);
+
+  React.useEffect(() => {
+    if (assignMemberModal && availableMembers.length > 0) {
+      if (!assignMemberForm.userId || !availableMembers.some((m) => m.id === assignMemberForm.userId)) {
+        setAssignMemberForm((prev) => ({ ...prev, userId: availableMembers[0].id }));
+      }
+    }
+  }, [assignMemberModal, availableMembers, assignMemberForm.userId]);
+
   const [edgeForm, setEdgeForm] = useState({
     sourceUserId: '',
     targetUserId: '',
     edgeType: 'REPORTING' as 'REPORTING' | 'COMMUNICATION' | 'TASK_DELEGATION',
     label: 'Direct Reporting Pipeline',
   });
+
+  React.useEffect(() => {
+    if (edgeModalTeam && edgeModalTeam.members.length > 0) {
+      const first = edgeModalTeam.members[0]?.userId;
+      const second = edgeModalTeam.members[1]?.userId || first;
+      setEdgeForm((prev) => ({
+        ...prev,
+        sourceUserId: prev.sourceUserId && edgeModalTeam.members.some((m) => m.userId === prev.sourceUserId) ? prev.sourceUserId : (first || ''),
+        targetUserId: prev.targetUserId && edgeModalTeam.members.some((m) => m.userId === prev.targetUserId) ? prev.targetUserId : (second || ''),
+      }));
+    }
+  }, [edgeModalTeam]);
 
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setNotice({ text, type });
@@ -825,13 +884,15 @@ export function PrivilegeDelegationWorkspace({
                 onChange={(e) => setCreateTeamForm({ ...createTeamForm, leadId: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
               >
-                {employees
-                  .filter((e) => e.role === 'MENTOR' || e.role === 'STAFF_EXECUTIVE' || e.role === 'SECURITY_ADMIN')
-                  .map((e) => (
+                {eligibleLeads.length === 0 ? (
+                  <option value="" disabled>No eligible team leads found</option>
+                ) : (
+                  eligibleLeads.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.name || e.email} ({e.role})
                     </option>
-                  ))}
+                  ))
+                )}
               </select>
             </div>
 
@@ -904,13 +965,15 @@ export function PrivilegeDelegationWorkspace({
                   onChange={(e) => setAssignMemberForm({ ...assignMemberForm, userId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
                 >
-                  {employees
-                    .filter((e) => e.id !== assignMemberModal.leadId)
-                    .map((e) => (
+                  {availableMembers.length === 0 ? (
+                    <option value="" disabled>No available staff members</option>
+                  ) : (
+                    availableMembers.map((e) => (
                       <option key={e.id} value={e.id}>
                         {e.name || e.email} ({e.role})
                       </option>
-                    ))}
+                    ))
+                  )}
                 </select>
               </div>
 

@@ -24,8 +24,8 @@ export default async function AdminDelegationPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <PrivilegeDelegationWorkspace
-        initialEmployees={data.employees}
-        initialTeams={JSON.parse(JSON.stringify(data.teams))}
+        initialEmployees={JSON.parse(JSON.stringify(data.employees || []))}
+        initialTeams={JSON.parse(JSON.stringify(data.teams || []))}
         availableModules={data.availableModules}
       />
     </div>

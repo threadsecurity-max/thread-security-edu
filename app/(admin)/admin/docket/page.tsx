@@ -27,7 +27,7 @@ export default async function AdminDocketPage() {
     assignableUsers = await prisma.user.findMany({
       where: {
         role: {
-          in: ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR', 'MENTOR'],
+          not: 'STUDENT',
         },
       },
       select: { id: true, name: true, email: true, role: true },
@@ -42,8 +42,8 @@ export default async function AdminDocketPage() {
     <div className="p-4 sm:p-6 lg:p-8">
       <TodaysDocketClient
         currentUser={user}
-        initialItems={JSON.parse(JSON.stringify(items))}
-        assignableUsers={assignableUsers}
+        initialItems={JSON.parse(JSON.stringify(items || []))}
+        assignableUsers={JSON.parse(JSON.stringify(assignableUsers || []))}
         portalType="admin"
       />
     </div>

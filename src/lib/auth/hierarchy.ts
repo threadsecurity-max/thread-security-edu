@@ -35,17 +35,27 @@ export function getUserHierarchyTier(role?: string | null): StaffHierarchyTier {
 }
 
 export function canAssignTask(assignerRole: string, targetRole: string): boolean {
-  const assignerTier = getUserHierarchyTier(assignerRole);
-  const targetTier = getUserHierarchyTier(targetRole);
+  const assignerUpper = (assignerRole || '').toUpperCase();
+  const targetUpper = (targetRole || '').toUpperCase();
 
-  // Super Admin (Tier 1) can assign to anyone (Tier 2 and Tier 3)
+  // Super Admin and System Admins have full operational authority to assign tasks to anyone
+  if (['SUPER_ADMIN', 'ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN'].includes(assignerUpper)) {
+    return true;
+  }
+
+  const assignerTier = getUserHierarchyTier(assignerUpper);
+  const targetTier = getUserHierarchyTier(targetUpper);
+
+  // Tier 1 (Super Admin) can assign to anyone
   if (assignerTier === StaffHierarchyTier.TIER_1_SUPER_ADMIN) {
     return true;
   }
 
-  // Tier 2 (Mentor, Executive, Security Admin) can assign tasks to Tier 3 (Junior Staff)
-  if (assignerTier === StaffHierarchyTier.TIER_2_OFFICER && targetTier === StaffHierarchyTier.TIER_3_JUNIOR) {
-    return true;
+  // Tier 2 (Mentor, Executive) can assign tasks to Tier 3 (Junior Staff) and peers
+  if (assignerTier === StaffHierarchyTier.TIER_2_OFFICER) {
+    if (targetTier === StaffHierarchyTier.TIER_3_JUNIOR || targetUpper === 'STAFF_JUNIOR' || targetUpper === 'STAFF_EXECUTIVE') {
+      return true;
+    }
   }
 
   return false;
