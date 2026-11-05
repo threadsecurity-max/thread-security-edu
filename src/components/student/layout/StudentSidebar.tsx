@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Activity,
   Layers,
+  Receipt,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -63,6 +64,13 @@ export function StudentSidebar({ student }: StudentSidebarProps) {
       items: [
         { label: 'Batch & Attendance', href: '/student/attendance', icon: Calendar, badge: 'LIVE' },
         { label: 'Study Materials', href: '/student/materials', icon: BookOpen, badge: 'DOCS' },
+      ],
+    },
+    {
+      title: 'FINANCE & CREDENTIALS',
+      items: [
+        { label: 'Invoices & Receipts', href: '/student/invoices', icon: Receipt },
+        { label: 'Certificates', href: '/student/certificates', icon: Award },
       ],
     },
   ];

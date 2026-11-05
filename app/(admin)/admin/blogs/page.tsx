@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/auth/session';
+import { getSession, isAdminRole } from '@/lib/auth/session';
 import { getAdminBlogs, getBlogCategories } from '@/server/services/blog.service';
 import { AdminBlogDashboardClient } from '@/components/admin/blog/AdminBlogDashboardClient';
 import { Metadata } from 'next';
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function AdminBlogsPage() {
   const session = await getSession();
 
-  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN' && session.role !== 'SECURITY_ADMIN')) {
+  if (!session || !isAdminRole(session.role)) {
     redirect('/login?error=UnauthorizedAccess');
   }
 

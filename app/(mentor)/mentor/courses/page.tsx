@@ -14,6 +14,12 @@ export default async function MentorCoursesPage() {
       modules: { include: { lessons: true } },
       labs: true,
       enrollments: true,
+      batches: {
+        include: {
+          sessions: true,
+          students: true,
+        },
+      },
     },
   });
 
@@ -54,6 +60,44 @@ export default async function MentorCoursesPage() {
                   <span className="font-bold text-sm text-primary">{course.enrollments.length}</span>
                 </div>
               </div>
+
+              {/* Associated Batches & Slot Attendance Management */}
+              {course.batches && course.batches.length > 0 ? (
+                <div className="space-y-2 pt-2 border-t border-slate-100">
+                  <span className="text-[11px] font-mono font-bold text-slate-500 uppercase tracking-wider block">
+                    Active Batches ({course.batches.length})
+                  </span>
+                  <div className="space-y-1.5">
+                    {course.batches.map((b: any) => (
+                      <div
+                        key={b.id}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs"
+                      >
+                        <div>
+                          <span className="font-mono font-bold text-violet-700">{b.batchCode}</span>
+                          <span className="text-slate-500 text-[11px] ml-2 font-mono">
+                            ({b.students?.length || 0} Students &bull; {b.sessions?.length || 0} Slots)
+                          </span>
+                        </div>
+                        <Link href={`/mentor/attendance?batchId=${b.id}`}>
+                          <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white text-[11px] h-7 px-2.5 rounded-lg font-bold">
+                            Capture Slot Attendance
+                          </Button>
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-xs text-slate-400 italic">No batches currently mapped</span>
+                  <Link href="/mentor/attendance">
+                    <Button size="sm" variant="outline" className="text-[11px] h-7">
+                      Open Attendance Center
+                    </Button>
+                  </Link>
+                </div>
+              )}
 
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="text-xs font-mono text-slate-500 flex items-center gap-1">

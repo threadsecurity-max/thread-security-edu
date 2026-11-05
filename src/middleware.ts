@@ -5,10 +5,22 @@ import { verifySessionToken, type UserSession } from '@/lib/auth/session-token';
 
 // Define route access policies
 const ROLE_ROUTES: Record<string, string[]> = {
-  '/admin': ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN'],
-  '/mentor': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'MENTOR'],
-  '/student': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STUDENT'],
+  '/admin': ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR', 'ADMIN'],
+  '/mentor': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'MENTOR'],
+  '/student': ['SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STUDENT'],
 };
+
+const FORGE_MODE_BYPASS_EMAILS = [
+  'threadsecuritydeveloper@gmail.com',
+  'kunaldigitalconnect@gmail.com',
+  'threadsecurity@gmail.com',
+  'threadsecuritymentor@gmail.com',
+];
+
+function isForgeBypassedEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return FORGE_MODE_BYPASS_EMAILS.includes(email.trim().toLowerCase());
+}
 
 function getSessionFromRequest(request: NextRequest): UserSession | null {
   try {
@@ -39,6 +51,35 @@ export async function middleware(request: NextRequest) {
       `https://www.threadsecurity.in${request.nextUrl.pathname}${request.nextUrl.search}`,
       301
     );
+  }
+
+  // Developer Forge Mode Lockdown Check (Puts panels to rest during development)
+  const isForgeModeCookie = request.cookies.get('tse_forge_mode')?.value === 'true';
+  if (isForgeModeCookie && pathname !== '/forge-mode') {
+    const isExemptPath =
+      pathname.startsWith('/api/auth') ||
+      pathname.startsWith('/api/forge') ||
+      pathname === '/login' ||
+      pathname === '/favicon.ico';
+
+    if (!isExemptPath) {
+      const session = getSessionFromRequest(request);
+      const isBypassed = isForgeBypassedEmail(session?.email);
+
+      if (!isBypassed) {
+        if (pathname.startsWith('/api/')) {
+          return new NextResponse(
+            JSON.stringify({
+              success: false,
+              code: 'FORGE_MODE_ACTIVE',
+              message: 'Developer Forge Mode active. Action panels are currently at rest. Please wait for the developer to open the doors.',
+            }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } }
+          );
+        }
+        return NextResponse.redirect(new URL('/forge-mode', request.url));
+      }
+    }
   }
 
   // 1. IP Rate Limiting for Authentication & Verification Endpoints

@@ -11,8 +11,8 @@ import {
 export async function getAdminConversationsAction() {
   try {
     const user = await getCurrentUser();
-    if (!user || !isAdminRole(user.role)) {
-      return { success: false, error: 'Unauthorized: Admin access required', data: [] };
+    if (!user || (!isAdminRole(user.role) && user.role !== 'MENTOR')) {
+      return { success: false, error: 'Unauthorized: Staff or Mentor access required', data: [] };
     }
     const conversations = await getAdminConversationsService(user.userId);
     return { success: true, data: conversations };
@@ -39,8 +39,8 @@ export async function getConversationMessagesAction(conversationId: string) {
 export async function sendAdminMessageAction(recipientId: string, content: string) {
   try {
     const user = await getCurrentUser();
-    if (!user || !isAdminRole(user.role)) {
-      return { success: false, error: 'Unauthorized: Admin access required' };
+    if (!user || (!isAdminRole(user.role) && user.role !== 'MENTOR')) {
+      return { success: false, error: 'Unauthorized: Staff or Mentor access required' };
     }
 
     if (!content.trim()) {
@@ -50,6 +50,7 @@ export async function sendAdminMessageAction(recipientId: string, content: strin
     const res = await sendAdminMessageService(user.userId, recipientId, content);
     revalidatePath('/admin/messages');
     revalidatePath('/admin/announcements');
+    revalidatePath('/mentor/messages');
     return { success: true, data: res };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to send message';

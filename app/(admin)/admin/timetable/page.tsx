@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/auth/session';
+import { getSession, isAdminRole } from '@/lib/auth/session';
 import { prisma } from '@/server/database/prisma';
 import { getAllBatchesService } from '@/server/services/batch.service';
 import { TimetableClient } from '@/app/(admin)/admin/timetable/timetable-client';
@@ -13,12 +13,7 @@ export const revalidate = 0;
 
 export default async function AdminTimetablePage() {
   const session = await getSession();
-  if (
-    !session ||
-    (session.role !== 'ADMIN' &&
-      session.role !== 'SUPER_ADMIN' &&
-      session.role !== 'ACADEMIC_ADMIN')
-  ) {
+  if (!session || !isAdminRole(session.role)) {
     redirect('/login');
   }
 

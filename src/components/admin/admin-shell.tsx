@@ -30,6 +30,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   UsersRound,
+  ClipboardList,
+  Receipt,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -82,14 +84,15 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
 
   const navGroups: NavGroup[] = [
     {
-      title: 'Overview',
+      title: 'Command Center',
       items: [
         { name: 'Dashboard', href: '/admin', icon: LayoutDashboard, exact: true },
+        { name: "Today's Docket", href: '/admin/docket', icon: ClipboardList, badge: 'DAILY' },
         { name: 'Announcements', href: '/admin/announcements', icon: Bell },
       ],
     },
     {
-      title: 'People',
+      title: 'People & Accounts',
       items: [
         { name: 'Users Directory', href: '/admin/users', icon: UsersRound },
         {
@@ -100,6 +103,7 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
         },
         { name: 'Student Directory', href: '/admin/students', icon: Users },
         { name: 'Access & Invites', href: '/admin/access', icon: UserCheck },
+        { name: 'Student Invoices', href: '/admin/invoices', icon: Receipt },
       ],
     },
     {

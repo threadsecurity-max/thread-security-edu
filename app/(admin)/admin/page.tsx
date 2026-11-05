@@ -12,8 +12,11 @@ import {
   AlertCircle,
   Clock,
   ShieldAlert,
+  Flame,
+  Network,
 } from 'lucide-react';
 import { getSession } from '@/lib/auth/session';
+import { getForgeModeStatusService } from '@/server/services/forge.service';
 import { redirect } from 'next/navigation';
 
 export const revalidate = 0; // Live database query
@@ -35,6 +38,7 @@ export default async function AdminDashboardOverviewPage() {
   let recentAuditLogs: any[] = [];
   let studentsList: any[] = [];
   let upcomingSessions: any[] = [];
+  let forgeStatus = { isEnabled: false };
 
   try {
     const [
@@ -48,6 +52,7 @@ export default async function AdminDashboardOverviewPage() {
       audits,
       recentStudents,
       sessions,
+      liveForge,
     ] = await Promise.all([
       prisma.user.count({ where: { role: { in: ['STUDENT', 'GUEST'] } } }),
       prisma.user.count({ where: { role: { in: ['STUDENT', 'GUEST'] }, isDashboardAccessGranted: true } }),
@@ -77,6 +82,7 @@ export default async function AdminDashboardOverviewPage() {
         orderBy: { sessionDate: 'asc' },
         take: 5,
       }),
+      getForgeModeStatusService(),
     ]);
 
     totalStudents = studentsCount;
@@ -90,6 +96,7 @@ export default async function AdminDashboardOverviewPage() {
     recentAuditLogs = audits;
     studentsList = recentStudents;
     upcomingSessions = sessions;
+    forgeStatus = liveForge;
   } catch (err) {
     console.error('Failed to query dashboard overview metrics:', err);
   }
@@ -172,6 +179,29 @@ export default async function AdminDashboardOverviewPage() {
 
         {/* Quick Action Dock */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Developer Forge Mode Quick Indicator & Switch */}
+          <Link href="/admin/forge">
+            <button
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-mono font-bold transition-all shadow-xs cursor-pointer ${
+                forgeStatus.isEnabled
+                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-600 animate-pulse'
+                  : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              }`}
+              title="Manage Developer Forge Mode & Panel Lockdown"
+            >
+              <Flame className={`w-4 h-4 ${forgeStatus.isEnabled ? 'text-black' : 'text-amber-500'}`} />
+              <span>{forgeStatus.isEnabled ? '🔥 FORGE ON' : 'Forge Mode'}</span>
+            </button>
+          </Link>
+
+          {/* Privilege Delegation Workspace */}
+          <Link href="/admin/delegation">
+            <button className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs transition-all shadow-xs cursor-pointer">
+              <Network className="w-4 h-4" />
+              <span>Privilege Delegation</span>
+            </button>
+          </Link>
+
           <Link href="/admin/workshops">
             <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-medium text-xs shadow-sm transition-all active:scale-95 cursor-pointer">
               <Sparkles className="w-4 h-4" />

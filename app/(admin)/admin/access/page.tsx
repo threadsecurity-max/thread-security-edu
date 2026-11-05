@@ -1,5 +1,5 @@
 import { prisma } from '@/server/database/prisma';
-import { getSession } from '@/lib/auth/session';
+import { getSession, isAdminRole } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { UserCheck } from 'lucide-react';
 import { AccessInvitationsClient } from '@/app/(admin)/admin/access/access-invitations-client';
@@ -13,7 +13,7 @@ export const revalidate = 0;
 
 export default async function AdminAccessInvitationsPage() {
   const session = await getSession();
-  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+  if (!session || !isAdminRole(session.role)) {
     redirect('/admin/security-analyst?notice=unauthorized-module');
   }
 

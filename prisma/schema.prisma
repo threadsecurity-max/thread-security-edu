@@ -15,6 +15,8 @@ enum RoleType {
   ACADEMIC_ADMIN
   SECURITY_ADMIN
   SUPER_ADMIN
+  STAFF_EXECUTIVE
+  STAFF_JUNIOR
 }
 
 enum CourseLevel {
@@ -110,6 +112,11 @@ model User {
   conversationsA AdminConversation[] @relation("ConvParticipantA")
   conversationsB AdminConversation[] @relation("ConvParticipantB")
   sentMessages  AdminMessage[]  @relation("SentMessages")
+  docketCreated TodaysDocketItem[] @relation("DocketCreatedBy")
+  docketAssigned TodaysDocketItem[] @relation("DocketAssignedTo")
+  invoicesCreated StudentInvoice[] @relation("InvoiceCreator")
+  ledTeams       DelegationTeam[]   @relation("TeamLead")
+  teamMemberships DelegationMember[]
 
   @@index([email])
 }
@@ -157,6 +164,7 @@ model StudentProfile {
   attendanceRecords AttendanceRecord[]
   correctionRequests AttendanceCorrectionRequest[]
   broadcastRecipients BroadcastRecipient[]
+  invoices          StudentInvoice[]
 }
 
 model MentorProfile {
@@ -1236,6 +1244,162 @@ model InvitationToken {
   @@index([email])
   @@index([token])
 }
+
+enum HierarchyTier {
+  TIER_1_SUPER_ADMIN
+  TIER_2_OFFICER
+  TIER_3_JUNIOR
+}
+
+enum DocketTaskStatus {
+  PENDING_PROOF
+  ACTIVE
+  IN_PROGRESS
+  UNDER_REVIEW
+  COMPLETED
+  BLOCKED
+}
+
+enum DocketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model TodaysDocketItem {
+  id                 String           @id @default(cuid())
+  title              String
+  description        String?          @db.Text
+  date               DateTime         @default(now())
+  category           String           @default("DAILY_OPS")
+  priority           DocketPriority   @default(MEDIUM)
+  status             DocketTaskStatus @default(PENDING_PROOF)
+  
+  assignerId         String
+  assigner           User             @relation("DocketCreatedBy", fields: [assignerId], references: [id], onDelete: Cascade)
+  assignerTier       HierarchyTier    @default(TIER_1_SUPER_ADMIN)
+  
+  assigneeId         String
+  assignee           User             @relation("DocketAssignedTo", fields: [assigneeId], references: [id], onDelete: Cascade)
+  assigneeTier       HierarchyTier    @default(TIER_2_OFFICER)
+
+  proofRequired      Boolean          @default(false)
+  proofUrl           String?          @db.Text
+  proofFilename      String?
+  proofNotes         String?          @db.Text
+  proofSubmittedAt   DateTime?
+  proofVerifiedAt    DateTime?
+  proofVerifiedBy    String?
+
+  dailyReport        String?          @db.Text
+  reportedAt         DateTime?
+  progressPercent    Int              @default(0)
+
+  supervisorFeedback String?          @db.Text
+  dueDate            DateTime?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@index([assigneeId])
+  @@index([assignerId])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model StudentInvoice {
+  id             String         @id @default(cuid())
+  invoiceNumber  String         @unique
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdById    String
+  createdBy      User           @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  
+  title          String
+  description    String?        @db.Text
+  itemsJson      String         @db.Text
+  subtotal       Float
+  taxRatePercent Float          @default(18.0)
+  taxAmount      Float          @default(0.0)
+  totalAmount    Float
+  currency       String         @default("INR")
+  
+  dueDate        DateTime
+  paidAt         DateTime?
+  status         InvoiceStatus  @default(SENT)
+  pdfUrl         String?        @db.Text
+  notes          String?        @db.Text
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([invoiceNumber])
+}
+
+model DelegationTeam {
+  id           String             @id @default(cuid())
+  name         String
+  code         String             @unique // e.g. TEAM-RED-LABS
+  description  String?            @db.Text
+  color        String             @default("#6366f1")
+  leadId       String
+  lead         User               @relation("TeamLead", fields: [leadId], references: [id], onDelete: Cascade)
+  systemGrants String[]           // e.g. ["DOCKET", "COMMUNICATIONS", "INVOICES", "ATTENDANCE", "BLOG_STUDIO", "LABS_RANGE"]
+  positionX    Float              @default(100)
+  positionY    Float              @default(100)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  members      DelegationMember[]
+  edges        DelegationEdge[]
+
+  @@index([leadId])
+  @@index([code])
+}
+
+model DelegationMember {
+  id           String         @id @default(cuid())
+  teamId       String
+  team         DelegationTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleInTeam   String         @default("JUNIOR") // "LEAD" | "JUNIOR" | "SPECIALIST" | "OBSERVER"
+  systemGrants String[]       // Subsystem permissions e.g. ["DOCKET_EXECUTE", "ATTENDANCE_SLOTS"]
+  canReport    Boolean        @default(true)
+  canAssign    Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model DelegationEdge {
+  id           String         @id @default(cuid())
+  teamId       String
+  team         DelegationTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sourceUserId String
+  targetUserId String
+  edgeType     String         @default("REPORTING") // "REPORTING" | "COMMUNICATION" | "TASK_DELEGATION" | "AUDIT"
+  label        String?
+  createdAt    DateTime       @default(now())
+
+  @@index([teamId])
+  @@index([sourceUserId])
+  @@index([targetUserId])
+}
+
 
 
 

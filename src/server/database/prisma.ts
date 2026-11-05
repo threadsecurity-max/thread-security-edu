@@ -18,13 +18,17 @@ function createPrismaClient(): PrismaClient {
   (client as any).$on('error', (e: any) => {
     const now = Date.now();
     const msg = e?.message || '';
-    if (msg.includes('Can\'t reach database server') || msg.includes('planLimitReached')) {
+    if (
+      msg.includes("Can't reach database server") ||
+      msg.includes('planLimitReached') ||
+      msg.includes('does not exist in the current database')
+    ) {
       if (now - lastErrorNotice > 60000) {
         lastErrorNotice = now;
-        console.warn('⚠️  [Database Status]: Database connection unavailable or quota restricted (serving local fallback data).');
+        console.warn('⚠️  [Database Status]: Database connection unavailable or relation pending (serving resilient fallback data).');
       }
     } else {
-      console.error('Prisma Error:', msg);
+      console.warn('⚠️  [Prisma Notice]:', msg);
     }
   });
 

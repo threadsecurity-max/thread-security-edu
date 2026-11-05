@@ -60,7 +60,15 @@ export default async function MentorLayout({ children }: { children: React.React
   const isAdmin = session.role === 'SUPER_ADMIN' || session.role === 'ACADEMIC_ADMIN';
 
   return (
-    <div className="min-h-screen md:h-screen md:overflow-hidden flex flex-col md:flex-row bg-[#09090d] text-slate-900 font-sans selection:bg-violet-600 selection:text-white">
+    <div
+      className="min-h-screen md:h-screen md:overflow-hidden flex flex-col md:flex-row bg-[#09090d] text-slate-900 selection:bg-violet-600 selection:text-white"
+      style={{
+        fontFamily: 'Inter, "Inter Fallback", sans-serif',
+        fontSize: '12px',
+        fontFeatureSettings: 'normal',
+        fontVariationSettings: 'normal',
+      }}
+    >
       {/* Mentor Navigation (Persistent Black Sidebar as in Admin) */}
       <MentorNavigation
         user={{
@@ -73,7 +81,15 @@ export default async function MentorLayout({ children }: { children: React.React
       />
 
       {/* Main Content Workspace (Light Theme: White & Violet) */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#F8F9FD] md:h-screen md:overflow-hidden">
+      <div
+        className="flex-1 flex flex-col min-w-0 bg-[#F8F9FD] md:h-screen md:overflow-hidden"
+        style={{
+          fontFamily: 'Inter, "Inter Fallback", sans-serif',
+          fontSize: '12px',
+          fontFeatureSettings: 'normal',
+          fontVariationSettings: 'normal',
+        }}
+      >
         {/* Top Header Bar */}
         <header className="h-16 shrink-0 border-b border-slate-200 bg-white/95 backdrop-blur-md flex items-center justify-between px-4 md:px-8 z-30 shadow-xs">
           <div className="flex items-center gap-3">

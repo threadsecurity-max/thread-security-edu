@@ -137,7 +137,7 @@ export function UsersDirectoryClient({
   const filteredUsers = users.filter((u) => {
     if (activeTab === 'STUDENT' && u.role !== 'STUDENT') return false;
     if (activeTab === 'MENTOR' && u.role !== 'MENTOR') return false;
-    if (activeTab === 'STAFF' && !['ACADEMIC_ADMIN', 'CONTENT_MANAGER'].includes(u.role)) return false;
+    if (activeTab === 'STAFF' && !['ACADEMIC_ADMIN', 'CONTENT_MANAGER', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(u.role)) return false;
     if (activeTab === 'SECURITY_ADMIN' && u.role !== 'SECURITY_ADMIN') return false;
     if (activeTab === 'SUPER_ADMIN' && u.role !== 'SUPER_ADMIN') return false;
 
@@ -1068,10 +1068,12 @@ export function UsersDirectoryClient({
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500 font-medium"
                 >
                   <option value="STUDENT">Student</option>
-                  <option value="MENTOR">Mentor (Faculty)</option>
-                  <option value="ACADEMIC_ADMIN">Academic Admin (Staff)</option>
-                  <option value="SECURITY_ADMIN">Security Admin</option>
-                  <option value="SUPER_ADMIN">Super Admin</option>
+                  <option value="MENTOR">Mentor (Faculty - Tier 2)</option>
+                  <option value="STAFF_EXECUTIVE">Staff Executive (Tier 2)</option>
+                  <option value="STAFF_JUNIOR">Staff Junior (Tier 3)</option>
+                  <option value="ACADEMIC_ADMIN">Academic Admin (Tier 2)</option>
+                  <option value="SECURITY_ADMIN">Security Admin (Tier 2)</option>
+                  <option value="SUPER_ADMIN">Super Admin (Tier 1)</option>
                 </select>
               </div>
 

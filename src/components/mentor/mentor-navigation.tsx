@@ -24,6 +24,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  ClipboardList,
+  MessageSquare,
 } from 'lucide-react';
 import { QuickCreateDropdown } from './QuickCreateModal';
 
@@ -58,9 +60,11 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
 
   const navSections: NavSection[] = [
     {
-      title: 'OVERVIEW',
+      title: 'OVERVIEW & DOCKET',
       items: [
         { name: 'Dashboard', href: '/mentor', icon: LayoutDashboard, exact: true },
+        { name: "Today's Docket", href: '/mentor/docket', icon: ClipboardList, badge: 'TASKS' },
+        { name: 'Messages & Comms', href: '/mentor/messages', icon: MessageSquare },
       ],
     },
     {

@@ -30,6 +30,9 @@ import {
   UserCheck,
   Sliders,
   Radio,
+  Network,
+  Flame,
+  Receipt,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -88,6 +91,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
     {
       title: 'PEOPLE',
       items: [
+        { name: 'Privilege Delegation', href: '/admin/delegation', icon: Network, badge: 'TEAMS' },
         { name: 'Faculty & Mentors', href: '/admin/mentors', icon: ShieldCheck },
         { name: 'Student Directory', href: '/admin/students', icon: Users },
         { name: 'Access & Invitations', href: '/admin/access', icon: UserCheck },
@@ -106,6 +110,8 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
     {
       title: 'OPERATIONS',
       items: [
+        { name: "Today's Docket", href: '/admin/docket', icon: CheckSquare, badge: 'DAILY' },
+        { name: 'Student Invoices', href: '/admin/invoices', icon: Receipt, badge: 'GST' },
         { name: 'Tasks (CSM & SEO)', href: '/admin/tasks', icon: CheckSquare, badge: 'OPS' },
         { name: 'Faculty Messages', href: '/admin/messages', icon: MessageSquare },
         { name: 'Lead Pipeline & AI', href: '/admin/leads', icon: Sliders },
@@ -115,6 +121,7 @@ export function AdminNavigation({ user }: AdminNavigationProps) {
     {
       title: 'MONITORING',
       items: [
+        { name: 'Developer Forge Mode', href: '/admin/forge', icon: Flame, badge: 'LOCK' },
         { name: 'Activity & Audit Logs', href: '/admin/audit', icon: ShieldAlert },
         { name: 'Server Health & Metrics', href: '/admin/server-health', icon: Activity },
         { name: 'SOC Operations', href: '/admin/security-analyst', icon: Terminal },

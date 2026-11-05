@@ -33,7 +33,7 @@ export function AccessInvitationsClient({
   const [invitations, setInvitations] = useState(initialInvitations);
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [emailInput, setEmailInput] = useState('');
-  const [roleInput, setRoleInput] = useState<'STUDENT' | 'MENTOR'>('MENTOR');
+  const [roleInput, setRoleInput] = useState<string>('STAFF_EXECUTIVE');
   const [loading, setLoading] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -167,6 +167,12 @@ export function AccessInvitationsClient({
                           className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                             inv.role === 'MENTOR'
                               ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                              : inv.role === 'STAFF_EXECUTIVE'
+                              ? 'bg-purple-50 text-purple-700 border-purple-200'
+                              : inv.role === 'STAFF_JUNIOR'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : inv.role === 'SECURITY_ADMIN'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
                               : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           }`}
                         >
@@ -245,10 +251,13 @@ export function AccessInvitationsClient({
               </label>
               <select
                 value={roleInput}
-                onChange={(e) => setRoleInput(e.target.value as any)}
+                onChange={(e) => setRoleInput(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-xs rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-violet-500 font-medium"
               >
-                <option value="MENTOR">Faculty Mentor</option>
+                <option value="STAFF_EXECUTIVE">Staff Executive (Tier 2)</option>
+                <option value="STAFF_JUNIOR">Staff Junior (Tier 3)</option>
+                <option value="MENTOR">Faculty Mentor (Tier 2)</option>
+                <option value="SECURITY_ADMIN">Security Admin (Tier 2)</option>
                 <option value="STUDENT">Student Account</option>
               </select>
             </div>
