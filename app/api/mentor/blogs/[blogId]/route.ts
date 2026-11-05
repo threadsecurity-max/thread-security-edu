@@ -9,7 +9,8 @@ export async function GET(
 ) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    const isStaffOrFaculty = ['MENTOR', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(session?.role || '');
+    if (!session || !isStaffOrFaculty) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 
@@ -32,7 +33,8 @@ export async function PATCH(
 ) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    const isStaffOrFaculty = ['MENTOR', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(session?.role || '');
+    if (!session || !isStaffOrFaculty) {
       return NextResponse.json({ error: 'Unauthorized. Mentor or staff access required.' }, { status: 401 });
     }
 
@@ -80,7 +82,8 @@ export async function DELETE(
 ) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
+    const isStaffOrFaculty = ['MENTOR', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(session?.role || '');
+    if (!session || !isStaffOrFaculty) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
 

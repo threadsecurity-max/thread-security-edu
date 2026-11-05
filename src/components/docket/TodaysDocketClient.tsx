@@ -55,7 +55,7 @@ interface TodaysDocketClientProps {
   };
   initialItems: any[];
   assignableUsers: UserItem[];
-  portalType: 'admin' | 'mentor';
+  portalType: 'admin' | 'mentor' | 'staff';
 }
 
 export function TodaysDocketClient({

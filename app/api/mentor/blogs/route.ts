@@ -5,8 +5,9 @@ import { createBlogDraft, getMentorBlogs } from '@/server/services/blog.service'
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
-      return NextResponse.json({ error: 'Unauthorized. Mentor access required.' }, { status: 401 });
+    const isStaffOrFaculty = ['MENTOR', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(session?.role || '');
+    if (!session || !isStaffOrFaculty) {
+      return NextResponse.json({ error: 'Unauthorized. Staff or faculty access required.' }, { status: 401 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -26,8 +27,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || (session.role !== 'MENTOR' && session.role !== 'SUPER_ADMIN' && session.role !== 'ACADEMIC_ADMIN')) {
-      return NextResponse.json({ error: 'Unauthorized. Mentor access required.' }, { status: 401 });
+    const isStaffOrFaculty = ['MENTOR', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(session?.role || '');
+    if (!session || !isStaffOrFaculty) {
+      return NextResponse.json({ error: 'Unauthorized. Staff or faculty access required.' }, { status: 401 });
     }
 
     const body = await req.json().catch(() => ({}));

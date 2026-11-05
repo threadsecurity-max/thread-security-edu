@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  getDelegationWorkspaceAction,
   createDelegationTeamAction,
   updateDelegationTeamAction,
   deleteDelegationTeamAction,
@@ -108,14 +109,35 @@ export function PrivilegeDelegationWorkspace({
   const [employees, setEmployees] = useState<EmployeeNode[]>(initialEmployees);
   const [viewMode, setViewMode] = useState<'ARCHITECTURE' | 'OBSERVER'>('ARCHITECTURE');
   const [isPending, startTransition] = useTransition();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [notice, setNotice] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Background fetch recovery if data is empty or refreshed
+  const fetchWorkspaceData = React.useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      const data = await getDelegationWorkspaceAction();
+      if (data?.employees && data.employees.length > 0) {
+        setEmployees(data.employees);
+      }
+      if (data?.teams) {
+        setTeams(data.teams as any);
+      }
+    } catch (err) {
+      console.warn('[PrivilegeDelegation] Background fetch notice:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
 
   // Sync state if initial props change
   React.useEffect(() => {
     if (initialEmployees && initialEmployees.length > 0) {
       setEmployees(initialEmployees);
+    } else {
+      fetchWorkspaceData();
     }
-  }, [initialEmployees]);
+  }, [initialEmployees, fetchWorkspaceData]);
 
   React.useEffect(() => {
     if (initialTeams && initialTeams.length > 0) {
@@ -133,12 +155,12 @@ export function PrivilegeDelegationWorkspace({
   const [teamGrantsModal, setTeamGrantsModal] = useState<DelegationTeamItem | null>(null);
   const [edgeModalTeam, setEdgeModalTeam] = useState<DelegationTeamItem | null>(null);
 
-  // Eligible Team Leads (Mentors, Executives, Security Admins, Admins)
+  // Eligible Team Leads (Mentors, Executives, Security Admins, Admins, Juniors)
   const eligibleLeads = React.useMemo(() => {
     const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
     const leads = list.filter((e) => {
       const r = (e.role || '').toUpperCase();
-      return ['MENTOR', 'STAFF_EXECUTIVE', 'SECURITY_ADMIN', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'ADMIN'].includes(r);
+      return ['MENTOR', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR', 'SECURITY_ADMIN', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'ADMIN'].includes(r);
     });
     return leads.length > 0 ? leads : list;
   }, [employees, initialEmployees]);
@@ -172,7 +194,8 @@ export function PrivilegeDelegationWorkspace({
   const availableMembers = React.useMemo(() => {
     if (!assignMemberModal) return [];
     const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
-    return list.filter((e) => e.id !== assignMemberModal.leadId);
+    const existingMemberIds = new Set(assignMemberModal.members.map((m) => m.userId));
+    return list.filter((e) => e.id !== assignMemberModal.leadId && !existingMemberIds.has(e.id));
   }, [assignMemberModal, employees, initialEmployees]);
 
   React.useEffect(() => {
@@ -473,6 +496,17 @@ export function PrivilegeDelegationWorkspace({
               <span>Observer Mode</span>
             </button>
           </div>
+
+          <button
+            type="button"
+            onClick={fetchWorkspaceData}
+            disabled={isRefreshing}
+            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold font-mono text-xs flex items-center gap-1.5 border border-slate-700 transition-all cursor-pointer disabled:opacity-50"
+            title="Refresh Roster and Teams"
+          >
+            <Clock className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Refreshing...' : 'Sync Roster'}</span>
+          </button>
 
           <button
             type="button"
@@ -884,8 +918,9 @@ export function PrivilegeDelegationWorkspace({
                 onChange={(e) => setCreateTeamForm({ ...createTeamForm, leadId: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
               >
+                <option value="" disabled>-- Select Team Lead --</option>
                 {eligibleLeads.length === 0 ? (
-                  <option value="" disabled>No eligible team leads found</option>
+                  <option value="" disabled>No eligible team leads found (Click Sync Roster)</option>
                 ) : (
                   eligibleLeads.map((e) => (
                     <option key={e.id} value={e.id}>
@@ -965,8 +1000,9 @@ export function PrivilegeDelegationWorkspace({
                   onChange={(e) => setAssignMemberForm({ ...assignMemberForm, userId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
                 >
+                  <option value="" disabled>-- Select Staff Member --</option>
                   {availableMembers.length === 0 ? (
-                    <option value="" disabled>No available staff members</option>
+                    <option value="" disabled>No available staff members for this team</option>
                   ) : (
                     availableMembers.map((e) => (
                       <option key={e.id} value={e.id}>

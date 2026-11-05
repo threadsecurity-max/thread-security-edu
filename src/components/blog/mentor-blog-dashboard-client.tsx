@@ -30,9 +30,10 @@ interface MentorBlogDashboardClientProps {
     email: string;
     role: string;
   };
+  baseHref?: string;
 }
 
-export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientProps) {
+export function MentorBlogDashboardClient({ user, baseHref = '/mentor/blogs' }: MentorBlogDashboardClientProps) {
   const router = useRouter();
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +91,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
       const text = await res.text();
       const data = text ? JSON.parse(text) : {};
       if (res.ok && data.blog?.id) {
-        router.push(`/mentor/blogs/${data.blog.id}/edit`);
+        router.push(`${baseHref}/${data.blog.id}/edit`);
       }
     } catch (err) {
       console.error('Error creating blog:', err);
@@ -295,7 +296,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
                     <td className="p-4 max-w-xs">
                       <div className="flex items-center gap-1.5">
                         <Link
-                          href={`/mentor/blogs/${b.id}/edit`}
+                          href={`${baseHref}/${b.id}/edit`}
                           className="font-semibold text-slate-900 hover:text-violet-600 transition-colors block truncate"
                         >
                           {b.title}
@@ -359,7 +360,7 @@ export function MentorBlogDashboardClient({ user }: MentorBlogDashboardClientPro
 
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
-                        <Link href={`/mentor/blogs/${b.id}/edit`}>
+                        <Link href={`${baseHref}/${b.id}/edit`}>
                           <Button
                             size="sm"
                             variant="ghost"

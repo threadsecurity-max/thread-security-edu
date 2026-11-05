@@ -139,3 +139,24 @@ export function verifyMentorPasskey(input: string): boolean {
   return safeTimingEqual(input.trim(), expected);
 }
 
+/**
+ * Validate Staff Member Secret Key
+ * Validates against process.env.STAFF_SECRET_KEY or default 'TSE-STF-8426'.
+ */
+export function verifyStaffSecretKey(input: string): boolean {
+  if (!input) return false;
+  const expected = (process.env.STAFF_SECRET_KEY?.trim() || 'TSE-STF-8426').toUpperCase();
+  return safeTimingEqual(input.trim().toUpperCase(), expected);
+}
+
+/**
+ * Validate Staff Member Passkey / Password
+ * Validates against process.env.STAFF_PASSKEY or default 'StaffThread6248'.
+ */
+export function verifyStaffPasskey(input: string): boolean {
+  if (!input) return false;
+  const expected = process.env.STAFF_PASSKEY?.trim() || 'StaffThread6248';
+  return safeTimingEqual(input.trim(), expected);
+}
+
+

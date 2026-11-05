@@ -97,9 +97,14 @@ interface MentorBlogEditorClientProps {
     email: string;
     role: string;
   };
+  returnHref?: string;
 }
 
-export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorClientProps) {
+export function MentorBlogEditorClient({
+  initialBlog,
+  user,
+  returnHref = '/mentor/blogs',
+}: MentorBlogEditorClientProps) {
   const router = useRouter();
   const [blog, setBlog] = useState(initialBlog);
   const [categories, setCategories] = useState<any[]>([]);
@@ -446,7 +451,7 @@ export function MentorBlogEditorClient({ initialBlog, user }: MentorBlogEditorCl
         {/* Top Header Navigation */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-white/15">
           <div className="flex items-center gap-3 flex-wrap">
-            <Link href="/mentor/blogs">
+            <Link href={returnHref}>
               <Button
                 size="sm"
                 variant="ghost"

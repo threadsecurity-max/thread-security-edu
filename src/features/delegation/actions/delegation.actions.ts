@@ -15,8 +15,8 @@ import {
 } from '@/server/services/delegation.service';
 
 function checkSuperAdminAccess(session: any) {
-  if (!session || (session.role !== 'SUPER_ADMIN' && session.role !== 'SECURITY_ADMIN')) {
-    throw new Error('Unauthorized: Super Admin or Security Admin clearance required.');
+  if (!session || (!['SUPER_ADMIN', 'SECURITY_ADMIN', 'ADMIN', 'ACADEMIC_ADMIN'].includes(session.role))) {
+    throw new Error('Unauthorized: Super Admin or Admin clearance required.');
   }
 }
 

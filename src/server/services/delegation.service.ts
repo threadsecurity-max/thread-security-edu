@@ -45,8 +45,27 @@ export async function getDelegationWorkspaceDataService() {
       orderBy: [{ role: 'asc' }, { name: 'asc' }],
     });
   } catch (err) {
-    console.error('[DelegationService] Error querying employees:', err);
-    employees = [];
+    console.error('[DelegationService] Error querying employees, attempting recovery query:', err);
+    try {
+      await new Promise((r) => setTimeout(r, 300));
+      employees = await prisma.user.findMany({
+        where: {
+          role: {
+            not: 'STUDENT',
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true,
+        },
+        orderBy: [{ role: 'asc' }, { name: 'asc' }],
+      });
+    } catch {
+      employees = [];
+    }
   }
 
   // 2. Fetch all Teams with members and edges

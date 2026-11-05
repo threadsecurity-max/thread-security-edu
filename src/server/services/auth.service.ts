@@ -10,6 +10,8 @@ import {
   verifyGeneralAdminPasskey,
   verifyMentorSecretKey,
   verifyMentorPasskey,
+  verifyStaffSecretKey,
+  verifyStaffPasskey,
 } from '../../lib/security/crypto-vault';
 import { getClientIpAddress, analyzeIpIntelligence } from '../../lib/security/ip-guard';
 
@@ -240,7 +242,7 @@ export async function verifySecurityAdminCredentials(secretKey: string, passkey:
 /**
  * Extracts assigned secret key and passkey from user record (JSON in approvedBy or passwordHash format)
  */
-export function getStoredUserCredentials(user: { passwordHash?: string | null; approvedBy?: string | null }) {
+export function getStoredUserCredentials(user: { role?: string; passwordHash?: string | null; approvedBy?: string | null }) {
   let assignedSecretKey: string | undefined;
   let assignedPasskey: string | undefined = user.passwordHash || undefined;
 
@@ -262,6 +264,12 @@ export function getStoredUserCredentials(user: { passwordHash?: string | null; a
     const [p, s] = user.passwordHash.split(':::');
     if (p) assignedPasskey = p.trim();
     if (s && !assignedSecretKey) assignedSecretKey = s.trim();
+  }
+
+  // System defaults for Staff Roles (TSE-STF-8426 / StaffThread6248)
+  if (user.role === 'STAFF_EXECUTIVE' || user.role === 'STAFF_JUNIOR') {
+    if (!assignedSecretKey) assignedSecretKey = 'TSE-STF-8426';
+    if (!assignedPasskey || assignedPasskey === 'MFA_OTP_ONLY') assignedPasskey = 'StaffThread6248';
   }
 
   return { assignedSecretKey, assignedPasskey };
@@ -295,19 +303,31 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     include: { tsIdentity: true },
   });
 
-  // If user not found by query, check if query is general admin secret key or configured super admin email
-  if (!user && (verifyGeneralAdminSecretKey(query) || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com')) {
-    user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { role: 'SUPER_ADMIN' },
-          { role: 'ACADEMIC_ADMIN' },
-          { email: superAdminEmail },
-          { email: 'threadsecurity@gmail.com' },
-        ],
-      },
-      include: { tsIdentity: true },
-    });
+  // If user not found by query, check if query is general admin secret key, staff secret key, or configured super admin email
+  if (!user && (verifyGeneralAdminSecretKey(query) || verifyStaffSecretKey(query) || query.toLowerCase() === superAdminEmail || query.toLowerCase() === 'threadsecurity@gmail.com')) {
+    if (verifyStaffSecretKey(query)) {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { role: 'STAFF_EXECUTIVE' },
+            { role: 'STAFF_JUNIOR' },
+          ],
+        },
+        include: { tsIdentity: true },
+      });
+    } else {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { role: 'SUPER_ADMIN' },
+            { role: 'ACADEMIC_ADMIN' },
+            { email: superAdminEmail },
+            { email: 'threadsecurity@gmail.com' },
+          ],
+        },
+        include: { tsIdentity: true },
+      });
+    }
 
     if (!user) {
       user = await (prisma.user as any).create({
@@ -334,11 +354,19 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     throw new Error('No active administrator or staff account found matching that Email Address or TS-ID.');
   }
 
+  const isStaffRole =
+    user.role === 'ACADEMIC_ADMIN' ||
+    (user.role as string) === 'CONTENT_MANAGER' ||
+    user.role === 'STAFF_EXECUTIVE' ||
+    user.role === 'STAFF_JUNIOR';
+
   const isAdminRole =
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
     (user.role as string) === 'CONTENT_MANAGER' ||
     (user.role as string) === 'SECURITY_ADMIN' ||
+    user.role === 'STAFF_EXECUTIVE' ||
+    user.role === 'STAFF_JUNIOR' ||
     user.email.toLowerCase() === 'threadsecurity@gmail.com' ||
     user.email.toLowerCase() === superAdminEmail;
 
@@ -347,17 +375,19 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
     throw new Error('Unauthorized: This account does not possess Administrative or Staff privileges.');
   }
 
-  const isStaff = user.role === 'ACADEMIC_ADMIN' || (user.role as string) === 'CONTENT_MANAGER';
+  const isStaff = isStaffRole;
   const roleLabel = isStaff ? 'Staff' : 'Admin';
 
   const { assignedSecretKey, assignedPasskey } = getStoredUserCredentials(user);
 
   // Validate Secret Key:
-  // Accept assigned key, or env ADMIN_SECRET_KEY, or SECURITY_ADMIN_SECRET_KEY
+  // Accept assigned key, or env ADMIN_SECRET_KEY, or SECURITY_ADMIN_SECRET_KEY, or STAFF_SECRET_KEY
   const isSecretKeyValid =
     (assignedSecretKey && cleanSecretKey.toUpperCase() === assignedSecretKey.toUpperCase()) ||
     verifyGeneralAdminSecretKey(cleanSecretKey) ||
-    verifySecurityAdminSecretKey(cleanSecretKey);
+    verifySecurityAdminSecretKey(cleanSecretKey) ||
+    (isStaff && verifyStaffSecretKey(cleanSecretKey)) ||
+    verifyStaffSecretKey(cleanSecretKey);
 
   if (!isSecretKeyValid) {
     await recordFailedAttempt(query);
@@ -365,12 +395,14 @@ export async function verifyAdminCredentials(emailOrTsId: string, secretKey: str
   }
 
   // Validate Passkey:
-  // Accept assigned passkey, or user.passwordHash, or env ADMIN_PASSKEY, or SECURITY_ADMIN_PASSKEY
+  // Accept assigned passkey, or user.passwordHash, or env ADMIN_PASSKEY, or SECURITY_ADMIN_PASSKEY, or STAFF_PASSKEY
   const isPasskeyValid =
     (assignedPasskey && cleanPasskey === assignedPasskey) ||
     cleanPasskey === user.passwordHash ||
     verifyGeneralAdminPasskey(cleanPasskey) ||
-    verifySecurityAdminPasskey(cleanPasskey);
+    verifySecurityAdminPasskey(cleanPasskey) ||
+    (isStaff && verifyStaffPasskey(cleanPasskey)) ||
+    verifyStaffPasskey(cleanPasskey);
 
   if (!isPasskeyValid) {
     await recordFailedAttempt(query);
@@ -627,6 +659,32 @@ export async function requestOtpService(emailOrTsId: string) {
     };
   }
 
+  // Check if identifier is the Staff Member Secret Key directly
+  if (verifyStaffSecretKey(query)) {
+    const staffUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { role: 'STAFF_EXECUTIVE' },
+          { role: 'STAFF_JUNIOR' },
+        ],
+      },
+      include: { tsIdentity: true },
+    });
+    const staffEmail = staffUser?.email || 'staff.executive@threadsecurity.org';
+    const parts = staffEmail.split('@');
+    const maskedEmail = `${parts[0][0]}***${parts[0].slice(-1)}@${parts[1]}`;
+    return {
+      success: true,
+      isStaffSecretKey: true,
+      isStaff: true,
+      isAdmin: false,
+      isMentor: false,
+      email: staffEmail,
+      maskedEmail,
+      tsId: staffUser?.tsIdentity?.tsId || 'TSE-STF-8426',
+    };
+  }
+
   // Check if identifier is the Mentor Faculty Secret Key directly
   if (verifyMentorSecretKey(query)) {
     const mentorUser = await prisma.user.findFirst({
@@ -684,12 +742,18 @@ export async function requestOtpService(emailOrTsId: string) {
     throw new Error('No active account found matching that Email Address or TS-ID.');
   }
 
-  const isStaff = user.role === 'ACADEMIC_ADMIN' || (user.role as string) === 'CONTENT_MANAGER';
+  const isStaff =
+    user.role === 'ACADEMIC_ADMIN' ||
+    (user.role as string) === 'CONTENT_MANAGER' ||
+    user.role === 'STAFF_EXECUTIVE' ||
+    user.role === 'STAFF_JUNIOR';
   const isAdmin =
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
     (user.role as string) === 'CONTENT_MANAGER' ||
     (user.role as string) === 'SECURITY_ADMIN' ||
+    user.role === 'STAFF_EXECUTIVE' ||
+    user.role === 'STAFF_JUNIOR' ||
     user.email.toLowerCase() === 'threadsecurity@gmail.com' ||
     user.email.toLowerCase() === superAdminEmail;
 
@@ -792,6 +856,11 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     query.toLowerCase() === 'tse-mentor-78987' ||
     query.toLowerCase() === 'tse-mentor';
 
+  const isStaffSecret =
+    verifyStaffSecretKey(query) ||
+    query.toLowerCase() === 'tse-stf-8426' ||
+    query.toLowerCase() === 'tse-staff';
+
   // Find matching user (if exists) so we can check across user.email, user.tsId, or query
   let user = await prisma.user.findFirst({
     where: {
@@ -826,6 +895,18 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     });
   }
 
+  if (!user && isStaffSecret) {
+    user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { role: 'STAFF_EXECUTIVE' },
+          { role: 'STAFF_JUNIOR' },
+        ],
+      },
+      include: { tsIdentity: true },
+    });
+  }
+
   const identifiersToCheck = [
     query.toLowerCase(),
     query.toUpperCase(),
@@ -835,6 +916,8 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     'tse-sec-admin',
     'tse-mentor-78987',
     'tse-mentor',
+    'tse-stf-8426',
+    'tse-staff',
     'ts-admin',
   ];
 
@@ -1008,12 +1091,14 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     throw new Error('Account authentication failed.');
   }
 
-  // Admins and Mentors are always granted dashboard access
+  // Admins, Mentors, and Staff are always granted dashboard access
   const isGranted =
     user.role === 'SUPER_ADMIN' ||
     user.role === 'ACADEMIC_ADMIN' ||
     user.role === 'SECURITY_ADMIN' ||
     user.role === 'MENTOR' ||
+    user.role === 'STAFF_EXECUTIVE' ||
+    user.role === 'STAFF_JUNIOR' ||
     Boolean((user as any).isDashboardAccessGranted);
 
   const userIp = await getClientIpAddress();
@@ -1045,6 +1130,8 @@ export async function verifyOtpService(emailOrTsId: string, code: string) {
     redirectTo = '/admin';
   } else if (user.role === 'MENTOR') {
     redirectTo = '/mentor';
+  } else if (user.role === 'STAFF_EXECUTIVE' || user.role === 'STAFF_JUNIOR') {
+    redirectTo = '/staff';
   } else if (user.role === 'STUDENT' || (user.role as string) === 'GUEST') {
     if (!isGranted) {
       redirectTo = '/?notice=clearance-pending';
