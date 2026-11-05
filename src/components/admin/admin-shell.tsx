@@ -97,6 +97,7 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
     user.userId === 'cmv6l9la40000c9014xt46hcv';
 
   const employeeAttendanceItems = [
+    { name: 'My Attendance', href: `/admin/employee-attendance/employees/${user.userId}`, icon: UserCheck, badge: 'MY DUTY' },
     { name: 'Employee Directory', href: '/admin/employee-attendance/directory', icon: UsersRound },
     { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: Clock, badge: 'OPS' },
     { name: 'Capture Attendance', href: '/admin/employee-attendance/capture', icon: UserCheck },
@@ -113,6 +114,7 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
     {
       title: 'Attendance Management',
       items: [
+        { name: 'My Attendance', href: `/admin/employee-attendance/employees/${user.userId}`, icon: UserCheck, badge: 'MY DUTY' },
         { name: 'Employee Attendance', href: '/admin/employee-attendance', icon: Clock, badge: 'OPS' },
         { name: 'Capture Attendance', href: '/admin/employee-attendance/capture', icon: UserCheck },
         { name: 'Attendance Reports', href: '/admin/employee-attendance/reports', icon: BarChart3 },

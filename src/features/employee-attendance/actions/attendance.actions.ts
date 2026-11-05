@@ -148,11 +148,12 @@ export async function getEmployeeAttendanceDetailAction(
 ) {
   try {
     const user = await getCurrentUser();
-    if (!user || !canAccessEmployeeAttendance(user)) {
-      // Allow employee to view their own profile if logged in
-      if (!user || user.userId !== employeeId) {
-        return { success: false, error: 'Unauthorized to view employee profile.', data: null };
-      }
+    if (!user) {
+      return { success: false, error: 'Unauthorized: Session required.', data: null };
+    }
+    // Allow if user has attendance management clearance OR if they are requesting their OWN attendance!
+    if (!canAccessEmployeeAttendance(user) && user.userId !== employeeId) {
+      return { success: false, error: 'Unauthorized to view employee profile.', data: null };
     }
 
     const data = await getEmployeeAttendanceProfileService(employeeId, year, month);

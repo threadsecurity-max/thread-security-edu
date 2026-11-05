@@ -65,6 +65,7 @@ export function MentorNavigation({ user, unreadNotificationsCount = 0 }: MentorN
       title: 'OVERVIEW & DOCKET',
       items: [
         { name: 'Dashboard', href: '/mentor', icon: LayoutDashboard, exact: true },
+        { name: 'My Attendance', href: '/mentor/my-attendance', icon: UserCheck, badge: 'DUTY' },
         { name: "Today's Docket", href: '/mentor/docket', icon: ClipboardList, badge: 'TASKS' },
         { name: 'Messages & Comms', href: '/mentor/messages', icon: MessageSquare },
       ],

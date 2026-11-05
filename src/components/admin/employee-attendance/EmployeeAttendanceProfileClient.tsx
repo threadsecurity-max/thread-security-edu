@@ -122,6 +122,8 @@ interface EmployeeProfileData {
 export function EmployeeAttendanceProfileClient({
   currentUser,
   initialData,
+  isPersonalView = false,
+  returnHref = '/admin/employee-attendance',
 }: {
   currentUser: {
     userId: string;
@@ -130,6 +132,8 @@ export function EmployeeAttendanceProfileClient({
     role: string;
   };
   initialData: EmployeeProfileData;
+  isPersonalView?: boolean;
+  returnHref?: string;
 }) {
   const router = useRouter();
   const [data, setData] = useState<EmployeeProfileData>(initialData);
@@ -368,28 +372,28 @@ export function EmployeeAttendanceProfileClient({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white border border-slate-200 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3">
-          <Link href="/admin/employee-attendance">
-            <button className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer">
+          <Link href={returnHref}>
+            <button className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors cursor-pointer" title="Return">
               <ArrowLeft className="w-4 h-4" />
             </button>
           </Link>
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200 uppercase">
-                INDIVIDUAL ATTENDANCE DOSSIER
+                {isPersonalView ? 'MY OFFICIAL ATTENDANCE RECORD' : 'INDIVIDUAL ATTENDANCE DOSSIER'}
               </span>
               <span className="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                 {data.employee.employeeId}
               </span>
             </div>
             <h1 className="text-xl font-black text-slate-900 tracking-tight mt-1">
-              {data.employee.name}
+              {isPersonalView ? 'My Attendance & Standing' : data.employee.name}
             </h1>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {data.allEmployees && data.allEmployees.length > 0 && (
+          {!isPersonalView && data.allEmployees && data.allEmployees.length > 0 && (
             <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden md:inline">
                 Switch Employee:
@@ -412,11 +416,20 @@ export function EmployeeAttendanceProfileClient({
             </div>
           )}
 
-          <Link href={`/admin/employee-attendance/capture`}>
-            <button className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer">
-              Capture Today
-            </button>
-          </Link>
+          {!isPersonalView && (
+            <Link href={`/admin/employee-attendance/capture`}>
+              <button className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer">
+                Capture Today
+              </button>
+            </Link>
+          )}
+
+          {isPersonalView && (
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Official Record &bull; {data.overall.attendancePercentage}% Attendance</span>
+            </span>
+          )}
         </div>
       </div>
 
