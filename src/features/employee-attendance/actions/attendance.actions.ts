@@ -24,6 +24,8 @@ import {
   updateEmployeeRecordService,
   toggleEmployeeStatusService,
   toggleEmployeeEligibilityService,
+  isAttendanceTestingModeActive,
+  setAttendanceTestingModeService,
 } from '@/server/services/employee-attendance.service';
 import { EmployeeAttendanceStatus } from '@prisma/client';
 
@@ -37,7 +39,7 @@ export async function getEmployeeAttendanceOverviewAction(dateInput?: string) {
       return { success: false, error: 'Unauthorized: Access restricted to authorized personnel.', data: null };
     }
 
-    const data = await getAttendanceAnalyticsOverviewService(dateInput);
+    const data = await getAttendanceAnalyticsOverviewService(dateInput, user);
     return { success: true, data };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch overview metrics';
@@ -55,7 +57,7 @@ export async function getDailyAttendanceAction(date: string, department?: string
       return { success: false, error: 'Unauthorized: Access restricted.', data: null };
     }
 
-    const data = await getDailyAttendanceService(date, department);
+    const data = await getDailyAttendanceService(date, department, user);
     return { success: true, data };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch daily attendance';
@@ -66,13 +68,14 @@ export async function getDailyAttendanceAction(date: string, department?: string
 /**
  * 3. POST / Capture Daily Attendance (Save Draft or Submit & Finalize)
  * Attendance Manager (Akshay Kumar) & Super Admin can capture and submit.
- * STRICT ENFORCEMENT: Once finalized, Attendance Manager CANNOT overwrite or rectify.
+ * Sequential accountability: records 24-hr check-in clock and incremental marking acts.
  */
 export async function captureEmployeeAttendanceAction(params: {
   date: string;
   records: Array<{
     employeeId: string;
     status: EmployeeAttendanceStatus;
+    checkInTime?: string;
     remarks?: string;
   }>;
   isFinalized?: boolean;
@@ -94,11 +97,50 @@ export async function captureEmployeeAttendanceAction(params: {
     revalidatePath('/admin/employee-attendance');
     revalidatePath('/admin/employee-attendance/capture');
     revalidatePath('/admin/employee-attendance/directory');
+    revalidatePath('/admin/employee-attendance/reports');
 
     return { success: true, data: result };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to submit attendance';
     return { success: false, error: msg };
+  }
+}
+
+/**
+ * Toggles Testing Mode (Showcase/Hide Testing Users from Coordinator Akshay Kumar)
+ */
+export async function toggleAttendanceTestingModeAction() {
+  try {
+    const user = await getCurrentUser();
+    if (!user || !isSuperAdminAttendanceUser(user)) {
+      return { success: false, error: 'Forbidden: Only Super Admin can toggle attendance testing mode.' };
+    }
+
+    const current = await isAttendanceTestingModeActive();
+    const result = await setAttendanceTestingModeService(!current, user);
+
+    revalidatePath('/admin/employee-attendance');
+    revalidatePath('/admin/employee-attendance/capture');
+    revalidatePath('/admin/employee-attendance/directory');
+    revalidatePath('/admin/employee-attendance/reports');
+    revalidatePath('/admin/employee-attendance/roster');
+
+    return { success: true, isEnabled: result.isEnabled };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to toggle testing mode';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Fetches current Testing Mode status
+ */
+export async function getAttendanceTestingModeAction() {
+  try {
+    const isEnabled = await isAttendanceTestingModeActive();
+    return { success: true, isEnabled };
+  } catch {
+    return { success: false, isEnabled: false };
   }
 }
 

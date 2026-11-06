@@ -2,10 +2,63 @@ import { prisma } from '../database/prisma';
 import {
   SUPER_ADMIN_ATTENDANCE_EMAIL,
   isSuperAdminAttendanceUser,
+  isAttendanceTestingEmail,
+  ATTENDANCE_TESTING_USER_EMAILS,
+  AttendanceAuthUser,
 } from '@/lib/auth/employee-attendance-auth';
 import { EmployeeAttendanceStatus } from '@prisma/client';
 
 const db = prisma as any;
+
+/**
+ * Feature Flag Key for Attendance Testing Mode:
+ * Controls whether test accounts are showcased to coordinator Akshay Kumar.
+ */
+export const ATTENDANCE_TESTING_FLAG_KEY = 'ATTENDANCE_SHOWCASE_TEST_USERS';
+
+/**
+ * Checks if Super Admin has enabled Testing Mode (showcasing test users to coordinator)
+ */
+export async function isAttendanceTestingModeActive(): Promise<boolean> {
+  try {
+    const flag = await prisma.featureFlag.findUnique({
+      where: { key: ATTENDANCE_TESTING_FLAG_KEY },
+    });
+    return Boolean(flag?.isEnabled);
+  } catch (err) {
+    console.warn('[AttendanceTestingMode] Error reading testing mode flag:', err);
+    return false;
+  }
+}
+
+/**
+ * Toggles Testing Mode (Exclusive Super Admin Authority)
+ */
+export async function setAttendanceTestingModeService(
+  enabled: boolean,
+  adminUser: AttendanceAuthUser
+): Promise<{ success: boolean; isEnabled: boolean }> {
+  if (!isSuperAdminAttendanceUser(adminUser)) {
+    throw new Error('Forbidden: Only Super Admin has authority to toggle attendance testing mode.');
+  }
+
+  const updated = await prisma.featureFlag.upsert({
+    where: { key: ATTENDANCE_TESTING_FLAG_KEY },
+    create: {
+      key: ATTENDANCE_TESTING_FLAG_KEY,
+      description: `Showcase test users (staff.junior, staff.executive, etc.) to coordinator Akshay Kumar. Toggled by ${adminUser.email}`,
+      isEnabled: enabled,
+      targetRoles: ['SUPER_ADMIN', 'MENTOR'],
+      percentage: 100,
+    },
+    update: {
+      isEnabled: enabled,
+      description: `Showcase test users in attendance operations to coordinator Akshay Kumar. Toggled by ${adminUser.email} at ${new Date().toISOString()}`,
+    },
+  });
+
+  return { success: true, isEnabled: updated.isEnabled };
+}
 
 /**
  * Normalizes any Date or ISO string to UTC Midnight (YYYY-MM-DDT00:00:00.000Z)
@@ -65,7 +118,8 @@ export interface AttendanceWindowInfo {
   todayIstDateKey: string;
   openTimeLabel: string;
   closeTimeLabel: string;
-  serverTimeIst: string;
+  serverTimeIst: string; // 24-hour clock string e.g. "10:30:15 IST (24-Hour Clock)"
+  serverTime24Hr: string; // 24-hour time "10:30:15"
   remainingMinutes: number;
   remainingTimeFormatted: string;
   status: 'OPEN' | 'LOCKED' | 'ROSTER_NOT_PUBLISHED' | 'BEFORE_WINDOW';
@@ -73,14 +127,15 @@ export interface AttendanceWindowInfo {
 }
 
 /**
- * Authoritative Server-Side 12-Hour Daily Attendance Window Calculator
+ * Authoritative Server-Side 24-Hour Daily Attendance Window Calculator
  * Timezone: Asia/Kolkata (IST, UTC+05:30)
- * Window: 09:00 AM to 09:00 PM IST (Strictly 12 Hours)
+ * Window: 24 Hours of the calendar day (00:00:00 to 23:59:59 IST)
+ * Multiple submissions/updates are permitted within the 24-hour window.
  */
 export function getAttendanceWindowStatus(targetDateInput?: string | Date): AttendanceWindowInfo {
   const now = new Date();
 
-  // Convert current server time to Asia/Kolkata
+  // Convert current server time to Asia/Kolkata (24-hour clock)
   const formatter = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Kolkata',
     year: 'numeric',
@@ -99,18 +154,11 @@ export function getAttendanceWindowStatus(targetDateInput?: string | Date): Atte
   const todayIstDateKey = `${partMap.year}-${partMap.month}-${partMap.day}`;
   const istHour = parseInt(partMap.hour, 10);
   const istMinute = parseInt(partMap.minute, 10);
-  const istMinutesSinceMidnight = istHour * 60 + istMinute;
+  const istSecond = parseInt(partMap.second || '00', 10);
 
-  // Window bounds in minutes since midnight IST:
-  // 09:00 AM IST = 540 minutes
-  // 09:00 PM IST = 1260 minutes (21:00)
-  const OPEN_MINUTES = 540;
-  const CLOSE_MINUTES = 1260;
-
-  // Format 12-hour server time
-  const hour12 = istHour % 12 || 12;
-  const ampm = istHour >= 12 ? 'PM' : 'AM';
-  const serverTimeIst = `${String(hour12).padStart(2, '0')}:${String(istMinute).padStart(2, '0')} ${ampm} IST`;
+  // Exact 24-hour clock formatting
+  const serverTime24Hr = `${String(istHour).padStart(2, '0')}:${String(istMinute).padStart(2, '0')}:${String(istSecond).padStart(2, '0')}`;
+  const serverTimeIst = `${serverTime24Hr} IST (24-Hour Clock)`;
 
   // Parse target date
   let targetDateKey = todayIstDateKey;
@@ -126,41 +174,40 @@ export function getAttendanceWindowStatus(targetDateInput?: string | Date): Atte
   const isPastDay = targetDateKey < todayIstDateKey;
   const isFutureDay = targetDateKey > todayIstDateKey;
 
-  const isBeforeOpen = isToday && istMinutesSinceMidnight < OPEN_MINUTES;
-  const isPastDeadline = isPastDay || (isToday && istMinutesSinceMidnight >= CLOSE_MINUTES);
-  const isOpen = isToday && istMinutesSinceMidnight >= OPEN_MINUTES && istMinutesSinceMidnight < CLOSE_MINUTES;
+  // In the 24-hour daily window architecture:
+  // Today's date is OPEN for the entire 24-hour calendar day (00:00:00 to 23:59:59 IST)
+  const isOpen = isToday;
+  const isPastDeadline = isPastDay;
+  const isBeforeOpen = false;
 
-  let remainingMinutes = 0;
+  // Calculate remaining time in today's 24-hour window
+  const totalSecondsInDay = 86400;
+  const elapsedSecondsToday = istHour * 3600 + istMinute * 60 + istSecond;
+  const remainingSeconds = Math.max(0, totalSecondsInDay - elapsedSecondsToday);
+  const remainingMinutes = Math.floor(remainingSeconds / 60);
+  const remainingHours = Math.floor(remainingMinutes / 60);
+  const remainingMinsModulo = remainingMinutes % 60;
+
   let remainingTimeFormatted = '';
   let status: 'OPEN' | 'LOCKED' | 'ROSTER_NOT_PUBLISHED' | 'BEFORE_WINDOW' = 'LOCKED';
   let message = '';
 
   if (isPastDay) {
     status = 'LOCKED';
-    remainingTimeFormatted = 'Historical attendance locked';
+    remainingTimeFormatted = '24-hour daily window expired';
     message = 'Attendance for this date is closed and read-only. Only Super Admin has historical rectification authority.';
   } else if (isFutureDay) {
     status = 'LOCKED';
     remainingTimeFormatted = 'Future date locked';
     message = 'Daily attendance cannot be marked for future dates.';
-  } else if (isBeforeOpen) {
-    status = 'BEFORE_WINDOW';
-    const minsUntilOpen = OPEN_MINUTES - istMinutesSinceMidnight;
-    const hrs = Math.floor(minsUntilOpen / 60);
-    const mins = minsUntilOpen % 60;
-    remainingTimeFormatted = `Opens in ${hrs}h ${mins}m (09:00 AM IST)`;
-    message = `Attendance window opens today at 09:00 AM IST. Current server time: ${serverTimeIst}.`;
   } else if (isOpen) {
     status = 'OPEN';
-    remainingMinutes = CLOSE_MINUTES - istMinutesSinceMidnight;
-    const hrs = Math.floor(remainingMinutes / 60);
-    const mins = remainingMinutes % 60;
-    remainingTimeFormatted = `${hrs}h ${mins}m remaining (Closes at 09:00 PM IST)`;
-    message = `Attendance window is OPEN until 09:00 PM IST. You may update and finalize attendance records.`;
+    remainingTimeFormatted = `${remainingHours}h ${remainingMinsModulo}m remaining in today's 24-hour window`;
+    message = `Attendance window is OPEN (24-Hour Clock: ${serverTime24Hr} IST). You may update attendance multiple times within the 24-hour cycle in proper sequence.`;
   } else {
     status = 'LOCKED';
-    remainingTimeFormatted = 'Daily 12-hour window closed at 09:00 PM IST';
-    message = `Daily editing deadline reached (09:00 PM IST). Attendance is now locked. Only Super Admin can rectify records.`;
+    remainingTimeFormatted = '24-hour window closed';
+    message = 'Daily editing deadline reached. Attendance is now locked. Only Super Admin can rectify records.';
   }
 
   return {
@@ -170,9 +217,10 @@ export function getAttendanceWindowStatus(targetDateInput?: string | Date): Atte
     isToday,
     targetDateKey,
     todayIstDateKey,
-    openTimeLabel: '09:00 AM IST',
-    closeTimeLabel: '09:00 PM IST',
+    openTimeLabel: '00:00:00 IST (24-Hour Window)',
+    closeTimeLabel: '23:59:59 IST (Midnight)',
     serverTimeIst,
+    serverTime24Hr,
     remainingMinutes,
     remainingTimeFormatted,
     status,
@@ -230,10 +278,13 @@ export async function syncEmployeeProfilesService() {
 /**
  * 1. GET Employee Directory with profiles and real-time attendance stats
  */
-export async function getEmployeeDirectoryService(filters?: {
-  department?: string;
-  search?: string;
-}) {
+export async function getEmployeeDirectoryService(
+  filters?: {
+    department?: string;
+    search?: string;
+  },
+  caller?: AttendanceAuthUser | null
+) {
   await syncEmployeeProfilesService();
 
   const whereUser: any = {
@@ -278,7 +329,7 @@ export async function getEmployeeDirectoryService(filters?: {
     ],
   });
 
-  return employees.map((emp) => {
+  const mapped = employees.map((emp) => {
     const records = emp.employeeAttendances || [];
     const present = records.filter((r) => r.status === 'PRESENT').length;
     const wfh = records.filter((r) => r.status === 'WFH').length;
@@ -293,6 +344,8 @@ export async function getEmployeeDirectoryService(filters?: {
       halfDay,
       absent,
     });
+
+    const isTestingUser = isAttendanceTestingEmail(emp.email);
 
     return {
       id: emp.id,
@@ -318,8 +371,22 @@ export async function getEmployeeDirectoryService(filters?: {
       attendanceCredits: credits,
       totalWorkingDays,
       attendancePercentage: percentage,
+      isTestingUser,
     };
   });
+
+  // STRICT ACCESS FILTER FOR ATTENDANCE COORDINATOR (AKSHAY KUMAR):
+  // Test users (staff.junior, staff.executive, threadsecuritymentor, threadsecurity@gmail.com)
+  // are completely hidden from coordinator unless Super Admin enabled Testing Mode.
+  const isSuperAdmin = caller ? isSuperAdminAttendanceUser(caller) : false;
+  if (!isSuperAdmin) {
+    const isTestingMode = await isAttendanceTestingModeActive();
+    if (!isTestingMode) {
+      return mapped.filter((emp) => !emp.isTestingUser);
+    }
+  }
+
+  return mapped;
 }
 
 /**
@@ -328,12 +395,13 @@ export async function getEmployeeDirectoryService(filters?: {
 export async function getDailyAttendanceService(
   dateInput: string | Date,
   department?: string,
-  caller?: { userId?: string; email?: string; role?: string }
+  caller?: AttendanceAuthUser | null
 ) {
   await syncEmployeeProfilesService();
   const targetDate = normalizeAttendanceDate(dateInput);
   const windowInfo = getAttendanceWindowStatus(targetDate);
   const isSuperAdmin = caller ? isSuperAdminAttendanceUser(caller) : false;
+  const isTestingMode = await isAttendanceTestingModeActive();
 
   // 1. Fetch Daily Roster snapshot for this date
   const rosterEntries = await db.dailyAttendanceRoster.findMany({
@@ -358,8 +426,8 @@ export async function getDailyAttendanceService(
     windowInfo.message = 'Super Admin has not published the attendance roster for this date yet. Attendance cannot be captured until the roster is published.';
   }
 
-  // Fetch all operational employees
-  let directory = await getEmployeeDirectoryService(department && department !== 'ALL' ? { department } : undefined);
+  // Fetch all operational employees (respecting caller testing visibility)
+  let directory = await getEmployeeDirectoryService(department && department !== 'ALL' ? { department } : undefined, caller);
 
   // If Attendance Manager views: ONLY show employees included in the published roster
   if (!isSuperAdmin) {
@@ -377,7 +445,7 @@ export async function getDailyAttendanceService(
     },
     include: {
       markedBy: {
-        select: { id: true, name: true, email: true },
+        select: { id: true, name: true, email: true, role: true },
       },
     },
   });
@@ -391,6 +459,8 @@ export async function getDailyAttendanceService(
       employee: emp,
       attendanceId: existing?.id || null,
       status: (existing?.status as EmployeeAttendanceStatus) || 'PRESENT',
+      checkInTime: existing?.checkInTime || null,
+      sequenceNumber: existing?.sequenceNumber || 1,
       remarks: existing?.remarks || '',
       isMarked: Boolean(existing),
       isFinalized: existing?.isFinalized ?? false,
@@ -398,6 +468,7 @@ export async function getDailyAttendanceService(
       markedBy: existing?.markedBy || null,
       submittedAt: existing?.submittedAt ? existing.submittedAt.toISOString() : null,
       updatedAt: existing?.updatedAt ? existing.updatedAt.toISOString() : null,
+      isTestingUser: isAttendanceTestingEmail(emp.email),
     };
   });
 
@@ -424,6 +495,7 @@ export async function getDailyAttendanceService(
     isRosterPublished,
     publishedMetadata,
     windowInfo,
+    isTestingModeActive: isTestingMode,
     totalEmployees: directory.length,
     markedCount,
     presentCount,
@@ -440,9 +512,9 @@ export async function getDailyAttendanceService(
 /**
  * 3. POST / Capture Daily Attendance
  * STRICT RULES:
- * - 12-Hour daily attendance window: 09:00 AM to 09:00 PM IST
- * - Akshay Kumar can update multiple times during the open window for today.
- * - At 09:00 PM IST or on past/future dates, the server automatically rejects updates from Akshay.
+ * - 24-Hour daily attendance window (00:00:00 to 23:59:59 IST)
+ * - Akshay Kumar & Admin can update multiple times during the open window for today.
+ * - Sequential accountability: Tracks check-in time via 24-hour clock and incremental act sequence.
  * - Akshay can only mark employees who exist in the published DailyAttendanceRoster.
  * - Only Super Admin (threadsecurity@gmail.com) can update finalized or historical records.
  */
@@ -451,6 +523,7 @@ export async function captureDailyAttendanceService(params: {
   records: Array<{
     employeeId: string;
     status: EmployeeAttendanceStatus;
+    checkInTime?: string;
     remarks?: string;
   }>;
   markedById: string;
@@ -477,7 +550,7 @@ export async function captureDailyAttendanceService(params: {
 
     if (!windowInfo.isOpen) {
       throw new Error(
-        `Forbidden: Daily attendance window is strictly 09:00 AM to 09:00 PM IST. Attendance editing is currently closed. ${windowInfo.message}`
+        `Forbidden: Daily attendance window is active for 24 hours of the current day. Attendance editing is currently closed. ${windowInfo.message}`
       );
     }
 
@@ -503,8 +576,30 @@ export async function captureDailyAttendanceService(params: {
     }
   }
 
+  // Fetch marker details for accountability
+  const marker = await prisma.user.findUnique({
+    where: { id: params.markedById },
+    select: { id: true, name: true, email: true, role: true },
+  });
+  const markerName = marker?.name || params.markedByEmail;
+  const markerRoleLabel = isSuperAdmin ? 'Super Admin' : 'Attendance Coordinator (Akshay Kumar)';
+
+  // Fetch existing attendance records to track incremental sequence acts within 24 hours
+  const existingRecords = await db.employeeAttendance.findMany({
+    where: { attendanceDate: targetDate },
+  });
+  const existingMap = new Map<string, any>(existingRecords.map((r: any) => [r.employeeId, r]));
+  const now24Hr = windowInfo.serverTime24Hr;
+
   // Perform atomic batch upsert inside transaction
   const upsertOps = params.records.map((rec) => {
+    const existing = existingMap.get(rec.employeeId);
+    const currentSeq = existing?.sequenceNumber || 1;
+    const nextSeq = existing ? currentSeq + 1 : 1;
+    const effectiveCheckIn =
+      rec.checkInTime ||
+      (['PRESENT', 'WFH', 'HALF_DAY'].includes(rec.status) ? existing?.checkInTime || now24Hr : null);
+
     return db.employeeAttendance.upsert({
       where: {
         employeeId_attendanceDate: {
@@ -516,6 +611,8 @@ export async function captureDailyAttendanceService(params: {
         employeeId: rec.employeeId,
         attendanceDate: targetDate,
         status: rec.status,
+        checkInTime: effectiveCheckIn,
+        sequenceNumber: 1,
         remarks: rec.remarks || null,
         markedById: params.markedById,
         isFinalized,
@@ -523,6 +620,8 @@ export async function captureDailyAttendanceService(params: {
       },
       update: {
         status: rec.status,
+        checkInTime: effectiveCheckIn,
+        sequenceNumber: nextSeq,
         remarks: rec.remarks || null,
         markedById: params.markedById,
         isFinalized,
@@ -532,6 +631,48 @@ export async function captureDailyAttendanceService(params: {
   });
 
   await prisma.$transaction(upsertOps);
+
+  // Audit Logging for accountability and proper sequence tracking
+  try {
+    const auditEntries: any[] = [];
+    for (const rec of params.records) {
+      const existing = existingMap.get(rec.employeeId);
+      const nextSeq = existing ? (existing.sequenceNumber || 1) + 1 : 1;
+      const effectiveCheckIn =
+        rec.checkInTime ||
+        (['PRESENT', 'WFH', 'HALF_DAY'].includes(rec.status) ? existing?.checkInTime || now24Hr : null);
+
+      const attendanceRecord = await db.employeeAttendance.findUnique({
+        where: {
+          employeeId_attendanceDate: {
+            employeeId: rec.employeeId,
+            attendanceDate: targetDate,
+          },
+        },
+        select: { id: true },
+      });
+
+      if (attendanceRecord) {
+        auditEntries.push({
+          attendanceId: attendanceRecord.id,
+          previousStatus: existing ? existing.status : rec.status,
+          updatedStatus: rec.status,
+          checkInTime: effectiveCheckIn,
+          sequenceNumber: nextSeq,
+          reason: `Daily Marking Act #${nextSeq} [24-Hr Clock: ${effectiveCheckIn || 'N/A'} IST] by ${markerRoleLabel} (${markerName} <${params.markedByEmail}>)`,
+          modifiedById: params.markedById,
+        });
+      }
+    }
+
+    if (auditEntries.length > 0) {
+      await db.employeeAttendanceAuditLog.createMany({
+        data: auditEntries,
+      });
+    }
+  } catch (auditErr) {
+    console.warn('[EmployeeAttendance] Notice logging sequence audit acts:', auditErr);
+  }
 
   return {
     success: true,
@@ -873,6 +1014,8 @@ export async function getAttendanceAuditHistoryService(filters?: {
     attendanceDate: formatDateKey(new Date(log.attendance.attendanceDate)),
     previousStatus: log.previousStatus,
     updatedStatus: log.updatedStatus,
+    checkInTime: log.checkInTime || null,
+    sequenceNumber: log.sequenceNumber || 1,
     reason: log.reason,
     modifiedAt: log.modifiedAt.toISOString(),
     modifiedBy: {
@@ -902,10 +1045,13 @@ export async function getAttendanceAuditHistoryService(filters?: {
 /**
  * 7. GET Attendance Analytics Overview
  */
-export async function getAttendanceAnalyticsOverviewService(dateInput?: string | Date) {
+export async function getAttendanceAnalyticsOverviewService(
+  dateInput?: string | Date,
+  caller?: AttendanceAuthUser | null
+) {
   const targetDate = normalizeAttendanceDate(dateInput || new Date());
-  const daily = await getDailyAttendanceService(targetDate);
-  const directory = await getEmployeeDirectoryService();
+  const daily = await getDailyAttendanceService(targetDate, undefined, caller);
+  const directory = await getEmployeeDirectoryService(undefined, caller);
 
   const totalEmployees = directory.length;
   const presentToday = daily.presentCount;
@@ -970,9 +1116,13 @@ export async function getAttendanceAnalyticsOverviewService(dateInput?: string |
 /**
  * 8. GET Monthly Attendance Report for Export & Analytics
  */
-export async function getMonthlyAttendanceReportService(year: number, month: number) {
+export async function getMonthlyAttendanceReportService(
+  year: number,
+  month: number,
+  caller?: AttendanceAuthUser | null
+) {
   await syncEmployeeProfilesService();
-  const directory = await getEmployeeDirectoryService();
+  const directory = await getEmployeeDirectoryService(undefined, caller);
 
   // Determine start and end of month in UTC
   const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
@@ -1133,8 +1283,10 @@ export async function publishDailyRosterService(params: {
 /**
  * 10. GET Daily Attendance Roster for a Date
  */
-export async function getDailyRosterService(dateInput: string | Date) {
+export async function getDailyRosterService(dateInput: string | Date, caller?: AttendanceAuthUser | null) {
   const targetDate = normalizeAttendanceDate(dateInput);
+  const isSuperAdmin = caller ? isSuperAdminAttendanceUser(caller) : false;
+  const isTestingMode = await isAttendanceTestingModeActive();
 
   const entries = await db.dailyAttendanceRoster.findMany({
     where: { attendanceDate: targetDate },
@@ -1155,18 +1307,23 @@ export async function getDailyRosterService(dateInput: string | Date) {
     orderBy: { publishedAt: 'desc' },
   });
 
-  const isPublished = entries.length > 0;
-  const publishedAt = isPublished ? entries[0].publishedAt.toISOString() : null;
-  const publishedBy = isPublished ? (entries[0].publishedBy?.name || entries[0].publishedBy?.email) : null;
+  let filteredEntries = entries;
+  if (!isSuperAdmin && !isTestingMode) {
+    filteredEntries = entries.filter((e: any) => !isAttendanceTestingEmail(e.employee?.email));
+  }
+
+  const isPublished = filteredEntries.length > 0;
+  const publishedAt = isPublished ? filteredEntries[0].publishedAt.toISOString() : null;
+  const publishedBy = isPublished ? (filteredEntries[0].publishedBy?.name || filteredEntries[0].publishedBy?.email) : null;
 
   return {
     date: formatDateKey(targetDate),
     isPublished,
     publishedAt,
     publishedBy,
-    totalCount: entries.length,
-    employeeIds: entries.map((e: any) => e.employeeId),
-    entries: entries.map((e: any) => ({
+    totalCount: filteredEntries.length,
+    employeeIds: filteredEntries.map((e: any) => e.employeeId),
+    entries: filteredEntries.map((e: any) => ({
       id: e.id,
       employeeId: e.employeeId,
       name: e.employee?.name || 'Unnamed',
@@ -1175,6 +1332,7 @@ export async function getDailyRosterService(dateInput: string | Date) {
       designation: e.employee?.employeeProfile?.designation || 'Faculty Member',
       status: e.employee?.employeeProfile?.status || 'ACTIVE',
       attendanceEligible: e.employee?.employeeProfile?.attendanceEligible ?? true,
+      isTestingUser: isAttendanceTestingEmail(e.employee?.email),
     })),
   };
 }

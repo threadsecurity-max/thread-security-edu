@@ -10,7 +10,9 @@ export const metadata: Metadata = {
   description: 'Assemble operational team blocks, assign leads and juniors, link communication edges, and delegate subsystem privileges.',
 };
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export default async function AdminDelegationPage() {
   const user = await getCurrentUser();

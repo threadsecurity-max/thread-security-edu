@@ -38,6 +38,9 @@ export const FALLBACK_EMPLOYEES: EmployeeNode[] = [
   { id: 'cmukqs1cm0007v85wrdjbfv4n', name: 'Security Analyst Admin', email: 'edu@threadsecurity.in', role: 'SECURITY_ADMIN', department: 'Cyber Operations & SOC', designation: 'Security Analyst', employeeId: 'TSE-SEC-ADMIN' },
   { id: 'cmt15lhcj0000v8roju6lbfr0', name: 'Super Admin (ThreadSecurity)', email: 'threadsecurity@gmail.com', role: 'SUPER_ADMIN', department: 'Executive Management', designation: 'Super Administrator', employeeId: 'TSE-EMP-BFR0' },
   { id: 'cmv554fr30000hk01ki4ynb2n', name: 'Kunal', email: 'kunaldigitalconnect@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Faculty', employeeId: 'TS-STF-01' },
+  { id: 'cmw3glkrn0000k701fbvno3e8', name: 'Tanveer Singh', email: 'tanveersingh3599@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-109' },
+  { id: 'cmw3gokc60007k701i6r4jgue', name: 'Manmeet Kaur', email: 'manmeetkaur3758@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-110' },
+  { id: 'cmt15lhhv0001v8rouqf1y21m', name: 'TS-Mentor-Dummy-01', email: 'threadsecuritymentor@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-101' },
 ];
 
 /**
@@ -87,6 +90,7 @@ export async function getDelegationWorkspaceDataService() {
     console.error('[DelegationService] Error querying employees, attempting recovery query:', err);
     try {
       await new Promise((r) => setTimeout(r, 200));
+      // Lean recovery query without nested relation to avoid pool starvation
       const recoveryUsers = await prisma.user.findMany({
         where: {
           role: {
@@ -99,15 +103,8 @@ export async function getDelegationWorkspaceDataService() {
           email: true,
           role: true,
           avatarUrl: true,
-          employeeProfile: {
-            select: {
-              employeeId: true,
-              department: true,
-              designation: true,
-              status: true,
-            },
-          },
         },
+        orderBy: [{ role: 'asc' }, { name: 'asc' }],
       });
       if (recoveryUsers && recoveryUsers.length > 0) {
         employees = recoveryUsers.map((u: any) => ({
@@ -116,9 +113,9 @@ export async function getDelegationWorkspaceDataService() {
           email: u.email,
           role: u.role,
           avatarUrl: u.avatarUrl,
-          department: u.employeeProfile?.department || null,
-          designation: u.employeeProfile?.designation || null,
-          employeeId: u.employeeProfile?.employeeId || null,
+          department: null,
+          designation: null,
+          employeeId: null,
         }));
       }
     } catch {

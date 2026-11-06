@@ -1457,6 +1457,8 @@ model EmployeeAttendance {
   employee        User                     @relation("EmployeeAttendanceRecords", fields: [employeeId], references: [id], onDelete: Cascade)
   attendanceDate  DateTime                 // Normalized to UTC midnight (YYYY-MM-DDT00:00:00.000Z)
   status          EmployeeAttendanceStatus @default(PRESENT)
+  checkInTime     String?                  // 24-hr check-in clock format e.g. "09:30:00" (Asia/Kolkata)
+  sequenceNumber  Int                      @default(1) // Incremental counter of markings/updates within 24 hours
   remarks         String?
   markedById      String?
   markedBy        User?                    @relation("AttendanceMarker", fields: [markedById], references: [id], onDelete: SetNull)
@@ -1478,6 +1480,8 @@ model EmployeeAttendanceAuditLog {
   attendance     EmployeeAttendance       @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
   previousStatus EmployeeAttendanceStatus
   updatedStatus  EmployeeAttendanceStatus
+  checkInTime    String?                  // 24-hr check-in timing at time of audit
+  sequenceNumber Int                      @default(1)
   reason         String                   @db.Text
   modifiedById   String
   modifiedBy     User                     @relation("AuditModifier", fields: [modifiedById], references: [id], onDelete: Cascade)

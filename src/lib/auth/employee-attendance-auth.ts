@@ -10,6 +10,24 @@
 export const SUPER_ADMIN_ATTENDANCE_EMAIL = 'threadsecurity@gmail.com';
 export const ATTENDANCE_MANAGER_EMAIL = 'akshay.kumar@threadsecurity.org';
 
+/**
+ * Designated Testing Accounts:
+ * These accounts are testing users and MUST NEVER appear in attendance operations
+ * for Attendance Coordinator (Akshay Kumar) unless Super Admin explicitly enables Testing Mode.
+ */
+export const ATTENDANCE_TESTING_USER_EMAILS = [
+  'staff.junior@threadsecurity.org',
+  'staff.executive@threadsecurity.org',
+  'threadsecuritymentor@gmail.com',
+  'threadsecurity@gmail.com',
+];
+
+export function isAttendanceTestingEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+  return ATTENDANCE_TESTING_USER_EMAILS.some((testEmail) => testEmail.toLowerCase() === clean);
+}
+
 export interface AttendanceAuthUser {
   userId?: string | null;
   email?: string | null;

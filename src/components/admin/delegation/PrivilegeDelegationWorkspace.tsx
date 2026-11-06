@@ -97,6 +97,24 @@ export interface DelegationTeamItem {
   edges: DelegationEdgeItem[];
 }
 
+export const VERIFIED_EMPLOYEES_FALLBACK: EmployeeNode[] = [
+  { id: 'cmv6l9la40000c9014xt46hcv', name: 'Akshay Kumar', email: 'akshay.kumar@threadsecurity.org', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Attendance Officer & Faculty Lead', employeeId: 'TS-MNT-103' },
+  { id: 'cmw27xk3n0000v8ksnvajbwch', name: 'Executive Staff Member', email: 'staff.executive@threadsecurity.org', role: 'STAFF_EXECUTIVE', department: 'Academic Operations', designation: 'Operations Executive', employeeId: 'TSE-EMP-BWCH' },
+  { id: 'cmvaouc8w000djp01whcl5pqd', name: 'Nardeep Singh', email: 'nardeepsingh0007@gmail.com', role: 'STAFF_JUNIOR', department: 'Academics & Faculty', designation: 'Faculty Associate', employeeId: 'TS-MNT-108' },
+  { id: 'cmw27xms00001v8ks3e3ebez4', name: 'Junior Staff Associate', email: 'staff.junior@threadsecurity.org', role: 'STAFF_JUNIOR', department: 'Lab & Technical Support', designation: 'Technical Support', employeeId: 'TSE-EMP-BEZ4' },
+  { id: 'cmv953rri002ee30136ss9mgu', name: 'Vishal Kumar', email: 'vishal.kumar@threadsecurity.org', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-107' },
+  { id: 'cmv7t45od000fkg016m918le3', name: 'Atish Chand', email: 'atish.chand@threadsecurity.org', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-105' },
+  { id: 'cmv92muow000se301o11rfu47', name: 'Gurmehak Kalra', email: 'gurmehakkalra086@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-106' },
+  { id: 'cmv6lg4ek000hc901shxpqth0', name: 'Simranjit Kaur', email: 'simranjit.kaur@threadsecurity.org', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-104' },
+  { id: 'cmv59zwzi0018hk01jsuoouk6', name: 'Shailja Tarungal', email: 'shailja.tarungal@threadsecurity.org', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-102' },
+  { id: 'cmukqs1cm0007v85wrdjbfv4n', name: 'Security Analyst Admin', email: 'edu@threadsecurity.in', role: 'SECURITY_ADMIN', department: 'Cyber Operations & SOC', designation: 'Security Analyst', employeeId: 'TSE-SEC-ADMIN' },
+  { id: 'cmt15lhcj0000v8roju6lbfr0', name: 'Super Admin (ThreadSecurity)', email: 'threadsecurity@gmail.com', role: 'SUPER_ADMIN', department: 'Executive Management', designation: 'Super Administrator', employeeId: 'TSE-EMP-BFR0' },
+  { id: 'cmv554fr30000hk01ki4ynb2n', name: 'Kunal', email: 'kunaldigitalconnect@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Faculty', employeeId: 'TS-STF-01' },
+  { id: 'cmw3glkrn0000k701fbvno3e8', name: 'Tanveer Singh', email: 'tanveersingh3599@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-109' },
+  { id: 'cmw3gokc60007k701i6r4jgue', name: 'Manmeet Kaur', email: 'manmeetkaur3758@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-110' },
+  { id: 'cmt15lhhv0001v8rouqf1y21m', name: 'TS-Mentor-Dummy-01', email: 'threadsecuritymentor@gmail.com', role: 'MENTOR', department: 'Academics & Faculty', designation: 'Mentor', employeeId: 'TS-MNT-101' },
+];
+
 interface PrivilegeDelegationWorkspaceProps {
   initialEmployees: EmployeeNode[];
   initialTeams: DelegationTeamItem[];
@@ -109,7 +127,9 @@ export function PrivilegeDelegationWorkspace({
   availableModules = [],
 }: PrivilegeDelegationWorkspaceProps) {
   const [teams, setTeams] = useState<DelegationTeamItem[]>(initialTeams);
-  const [employees, setEmployees] = useState<EmployeeNode[]>(initialEmployees);
+  const [employees, setEmployees] = useState<EmployeeNode[]>(
+    initialEmployees && initialEmployees.length > 0 ? initialEmployees : VERIFIED_EMPLOYEES_FALLBACK
+  );
   const [viewMode, setViewMode] = useState<'ARCHITECTURE' | 'OBSERVER'>('ARCHITECTURE');
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -167,6 +187,13 @@ export function PrivilegeDelegationWorkspace({
     }
   }, [initialTeams]);
 
+  // Guaranteed active operational employee pool (Server Data -> Props -> Fallback Roster)
+  const activeEmployeePool = React.useMemo(() => {
+    if (Array.isArray(employees) && employees.length > 0) return employees;
+    if (Array.isArray(initialEmployees) && initialEmployees.length > 0) return initialEmployees;
+    return VERIFIED_EMPLOYEES_FALLBACK;
+  }, [employees, initialEmployees]);
+
   // Modals
   const [createTeamOpen, setCreateTeamOpen] = useState(false);
   const [assignMemberModal, setAssignMemberModal] = useState<DelegationTeamItem | null>(null);
@@ -177,15 +204,14 @@ export function PrivilegeDelegationWorkspace({
   const [teamGrantsModal, setTeamGrantsModal] = useState<DelegationTeamItem | null>(null);
   const [edgeModalTeam, setEdgeModalTeam] = useState<DelegationTeamItem | null>(null);
 
-  // Eligible Team Leads (Mentors, Executives, Security Admins, Admins, Juniors)
+  // Eligible Team Leads (Mentors, Executives, Juniors, Admins, Security Admins)
   const eligibleLeads = React.useMemo(() => {
-    const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
-    const leads = list.filter((e) => {
+    const leads = activeEmployeePool.filter((e) => {
       const r = (e.role || '').toUpperCase();
       return ['MENTOR', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR', 'SECURITY_ADMIN', 'SUPER_ADMIN', 'ACADEMIC_ADMIN', 'ADMIN'].includes(r);
     });
-    return leads.length > 0 ? leads : list;
-  }, [employees, initialEmployees]);
+    return leads.length > 0 ? leads : activeEmployeePool;
+  }, [activeEmployeePool]);
 
   // Form states
   const [createTeamForm, setCreateTeamForm] = useState({
@@ -193,17 +219,16 @@ export function PrivilegeDelegationWorkspace({
     code: '',
     description: '',
     color: '#6366f1',
-    leadId: eligibleLeads[0]?.id || '',
+    leadId: eligibleLeads[0]?.id || VERIFIED_EMPLOYEES_FALLBACK[0].id,
     systemGrants: ['DOCKET', 'COMMUNICATIONS', 'ATTENDANCE'],
   });
 
   const openCreateTeamModal = () => {
-    if (eligibleLeads.length > 0) {
-      setCreateTeamForm((prev) => ({
-        ...prev,
-        leadId: prev.leadId && eligibleLeads.some((l) => l.id === prev.leadId) ? prev.leadId : eligibleLeads[0].id,
-      }));
-    }
+    const defaultLead = eligibleLeads[0]?.id || activeEmployeePool[0]?.id || VERIFIED_EMPLOYEES_FALLBACK[0].id;
+    setCreateTeamForm((prev) => ({
+      ...prev,
+      leadId: prev.leadId && eligibleLeads.some((l) => l.id === prev.leadId) ? prev.leadId : defaultLead,
+    }));
     setCreateTeamOpen(true);
   };
 
@@ -225,11 +250,23 @@ export function PrivilegeDelegationWorkspace({
   // Available staff members for assignment modal
   const availableMembers = React.useMemo(() => {
     if (!assignMemberModal) return [];
-    const list = Array.isArray(employees) && employees.length > 0 ? employees : (Array.isArray(initialEmployees) ? initialEmployees : []);
     const existingMemberIds = new Set((assignMemberModal.members || []).map((m) => m.userId));
-    const unallocated = list.filter((e) => e.id !== assignMemberModal.leadId && !existingMemberIds.has(e.id));
-    return unallocated.length > 0 ? unallocated : list.filter((e) => e.id !== assignMemberModal.leadId);
-  }, [assignMemberModal, employees, initialEmployees]);
+    const unallocated = activeEmployeePool.filter((e) => e.id !== assignMemberModal.leadId && !existingMemberIds.has(e.id));
+    return unallocated.length > 0 ? unallocated : activeEmployeePool.filter((e) => e.id !== assignMemberModal.leadId);
+  }, [assignMemberModal, activeEmployeePool]);
+
+  const openAssignMemberModal = (team: DelegationTeamItem) => {
+    setAssignMemberModal(team);
+    const existingIds = new Set((team.members || []).map((m) => m.userId));
+    const candidates = activeEmployeePool.filter((e) => e.id !== team.leadId && !existingIds.has(e.id));
+    const fallbackCand = activeEmployeePool.find((e) => e.id !== team.leadId);
+    const defaultUserId = candidates[0]?.id || fallbackCand?.id || activeEmployeePool[0]?.id || '';
+    setAssignMemberForm({
+      userId: defaultUserId,
+      roleInTeam: 'JUNIOR',
+      systemGrants: team.systemGrants && team.systemGrants.length > 0 ? team.systemGrants.slice(0, 3) : ['DOCKET', 'COMMUNICATIONS'],
+    });
+  };
 
   React.useEffect(() => {
     if (assignMemberModal && availableMembers.length > 0) {
@@ -264,8 +301,8 @@ export function PrivilegeDelegationWorkspace({
   };
 
   // Find unassigned employees
-  const assignedUserIds = new Set(teams.flatMap((t) => t.members.map((m) => m.userId)));
-  const unassignedEmployees = employees.filter((e) => !assignedUserIds.has(e.id) && e.role !== 'SUPER_ADMIN');
+  const assignedUserIds = new Set(teams.flatMap((t) => (t.members || []).map((m) => m.userId)));
+  const unassignedEmployees = activeEmployeePool.filter((e) => !assignedUserIds.has(e.id) && e.role !== 'SUPER_ADMIN');
 
   // Handle Team Creation
   const handleCreateTeamSubmit = (e: React.FormEvent) => {
@@ -732,17 +769,7 @@ export function PrivilegeDelegationWorkspace({
                         </span>
                         <button
                           type="button"
-                          onClick={() => {
-                            setAssignMemberModal(team);
-                            const existingIds = new Set((team.members || []).map((m) => m.userId));
-                            const candidates = employees.filter((e) => e.id !== team.leadId && !existingIds.has(e.id));
-                            const candidateId = candidates[0]?.id || employees.find((e) => e.id !== team.leadId)?.id || '';
-                            setAssignMemberForm({
-                              userId: candidateId,
-                              roleInTeam: 'JUNIOR',
-                              systemGrants: team.systemGrants && team.systemGrants.length > 0 ? team.systemGrants.slice(0, 3) : ['DOCKET', 'COMMUNICATIONS'],
-                            });
-                          }}
+                          onClick={() => openAssignMemberModal(team)}
                           className="text-[11px] font-semibold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
@@ -972,7 +999,7 @@ export function PrivilegeDelegationWorkspace({
                 onChange={(e) => setCreateTeamForm({ ...createTeamForm, leadId: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
               >
-                <option value="">-- Choose Team Lead (Tier 2 Officer) --</option>
+                <option value="" disabled>-- Choose Team Lead (Tier 2 Officer) --</option>
                 {eligibleLeads.map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.name || e.email} ({e.role}){e.department ? ` • ${e.department}` : ''}
@@ -1057,7 +1084,7 @@ export function PrivilegeDelegationWorkspace({
                   onChange={(e) => setAssignMemberForm({ ...assignMemberForm, userId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 font-medium focus:outline-none focus:border-indigo-500"
                 >
-                  <option value="">-- Choose Staff Member / Operational Associate --</option>
+                  <option value="" disabled>-- Choose Staff Member / Operational Associate --</option>
                   {availableMembers.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.name || e.email} ({e.role}){e.department ? ` • ${e.department}` : ''}
