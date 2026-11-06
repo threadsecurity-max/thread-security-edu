@@ -8,6 +8,7 @@ import {
   updateUserService,
   deleteUserService,
   toggleStudentDashboardAccessService,
+  toggleUserActiveService,
 } from '@/server/services/admin.service';
 import { StudentTrack } from '@/lib/auth/ts-id';
 import { RoleType } from '@prisma/client';
@@ -137,6 +138,21 @@ export async function PUT(req: NextRequest) {
       revalidatePath('/admin');
       revalidatePath('/admin/users');
       revalidatePath('/admin/students');
+
+      return NextResponse.json({ success: true, user: updated });
+    }
+
+    if (body.action === 'toggle-active') {
+      const { userId, isActive } = body;
+      if (!userId) {
+        return NextResponse.json({ success: false, error: 'User ID is required.' }, { status: 400 });
+      }
+
+      const updated = await toggleUserActiveService(userId, !!isActive, session.userId);
+      revalidatePath('/admin');
+      revalidatePath('/admin/users');
+      revalidatePath('/admin/employee-attendance');
+      revalidatePath('/admin/delegation');
 
       return NextResponse.json({ success: true, user: updated });
     }

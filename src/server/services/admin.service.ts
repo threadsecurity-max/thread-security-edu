@@ -1118,10 +1118,74 @@ export interface UpdateUserInput {
   role?: RoleType;
   isActive?: boolean;
   isDashboardAccessGranted?: boolean;
+  joiningDate?: string | Date;
+  department?: string;
+  designation?: string;
+  attendanceEligible?: boolean;
   newPasskey?: string;
   newSecretKey?: string;
   dispatchUpdatedCredentials?: boolean;
   actorId?: string;
+}
+
+export async function toggleUserActiveService(userId: string, isActive: boolean, actorId?: string) {
+  const existing = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, role: true, isActive: true },
+  });
+  if (!existing) throw new Error('User not found.');
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { isActive },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      isActive: true,
+      isDashboardAccessGranted: true,
+      createdAt: true,
+    },
+  });
+
+  // Keep employee profile synced for attendance
+  try {
+    const existingEmp = await prisma.employeeProfile.findUnique({ where: { userId } });
+    if (existingEmp) {
+      await prisma.employeeProfile.update({
+        where: { userId },
+        data: {
+          status: isActive ? 'ACTIVE' : 'INACTIVE',
+          attendanceEligible: isActive,
+        },
+      });
+    } else if (existing.role !== 'STUDENT') {
+      await prisma.employeeProfile.create({
+        data: {
+          userId,
+          employeeId: `TSE-EMP-${userId.slice(-4).toUpperCase()}`,
+          department: 'Academics & Faculty',
+          designation: 'Faculty Member',
+          joiningDate: new Date(),
+          status: isActive ? 'ACTIVE' : 'INACTIVE',
+          attendanceEligible: isActive,
+        },
+      });
+    }
+  } catch (err) {
+    console.warn('[AdminService] EmployeeProfile sync error:', err);
+  }
+
+  await logAuditEvent({
+    actorId,
+    action: isActive ? 'USER_ACTIVATED' : 'USER_DEACTIVATED',
+    entity: 'USER',
+    entityId: userId,
+    details: `${isActive ? 'Activated' : 'Deactivated'} user account for ${existing.name} (${existing.email}, Role: ${existing.role}). Attendance eligibility set to ${isActive}.`,
+  });
+
+  return updatedUser;
 }
 
 export async function updateUserService(userId: string, data: UpdateUserInput) {
@@ -1196,6 +1260,53 @@ export async function updateUserService(userId: string, data: UpdateUserInput) {
         bio: 'Faculty mentor profile.',
       },
     });
+  }
+
+  // Sync EmployeeProfile if tenure/department/status was modified
+  if (
+    data.joiningDate ||
+    data.department ||
+    data.designation ||
+    typeof data.isActive === 'boolean' ||
+    typeof data.attendanceEligible === 'boolean'
+  ) {
+    try {
+      const existingEmp = await prisma.employeeProfile.findUnique({ where: { userId } });
+      const activeStatus = data.isActive === false ? 'INACTIVE' : (existingEmp?.status || 'ACTIVE');
+      const attendanceEligible =
+        typeof data.attendanceEligible === 'boolean'
+          ? data.attendanceEligible
+          : typeof data.isActive === 'boolean'
+          ? data.isActive
+          : (existingEmp?.attendanceEligible ?? true);
+
+      if (existingEmp) {
+        await prisma.employeeProfile.update({
+          where: { userId },
+          data: {
+            ...(data.joiningDate ? { joiningDate: new Date(data.joiningDate) } : {}),
+            ...(data.department ? { department: data.department.trim() } : {}),
+            ...(data.designation ? { designation: data.designation.trim() } : {}),
+            status: activeStatus,
+            attendanceEligible,
+          },
+        });
+      } else if (existing.role !== 'STUDENT' || (data.role && data.role !== 'STUDENT')) {
+        await prisma.employeeProfile.create({
+          data: {
+            userId,
+            employeeId: `TSE-EMP-${userId.slice(-4).toUpperCase()}`,
+            department: data.department?.trim() || 'Academics & Faculty',
+            designation: data.designation?.trim() || 'Faculty Member',
+            joiningDate: data.joiningDate ? new Date(data.joiningDate) : existing.createdAt,
+            status: activeStatus,
+            attendanceEligible,
+          },
+        });
+      }
+    } catch (empErr) {
+      console.warn('[AdminService] EmployeeProfile update warning:', empErr);
+    }
   }
 
   if (data.dispatchUpdatedCredentials) {

@@ -44,6 +44,11 @@ export interface UserRecord {
   phone: string | null;
   batchId?: string | null;
   createdAt: string;
+  joiningDate?: string | null;
+  department?: string | null;
+  designation?: string | null;
+  employeeStatus?: string | null;
+  attendanceEligible?: boolean;
 }
 
 export interface UserMetrics {

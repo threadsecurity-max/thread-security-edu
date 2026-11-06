@@ -36,6 +36,16 @@ export default async function AdminUsersDirectoryPage() {
         studentProfile: {
           select: { phone: true, batchId: true },
         },
+        employeeProfile: {
+          select: {
+            employeeId: true,
+            department: true,
+            designation: true,
+            joiningDate: true,
+            status: true,
+            attendanceEligible: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     }),
@@ -63,6 +73,13 @@ export default async function AdminUsersDirectoryPage() {
     phone: u.studentProfile?.phone || null,
     batchId: u.studentProfile?.batchId || null,
     createdAt: u.createdAt.toISOString(),
+    joiningDate: u.employeeProfile?.joiningDate
+      ? u.employeeProfile.joiningDate.toISOString()
+      : u.createdAt.toISOString(),
+    department: u.employeeProfile?.department || null,
+    designation: u.employeeProfile?.designation || null,
+    employeeStatus: u.employeeProfile?.status || (u.isActive ? 'ACTIVE' : 'INACTIVE'),
+    attendanceEligible: u.employeeProfile?.attendanceEligible ?? u.isActive,
   }));
 
   const metrics = {
