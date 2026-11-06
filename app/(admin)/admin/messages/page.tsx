@@ -9,7 +9,9 @@ export const metadata = {
   description: 'Two-way internal communications and operational directives with mentors and students.',
 };
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export default async function AdminMessagesPage() {
   let user: any = null;

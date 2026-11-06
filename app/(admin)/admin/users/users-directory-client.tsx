@@ -24,6 +24,7 @@ import {
   Crown,
   KeyRound,
   Layers,
+  Clock,
 } from 'lucide-react';
 import {
   Dialog,
@@ -128,6 +129,10 @@ export function UsersDirectoryClient({
     role: 'STUDENT' as RoleType,
     isActive: true,
     isDashboardAccessGranted: true,
+    joiningDate: '',
+    department: '',
+    designation: '',
+    attendanceEligible: true,
     newPasskey: '',
     newSecretKey: '',
     dispatchUpdatedCredentials: false,
@@ -136,6 +141,48 @@ export function UsersDirectoryClient({
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setFeedback({ type, message });
     setTimeout(() => setFeedback(null), 4000);
+  };
+
+  const formatWorkTenure = (startDateStr?: string | null) => {
+    if (!startDateStr) return { label: 'New Recruit', detail: 'Just joined', days: 0 };
+    const start = new Date(startDateStr);
+    if (isNaN(start.getTime())) return { label: 'Active Staff', detail: 'Standard Tenure', days: 0 };
+    const now = new Date();
+    const diffMs = now.getTime() - start.getTime();
+    const days = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+    if (days < 7) {
+      return {
+        label: `${days}d tenure`,
+        detail: days === 0 ? 'Joined today' : `Joined ${days} days ago`,
+        days,
+      };
+    }
+    if (days < 30) {
+      const weeks = Math.floor(days / 7);
+      const remDays = days % 7;
+      return {
+        label: `${weeks}w tenure`,
+        detail: remDays > 0 ? `${weeks}w ${remDays}d working` : `${weeks} weeks working`,
+        days,
+      };
+    }
+    const months = Math.floor(days / 30.4375);
+    if (months < 12) {
+      const remDays = Math.floor(days % 30.4375);
+      return {
+        label: `${months}mo tenure`,
+        detail: remDays > 0 ? `${months} mos ${remDays}d` : `${months} months working`,
+        days,
+      };
+    }
+    const years = Math.floor(months / 12);
+    const remMonths = months % 12;
+    return {
+      label: `${years}y ${remMonths}m tenure`,
+      detail: remMonths > 0 ? `${years} yr ${remMonths} mos` : `${years} years tenure`,
+      days,
+    };
   };
 
   // Filtered Users
@@ -285,6 +332,9 @@ export function UsersDirectoryClient({
   // Open Edit User
   const handleOpenEditModal = (user: UserRecord) => {
     setEditingUser(user);
+    const dateStr = user.joiningDate
+      ? new Date(user.joiningDate).toISOString().slice(0, 10)
+      : new Date(user.createdAt).toISOString().slice(0, 10);
     setEditFormData({
       name: user.name || '',
       email: user.email || '',
@@ -292,6 +342,10 @@ export function UsersDirectoryClient({
       role: user.role as RoleType,
       isActive: user.isActive,
       isDashboardAccessGranted: user.isDashboardAccessGranted,
+      joiningDate: dateStr,
+      department: user.department || '',
+      designation: user.designation || '',
+      attendanceEligible: user.attendanceEligible !== false,
       newPasskey: '',
       newSecretKey: '',
       dispatchUpdatedCredentials: false,
@@ -316,6 +370,10 @@ export function UsersDirectoryClient({
             role: editFormData.role,
             isActive: editFormData.isActive,
             isDashboardAccessGranted: editFormData.isDashboardAccessGranted,
+            joiningDate: editFormData.joiningDate || undefined,
+            department: editFormData.department || undefined,
+            designation: editFormData.designation || undefined,
+            attendanceEligible: editFormData.attendanceEligible,
             newPasskey: editFormData.newPasskey || undefined,
             newSecretKey: editFormData.newSecretKey || undefined,
             dispatchUpdatedCredentials: editFormData.dispatchUpdatedCredentials,
@@ -336,6 +394,13 @@ export function UsersDirectoryClient({
                     isActive: data.user.isActive,
                     isDashboardAccessGranted: data.user.isDashboardAccessGranted,
                     phone: editFormData.phone || null,
+                    joiningDate: editFormData.joiningDate
+                      ? new Date(editFormData.joiningDate).toISOString()
+                      : u.joiningDate,
+                    department: editFormData.department || u.department,
+                    designation: editFormData.designation || u.designation,
+                    attendanceEligible: editFormData.attendanceEligible,
+                    employeeStatus: editFormData.isActive ? 'ACTIVE' : 'INACTIVE',
                   }
                 : u
             )
@@ -347,6 +412,52 @@ export function UsersDirectoryClient({
         }
       } catch (err: any) {
         showToast(err?.message || 'Network error while updating user.', 'error');
+      }
+    });
+  };
+
+  // Toggle Account Active / Inactive Status via REST API
+  const handleToggleActive = async (userId: string, currentActive: boolean) => {
+    startTransition(async () => {
+      const nextActive = !currentActive;
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'toggle-active',
+            userId,
+            isActive: nextActive,
+          }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === userId
+                ? {
+                    ...u,
+                    isActive: nextActive,
+                    employeeStatus: nextActive ? 'ACTIVE' : 'INACTIVE',
+                    attendanceEligible: nextActive,
+                  }
+                : u
+            )
+          );
+          showToast(
+            `Account status updated to ${nextActive ? 'Active' : 'Inactive'}. ${
+              nextActive
+                ? 'User is now active and eligible for Attendance Roster.'
+                : 'User is deactivated and excluded from active attendance.'
+            }`,
+            'success'
+          );
+        } else {
+          showToast(data.error || 'Failed to update account active status', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while updating account status.', 'error');
       }
     });
   };
@@ -584,15 +695,16 @@ export function UsersDirectoryClient({
                 <th className="p-4">Email &amp; Contact</th>
                 <th className="p-4">Role</th>
                 <th className="p-4">TS-ID</th>
+                <th className="p-4 text-center">Account Status</th>
                 <th className="p-4 text-center">Dashboard Access</th>
-                <th className="p-4">Joined Date</th>
+                <th className="p-4">Work Tenure &amp; Joining</th>
                 <th className="p-4 text-right">Actions &amp; Creds</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-12 text-center text-slate-400">
+                  <td colSpan={8} className="p-12 text-center text-slate-400">
                     No users matching the active filter or search query.
                   </td>
                 </tr>
@@ -658,32 +770,71 @@ export function UsersDirectoryClient({
 
                       <td className="p-4 text-center">
                         <button
+                          type="button"
+                          onClick={() => handleToggleActive(u.id, u.isActive)}
+                          disabled={isPending || isPrimaryRoot}
+                          title={`Click to set account as ${u.isActive ? 'Inactive' : 'Active'}`}
+                          className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
+                            u.isActive
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100 hover:scale-[1.02]'
+                              : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 opacity-90'
+                          }`}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              u.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'
+                            }`}
+                          />
+                          <span>{u.isActive ? 'Active' : 'Inactive'}</span>
+                        </button>
+                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          {u.isActive ? 'In Attendance' : 'Excluded'}
+                        </div>
+                      </td>
+
+                      <td className="p-4 text-center">
+                        <button
                           onClick={() => handleToggleAccess(u.id, u.isDashboardAccessGranted)}
                           disabled={isPending}
                           className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border inline-flex items-center gap-1.5 transition-all cursor-pointer ${
                             u.isDashboardAccessGranted
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                              ? 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100'
                               : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                           }`}
                         >
                           {u.isDashboardAccessGranted ? (
                             <>
-                              <Unlock className="w-3 h-3 text-emerald-600" /> Active
+                              <Unlock className="w-3 h-3 text-violet-600" /> Granted
                             </>
                           ) : (
                             <>
-                              <Lock className="w-3 h-3 text-amber-600" /> Pending
+                              <Lock className="w-3 h-3 text-amber-600" /> Locked
                             </>
                           )}
                         </button>
                       </td>
 
-                      <td className="p-4 text-slate-500 text-[11px]">
-                        {new Date(u.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
+                      <td className="p-4">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                            <span className="font-semibold text-[11px] text-slate-900">
+                              {formatWorkTenure(u.joiningDate || u.createdAt).detail}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px]">
+                            <span className="px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-mono font-semibold border border-indigo-200">
+                              {formatWorkTenure(u.joiningDate || u.createdAt).label}
+                            </span>
+                            <span className="text-slate-400 font-mono">
+                              Since {new Date(u.joiningDate || u.createdAt).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
+                        </div>
                       </td>
 
                       <td className="p-4 text-right">
@@ -1093,6 +1244,42 @@ export function UsersDirectoryClient({
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1">
+                  <label className="text-slate-600 text-[11px] font-semibold">
+                    Work Joining Date (Tenure Start)
+                  </label>
+                  <input
+                    type="date"
+                    value={editFormData.joiningDate}
+                    onChange={(e) => setEditFormData({ ...editFormData, joiningDate: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500 font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-600 text-[11px] font-semibold">Department / Cell</label>
+                  <input
+                    type="text"
+                    value={editFormData.department}
+                    placeholder="e.g. Academics & Faculty"
+                    onChange={(e) => setEditFormData({ ...editFormData, department: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-slate-600 text-[11px] font-semibold">Designation / Official Title</label>
+                <input
+                  type="text"
+                  value={editFormData.designation}
+                  placeholder="e.g. Attendance Officer & Faculty Lead"
+                  onChange={(e) => setEditFormData({ ...editFormData, designation: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <label className="flex items-center gap-2 cursor-pointer text-slate-700">
                   <input
@@ -1101,7 +1288,7 @@ export function UsersDirectoryClient({
                     onChange={(e) => setEditFormData({ ...editFormData, isActive: e.target.checked })}
                     className="rounded text-violet-600 border-slate-300"
                   />
-                  <span>Active Account</span>
+                  <span className="font-semibold text-slate-900">Active Account</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer text-slate-700">
@@ -1112,6 +1299,18 @@ export function UsersDirectoryClient({
                     className="rounded text-violet-600 border-slate-300"
                   />
                   <span>Dashboard Access</span>
+                </label>
+              </div>
+
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.attendanceEligible}
+                    onChange={(e) => setEditFormData({ ...editFormData, attendanceEligible: e.target.checked })}
+                    className="rounded text-violet-600 border-slate-300"
+                  />
+                  <span className="text-[11px] text-slate-600">Eligible in Attendance Rosters &amp; Platform Roster</span>
                 </label>
               </div>
 

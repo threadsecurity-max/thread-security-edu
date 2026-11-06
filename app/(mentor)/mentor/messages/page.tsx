@@ -9,7 +9,9 @@ export const metadata = {
   description: 'Two-way internal communications and operational directives between faculty, mentors, and administrative staff.',
 };
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export default async function MentorMessagesPage() {
   const user = await getCurrentUser();
