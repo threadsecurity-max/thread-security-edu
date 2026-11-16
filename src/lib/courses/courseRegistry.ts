@@ -1,3 +1,5 @@
+import { JALANDHAR_COURSES, JALANDHAR_SEO_METADATA } from './jalandharCourses';
+
 export interface CourseModule {
   id: string;
   title: string;
@@ -57,7 +59,7 @@ export interface CourseSeoMeta {
   metaDescription: string;
 }
 
-export const COURSE_SEO_METADATA: Record<string, CourseSeoMeta> = {
+const RAW_COURSE_SEO_METADATA: Record<string, CourseSeoMeta> = {
   'cyber-security-course': {
     metaTitle: 'Cyber Security Course & Training | Thread Security',
     metaDescription: 'Master Ethical Hacking, VAPT, SOC & Cloud Security with 100% hands-on sandboxed labs, global cert prep, and placement support at Thread Security.',
@@ -126,6 +128,11 @@ export const COURSE_SEO_METADATA: Record<string, CourseSeoMeta> = {
     metaTitle: 'Edge AI & Model Quantization | Thread Security',
     metaDescription: 'Master INT8/FP4 quantization, TensorRT acceleration, ONNX runtime tuning, and secure deployment of high-throughput AI models on edge hardware.',
   },
+};
+
+export const COURSE_SEO_METADATA: Record<string, CourseSeoMeta> = {
+  ...RAW_COURSE_SEO_METADATA,
+  ...JALANDHAR_SEO_METADATA,
 };
 
 export function getCourseSeoMeta(course: {
@@ -1105,7 +1112,9 @@ const RAW_MASTER_COURSES: MasterCourseData[] = [
   },
 ];
 
-export const MASTER_COURSES: MasterCourseData[] = RAW_MASTER_COURSES.map((c) => {
+const ALL_MASTER_COURSES: MasterCourseData[] = [...RAW_MASTER_COURSES, ...JALANDHAR_COURSES];
+
+export const MASTER_COURSES: MasterCourseData[] = ALL_MASTER_COURSES.map((c) => {
   const seo = getCourseSeoMeta(c);
   return {
     ...c,
@@ -1115,5 +1124,7 @@ export const MASTER_COURSES: MasterCourseData[] = RAW_MASTER_COURSES.map((c) => 
 });
 
 export function getMasterCourseBySlug(slug: string): MasterCourseData | undefined {
-  return MASTER_COURSES.find((c) => c.slug === slug);
+  if (!slug) return undefined;
+  const clean = slug.toLowerCase().trim();
+  return MASTER_COURSES.find((c) => c.slug === clean || c.slug === slug);
 }

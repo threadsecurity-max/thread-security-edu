@@ -112,6 +112,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:slug(cybersecurity-course-in-jalandhar|ethical-hacking-course-in-jalandhar|ceh-course-in-jalandhar|cybersecurity-professional-course-in-jalandhar|bug-bounty-course-in-jalandhar|bug-bounty-hunting-course-in-jalandhar|penetration-testing-course-in-jalandhar|web-application-penetration-testing-course-in-jalandhar|soc-analyst-course-in-jalandhar|cybersecurity-professional-fellowship-course-in-jalandhar|defensive-cybersecurity-course-in-jalandhar|blue-team-course-in-jalandhar|soc-operations-course-in-jalandhar|web-penetration-testing-course-in-jalandhar|enterprise-red-teaming-course-in-jalandhar|adversary-simulation-course-in-jalandhar|web-security-course-in-jalandhar|advanced-ethical-hacking-course-in-jalandhar|artificial-intelligence-course-in-jalandhar|ai-course-in-jalandhar|python-for-ai-course-in-jalandhar|ai-programming-course-in-jalandhar|python-programming-for-ai-course-in-jalandhar|ai-security-course-in-jalandhar|responsible-ai-engineering-course-in-jalandhar|ai-security-responsible-ai-course-in-jalandhar|data-analysis-course-in-jalandhar|data-analytics-course-in-jalandhar|business-intelligence-course-in-jalandhar|power-bi-course-in-jalandhar|tableau-course-in-jalandhar|data-science-course-in-jalandhar|machine-learning-course-in-jalandhar|advanced-data-science-course-in-jalandhar|machine-learning-engineering-course-in-jalandhar|deep-learning-course-in-jalandhar|neural-networks-course-in-jalandhar|ai-security-llm-red-teaming-course-in-jalandhar|rag-security-vector-database-defense-course-in-jalandhar|enterprise-ai-governance-guardrails-course-in-jalandhar|model-inversion-model-stealing-defense-course-in-jalandhar|prompt-injection-jailbreak-defense-course-in-jalandhar|computer-vision-deepfake-intelligence-course-in-jalandhar|adversarial-machine-learning-evasion-attacks-course-in-jalandhar|ai-safety-dual-llm-moderation-course-in-jalandhar)',
+        destination: '/courses/:slug',
+      },
+    ];
+  },
   async headers() {
     return [
       {
