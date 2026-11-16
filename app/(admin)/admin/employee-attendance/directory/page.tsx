@@ -20,7 +20,7 @@ export default async function EmployeeDirectoryPage() {
     redirect('/login?error=UnauthorizedAttendanceAccess');
   }
 
-  const directory = await getEmployeeDirectoryService();
+  const directory = await getEmployeeDirectoryService(undefined, session);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

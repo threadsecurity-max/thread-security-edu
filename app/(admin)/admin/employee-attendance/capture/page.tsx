@@ -32,8 +32,8 @@ export default async function CaptureEmployeeAttendancePage({
   const targetDateStr = date || formatDateKey(new Date());
 
   const [directory, daily] = await Promise.all([
-    getEmployeeDirectoryService(),
-    getDailyAttendanceService(targetDateStr),
+    getEmployeeDirectoryService(undefined, session),
+    getDailyAttendanceService(targetDateStr, undefined, session),
   ]);
 
   const initialRecords = (daily?.items || []).map((item: any) => ({

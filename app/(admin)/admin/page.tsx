@@ -195,7 +195,7 @@ export default async function AdminDashboardOverviewPage() {
               title="Manage Developer Forge Mode & Panel Lockdown"
             >
               <Flame className={`w-4 h-4 ${forgeStatus.isEnabled ? 'text-black' : 'text-amber-500'}`} />
-              <span>{forgeStatus.isEnabled ? '🔥 FORGE ON' : 'Forge Mode'}</span>
+              <span>{forgeStatus.isEnabled ? ' FORGE ON' : 'Forge Mode'}</span>
             </button>
           </Link>
 

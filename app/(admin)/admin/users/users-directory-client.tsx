@@ -34,6 +34,8 @@ import {
 } from '@/components/ui/dialog';
 import { RoleType } from '@prisma/client';
 
+export type UserClassification = 'STAFF_OPERATIONAL' | 'NON_STAFF' | 'TESTING';
+
 export interface UserRecord {
   id: string;
   name: string;
@@ -50,6 +52,7 @@ export interface UserRecord {
   designation?: string | null;
   employeeStatus?: string | null;
   attendanceEligible?: boolean;
+  classification?: UserClassification;
 }
 
 export interface UserMetrics {
@@ -59,6 +62,9 @@ export interface UserMetrics {
   staff: number;
   securityAdmins: number;
   superAdmins: number;
+  staffOperational?: number;
+  nonStaff?: number;
+  testingPhase?: number;
 }
 
 interface BatchOption {
@@ -95,6 +101,7 @@ export function UsersDirectoryClient({
 }: UsersDirectoryClientProps) {
   const [users, setUsers] = useState<UserRecord[]>(initialUsers);
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
+  const [classificationFilter, setClassificationFilter] = useState<'ALL' | UserClassification>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -133,6 +140,7 @@ export function UsersDirectoryClient({
     department: '',
     designation: '',
     attendanceEligible: true,
+    classification: 'STAFF_OPERATIONAL' as UserClassification,
     newPasskey: '',
     newSecretKey: '',
     dispatchUpdatedCredentials: false,
@@ -192,6 +200,12 @@ export function UsersDirectoryClient({
     if (activeTab === 'STAFF' && !['ACADEMIC_ADMIN', 'CONTENT_MANAGER', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(u.role)) return false;
     if (activeTab === 'SECURITY_ADMIN' && u.role !== 'SECURITY_ADMIN') return false;
     if (activeTab === 'SUPER_ADMIN' && u.role !== 'SUPER_ADMIN') return false;
+
+    // Filter by Operational Work Mode
+    if (classificationFilter !== 'ALL') {
+      const userClass = u.classification || (u.role === 'STUDENT' ? 'NON_STAFF' : 'STAFF_OPERATIONAL');
+      if (userClass !== classificationFilter) return false;
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -346,6 +360,7 @@ export function UsersDirectoryClient({
       department: user.department || '',
       designation: user.designation || '',
       attendanceEligible: user.attendanceEligible !== false,
+      classification: user.classification || (user.role === 'STUDENT' ? 'NON_STAFF' : 'STAFF_OPERATIONAL'),
       newPasskey: '',
       newSecretKey: '',
       dispatchUpdatedCredentials: false,
@@ -374,6 +389,7 @@ export function UsersDirectoryClient({
             department: editFormData.department || undefined,
             designation: editFormData.designation || undefined,
             attendanceEligible: editFormData.attendanceEligible,
+            classification: editFormData.classification,
             newPasskey: editFormData.newPasskey || undefined,
             newSecretKey: editFormData.newSecretKey || undefined,
             dispatchUpdatedCredentials: editFormData.dispatchUpdatedCredentials,
@@ -400,7 +416,15 @@ export function UsersDirectoryClient({
                     department: editFormData.department || u.department,
                     designation: editFormData.designation || u.designation,
                     attendanceEligible: editFormData.attendanceEligible,
-                    employeeStatus: editFormData.isActive ? 'ACTIVE' : 'INACTIVE',
+                    classification: editFormData.classification,
+                    employeeStatus:
+                      editFormData.classification === 'TESTING'
+                        ? 'TESTING'
+                        : editFormData.classification === 'NON_STAFF'
+                        ? 'NON_STAFF'
+                        : editFormData.isActive
+                        ? 'ACTIVE'
+                        : 'INACTIVE',
                   }
                 : u
             )
@@ -412,6 +436,60 @@ export function UsersDirectoryClient({
         }
       } catch (err: any) {
         showToast(err?.message || 'Network error while updating user.', 'error');
+      }
+    });
+  };
+
+  // Change User Classification (Staff Work / Non-Staff / Testing Phase)
+  const handleSetClassification = async (
+    userId: string,
+    nextClassification: UserClassification
+  ) => {
+    startTransition(async () => {
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'set-classification',
+            userId,
+            classification: nextClassification,
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === userId
+                ? {
+                    ...u,
+                    classification: nextClassification,
+                    employeeStatus:
+                      nextClassification === 'TESTING'
+                        ? 'TESTING'
+                        : nextClassification === 'NON_STAFF'
+                        ? 'NON_STAFF'
+                        : 'ACTIVE',
+                    attendanceEligible: nextClassification !== 'NON_STAFF',
+                  }
+                : u
+            )
+          );
+          showToast(
+            `Operational classification set to ${
+              nextClassification === 'STAFF_OPERATIONAL'
+                ? '🏢 Staff-Oriented Work'
+                : nextClassification === 'NON_STAFF'
+                ? '🎓 Non-Staff (Learner/Guest)'
+                : '🧪 Testing Phase'
+            }.`,
+            'success'
+          );
+        } else {
+          showToast(data.error || 'Failed to update classification', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Error updating classification', 'error');
       }
     });
   };
@@ -668,20 +746,80 @@ export function UsersDirectoryClient({
       </div>
 
       {/* Search and Filters */}
-      <div className="p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-xs">
-        <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search users by name, email, TS-ID, or role..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white transition-colors"
-          />
+      <div className="p-4 rounded-xl bg-white border border-slate-200 flex flex-col gap-3 shadow-xs">
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search users by name, email, TS-ID, or role..."
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 text-xs rounded-xl focus:outline-none focus:border-violet-500 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-slate-500 whitespace-nowrap">
+            Showing <strong className="text-slate-900">{filteredUsers.length}</strong> of {users.length} accounts
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 whitespace-nowrap">
-          Showing <strong className="text-slate-900">{filteredUsers.length}</strong> of {users.length} accounts
+        {/* Operational Mode Filter Tabs */}
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 flex-wrap">
+          <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mr-1">Work Mode:</span>
+          <button
+            type="button"
+            onClick={() => setClassificationFilter('ALL')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+              classificationFilter === 'ALL'
+                ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            All Modes ({users.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setClassificationFilter('STAFF_OPERATIONAL')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+              classificationFilter === 'STAFF_OPERATIONAL'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+            }`}
+          >
+            <span>🏢 Staff-Oriented Work</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">
+              {users.filter((u) => (u.classification || (u.role === 'STUDENT' ? 'NON_STAFF' : 'STAFF_OPERATIONAL')) === 'STAFF_OPERATIONAL').length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setClassificationFilter('NON_STAFF')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+              classificationFilter === 'NON_STAFF'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                : 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
+            }`}
+          >
+            <span>🎓 Non-Staff (Learners/Guests)</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">
+              {users.filter((u) => (u.classification || (u.role === 'STUDENT' ? 'NON_STAFF' : 'STAFF_OPERATIONAL')) === 'NON_STAFF').length}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setClassificationFilter('TESTING')}
+            className={`px-3 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+              classificationFilter === 'TESTING'
+                ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+                : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
+            }`}
+          >
+            <span>🧪 Testing Phase</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-white/20 text-[10px]">
+              {users.filter((u) => u.classification === 'TESTING').length}
+            </span>
+          </button>
         </div>
       </div>
 
@@ -695,6 +833,7 @@ export function UsersDirectoryClient({
                 <th className="p-4">Email &amp; Contact</th>
                 <th className="p-4">Role</th>
                 <th className="p-4">TS-ID</th>
+                <th className="p-4 text-center">Operational Mode</th>
                 <th className="p-4 text-center">Account Status</th>
                 <th className="p-4 text-center">Dashboard Access</th>
                 <th className="p-4">Work Tenure &amp; Joining</th>
@@ -704,7 +843,7 @@ export function UsersDirectoryClient({
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-12 text-center text-slate-400">
+                  <td colSpan={9} className="p-12 text-center text-slate-400">
                     No users matching the active filter or search query.
                   </td>
                 </tr>
@@ -766,6 +905,64 @@ export function UsersDirectoryClient({
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Unassigned</span>
                         )}
+                      </td>
+
+                      <td className="p-4 text-center">
+                        <div className="inline-flex flex-col items-center gap-1">
+                          {u.classification === 'TESTING' ? (
+                            <span className="px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                              <span>🧪 Testing Phase</span>
+                            </span>
+                          ) : u.classification === 'NON_STAFF' ? (
+                            <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                              <span>🎓 Non-Staff</span>
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              <span>🏢 Staff Work</span>
+                            </span>
+                          )}
+
+                          {/* Quick 1-click classification switchers */}
+                          <div className="flex items-center gap-1 mt-0.5">
+                            {u.classification !== 'STAFF_OPERATIONAL' && (
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                onClick={() => handleSetClassification(u.id, 'STAFF_OPERATIONAL')}
+                                title="Move user into Staff-Oriented Work (Attendance & Operations)"
+                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 transition-colors font-medium"
+                              >
+                                +Staff
+                              </button>
+                            )}
+                            {u.classification !== 'NON_STAFF' && (
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                onClick={() => handleSetClassification(u.id, 'NON_STAFF')}
+                                title="Move user to Non-Staff (Learners/Guests - Excluded from employee rosters)"
+                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-slate-600 transition-colors font-medium"
+                              >
+                                +Non-Staff
+                              </button>
+                            )}
+                            {u.classification !== 'TESTING' && (
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                onClick={() => handleSetClassification(u.id, 'TESTING')}
+                                title="Put user in Testing Phase (Quarantined from Akshay Kumar)"
+                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-purple-100 hover:text-purple-800 text-slate-600 transition-colors font-medium"
+                              >
+                                +Testing
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </td>
 
                       <td className="p-4 text-center">
@@ -1278,6 +1475,78 @@ export function UsersDirectoryClient({
                   onChange={(e) => setEditFormData({ ...editFormData, designation: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs focus:outline-none focus:border-violet-500"
                 />
+              </div>
+
+              {/* Operational Classification Mode */}
+              <div className="space-y-1.5 pt-1">
+                <label className="text-slate-700 text-[11px] font-bold flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-violet-600" />
+                  <span>Operational Work Mode &amp; Classification</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditFormData({
+                        ...editFormData,
+                        classification: 'STAFF_OPERATIONAL',
+                        attendanceEligible: true,
+                      })
+                    }
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      editFormData.classification === 'STAFF_OPERATIONAL'
+                        ? 'bg-emerald-50 border-emerald-400 text-emerald-900 ring-2 ring-emerald-500/20'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px]">🏢 Staff Work</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                      Active faculty/staff in daily rosters &amp; attendance
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditFormData({
+                        ...editFormData,
+                        classification: 'NON_STAFF',
+                        attendanceEligible: false,
+                      })
+                    }
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      editFormData.classification === 'NON_STAFF'
+                        ? 'bg-blue-50 border-blue-400 text-blue-900 ring-2 ring-blue-500/20'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px]">🎓 Non-Staff</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                      Learners/guests excluded from employee attendance
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEditFormData({
+                        ...editFormData,
+                        classification: 'TESTING',
+                        attendanceEligible: true,
+                      })
+                    }
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      editFormData.classification === 'TESTING'
+                        ? 'bg-purple-50 border-purple-400 text-purple-900 ring-2 ring-purple-500/20'
+                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="font-bold text-[11px]">🧪 Testing Phase</div>
+                    <div className="text-[10px] text-slate-500 mt-0.5 leading-tight">
+                      Sandbox account quarantined from Akshay Kumar
+                    </div>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-1">

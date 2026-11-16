@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     const department = searchParams.get('department') || undefined;
     const search = searchParams.get('search') || undefined;
 
-    const directory = await getEmployeeDirectoryService({ department, search });
+    const directory = await getEmployeeDirectoryService({ department, search }, session);
     return NextResponse.json({ success: true, count: directory.length, directory });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Internal Server Error';

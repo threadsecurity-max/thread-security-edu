@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const dateStr = searchParams.get('date') || new Date().toISOString();
     const department = searchParams.get('department') || undefined;
 
-    const data = await getDailyAttendanceService(dateStr, department);
+    const data = await getDailyAttendanceService(dateStr, department, session);
     return NextResponse.json({ success: true, data });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Internal Server Error';

@@ -2,6 +2,7 @@ import { prisma } from '@/server/database/prisma';
 import { getSession } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
 import { UsersDirectoryClient, UserRecord } from './users-directory-client';
+import { isAttendanceTestingEmail } from '@/lib/auth/employee-attendance-auth';
 
 export const metadata = {
   title: 'Unified Users Directory | Thread Security Admin',
@@ -62,25 +63,51 @@ export default async function AdminUsersDirectoryPage() {
     }),
   ]);
 
-  const users: UserRecord[] = rawUsers.map((u) => ({
-    id: u.id,
-    name: u.name,
-    email: u.email,
-    role: u.role,
-    isActive: u.isActive,
-    isDashboardAccessGranted: u.isDashboardAccessGranted,
-    tsId: u.tsIdentity?.tsId || null,
-    phone: u.studentProfile?.phone || null,
-    batchId: u.studentProfile?.batchId || null,
-    createdAt: u.createdAt.toISOString(),
-    joiningDate: u.employeeProfile?.joiningDate
-      ? u.employeeProfile.joiningDate.toISOString()
-      : u.createdAt.toISOString(),
-    department: u.employeeProfile?.department || null,
-    designation: u.employeeProfile?.designation || null,
-    employeeStatus: u.employeeProfile?.status || (u.isActive ? 'ACTIVE' : 'INACTIVE'),
-    attendanceEligible: u.employeeProfile?.attendanceEligible ?? u.isActive,
-  }));
+  const users: UserRecord[] = rawUsers.map((u) => {
+    const isTesting =
+      isAttendanceTestingEmail(u.email) ||
+      u.employeeProfile?.status === 'TESTING';
+
+    let classification: 'STAFF_OPERATIONAL' | 'NON_STAFF' | 'TESTING' = 'STAFF_OPERATIONAL';
+    if (isTesting) {
+      classification = 'TESTING';
+    } else if (
+      u.role === 'STUDENT' ||
+      u.employeeProfile?.status === 'NON_STAFF' ||
+      u.employeeProfile?.attendanceEligible === false
+    ) {
+      classification = 'NON_STAFF';
+    } else {
+      classification = 'STAFF_OPERATIONAL';
+    }
+
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      isActive: u.isActive,
+      isDashboardAccessGranted: u.isDashboardAccessGranted,
+      tsId: u.tsIdentity?.tsId || null,
+      phone: u.studentProfile?.phone || null,
+      batchId: u.studentProfile?.batchId || null,
+      createdAt: u.createdAt.toISOString(),
+      joiningDate: u.employeeProfile?.joiningDate
+        ? u.employeeProfile.joiningDate.toISOString()
+        : u.createdAt.toISOString(),
+      department: u.employeeProfile?.department || null,
+      designation: u.employeeProfile?.designation || null,
+      employeeStatus: u.employeeProfile?.status || (u.isActive ? 'ACTIVE' : 'INACTIVE'),
+      attendanceEligible: u.employeeProfile?.attendanceEligible ?? u.isActive,
+      classification,
+    };
+  });
+
+  const classificationCounts = {
+    staff: users.filter((u) => u.classification === 'STAFF_OPERATIONAL').length,
+    nonStaff: users.filter((u) => u.classification === 'NON_STAFF').length,
+    testing: users.filter((u) => u.classification === 'TESTING').length,
+  };
 
   const metrics = {
     total: rawUsers.length,
@@ -89,6 +116,9 @@ export default async function AdminUsersDirectoryPage() {
     staff: staffCount,
     securityAdmins: secAdminsCount,
     superAdmins: superAdminsCount,
+    staffOperational: classificationCounts.staff,
+    nonStaff: classificationCounts.nonStaff,
+    testingPhase: classificationCounts.testing,
   };
 
   return (

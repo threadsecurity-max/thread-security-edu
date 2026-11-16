@@ -9,6 +9,7 @@ import {
   deleteUserService,
   toggleStudentDashboardAccessService,
   toggleUserActiveService,
+  updateUserClassificationService,
 } from '@/server/services/admin.service';
 import { StudentTrack } from '@/lib/auth/ts-id';
 import { RoleType } from '@prisma/client';
@@ -155,6 +156,24 @@ export async function PUT(req: NextRequest) {
       revalidatePath('/admin/delegation');
 
       return NextResponse.json({ success: true, user: updated });
+    }
+
+    if (body.action === 'set-classification') {
+      const { userId, classification } = body;
+      if (!userId || !['STAFF_OPERATIONAL', 'NON_STAFF', 'TESTING'].includes(classification)) {
+        return NextResponse.json(
+          { success: false, error: 'Valid userId and classification (STAFF_OPERATIONAL, NON_STAFF, TESTING) are required.' },
+          { status: 400 }
+        );
+      }
+
+      const res = await updateUserClassificationService(userId, classification, session.userId);
+      revalidatePath('/admin');
+      revalidatePath('/admin/users');
+      revalidatePath('/admin/employee-attendance');
+      revalidatePath('/admin/delegation');
+
+      return NextResponse.json({ success: true, ...res });
     }
 
     const { userId, ...updateData } = body;

@@ -287,29 +287,39 @@ export async function getEmployeeDirectoryService(
 ) {
   await syncEmployeeProfilesService();
 
-  const whereUser: any = {
-    role: { not: 'STUDENT' },
-  };
+  const andConditions: any[] = [
+    { role: { not: 'STUDENT' } },
+    {
+      OR: [
+        { employeeProfile: null },
+        { employeeProfile: { status: { not: 'NON_STAFF' } } },
+      ],
+    },
+  ];
 
   if (filters?.search) {
     const s = filters.search.trim();
-    whereUser.OR = [
-      { name: { contains: s, mode: 'insensitive' } },
-      { email: { contains: s, mode: 'insensitive' } },
-      { employeeProfile: { employeeId: { contains: s, mode: 'insensitive' } } },
-      { employeeProfile: { department: { contains: s, mode: 'insensitive' } } },
-      { employeeProfile: { designation: { contains: s, mode: 'insensitive' } } },
-    ];
+    andConditions.push({
+      OR: [
+        { name: { contains: s, mode: 'insensitive' } },
+        { email: { contains: s, mode: 'insensitive' } },
+        { employeeProfile: { employeeId: { contains: s, mode: 'insensitive' } } },
+        { employeeProfile: { department: { contains: s, mode: 'insensitive' } } },
+        { employeeProfile: { designation: { contains: s, mode: 'insensitive' } } },
+      ],
+    });
   }
 
   if (filters?.department && filters.department !== 'ALL') {
-    whereUser.employeeProfile = {
-      department: filters.department,
-    };
+    andConditions.push({
+      employeeProfile: {
+        department: filters.department,
+      },
+    });
   }
 
   const employees = await prisma.user.findMany({
-    where: whereUser,
+    where: { AND: andConditions },
     select: {
       id: true,
       name: true,
@@ -345,7 +355,7 @@ export async function getEmployeeDirectoryService(
       absent,
     });
 
-    const isTestingUser = isAttendanceTestingEmail(emp.email);
+    const isTestingUser = isAttendanceTestingEmail(emp.email) || emp.employeeProfile?.status === 'TESTING';
 
     return {
       id: emp.id,

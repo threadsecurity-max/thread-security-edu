@@ -28,7 +28,7 @@ export default async function EmployeeAttendanceDashboardPage() {
 
   const [overview, daily] = await Promise.all([
     getAttendanceAnalyticsOverviewService(todayStr).catch(() => null),
-    getDailyAttendanceService(todayStr).catch(() => null),
+    getDailyAttendanceService(todayStr, undefined, session).catch(() => null),
   ]);
 
   return (

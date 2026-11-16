@@ -121,7 +121,7 @@ export function AdminForgeControlClient({ initialStatus }: AdminForgeControlProp
               isEnabled ? 'text-amber-400' : 'text-emerald-400'
             }`}
           >
-            {isEnabled ? '🔥 FORGE ON' : '🛡️ DOORS OPEN'}
+            {isEnabled ? ' FORGE ON' : '🛡️ DOORS OPEN'}
           </div>
           <button
             type="button"

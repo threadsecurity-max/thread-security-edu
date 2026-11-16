@@ -1111,6 +1111,8 @@ export async function createUserService({
   };
 }
 
+export type UserClassification = 'STAFF_OPERATIONAL' | 'NON_STAFF' | 'TESTING';
+
 export interface UpdateUserInput {
   name?: string;
   email?: string;
@@ -1122,6 +1124,7 @@ export interface UpdateUserInput {
   department?: string;
   designation?: string;
   attendanceEligible?: boolean;
+  classification?: UserClassification;
   newPasskey?: string;
   newSecretKey?: string;
   dispatchUpdatedCredentials?: boolean;
@@ -1186,6 +1189,63 @@ export async function toggleUserActiveService(userId: string, isActive: boolean,
   });
 
   return updatedUser;
+}
+
+export async function updateUserClassificationService(
+  userId: string,
+  classification: UserClassification,
+  actorId?: string
+) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { employeeProfile: true, tsIdentity: true },
+  });
+
+  if (!user) {
+    throw new Error('User account not found.');
+  }
+
+  const status =
+    classification === 'TESTING'
+      ? 'TESTING'
+      : classification === 'NON_STAFF'
+      ? 'NON_STAFF'
+      : 'ACTIVE';
+
+  const attendanceEligible = classification === 'STAFF_OPERATIONAL' || classification === 'TESTING';
+
+  let empProfile = await prisma.employeeProfile.findUnique({ where: { userId } });
+  if (empProfile) {
+    empProfile = await prisma.employeeProfile.update({
+      where: { userId },
+      data: {
+        status,
+        attendanceEligible,
+      },
+    });
+  } else {
+    empProfile = await prisma.employeeProfile.create({
+      data: {
+        userId,
+        employeeId: user.tsIdentity?.tsId || `TSE-EMP-${userId.slice(-4).toUpperCase()}`,
+        department: classification === 'NON_STAFF' ? 'External / Learner' : 'Academics & Operations',
+        designation: classification === 'NON_STAFF' ? 'Non-Staff Learner' : 'Staff Associate',
+        joiningDate: user.createdAt,
+        status,
+        attendanceEligible,
+      },
+    });
+  }
+
+  await logAuditEvent({
+    actorId,
+    action: 'USER_CLASSIFICATION_UPDATED',
+    entity: 'USER',
+    entityId: userId,
+    details: `Updated operational classification for ${user.name} (${user.email}) to ${classification} (status: ${status}, attendanceEligible: ${attendanceEligible}).`,
+  });
+
+  return { user, employeeProfile: empProfile, classification };
 }
 
 export async function updateUserService(userId: string, data: UpdateUserInput) {
@@ -1262,19 +1322,26 @@ export async function updateUserService(userId: string, data: UpdateUserInput) {
     });
   }
 
-  // Sync EmployeeProfile if tenure/department/status was modified
+  // Sync EmployeeProfile if tenure/department/status/classification was modified
   if (
     data.joiningDate ||
     data.department ||
     data.designation ||
+    data.classification ||
     typeof data.isActive === 'boolean' ||
     typeof data.attendanceEligible === 'boolean'
   ) {
     try {
       const existingEmp = await prisma.employeeProfile.findUnique({ where: { userId } });
-      const activeStatus = data.isActive === false ? 'INACTIVE' : (existingEmp?.status || 'ACTIVE');
+      let activeStatus = data.isActive === false ? 'INACTIVE' : (existingEmp?.status || 'ACTIVE');
+      if (data.classification === 'TESTING') activeStatus = 'TESTING';
+      else if (data.classification === 'NON_STAFF') activeStatus = 'NON_STAFF';
+      else if (data.classification === 'STAFF_OPERATIONAL') activeStatus = 'ACTIVE';
+
       const attendanceEligible =
-        typeof data.attendanceEligible === 'boolean'
+        data.classification === 'NON_STAFF'
+          ? false
+          : typeof data.attendanceEligible === 'boolean'
           ? data.attendanceEligible
           : typeof data.isActive === 'boolean'
           ? data.isActive
