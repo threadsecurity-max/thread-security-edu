@@ -1398,23 +1398,163 @@ export async function deleteUserService(userId: string, currentAdminUserId?: str
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { tsIdentity: true },
+    include: {
+      tsIdentity: true,
+      mentorProfile: true,
+      studentProfile: true,
+      employeeProfile: true,
+    },
   });
 
   if (!user) {
     throw new Error('User account not found.');
   }
 
-  if (user.email === 'threadsecuritydeveloper@gmail.com') {
-    throw new Error('Protected system administrator account cannot be deleted.');
+  const protectedEmails = [
+    'threadsecuritydeveloper@gmail.com',
+    'threadsecurity@gmail.com',
+  ];
+  if (protectedEmails.includes(user.email.toLowerCase())) {
+    throw new Error('Security Restriction: Primary Super Administrator account is protected and cannot be deleted.');
   }
 
   const userName = user.name;
   const userEmail = user.email;
   const tsId = user.tsIdentity?.tsId || 'N/A';
 
-  await prisma.user.delete({
-    where: { id: userId },
+  // Perform cascading clean-up across all LMS, Mentorship, Attendance, and Staff dependencies
+  await prisma.$transaction(async (tx: any) => {
+    // 1. Mentor profile dependent unlinking
+    if (user.mentorProfile) {
+      const mentorProfileId = user.mentorProfile.id;
+
+      // Unassign students from this mentor
+      await tx.studentProfile.updateMany({
+        where: { assignedMentorId: mentorProfileId },
+        data: { assignedMentorId: null },
+      });
+
+      // Unlink courses
+      await tx.course.updateMany({
+        where: { mentorId: mentorProfileId },
+        data: { mentorId: null },
+      });
+
+      // Unlink batches
+      await tx.batch.updateMany({
+        where: { mentorId: mentorProfileId },
+        data: { mentorId: null },
+      });
+
+      // Reassign blogs authored by this mentor to an alternate mentor so publications remain intact
+      const otherMentor = await tx.mentorProfile.findFirst({
+        where: { id: { not: mentorProfileId } },
+        select: { id: true },
+      });
+      if (otherMentor) {
+        await tx.blog.updateMany({
+          where: { authorId: mentorProfileId },
+          data: { authorId: otherMentor.id },
+        });
+      }
+
+      // Delete mentor assignments & correction requests
+      await tx.assignment.deleteMany({ where: { mentorId: mentorProfileId } });
+      await tx.batchAttendanceCorrectionRequest.deleteMany({ where: { mentorId: mentorProfileId } });
+      await tx.mentorProfile.delete({ where: { id: mentorProfileId } });
+    }
+
+    // 2. Student profile clean-up
+    if (user.studentProfile) {
+      const studentProfileId = user.studentProfile.id;
+      await tx.attendanceRecord.deleteMany({ where: { studentId: studentProfileId } });
+      await tx.batchAttendanceCorrectionRequest.deleteMany({ where: { studentId: studentProfileId } });
+      await tx.broadcastDelivery.deleteMany({ where: { studentId: studentProfileId } });
+      await tx.studentSkill.deleteMany({ where: { studentId: studentProfileId } });
+      await tx.studentProfile.delete({ where: { id: studentProfileId } });
+    }
+
+    // 3. Employee & Attendance records
+    await tx.employeeAttendanceAuditLog.deleteMany({
+      where: {
+        OR: [
+          { modifiedById: userId },
+          { attendance: { employeeId: userId } },
+        ],
+      },
+    });
+
+    await tx.dailyAttendanceRoster.deleteMany({
+      where: {
+        OR: [
+          { employeeId: userId },
+          { publishedById: userId },
+        ],
+      },
+    });
+
+    await tx.employeeAttendance.deleteMany({
+      where: {
+        OR: [
+          { employeeId: userId },
+          { markedById: userId },
+        ],
+      },
+    });
+
+    if (user.employeeProfile) {
+      await tx.employeeProfile.deleteMany({ where: { userId } });
+    }
+
+    // 4. Blog revisions created by this user
+    try {
+      await tx.blogRevision.deleteMany({ where: { changedById: userId } });
+    } catch {}
+
+    // 5. Delegation Team & Memberships
+    try {
+      await tx.delegationEdge.deleteMany({
+        where: {
+          OR: [{ sourceUserId: userId }, { targetUserId: userId }],
+        },
+      });
+      await tx.delegationMember.deleteMany({ where: { userId } });
+      await tx.delegationTeam.deleteMany({ where: { leadId: userId } });
+    } catch {}
+
+    // 6. Admin Tasks, Docket Items, Messages, and Conversations
+    try {
+      await tx.adminTask.deleteMany({
+        where: { OR: [{ assigneeId: userId }, { createdById: userId }] },
+      });
+      await tx.todaysDocketItem.deleteMany({
+        where: { OR: [{ assignerId: userId }, { assigneeId: userId }] },
+      });
+      await tx.adminMessage.deleteMany({ where: { senderId: userId } });
+      await tx.adminConversation.deleteMany({
+        where: { OR: [{ participantAId: userId }, { participantBId: userId }] },
+      });
+    } catch {}
+
+    // 7. Student Invoices, Notifications, Certificates, Attempts & Submissions
+    try {
+      await tx.studentInvoice.deleteMany({ where: { createdById: userId } });
+      await tx.notification.deleteMany({ where: { userId } });
+      await tx.certificate.deleteMany({ where: { userId } });
+      await tx.progress.deleteMany({ where: { userId } });
+      await tx.labAttempt.deleteMany({ where: { userId } });
+      await tx.assessmentAttempt.deleteMany({ where: { userId } });
+      await tx.testAttempt.deleteMany({ where: { userId } });
+      await tx.assignmentSubmission.deleteMany({ where: { studentId: userId } });
+      await tx.enrollment.deleteMany({ where: { userId } });
+      await tx.tSIdentity.deleteMany({ where: { userId } });
+      await tx.mentorIdentity.deleteMany({ where: { userId } });
+    } catch {}
+
+    // 8. Finally delete User record cleanly
+    await tx.user.delete({
+      where: { id: userId },
+    });
   });
 
   await logAuditEvent({
