@@ -25,6 +25,9 @@ import {
   KeyRound,
   Layers,
   Clock,
+  RotateCcw,
+  Undo2,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Dialog,
@@ -35,6 +38,7 @@ import {
 import { RoleType } from '@prisma/client';
 
 export type UserClassification = 'STAFF_OPERATIONAL' | 'NON_STAFF' | 'TESTING';
+export type ListFilter = 'ALL' | 'ACTIVE' | 'INACTIVE' | 'LOCKED' | 'TRASH';
 
 export interface UserRecord {
   id: string;
@@ -53,10 +57,16 @@ export interface UserRecord {
   employeeStatus?: string | null;
   attendanceEligible?: boolean;
   classification?: UserClassification;
+  isTrashed?: boolean;
+  trashedAt?: string | null;
 }
 
 export interface UserMetrics {
   total: number;
+  active?: number;
+  inactive?: number;
+  locked?: number;
+  trash?: number;
   students: number;
   mentors: number;
   staff: number;
@@ -100,6 +110,7 @@ export function UsersDirectoryClient({
   defaultEnvKeys,
 }: UsersDirectoryClientProps) {
   const [users, setUsers] = useState<UserRecord[]>(initialUsers);
+  const [listFilter, setListFilter] = useState<ListFilter>('ALL');
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
   const [classificationFilter, setClassificationFilter] = useState<'ALL' | UserClassification>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,7 +120,8 @@ export function UsersDirectoryClient({
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
-  const [deletingUser, setDeletingUser] = useState<UserRecord | null>(null);
+  const [trashingUser, setTrashingUser] = useState<UserRecord | null>(null);
+  const [purgingUser, setPurgingUser] = useState<UserRecord | null>(null);
   const [dispatchingUser, setDispatchingUser] = useState<UserRecord | null>(null);
 
   // Create User Form State
@@ -193,20 +205,32 @@ export function UsersDirectoryClient({
     };
   };
 
-  // Filtered Users
+  // Filtered Users (Database-backed separate list lifecycle + role + mode + search)
   const filteredUsers = users.filter((u) => {
+    // 1. Separate List Lifecycle
+    if (listFilter === 'TRASH') {
+      if (!u.isTrashed) return false;
+    } else {
+      if (u.isTrashed) return false;
+      if (listFilter === 'ACTIVE' && !u.isActive) return false;
+      if (listFilter === 'INACTIVE' && u.isActive) return false;
+      if (listFilter === 'LOCKED' && u.isDashboardAccessGranted) return false;
+    }
+
+    // 2. Role Filter Tab
     if (activeTab === 'STUDENT' && u.role !== 'STUDENT') return false;
     if (activeTab === 'MENTOR' && u.role !== 'MENTOR') return false;
     if (activeTab === 'STAFF' && !['ACADEMIC_ADMIN', 'CONTENT_MANAGER', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(u.role)) return false;
     if (activeTab === 'SECURITY_ADMIN' && u.role !== 'SECURITY_ADMIN') return false;
     if (activeTab === 'SUPER_ADMIN' && u.role !== 'SUPER_ADMIN') return false;
 
-    // Filter by Operational Work Mode
+    // 3. Operational Work Mode
     if (classificationFilter !== 'ALL') {
       const userClass = u.classification || (u.role === 'STUDENT' ? 'NON_STAFF' : 'STAFF_OPERATIONAL');
       if (userClass !== classificationFilter) return false;
     }
 
+    // 4. Search Query
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchName = u.name?.toLowerCase().includes(q);
@@ -242,6 +266,12 @@ export function UsersDirectoryClient({
       return {
         secretKey: defaultEnvKeys?.adminSecretKey || 'TSE-ADMIN-8080',
         passkey: defaultEnvKeys?.adminPasskey || 'ThreadSec@789',
+      };
+    }
+    if (targetRole === 'STAFF_EXECUTIVE' || targetRole === 'STAFF_JUNIOR') {
+      return {
+        secretKey: 'TSE-STF-8426',
+        passkey: 'StaffThread6248',
       };
     }
     if (targetRole === 'MENTOR') {
@@ -478,10 +508,10 @@ export function UsersDirectoryClient({
           showToast(
             `Operational classification set to ${
               nextClassification === 'STAFF_OPERATIONAL'
-                ? '🏢 Staff-Oriented Work'
+                ? 'Staff-Oriented'
                 : nextClassification === 'NON_STAFF'
-                ? '🎓 Non-Staff (Learner/Guest)'
-                : '🧪 Testing Phase'
+                ? 'Non-Staff (Learner/Guest)'
+                : 'Testing Account'
             }.`,
             'success'
           );
@@ -540,25 +570,111 @@ export function UsersDirectoryClient({
     });
   };
 
-  // Delete User via REST API
-  const handleDeleteUser = async () => {
-    if (!deletingUser) return;
+  // Move User to Trash Bin (Soft Delete)
+  const handleMoveToTrashSubmit = async () => {
+    if (!trashingUser) return;
     startTransition(async () => {
       try {
-        const res = await fetch(`/api/admin/users?id=${encodeURIComponent(deletingUser.id)}`, {
-          method: 'DELETE',
+        const res = await fetch('/api/admin/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'trash-user',
+            userId: trashingUser.id,
+          }),
         });
         const data = await res.json();
 
         if (data.success) {
-          setUsers((prev) => prev.filter((u) => u.id !== deletingUser.id));
-          setDeletingUser(null);
-          showToast(`User ${deletingUser.name} deleted successfully.`, 'success');
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === trashingUser.id
+                ? {
+                    ...u,
+                    isTrashed: true,
+                    trashedAt: data.trashedAt || new Date().toISOString(),
+                    isActive: false,
+                    isDashboardAccessGranted: false,
+                    employeeStatus: 'TRASH',
+                    attendanceEligible: false,
+                  }
+                : u
+            )
+          );
+          setTrashingUser(null);
+          showToast(
+            `Account for ${trashingUser.name} moved to Trash Bin. You can restore or permanently purge it from the Trash tab.`,
+            'success'
+          );
         } else {
-          showToast(data.error || 'Failed to delete user.', 'error');
+          showToast(data.error || 'Failed to move user to trash.', 'error');
         }
       } catch (err: any) {
-        showToast(err?.message || 'Network error while deleting user.', 'error');
+        showToast(err?.message || 'Network error while moving user to trash.', 'error');
+      }
+    });
+  };
+
+  // Restore User from Trash Bin via REST API
+  const handleRestoreUser = async (user: UserRecord) => {
+    startTransition(async () => {
+      try {
+        const res = await fetch('/api/admin/users', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'restore-user',
+            userId: user.id,
+          }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === user.id
+                ? {
+                    ...u,
+                    isTrashed: false,
+                    trashedAt: null,
+                    isActive: true,
+                    isDashboardAccessGranted: true,
+                    employeeStatus: u.role === 'STUDENT' ? 'NON_STAFF' : 'ACTIVE',
+                    attendanceEligible: u.role !== 'STUDENT',
+                  }
+                : u
+            )
+          );
+          showToast(`Account for ${user.name} restored from Trash back to active standing.`, 'success');
+        } else {
+          showToast(data.error || 'Failed to restore user from trash.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while restoring user.', 'error');
+      }
+    });
+  };
+
+  // Permanently Purge User Account via REST API
+  const handlePermanentPurgeSubmit = async () => {
+    if (!purgingUser) return;
+    startTransition(async () => {
+      try {
+        const res = await fetch(
+          `/api/admin/users?id=${encodeURIComponent(purgingUser.id)}&permanent=true`,
+          { method: 'DELETE' }
+        );
+        const data = await res.json();
+
+        if (data.success) {
+          setUsers((prev) => prev.filter((u) => u.id !== purgingUser.id));
+          setPurgingUser(null);
+          showToast(`Account for ${purgingUser.name} permanently purged from system.`, 'success');
+        } else {
+          showToast(data.error || 'Failed to permanently purge user.', 'error');
+        }
+      } catch (err: any) {
+        showToast(err?.message || 'Network error while purging user.', 'error');
       }
     });
   };
@@ -659,6 +775,88 @@ export function UsersDirectoryClient({
         </div>
       )}
 
+      {/* ── LIFECYCLE SEPARATE LISTS TABS (Database Maintained) ── */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-3 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setListFilter('ALL')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-2 ${
+            listFilter === 'ALL'
+              ? 'bg-slate-900 text-white border-slate-900 shadow-sm ring-2 ring-slate-900/20'
+              : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <span>👥 All Users</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${listFilter === 'ALL' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'}`}>
+            {users.filter((u) => !u.isTrashed).length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setListFilter('ACTIVE')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-2 ${
+            listFilter === 'ACTIVE'
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm ring-2 ring-emerald-500/20'
+              : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Active Accounts</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${listFilter === 'ACTIVE' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
+            {users.filter((u) => !u.isTrashed && u.isActive).length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setListFilter('INACTIVE')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-2 ${
+            listFilter === 'INACTIVE'
+              ? 'bg-slate-700 text-white border-slate-700 shadow-sm ring-2 ring-slate-700/20'
+              : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+          }`}
+        >
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+          <span>Inactive Accounts</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${listFilter === 'INACTIVE' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-800'}`}>
+            {users.filter((u) => !u.isTrashed && !u.isActive).length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setListFilter('LOCKED')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-2 ${
+            listFilter === 'LOCKED'
+              ? 'bg-amber-600 text-white border-amber-600 shadow-sm ring-2 ring-amber-500/20'
+              : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+          }`}
+        >
+          <Lock className="w-3.5 h-3.5" />
+          <span>Locked Accounts</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${listFilter === 'LOCKED' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'}`}>
+            {users.filter((u) => !u.isTrashed && !u.isDashboardAccessGranted).length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setListFilter('TRASH')}
+          className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer flex items-center gap-2 sm:ml-auto ${
+            listFilter === 'TRASH'
+              ? 'bg-rose-600 text-white border-rose-600 shadow-sm ring-2 ring-rose-500/30'
+              : 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100'
+          }`}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+          <span>Trash Bin (Recycle Bin)</span>
+          <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${listFilter === 'TRASH' ? 'bg-white/20 text-white' : 'bg-rose-200 text-rose-900'}`}>
+            {users.filter((u) => u.isTrashed).length}
+          </span>
+        </button>
+      </div>
+
       {/* Top Action Bar & Metrics */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5 w-full sm:w-auto flex-1">
@@ -670,8 +868,8 @@ export function UsersDirectoryClient({
                 : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300'
             }`}
           >
-            <div className="text-[10px] font-semibold uppercase opacity-80">All Users</div>
-            <div className="text-xl font-bold mt-0.5">{metrics.total}</div>
+            <div className="text-[10px] font-semibold uppercase opacity-80">All Roles</div>
+            <div className="text-xl font-bold mt-0.5">{users.filter((u) => !u.isTrashed).length}</div>
           </button>
 
           <button
@@ -683,7 +881,7 @@ export function UsersDirectoryClient({
             }`}
           >
             <div className="text-[10px] font-semibold uppercase opacity-80">Students</div>
-            <div className="text-xl font-bold mt-0.5">{metrics.students}</div>
+            <div className="text-xl font-bold mt-0.5">{users.filter((u) => !u.isTrashed && u.role === 'STUDENT').length}</div>
           </button>
 
           <button
@@ -695,7 +893,7 @@ export function UsersDirectoryClient({
             }`}
           >
             <div className="text-[10px] font-semibold uppercase opacity-80">Mentors</div>
-            <div className="text-xl font-bold mt-0.5">{metrics.mentors}</div>
+            <div className="text-xl font-bold mt-0.5">{users.filter((u) => !u.isTrashed && u.role === 'MENTOR').length}</div>
           </button>
 
           <button
@@ -707,7 +905,7 @@ export function UsersDirectoryClient({
             }`}
           >
             <div className="text-[10px] font-semibold uppercase opacity-80">Staff / Ops</div>
-            <div className="text-xl font-bold mt-0.5">{metrics.staff}</div>
+            <div className="text-xl font-bold mt-0.5">{users.filter((u) => !u.isTrashed && ['ACADEMIC_ADMIN', 'CONTENT_MANAGER', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(u.role)).length}</div>
           </button>
 
           <button
@@ -719,7 +917,7 @@ export function UsersDirectoryClient({
             }`}
           >
             <div className="text-[10px] font-semibold uppercase opacity-80">Security</div>
-            <div className="text-xl font-bold mt-0.5">{metrics.securityAdmins}</div>
+            <div className="text-xl font-bold mt-0.5">{users.filter((u) => !u.isTrashed && u.role === 'SECURITY_ADMIN').length}</div>
           </button>
 
           <button
@@ -731,7 +929,7 @@ export function UsersDirectoryClient({
             }`}
           >
             <div className="text-[10px] font-semibold uppercase opacity-80">Super Admins</div>
-            <div className="text-xl font-bold mt-0.5">{metrics.superAdmins}</div>
+            <div className="text-xl font-bold mt-0.5">{users.filter((u) => !u.isTrashed && u.role === 'SUPER_ADMIN').length}</div>
           </button>
         </div>
 
@@ -828,23 +1026,37 @@ export function UsersDirectoryClient({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase text-[11px] font-semibold tracking-wider">
-              <tr>
-                <th className="p-4">User</th>
-                <th className="p-4">Email &amp; Contact</th>
-                <th className="p-4">Role</th>
-                <th className="p-4">TS-ID</th>
-                <th className="p-4 text-center">Operational Mode</th>
-                <th className="p-4 text-center">Account Status</th>
-                <th className="p-4 text-center">Dashboard Access</th>
-                <th className="p-4">Work Tenure &amp; Joining</th>
-                <th className="p-4 text-right">Actions &amp; Creds</th>
-              </tr>
+              {listFilter === 'TRASH' ? (
+                <tr>
+                  <th className="p-4">Quarantined Account</th>
+                  <th className="p-4">Email &amp; Contact</th>
+                  <th className="p-4">Role Standing</th>
+                  <th className="p-4">TS-ID</th>
+                  <th className="p-4 text-center">Lifecycle State</th>
+                  <th className="p-4">Trashed Timestamp</th>
+                  <th className="p-4 text-right">Trash Operations</th>
+                </tr>
+              ) : (
+                <tr>
+                  <th className="p-4">User</th>
+                  <th className="p-4">Email &amp; Contact</th>
+                  <th className="p-4">Role</th>
+                  <th className="p-4">TS-ID</th>
+                  <th className="p-4 text-center">Operational Mode</th>
+                  <th className="p-4 text-center">Account Status</th>
+                  <th className="p-4 text-center">Dashboard Access</th>
+                  <th className="p-4">Work Tenure &amp; Joining</th>
+                  <th className="p-4 text-right">Actions &amp; Creds</th>
+                </tr>
+              )}
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-12 text-center text-slate-400">
-                    No users matching the active filter or search query.
+                  <td colSpan={listFilter === 'TRASH' ? 7 : 9} className="p-12 text-center text-slate-400">
+                    {listFilter === 'TRASH'
+                      ? 'The Trash Bin is empty. No deleted or quarantined accounts.'
+                      : 'No users matching the active filter or search query.'}
                   </td>
                 </tr>
               ) : (
@@ -852,6 +1064,109 @@ export function UsersDirectoryClient({
                   const initial = u.name ? u.name.charAt(0).toUpperCase() : 'U';
                   const isCurrentAdmin = u.id === currentUserId;
                   const isPrimaryRoot = u.email === 'threadsecuritydeveloper@gmail.com';
+
+                  if (listFilter === 'TRASH') {
+                    return (
+                      <tr key={u.id} className="hover:bg-rose-50/20 bg-rose-50/5 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-xs shrink-0">
+                              {initial}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                                <span className="line-through text-slate-500">{u.name}</span>
+                                <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 font-bold">
+                                  Trashed
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-400 font-mono">{u.id}</div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="p-4">
+                          <div className="text-slate-800 flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 text-slate-400" />
+                            <span>{u.email}</span>
+                          </div>
+                          {u.phone && (
+                            <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                              <Phone className="w-3.5 h-3.5 text-slate-400" />
+                              <span>{u.phone}</span>
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="p-4">
+                          <span
+                            className={`inline-block px-2.5 py-0.5 rounded-full border text-[11px] font-semibold ${getRoleBadge(
+                              u.role
+                            )}`}
+                          >
+                            {u.role}
+                          </span>
+                        </td>
+
+                        <td className="p-4">
+                          {u.tsId ? (
+                            <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-600 font-mono text-[11px]">
+                              {u.tsId}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">Unassigned</span>
+                          )}
+                        </td>
+
+                        <td className="p-4 text-center">
+                          <span className="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-bold text-[10px] inline-flex items-center gap-1">
+                            <Trash2 className="w-3 h-3 text-rose-500" />
+                            <span>Quarantined in Trash</span>
+                          </span>
+                        </td>
+
+                        <td className="p-4">
+                          <div className="text-slate-700 font-mono text-[11px]">
+                            {u.trashedAt ? new Date(u.trashedAt).toLocaleString('en-IN', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              hour12: true,
+                            }) : 'Recently Trashed'}
+                          </div>
+                          <div className="text-[10px] text-slate-400">Suspended from operations</div>
+                        </td>
+
+                        <td className="p-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleRestoreUser(u)}
+                              disabled={isPending}
+                              title="Restore account back to active standing"
+                              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Restore Account</span>
+                            </button>
+
+                            {!isCurrentAdmin && !isPrimaryRoot && (
+                              <button
+                                onClick={() => setPurgingUser(u)}
+                                disabled={isPending}
+                                title="Permanently wipe this record from database"
+                                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 text-[11px] font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                                <span>Purge Permanently</span>
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
 
                   return (
                     <tr key={u.id} className="hover:bg-violet-50/20 transition-colors">
@@ -912,17 +1227,17 @@ export function UsersDirectoryClient({
                           {u.classification === 'TESTING' ? (
                             <span className="px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs">
                               <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
-                              <span>🧪 Testing Phase</span>
+                              <span>Testing</span>
                             </span>
                           ) : u.classification === 'NON_STAFF' ? (
                             <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs">
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                              <span>🎓 Non-Staff</span>
+                              <span>Non-Staff</span>
                             </span>
                           ) : (
                             <span className="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px] inline-flex items-center gap-1 shadow-2xs">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                              <span>🏢 Staff Work</span>
+                              <span>Staff Work</span>
                             </span>
                           )}
 
@@ -934,7 +1249,7 @@ export function UsersDirectoryClient({
                                 disabled={isPending}
                                 onClick={() => handleSetClassification(u.id, 'STAFF_OPERATIONAL')}
                                 title="Move user into Staff-Oriented Work (Attendance & Operations)"
-                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 transition-colors font-medium"
+                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-emerald-100 hover:text-emerald-800 text-slate-600 transition-colors font-medium cursor-pointer"
                               >
                                 +Staff
                               </button>
@@ -945,7 +1260,7 @@ export function UsersDirectoryClient({
                                 disabled={isPending}
                                 onClick={() => handleSetClassification(u.id, 'NON_STAFF')}
                                 title="Move user to Non-Staff (Learners/Guests - Excluded from employee rosters)"
-                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-slate-600 transition-colors font-medium"
+                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-blue-100 hover:text-blue-800 text-slate-600 transition-colors font-medium cursor-pointer"
                               >
                                 +Non-Staff
                               </button>
@@ -956,7 +1271,7 @@ export function UsersDirectoryClient({
                                 disabled={isPending}
                                 onClick={() => handleSetClassification(u.id, 'TESTING')}
                                 title="Put user in Testing Phase (Quarantined from Akshay Kumar)"
-                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-purple-100 hover:text-purple-800 text-slate-600 transition-colors font-medium"
+                                className="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 hover:bg-purple-100 hover:text-purple-800 text-slate-600 transition-colors font-medium cursor-pointer"
                               >
                                 +Testing
                               </button>
@@ -1056,11 +1371,11 @@ export function UsersDirectoryClient({
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
 
-                          {/* Delete User Button */}
+                          {/* Move to Trash Button */}
                           {!isCurrentAdmin && !isPrimaryRoot && (
                             <button
-                              onClick={() => setDeletingUser(u)}
-                              title="Delete user account"
+                              onClick={() => setTrashingUser(u)}
+                              title="Move user account to Trash Bin"
                               className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] transition-colors cursor-pointer"
                             >
                               <Trash2 className="w-3.5 h-3.5 text-rose-600" />
@@ -1151,16 +1466,18 @@ export function UsersDirectoryClient({
                 </div>
               </div>
 
-              {/* Step 2: 5 Roles Selection */}
+              {/* Step 2: Role Selection */}
               <div className="space-y-2">
                 <label className="text-slate-700 font-semibold text-[11px] block">
-                  Select Role Assignment (5 Roles)
+                  Select Role Assignment
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
                   {[
                     { role: 'STUDENT', label: 'Student', icon: GraduationCap, desc: 'Candidate learner' },
                     { role: 'MENTOR', label: 'Mentor', icon: Briefcase, desc: 'Faculty & instructor' },
-                    { role: 'ACADEMIC_ADMIN', label: 'Staff / Ops', icon: Layers, desc: 'Academic operations' },
+                    { role: 'STAFF_EXECUTIVE', label: 'Staff Executive', icon: Layers, desc: 'Executive Associate' },
+                    { role: 'STAFF_JUNIOR', label: 'Staff Junior', icon: Layers, desc: 'Junior Technical' },
+                    { role: 'ACADEMIC_ADMIN', label: 'Academic Admin', icon: Layers, desc: 'Academic operations' },
                     { role: 'SECURITY_ADMIN', label: 'Security Admin', icon: ShieldAlert, desc: 'SOC & security vault' },
                     { role: 'SUPER_ADMIN', label: 'Super Admin', icon: Crown, desc: 'Master clearance' },
                   ].map(({ role, label, icon: Icon, desc }) => {
@@ -1616,46 +1933,101 @@ export function UsersDirectoryClient({
         </Dialog>
       )}
 
-      {/* ── DELETE USER CONFIRMATION MODAL ── */}
-      {deletingUser && (
-        <Dialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
+      {/* ── MOVE TO TRASH CONFIRMATION MODAL (Soft Delete) ── */}
+      {trashingUser && (
+        <Dialog open={!!trashingUser} onOpenChange={() => setTrashingUser(null)}>
           <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 font-sans text-xs">
             <DialogHeader className="border-b border-slate-100 pb-3">
-              <DialogTitle className="text-base font-bold text-rose-700 flex items-center gap-2">
-                <Trash2 className="w-4 h-4 text-rose-600" />
-                Delete User Account
+              <DialogTitle className="text-base font-bold text-amber-700 flex items-center gap-2">
+                <Trash2 className="w-4 h-4 text-amber-600" />
+                Move User to Trash Bin
               </DialogTitle>
             </DialogHeader>
 
             <div className="space-y-3 pt-2">
               <p className="text-slate-600 leading-relaxed">
-                Are you sure you want to permanently delete the account for{' '}
-                <strong className="text-slate-900">{deletingUser.name}</strong> ({deletingUser.email})?
+                Are you sure you want to move the account for{' '}
+                <strong className="text-slate-900">{trashingUser.name}</strong> ({trashingUser.email}) to the Trash Bin?
               </p>
 
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 space-y-1 text-[11px]">
-                <span className="font-bold block">Irreversible Security Action:</span>
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 space-y-1 text-[11px]">
+                <span className="font-bold block flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+                  Quarantined Lifecycle State:
+                </span>
                 <p>
-                  This will permanently delete this user’s identity records, profile data, and revoke their platform clearance immediately.
+                  This account will be deactivated, excluded from active attendance rosters, and locked out of the dashboard.
+                  All historical database records, course assignments, and logs remain completely intact and can be restored anytime from the Trash Bin tab.
                 </p>
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setDeletingUser(null)}
+                  onClick={() => setTrashingUser(null)}
                   className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={handleDeleteUser}
+                  onClick={handleMoveToTrashSubmit}
+                  disabled={isPending}
+                  className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isPending ? 'Moving to Trash...' : 'Move to Trash Bin'}</span>
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* ── PERMANENTLY PURGE USER CONFIRMATION MODAL (Hard Cascading Delete) ── */}
+      {purgingUser && (
+        <Dialog open={!!purgingUser} onOpenChange={() => setPurgingUser(null)}>
+          <DialogContent className="max-w-md bg-white border border-slate-200 text-slate-900 shadow-xl rounded-2xl p-6 font-sans text-xs">
+            <DialogHeader className="border-b border-slate-100 pb-3">
+              <DialogTitle className="text-base font-bold text-rose-700 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
+                Permanently Purge User Account
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-3 pt-2">
+              <p className="text-slate-600 leading-relaxed">
+                DANGER: You are about to permanently purge{' '}
+                <strong className="text-slate-900">{purgingUser.name}</strong> ({purgingUser.email}) from the database.
+              </p>
+
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 space-y-1 text-[11px]">
+                <span className="font-bold block flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                  Irreversible Destruction of Records:
+                </span>
+                <p>
+                  This executes a full cascading purge unlinking and deleting all dependent student profiles, employee profiles, attendance histories, audit records, and security identities.
+                  This action CANNOT be undone.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setPurgingUser(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePermanentPurgeSubmit}
                   disabled={isPending}
                   className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs shadow-xs cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>{isPending ? 'Deleting Account...' : 'Confirm Delete'}</span>
+                  <span>{isPending ? 'Purging Database...' : 'Permanently Purge User'}</span>
                 </button>
               </div>
             </div>

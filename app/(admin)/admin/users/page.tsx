@@ -81,6 +81,13 @@ export default async function AdminUsersDirectoryPage() {
       classification = 'STAFF_OPERATIONAL';
     }
 
+    const isTrashed =
+      Boolean(u.approvedBy?.startsWith('TRASHED:')) ||
+      u.employeeProfile?.status === 'TRASH';
+    const trashedAt = u.approvedBy?.startsWith('TRASHED:')
+      ? u.approvedBy.replace('TRASHED:', '')
+      : null;
+
     return {
       id: u.id,
       name: u.name,
@@ -100,22 +107,33 @@ export default async function AdminUsersDirectoryPage() {
       employeeStatus: u.employeeProfile?.status || (u.isActive ? 'ACTIVE' : 'INACTIVE'),
       attendanceEligible: u.employeeProfile?.attendanceEligible ?? u.isActive,
       classification,
+      isTrashed,
+      trashedAt,
     };
   });
 
+  const nonTrashedUsers = users.filter((u) => !u.isTrashed);
+  const trashedUsers = users.filter((u) => u.isTrashed);
+
   const classificationCounts = {
-    staff: users.filter((u) => u.classification === 'STAFF_OPERATIONAL').length,
-    nonStaff: users.filter((u) => u.classification === 'NON_STAFF').length,
-    testing: users.filter((u) => u.classification === 'TESTING').length,
+    staff: nonTrashedUsers.filter((u) => u.classification === 'STAFF_OPERATIONAL').length,
+    nonStaff: nonTrashedUsers.filter((u) => u.classification === 'NON_STAFF').length,
+    testing: nonTrashedUsers.filter((u) => u.classification === 'TESTING').length,
   };
 
   const metrics = {
-    total: rawUsers.length,
-    students: studentsCount,
-    mentors: mentorsCount,
-    staff: staffCount,
-    securityAdmins: secAdminsCount,
-    superAdmins: superAdminsCount,
+    total: nonTrashedUsers.length,
+    active: nonTrashedUsers.filter((u) => u.isActive).length,
+    inactive: nonTrashedUsers.filter((u) => !u.isActive).length,
+    locked: nonTrashedUsers.filter((u) => !u.isDashboardAccessGranted).length,
+    trash: trashedUsers.length,
+    students: nonTrashedUsers.filter((u) => u.role === 'STUDENT').length,
+    mentors: nonTrashedUsers.filter((u) => u.role === 'MENTOR').length,
+    staff: nonTrashedUsers.filter((u) =>
+      ['ACADEMIC_ADMIN', 'CONTENT_MANAGER', 'STAFF_EXECUTIVE', 'STAFF_JUNIOR'].includes(u.role)
+    ).length,
+    securityAdmins: nonTrashedUsers.filter((u) => u.role === 'SECURITY_ADMIN').length,
+    superAdmins: nonTrashedUsers.filter((u) => u.role === 'SUPER_ADMIN').length,
     staffOperational: classificationCounts.staff,
     nonStaff: classificationCounts.nonStaff,
     testingPhase: classificationCounts.testing,

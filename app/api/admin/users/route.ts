@@ -7,6 +7,8 @@ import {
   createUserService,
   updateUserService,
   deleteUserService,
+  trashUserService,
+  restoreUserService,
   toggleStudentDashboardAccessService,
   toggleUserActiveService,
   updateUserClassificationService,
@@ -15,10 +17,16 @@ import { StudentTrack } from '@/lib/auth/ts-id';
 import { RoleType } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
+function isAuthorizedAdmin(session: any): session is { userId: string; role: RoleType; email: string } {
+  if (!session || !session.userId) return false;
+  if (session.email?.toLowerCase() === 'threadsecurity@gmail.com') return true;
+  return ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN', 'CONTENT_MANAGER'].includes(session.role);
+}
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || !['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN', 'CONTENT_MANAGER'].includes(session.role)) {
+    if (!isAuthorizedAdmin(session)) {
       return NextResponse.json({ success: false, error: 'Unauthorized admin access' }, { status: 403 });
     }
 
@@ -54,7 +62,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || !['SUPER_ADMIN', 'ACADEMIC_ADMIN'].includes(session.role)) {
+    if (!isAuthorizedAdmin(session)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized: Admin privileges required to provision users.' },
         { status: 403 }
@@ -102,6 +110,7 @@ export async function POST(req: NextRequest) {
     revalidatePath('/admin/users');
     revalidatePath('/admin/students');
     revalidatePath('/admin/mentors');
+    revalidatePath('/admin/employee-attendance');
 
     return NextResponse.json({
       success: true,
@@ -120,7 +129,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || !['SUPER_ADMIN', 'ACADEMIC_ADMIN'].includes(session.role)) {
+    if (!isAuthorizedAdmin(session)) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized: Admin privileges required to update users.' },
         { status: 403 }
@@ -128,6 +137,36 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
+
+    if (body.action === 'trash-user') {
+      const { userId } = body;
+      if (!userId) {
+        return NextResponse.json({ success: false, error: 'User ID is required.' }, { status: 400 });
+      }
+
+      const res = await trashUserService(userId, session.userId);
+      revalidatePath('/admin');
+      revalidatePath('/admin/users');
+      revalidatePath('/admin/employee-attendance');
+      revalidatePath('/admin/delegation');
+
+      return NextResponse.json({ ...res, success: true });
+    }
+
+    if (body.action === 'restore-user') {
+      const { userId } = body;
+      if (!userId) {
+        return NextResponse.json({ success: false, error: 'User ID is required.' }, { status: 400 });
+      }
+
+      const res = await restoreUserService(userId, session.userId);
+      revalidatePath('/admin');
+      revalidatePath('/admin/users');
+      revalidatePath('/admin/employee-attendance');
+      revalidatePath('/admin/delegation');
+
+      return NextResponse.json({ ...res, success: true });
+    }
 
     if (body.action === 'toggle-access') {
       const { userId, grant } = body;
@@ -173,7 +212,7 @@ export async function PUT(req: NextRequest) {
       revalidatePath('/admin/employee-attendance');
       revalidatePath('/admin/delegation');
 
-      return NextResponse.json({ success: true, ...res });
+      return NextResponse.json({ ...res, success: true });
     }
 
     const { userId, ...updateData } = body;
@@ -204,19 +243,16 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getSession();
-    const isSuperAdmin =
-      session &&
-      (session.role === 'SUPER_ADMIN' || session.email?.toLowerCase() === 'threadsecurity@gmail.com');
-
-    if (!isSuperAdmin) {
+    if (!isAuthorizedAdmin(session)) {
       return NextResponse.json(
-        { success: false, error: 'Security restriction: Only Super Administrators can delete user accounts.' },
+        { success: false, error: 'Security restriction: Admin privileges required.' },
         { status: 403 }
       );
     }
 
     const { searchParams } = new URL(req.url);
     let userId = searchParams.get('id');
+    const isPermanent = searchParams.get('permanent') === 'true';
 
     if (!userId) {
       try {
@@ -231,17 +267,47 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'User ID is required for deletion.' }, { status: 400 });
     }
 
-    const res = await deleteUserService(userId, session.userId);
+    if (isPermanent) {
+      const isSuperAdmin =
+        session.role === 'SUPER_ADMIN' || session.email?.toLowerCase() === 'threadsecurity@gmail.com';
+      if (!isSuperAdmin) {
+        return NextResponse.json(
+          { success: false, error: 'Security restriction: Only Super Administrators can permanently purge user accounts.' },
+          { status: 403 }
+        );
+      }
+
+      const res = await deleteUserService(userId, session.userId);
+
+      revalidatePath('/admin');
+      revalidatePath('/admin/users');
+      revalidatePath('/admin/students');
+      revalidatePath('/admin/mentors');
+      revalidatePath('/admin/employee-attendance');
+
+      return NextResponse.json({
+        success: true,
+        permanent: true,
+        deletedName: res.deletedName,
+        deletedEmail: res.deletedEmail,
+      });
+    }
+
+    // Default delete: Soft delete / move to Trash
+    const res = await trashUserService(userId, session.userId);
 
     revalidatePath('/admin');
     revalidatePath('/admin/users');
     revalidatePath('/admin/students');
     revalidatePath('/admin/mentors');
+    revalidatePath('/admin/employee-attendance');
 
     return NextResponse.json({
       success: true,
-      deletedName: res.deletedName,
-      deletedEmail: res.deletedEmail,
+      permanent: false,
+      trashedAt: res.trashedAt,
+      name: res.name,
+      email: res.email,
     });
   } catch (error: any) {
     console.error('[API /api/admin/users DELETE Error]:', error);

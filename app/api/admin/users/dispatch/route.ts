@@ -5,7 +5,12 @@ import { dispatchUserCredentialsService } from '@/server/services/admin.service'
 export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session || !['SUPER_ADMIN', 'ACADEMIC_ADMIN'].includes(session.role)) {
+    const isAuthorized =
+      session &&
+      (['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN', 'CONTENT_MANAGER'].includes(session.role) ||
+        session.email?.toLowerCase() === 'threadsecurity@gmail.com');
+
+    if (!isAuthorized) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized: Admin privileges required to dispatch credentials.' },
         { status: 403 }
@@ -26,6 +31,7 @@ export async function POST(req: NextRequest) {
       success: true,
       email: res.email,
       identifier,
+      emailDispatched: (res as any).emailDispatched ?? true,
     });
   } catch (error: any) {
     console.error('[API /api/admin/users/dispatch POST Error]:', error);

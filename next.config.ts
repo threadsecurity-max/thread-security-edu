@@ -41,6 +41,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/admin/employee%20attendance/:path*',
+        destination: '/admin/employee-attendance/:path*',
+        permanent: false,
+      },
+      {
         source: '/mentor/blog',
         destination: '/mentor/blogs',
         permanent: false,

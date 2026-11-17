@@ -209,24 +209,31 @@ export async function dispatchStudentCredentialsService(userId: string, customPa
   });
 
   const batch = user.studentProfile?.batch;
-  const emailRes = await sendStudentOnboardingEmail({
-    toEmail: user.email,
-    studentName: user.name,
-    tsId,
-    tempPassword,
-    batchCode: batch?.batchCode,
-    courseTitle: batch?.course?.title,
-    mentorName: batch?.mentor?.user?.name,
-  });
+  let emailDispatched = false;
+  let emailRes: any = null;
+  try {
+    emailRes = await sendStudentOnboardingEmail({
+      toEmail: user.email,
+      studentName: user.name,
+      tsId,
+      tempPassword,
+      batchCode: batch?.batchCode,
+      courseTitle: batch?.course?.title,
+      mentorName: batch?.mentor?.user?.name,
+    });
+    emailDispatched = emailRes?.success ?? true;
+  } catch (err: any) {
+    console.error('[dispatchStudentCredentialsService Email Error]:', err?.message);
+  }
 
   await logAuditEvent({
     action: 'STUDENT_CREDENTIALS_DISPATCHED',
     entity: 'USER',
     entityId: user.id,
-    details: `Dispatched login credentials email to student ${user.name} (${user.email}, TS-ID: ${tsId}).`,
+    details: `Dispatched login credentials email to student ${user.name} (${user.email}, TS-ID: ${tsId}). Email dispatched: ${emailDispatched}`,
   });
 
-  return { success: true, email: user.email, tsId, emailResult: emailRes };
+  return { success: true, email: user.email, tsId, emailDispatched, emailResult: emailRes };
 }
 
 export async function reassignStudentTrackService(userId: string, track: StudentTrack) {
@@ -652,24 +659,31 @@ export async function dispatchMentorCredentialsService(mentorProfileId: string, 
     },
   });
 
-  const emailRes = await sendFacultyOnboardingEmail({
-    toEmail: mentor.user.email,
-    facultyName: mentor.user.name,
-    mentorId,
-    tempPassword: facultyPasskey,
-    batches: mentor.batches.map((b) => b.batchCode),
-    courses: mentor.courses.map((c) => c.title),
-    schedule: mentor.officeHours || undefined,
-  });
+  let emailDispatched = false;
+  let emailRes: any = null;
+  try {
+    emailRes = await sendFacultyOnboardingEmail({
+      toEmail: mentor.user.email,
+      facultyName: mentor.user.name,
+      mentorId,
+      tempPassword: facultyPasskey,
+      batches: mentor.batches.map((b) => b.batchCode),
+      courses: mentor.courses.map((c) => c.title),
+      schedule: mentor.officeHours || undefined,
+    });
+    emailDispatched = emailRes?.success ?? true;
+  } catch (err: any) {
+    console.error('[dispatchMentorCredentialsService Email Error]:', err?.message);
+  }
 
   await logAuditEvent({
     action: 'MENTOR_CREDENTIALS_DISPATCHED',
     entity: 'MENTOR_PROFILE',
     entityId: mentor.id,
-    details: `Dispatched login credentials email to mentor ${mentor.user.name} (${mentor.user.email}, Mentor ID: ${mentorId}).`,
+    details: `Dispatched login credentials email to mentor ${mentor.user.name} (${mentor.user.email}, Mentor ID: ${mentorId}). Email dispatched: ${emailDispatched}`,
   });
 
-  return { success: true, email: mentor.user.email, mentorId, emailResult: emailRes };
+  return { success: true, email: mentor.user.email, mentorId, emailDispatched, emailResult: emailRes };
 }
 
 export async function assignBatchToMentorService(mentorProfileId: string, batchId: string) {
@@ -877,7 +891,7 @@ export async function reassignStudentBatchService(
  * Calculates next available sequential TS-ID for Staff, Security Admin, or Super Admin
  */
 export async function getNextSuggestedStaffOrAdminID(
-  role: 'SECURITY_ADMIN' | 'ACADEMIC_ADMIN' | 'SUPER_ADMIN' | 'CONTENT_MANAGER'
+  role: RoleType | string
 ): Promise<string> {
   const prefix =
     role === 'SECURITY_ADMIN'
@@ -974,10 +988,13 @@ export async function createUserService({
   if (role === 'SECURITY_ADMIN') {
     resolvedSecretKey = resolvedSecretKey || process.env.SECURITY_ADMIN_SECRET_KEY || 'TSE-SEC-ADMIN-789';
     resolvedPasskey = resolvedPasskey || process.env.SECURITY_ADMIN_PASSKEY || 'ThreadSec@789789789';
-  } else if (role === 'ACADEMIC_ADMIN' || role === 'CONTENT_MANAGER') {
+  } else if (role === 'SUPER_ADMIN') {
     resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
     resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
-  } else if (role === 'SUPER_ADMIN') {
+  } else if (role === 'STAFF_EXECUTIVE' || role === 'STAFF_JUNIOR') {
+    resolvedSecretKey = resolvedSecretKey || process.env.STAFF_SECRET_KEY || 'TSE-STF-8426';
+    resolvedPasskey = resolvedPasskey || process.env.STAFF_PASSKEY || 'StaffThread6248';
+  } else if (role === 'ACADEMIC_ADMIN' || role === 'CONTENT_MANAGER') {
     resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
     resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
   } else if (role === 'MENTOR') {
@@ -1039,12 +1056,57 @@ export async function createUserService({
           data: { mentorId: mentorProfile.id },
         });
       }
+      // Create EmployeeProfile for Mentor
+      await tx.employeeProfile.create({
+        data: {
+          userId: user.id,
+          employeeId: appointedTsId,
+          department: department || 'Academics & Faculty',
+          designation: 'Faculty Mentor',
+          joiningDate: new Date(),
+          status: 'ACTIVE',
+          attendanceEligible: true,
+        },
+      });
+    } else if (role !== 'GUEST') {
+      // Staff, Security Admin, Academic Admin, Super Admin
+      let dept = department || 'Academic Operations';
+      let desig = 'Staff Associate';
+      if (role === 'SUPER_ADMIN') {
+        dept = department || 'Executive Management';
+        desig = 'Super Administrator';
+      } else if (role === 'SECURITY_ADMIN') {
+        dept = department || 'Cyber Operations & SOC';
+        desig = 'Security Operations Analyst';
+      } else if (role === 'STAFF_EXECUTIVE') {
+        dept = department || 'Academic Operations';
+        desig = 'Executive Staff Associate';
+      } else if (role === 'STAFF_JUNIOR') {
+        dept = department || 'Lab & Technical Support';
+        desig = 'Junior Technical Associate';
+      } else if (role === 'CONTENT_MANAGER') {
+        dept = department || 'Content & Curriculum';
+        desig = 'Content Manager';
+      }
+
+      await tx.employeeProfile.create({
+        data: {
+          userId: user.id,
+          employeeId: appointedTsId,
+          department: dept,
+          designation: desig,
+          joiningDate: new Date(),
+          status: 'ACTIVE',
+          attendanceEligible: true,
+        },
+      });
     }
 
     return user;
   });
 
-  // 6. Automatic Credentials Email Dispatch
+  // 6. Automatic Credentials Email Dispatch (Guarded against throwing)
+  let emailDispatched = false;
   if (dispatchEmail !== false) {
     try {
       if (role === 'STUDENT') {
@@ -1058,7 +1120,7 @@ export async function createUserService({
           batchCode = b?.batchCode;
           courseTitle = b?.course?.title;
         }
-        await sendStudentOnboardingEmail({
+        const res = await sendStudentOnboardingEmail({
           toEmail: cleanEmail,
           studentName: cleanName,
           tsId: appointedTsId,
@@ -1066,31 +1128,29 @@ export async function createUserService({
           batchCode,
           courseTitle,
         });
+        emailDispatched = res?.success ?? true;
       } else if (role === 'MENTOR') {
-        await sendFacultyOnboardingEmail({
+        const res = await sendFacultyOnboardingEmail({
           toEmail: cleanEmail,
           facultyName: cleanName,
           mentorId: appointedTsId,
           tempPassword: resolvedPasskey,
         });
-      } else if (
-        role === 'SECURITY_ADMIN' ||
-        role === 'ACADEMIC_ADMIN' ||
-        role === 'SUPER_ADMIN' ||
-        role === 'CONTENT_MANAGER'
-      ) {
-        await sendStaffOrAdminOnboardingEmail({
+        emailDispatched = res?.success ?? true;
+      } else {
+        const res = await sendStaffOrAdminOnboardingEmail({
           toEmail: cleanEmail,
           name: cleanName,
-          role,
+          role: role as any,
           tsId: appointedTsId,
           secretKey: resolvedSecretKey,
           passkey: resolvedPasskey,
           department,
         });
+        emailDispatched = res?.success ?? true;
       }
     } catch (mailErr: any) {
-      console.error('[CreateUser Email Dispatch Error]:', mailErr?.message);
+      console.warn('[CreateUser Email Dispatch Error - Handled]:', mailErr?.message);
     }
   }
 
@@ -1568,6 +1628,109 @@ export async function deleteUserService(userId: string, currentAdminUserId?: str
   return { success: true, deletedName: userName, deletedEmail: userEmail };
 }
 
+/**
+ * Move user account to Trash (Soft delete lifecycle)
+ * Maintains separate database state without permanently destroying FK histories.
+ */
+export async function trashUserService(userId: string, actorId?: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { employeeProfile: true, tsIdentity: true },
+  });
+
+  if (!user) {
+    throw new Error('User account not found.');
+  }
+
+  const protectedEmails = [
+    'threadsecuritydeveloper@gmail.com',
+    'threadsecurity@gmail.com',
+  ];
+  if (protectedEmails.includes(user.email.toLowerCase())) {
+    throw new Error('Security Restriction: Primary Super Administrator account is protected and cannot be trashed.');
+  }
+
+  const trashedTimestamp = new Date().toISOString();
+  const trashedTag = `TRASHED:${trashedTimestamp}`;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        isActive: false,
+        isDashboardAccessGranted: false,
+        approvedBy: trashedTag,
+      },
+    });
+
+    if (user.employeeProfile) {
+      await tx.employeeProfile.update({
+        where: { userId },
+        data: {
+          status: 'TRASH',
+          attendanceEligible: false,
+        },
+      });
+    }
+  });
+
+  await logAuditEvent({
+    actorId,
+    action: 'USER_MOVED_TO_TRASH',
+    entity: 'USER',
+    entityId: userId,
+    details: `Moved user account for ${user.name} (${user.email}, ${user.tsIdentity?.tsId || 'N/A'}) to Trash Bin.`,
+  });
+
+  return { success: true, userId, trashedAt: trashedTimestamp, name: user.name, email: user.email };
+}
+
+/**
+ * Restore user account from Trash back to active standing
+ */
+export async function restoreUserService(userId: string, actorId?: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { employeeProfile: true, tsIdentity: true },
+  });
+
+  if (!user) {
+    throw new Error('User account not found.');
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        isActive: true,
+        isDashboardAccessGranted: true,
+        approvedBy: actorId ? `RESTORED_BY:${actorId}` : null,
+      },
+    });
+
+    if (user.employeeProfile) {
+      const restoredStatus = user.role === 'STUDENT' ? 'NON_STAFF' : 'ACTIVE';
+      await tx.employeeProfile.update({
+        where: { userId },
+        data: {
+          status: restoredStatus,
+          attendanceEligible: user.role !== 'STUDENT',
+        },
+      });
+    }
+  });
+
+  await logAuditEvent({
+    actorId,
+    action: 'USER_RESTORED_FROM_TRASH',
+    entity: 'USER',
+    entityId: userId,
+    details: `Restored user account for ${user.name} (${user.email}) from Trash back to Active standing.`,
+  });
+
+  return { success: true, userId, name: user.name, email: user.email };
+}
+
 export async function dispatchUserCredentialsService(
   userId: string,
   customPasskey?: string,
@@ -1619,6 +1782,9 @@ export async function dispatchUserCredentialsService(
   } else if (user.role === 'SUPER_ADMIN') {
     resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
     resolvedPasskey = resolvedPasskey || process.env.ADMIN_PASSKEY || 'ThreadSec@789';
+  } else if (user.role === 'STAFF_EXECUTIVE' || user.role === 'STAFF_JUNIOR') {
+    resolvedSecretKey = resolvedSecretKey || process.env.STAFF_SECRET_KEY || 'TSE-STF-8426';
+    resolvedPasskey = resolvedPasskey || process.env.STAFF_PASSKEY || 'StaffThread6248';
   } else {
     // ACADEMIC_ADMIN or CONTENT_MANAGER
     resolvedSecretKey = resolvedSecretKey || process.env.ADMIN_SECRET_KEY || 'TSE-ADMIN-8080';
@@ -1639,23 +1805,30 @@ export async function dispatchUserCredentialsService(
     },
   });
 
-  const emailRes = await sendStaffOrAdminOnboardingEmail({
-    toEmail: user.email,
-    name: user.name,
-    role: user.role as any,
-    tsId,
-    secretKey: resolvedSecretKey,
-    passkey: resolvedPasskey,
-  });
+  let emailDispatched = false;
+  let emailRes: any = null;
+  try {
+    emailRes = await sendStaffOrAdminOnboardingEmail({
+      toEmail: user.email,
+      name: user.name,
+      role: user.role as any,
+      tsId,
+      secretKey: resolvedSecretKey,
+      passkey: resolvedPasskey,
+    });
+    emailDispatched = emailRes?.success ?? true;
+  } catch (err: any) {
+    console.warn('[dispatchUserCredentialsService Email Error - Handled]:', err?.message);
+  }
 
   await logAuditEvent({
     action: 'ADMIN_CREDENTIALS_DISPATCHED',
     entity: 'USER',
     entityId: user.id,
-    details: `Dispatched ${user.role} clearance credentials and keys to ${user.name} (${user.email}, TS-ID: ${tsId}).`,
+    details: `Dispatched ${user.role} clearance credentials and keys to ${user.name} (${user.email}, TS-ID: ${tsId}). Email dispatched: ${emailDispatched}`,
   });
 
-  return { success: true, email: user.email, tsId, role: user.role, emailResult: emailRes };
+  return { success: true, email: user.email, tsId, role: user.role, emailDispatched, emailResult: emailRes };
 }
 
 
