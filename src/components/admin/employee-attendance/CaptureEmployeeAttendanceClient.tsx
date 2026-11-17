@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { captureEmployeeAttendanceAction } from '@/features/employee-attendance/actions/attendance.actions';
 import { EmployeeAttendanceStatus } from '@prisma/client';
+import { Live24HourAttendanceClock } from './Live24HourAttendanceClock';
 
 interface EmployeeItem {
   id: string;
@@ -82,6 +83,25 @@ export function CaptureEmployeeAttendanceClient({
     currentUser.email?.trim().toLowerCase() === 'threadsecurity@gmail.com' ||
     currentUser.role?.toUpperCase() === 'SUPER_ADMIN';
 
+  // Check if target attendance date is today in IST
+  const todayIstDateKey = useMemo(() => {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      return formatter.format(new Date());
+    } catch {
+      return new Date().toISOString().slice(0, 10);
+    }
+  }, []);
+
+  const isToday = attendanceDate === todayIstDateKey;
+  // Past dates are locked for coordinator; today is open for 24 hours to mark and update in sequence
+  const isLocked = !isToday && !isSuperAdmin;
+
   // State map: employeeId -> { status, remarks }
   const [attendanceMap, setAttendanceMap] = useState<
     Record<string, { status: EmployeeAttendanceStatus; remarks: string }>
@@ -131,8 +151,8 @@ export function CaptureEmployeeAttendanceClient({
 
   // Bulk actions
   const handleBulkMark = (status: EmployeeAttendanceStatus) => {
-    if (isFinalizedState && !isSuperAdmin) {
-      showToast('Attendance is finalized and locked. Only Super Admin can modify.', 'error');
+    if (isLocked) {
+      showToast('Attendance for past dates is locked. Only Super Admin has rectification authority.', 'error');
       return;
     }
 
@@ -152,8 +172,8 @@ export function CaptureEmployeeAttendanceClient({
 
   // Single employee change
   const handleStatusChange = (employeeId: string, status: EmployeeAttendanceStatus) => {
-    if (isFinalizedState && !isSuperAdmin) {
-      showToast('Attendance for this date is finalized & locked for Attendance Manager.', 'error');
+    if (isLocked) {
+      showToast('Attendance for past dates is locked. Only Super Admin has rectification authority.', 'error');
       return;
     }
 
@@ -167,7 +187,7 @@ export function CaptureEmployeeAttendanceClient({
   };
 
   const handleRemarksChange = (employeeId: string, remarks: string) => {
-    if (isFinalizedState && !isSuperAdmin) return;
+    if (isLocked) return;
     setAttendanceMap((prev) => ({
       ...prev,
       [employeeId]: {
@@ -216,8 +236,8 @@ export function CaptureEmployeeAttendanceClient({
 
   // Submission handler
   const executeSubmit = (isFinalized: boolean) => {
-    if (isFinalizedState && !isSuperAdmin) {
-      showToast('Attendance is finalized. Only Super Admin has rectification authority.', 'error');
+    if (isLocked) {
+      showToast('Attendance for past dates is locked. Only Super Admin has rectification authority.', 'error');
       return;
     }
 
@@ -239,7 +259,7 @@ export function CaptureEmployeeAttendanceClient({
         setShowConfirmModal(false);
         showToast(
           isFinalized
-            ? 'Daily attendance finalized and locked successfully.'
+            ? 'Daily attendance submitted successfully! Audit log dispatched to Super Admin for verification.'
             : 'Attendance saved as draft successfully.'
         );
         router.refresh();
@@ -276,13 +296,20 @@ export function CaptureEmployeeAttendanceClient({
             </button>
           </Link>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-bold text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-200 uppercase">
                 ATTENDANCE CAPTURE WORKFLOW
               </span>
-              {isFinalizedState ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" /> AUDIT DISPATCH LINKED
+              </span>
+              {isLocked ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  <Lock className="w-3 h-3 text-amber-700" /> FINALIZED RECORD (LOCKED)
+                  <Lock className="w-3 h-3 text-amber-700" /> HISTORICAL RECORD (LOCKED)
+                </span>
+              ) : isFinalizedState ? (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+                  <CheckCircle2 className="w-3 h-3 text-indigo-600" /> SUBMITTED (ACTIVE 24-HR EDIT WINDOW)
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
@@ -301,7 +328,7 @@ export function CaptureEmployeeAttendanceClient({
           <button
             type="button"
             onClick={() => executeSubmit(false)}
-            disabled={isPending || (isFinalizedState && !isSuperAdmin)}
+            disabled={isPending || isLocked}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all border border-slate-200 cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4 text-slate-600" />
@@ -311,23 +338,29 @@ export function CaptureEmployeeAttendanceClient({
           <button
             type="button"
             onClick={() => setShowConfirmModal(true)}
-            disabled={isPending || (isFinalizedState && !isSuperAdmin)}
+            disabled={isPending || isLocked}
             className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs transition-all shadow-md cursor-pointer disabled:opacity-50"
           >
             <Check className="w-4 h-4" />
-            <span>{isFinalizedState && isSuperAdmin ? 'Update & Finalize' : 'Submit & Finalize'}</span>
+            <span>{isFinalizedState ? 'Update & Resubmit' : 'Submit & Finalize'}</span>
           </button>
         </div>
       </div>
 
-      {/* Lock Notice if Finalized */}
-      {isFinalizedState && !isSuperAdmin && (
+      {/* 24-Hour Live Check-in Clock */}
+      <Live24HourAttendanceClock
+        currentUser={currentUser}
+        isSuperAdmin={isSuperAdmin}
+      />
+
+      {/* Lock Notice if Past Date */}
+      {isLocked && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-800 text-xs">
           <Lock className="w-5 h-5 text-amber-600 shrink-0" />
           <div>
-            <div className="font-bold">Daily Attendance Finalized for this Date</div>
+            <div className="font-bold">Historical Attendance Date Locked</div>
             <div className="text-[11px] text-amber-700">
-              This attendance register has been submitted and locked. Akshay Kumar (Attendance Manager) cannot edit historical attendance. Only Super Admin ([threadsecurity@gmail.com](mailto:threadsecurity@gmail.com)) possesses rectification authority.
+              Attendance records for past dates are closed for Attendance Coordinator (Akshay Kumar). Only Super Admin (<span className="font-mono">threadsecurity@gmail.com</span>) possesses historical rectification authority.
             </div>
           </div>
         </div>
@@ -535,7 +568,6 @@ export function CaptureEmployeeAttendanceClient({
               ) : (
                 filteredEmployees.map((emp, index) => {
                   const state = attendanceMap[emp.id] || { status: 'PRESENT', remarks: '' };
-                  const isLocked = isFinalizedState && !isSuperAdmin;
 
                   return (
                     <tr
@@ -685,7 +717,7 @@ export function CaptureEmployeeAttendanceClient({
 
             <div className="space-y-4 pt-2">
               <p className="text-slate-600 text-[11px]">
-                Please review the attendance breakdown for <span className="font-bold text-slate-900">{attendanceDate}</span> before locking. Once submitted, records are finalized for the Attendance Manager and can only be rectified by the Super Admin.
+                Review the attendance breakdown for <span className="font-bold text-slate-900">{attendanceDate}</span>. Submitting marks this act in proper sequence with check-in time and dispatches an audit alert to the Super Admin.
               </p>
 
               {/* Breakdown Cards */}
@@ -726,10 +758,10 @@ export function CaptureEmployeeAttendanceClient({
                 </div>
               </div>
 
-              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[11px] flex items-start gap-2">
-                <Lock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-900 text-[11px] flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-bold">Irreversible Lockout Notice:</span> After submission, this date will be sealed against further edits by the Attendance Manager.
+                  <span className="font-bold">Super Admin Audit Oversight:</span> Every submission creates an immutable audit trail logged with the 24-hr check-in clock and notifies the Super Admin.
                 </div>
               </div>
 
@@ -747,7 +779,7 @@ export function CaptureEmployeeAttendanceClient({
                   disabled={isPending}
                   className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold transition-all shadow-md cursor-pointer disabled:opacity-50"
                 >
-                  {isPending ? 'Finalizing...' : 'Submit & Lock Register'}
+                  {isPending ? 'Submitting...' : 'Submit & Dispatch Audit'}
                 </button>
               </div>
             </div>

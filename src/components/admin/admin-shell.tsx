@@ -38,6 +38,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { isAttendanceManagerUser, isSuperAdminAttendanceUser } from '@/lib/auth/employee-attendance-auth';
 
 export interface AdminShellProps {
   user: {
@@ -86,15 +87,8 @@ export function AdminShell({ user, mentorsCount, headerActions, children }: Admi
     });
   };
 
-  const isSuperAdmin =
-    user.email?.trim().toLowerCase() === 'threadsecurity@gmail.com' ||
-    user.role?.toUpperCase() === 'SUPER_ADMIN';
-
-  const isAttendanceManager =
-    user.email?.trim().toLowerCase() === 'akshay.kumar@threadsecurity.org' ||
-    user.email?.trim().toLowerCase().includes('akshay') ||
-    user.name?.toLowerCase().includes('akshay kumar') ||
-    user.userId === 'cmv6l9la40000c9014xt46hcv';
+  const isSuperAdmin = isSuperAdminAttendanceUser(user);
+  const isAttendanceManager = isAttendanceManagerUser(user);
 
   const employeeAttendanceItems = [
     { name: 'My Attendance', href: `/admin/employee-attendance/employees/${user.userId}`, icon: UserCheck, badge: 'MY DUTY' },
