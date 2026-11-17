@@ -234,7 +234,7 @@ export function CaptureEmployeeAttendanceClient({
     };
   }, [employees, attendanceMap]);
 
-  // Submission handler
+  // Submission handler with resilient REST API fallback for deployment sync
   const executeSubmit = (isFinalized: boolean) => {
     if (isLocked) {
       showToast('Attendance for past dates is locked. Only Super Admin has rectification authority.', 'error');
@@ -248,11 +248,35 @@ export function CaptureEmployeeAttendanceClient({
         remarks: attendanceMap[emp.id]?.remarks || undefined,
       }));
 
-      const res = await captureEmployeeAttendanceAction({
-        date: attendanceDate,
-        records,
-        isFinalized,
-      });
+      let res: { success: boolean; error?: string; data?: any };
+      try {
+        res = await captureEmployeeAttendanceAction({
+          date: attendanceDate,
+          records,
+          isFinalized,
+        });
+      } catch (actionErr: any) {
+        console.warn('[CaptureAttendance] Server Action sync note, attempting direct API fallback:', actionErr);
+        try {
+          const apiRes = await fetch('/api/employee-attendance/daily', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              date: attendanceDate,
+              records,
+              isFinalized,
+            }),
+          });
+          const apiData = await apiRes.json();
+          if (apiRes.ok && apiData.success) {
+            res = { success: true, data: apiData.data };
+          } else {
+            res = { success: false, error: apiData.error || 'Failed to save attendance via API' };
+          }
+        } catch (apiErr: any) {
+          res = { success: false, error: apiErr?.message || 'Network error saving attendance' };
+        }
+      }
 
       if (res.success) {
         setIsFinalizedState(isFinalized);

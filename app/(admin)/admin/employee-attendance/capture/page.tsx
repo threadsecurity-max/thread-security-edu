@@ -7,6 +7,7 @@ import {
   getEmployeeDirectoryService,
   getDailyAttendanceService,
   formatDateKey,
+  normalizeAttendanceDate,
 } from '@/server/services/employee-attendance.service';
 import { CaptureEmployeeAttendanceClient } from '@/components/admin/employee-attendance/CaptureEmployeeAttendanceClient';
 
@@ -29,11 +30,26 @@ export default async function CaptureEmployeeAttendancePage({
   }
 
   const { date } = await searchParams;
-  const targetDateStr = date || formatDateKey(new Date());
+  let targetDateStr = formatDateKey(new Date());
+  if (date) {
+    try {
+      const cleaned = decodeURIComponent(date).trim().replace(/[\s_/]+/g, '-');
+      const d = normalizeAttendanceDate(cleaned);
+      targetDateStr = formatDateKey(d);
+    } catch {
+      targetDateStr = formatDateKey(new Date());
+    }
+  }
 
   const [directory, daily] = await Promise.all([
-    getEmployeeDirectoryService(undefined, session),
-    getDailyAttendanceService(targetDateStr, undefined, session),
+    getEmployeeDirectoryService(undefined, session).catch((err) => {
+      console.error('[CaptureEmployeeAttendancePage] Error fetching directory:', err);
+      return [];
+    }),
+    getDailyAttendanceService(targetDateStr, undefined, session).catch((err) => {
+      console.error('[CaptureEmployeeAttendancePage] Error fetching daily attendance:', err);
+      return null;
+    }),
   ]);
 
   const initialRecords = (daily?.items || []).map((item: any) => ({

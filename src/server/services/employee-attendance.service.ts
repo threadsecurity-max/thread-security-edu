@@ -62,22 +62,46 @@ export async function setAttendanceTestingModeService(
 
 /**
  * Normalizes any Date or ISO string to UTC Midnight (YYYY-MM-DDT00:00:00.000Z)
- * Timezone-proof: Parses YYYY-MM-DD directly without local browser/server timezone skew.
+ * Timezone-proof: Handles YYYY-MM-DD, spaces, slashes, and decoded strings.
+ * Never throws NaN / Invalid Date.
  */
-export function normalizeAttendanceDate(inputDate: string | Date): Date {
+export function normalizeAttendanceDate(inputDate?: string | Date | null): Date {
+  if (!inputDate) {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  }
+
   if (typeof inputDate === 'string') {
-    const trimmed = inputDate.trim();
-    const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    let cleaned = inputDate.trim();
+    try {
+      cleaned = decodeURIComponent(cleaned);
+    } catch {}
+    cleaned = cleaned.replace(/[\s_/]+/g, '-');
+
+    const match = cleaned.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
     if (match) {
       const year = parseInt(match[1], 10);
       const month = parseInt(match[2], 10) - 1;
       const day = parseInt(match[3], 10);
-      return new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+      }
     }
-    const parsed = new Date(trimmed);
-    return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate(), 0, 0, 0, 0));
+
+    const parsed = new Date(cleaned);
+    if (!isNaN(parsed.getTime())) {
+      return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate(), 0, 0, 0, 0));
+    }
+
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
   }
+
   const d = new Date(inputDate.getTime());
+  if (isNaN(d.getTime())) {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  }
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
 }
 
