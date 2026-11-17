@@ -857,6 +857,36 @@ export async function captureDailyAttendanceService(params: {
       await db.employeeAttendanceAuditLog.createMany({
         data: auditEntries,
       });
+
+      // Dispatch audit notification to Super Admin accounts
+      const superAdmins = await prisma.user.findMany({
+        where: {
+          OR: [
+            { email: SUPER_ADMIN_ATTENDANCE_EMAIL },
+            { role: 'SUPER_ADMIN' },
+          ],
+        },
+        select: { id: true, email: true },
+      });
+
+      if (superAdmins.length > 0) {
+        const dateStr = formatDateKey(targetDate);
+        const count = params.records.length;
+        const notifTitle = `Attendance Audit: Submitted by ${markerName}`;
+        const notifMsg = `${markerRoleLabel} (${markerName}) submitted attendance for ${dateStr} [${now24Hr} IST]. ${count} staff records marked. Check attendance audit history.`;
+        const notifLink = `/admin/employee-attendance/audit`;
+
+        await prisma.notification.createMany({
+          data: superAdmins.map((adm: any) => ({
+            userId: adm.id,
+            title: notifTitle,
+            message: notifMsg,
+            type: 'ATTENDANCE_AUDIT',
+            linkUrl: notifLink,
+            isRead: false,
+          })),
+        });
+      }
     }
   } catch (auditErr) {
     console.warn('[EmployeeAttendance] Notice logging sequence audit acts:', auditErr);
