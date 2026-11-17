@@ -1236,6 +1236,19 @@ export async function toggleUserActiveService(userId: string, isActive: boolean,
         },
       });
     }
+
+    // If account was deactivated, immediately evict from rosters and remove unfinalized attendance
+    if (!isActive) {
+      await prisma.dailyAttendanceRoster.deleteMany({
+        where: { employeeId: userId },
+      });
+      await prisma.employeeAttendance.deleteMany({
+        where: {
+          employeeId: userId,
+          isFinalized: false,
+        },
+      });
+    }
   } catch (err) {
     console.warn('[AdminService] EmployeeProfile sync error:', err);
   }
@@ -1295,6 +1308,22 @@ export async function updateUserClassificationService(
         attendanceEligible,
       },
     });
+  }
+
+  if (classification === 'NON_STAFF') {
+    try {
+      await prisma.dailyAttendanceRoster.deleteMany({
+        where: { employeeId: userId },
+      });
+      await prisma.employeeAttendance.deleteMany({
+        where: {
+          employeeId: userId,
+          isFinalized: false,
+        },
+      });
+    } catch (err) {
+      console.warn('[AdminService] Evict non-staff attendance error:', err);
+    }
   }
 
   await logAuditEvent({
@@ -1672,6 +1701,19 @@ export async function trashUserService(userId: string, actorId?: string) {
         },
       });
     }
+
+    // Immediately evict trashed user from all daily attendance rosters
+    await tx.dailyAttendanceRoster.deleteMany({
+      where: { employeeId: userId },
+    });
+
+    // Remove unfinalized attendance records for this user
+    await tx.employeeAttendance.deleteMany({
+      where: {
+        employeeId: userId,
+        isFinalized: false,
+      },
+    });
   });
 
   await logAuditEvent({

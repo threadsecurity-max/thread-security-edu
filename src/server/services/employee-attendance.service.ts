@@ -299,14 +299,18 @@ export async function syncEmployeeProfilesService() {
       desig = 'Junior Technical Associate';
     }
 
+    const isTrashed = u.approvedBy?.startsWith('TRASHED:');
+    const initialStatus = isTrashed ? 'TRASH' : u.isActive ? 'ACTIVE' : 'INACTIVE';
+    const isEligible = !isTrashed && u.isActive;
+
     await db.employeeProfile.create({
       data: {
         userId: u.id,
         employeeId: empId,
         department: dept,
         designation: desig,
-        status: 'ACTIVE',
-        attendanceEligible: true,
+        status: initialStatus,
+        attendanceEligible: isEligible,
       },
     });
   }
@@ -314,6 +318,8 @@ export async function syncEmployeeProfilesService() {
 
 /**
  * 1. GET Employee Directory with profiles and real-time attendance stats
+ * STRICT RULE: Only active working staff are returned.
+ * Trashed, inactive, and non-staff accounts are completely excluded from attendance.
  */
 export async function getEmployeeDirectoryService(
   filters?: {
@@ -326,10 +332,22 @@ export async function getEmployeeDirectoryService(
 
   const andConditions: any[] = [
     { role: { not: 'STUDENT' } },
+    { isActive: true },
+    {
+      OR: [
+        { approvedBy: null },
+        { approvedBy: { not: { startsWith: 'TRASHED:' } } },
+      ],
+    },
     {
       OR: [
         { employeeProfile: null },
-        { employeeProfile: { status: { not: 'NON_STAFF' } } },
+        {
+          employeeProfile: {
+            status: { notIn: ['TRASH', 'INACTIVE', 'NON_STAFF'] },
+            attendanceEligible: true,
+          },
+        },
       ],
     },
   ];
@@ -363,6 +381,8 @@ export async function getEmployeeDirectoryService(
       email: true,
       role: true,
       avatarUrl: true,
+      isActive: true,
+      approvedBy: true,
       employeeProfile: true,
       employeeAttendances: {
         select: {
@@ -393,6 +413,7 @@ export async function getEmployeeDirectoryService(
     });
 
     const isTestingUser = isAttendanceTestingEmail(emp.email) || emp.employeeProfile?.status === 'TESTING';
+    const isTrashed = emp.approvedBy?.startsWith('TRASHED:') || emp.employeeProfile?.status === 'TRASH';
 
     return {
       id: emp.id,
@@ -419,7 +440,18 @@ export async function getEmployeeDirectoryService(
       totalWorkingDays,
       attendancePercentage: percentage,
       isTestingUser,
+      isTrashed,
+      isActive: emp.isActive,
     };
+  });
+
+  // STRICT RULE: Only active, non-trashed, attendance-eligible staff appear in attendance
+  const workingStaffOnly = mapped.filter((emp) => {
+    if (!emp.isActive) return false;
+    if (emp.isTrashed) return false;
+    if (emp.status === 'TRASH' || emp.status === 'INACTIVE' || emp.status === 'NON_STAFF') return false;
+    if (emp.attendanceEligible === false) return false;
+    return true;
   });
 
   // STRICT ACCESS FILTER FOR ATTENDANCE COORDINATOR (AKSHAY KUMAR):
@@ -429,11 +461,11 @@ export async function getEmployeeDirectoryService(
   if (!isSuperAdmin) {
     const isTestingMode = await isAttendanceTestingModeActive();
     if (!isTestingMode) {
-      return mapped.filter((emp) => !emp.isTestingUser);
+      return workingStaffOnly.filter((emp) => !emp.isTestingUser);
     }
   }
 
-  return mapped;
+  return workingStaffOnly;
 }
 
 /**
@@ -449,6 +481,25 @@ export async function ensureDailyRosterPublishedService(
   fallbackPublisherId?: string
 ) {
   const targetDate = normalizeAttendanceDate(targetDateInput);
+
+  // 0. Proactively purge any ineligible, trashed, inactive, or non-staff employees from this targetDate roster
+  try {
+    await db.dailyAttendanceRoster.deleteMany({
+      where: {
+        attendanceDate: targetDate,
+        employee: {
+          OR: [
+            { isActive: false },
+            { approvedBy: { startsWith: 'TRASHED:' } },
+            { employeeProfile: { status: { in: ['TRASH', 'INACTIVE', 'NON_STAFF'] } } },
+            { employeeProfile: { attendanceEligible: false } },
+          ],
+        },
+      },
+    });
+  } catch (err) {
+    console.warn('[AttendanceRoster] Cleanup of ineligible roster entries warning:', err);
+  }
 
   // 1. Check if entries already exist for targetDate
   let rosterEntries = await db.dailyAttendanceRoster.findMany({
@@ -496,30 +547,34 @@ export async function ensureDailyRosterPublishedService(
   // 3. Ensure employee profiles are synced
   await syncEmployeeProfilesService();
 
-  // 4. Query all active, attendance-eligible staff
+  // 4. Query strictly active, non-trashed, attendance-eligible staff
   const eligibleUsers = await prisma.user.findMany({
     where: {
       role: { not: 'STUDENT' },
+      isActive: true,
       OR: [
-        { employeeProfile: null },
-        {
-          employeeProfile: {
-            status: { not: 'NON_STAFF' },
-            attendanceEligible: { not: false },
-          },
-        },
+        { approvedBy: null },
+        { approvedBy: { not: { startsWith: 'TRASHED:' } } },
       ],
+      employeeProfile: {
+        status: 'ACTIVE',
+        attendanceEligible: true,
+      },
     },
     select: {
       id: true,
       email: true,
+      isActive: true,
+      approvedBy: true,
       employeeProfile: { select: { status: true, attendanceEligible: true } },
     },
   });
 
   const activeStaff = eligibleUsers.filter((u: any) => {
-    if (u.employeeProfile?.status === 'INACTIVE') return false;
-    if (u.employeeProfile?.attendanceEligible === false) return false;
+    if (!u.isActive) return false;
+    if (u.approvedBy?.startsWith('TRASHED:')) return false;
+    if (u.employeeProfile?.status !== 'ACTIVE') return false;
+    if (u.employeeProfile?.attendanceEligible !== true) return false;
     return true;
   });
 
@@ -608,6 +663,15 @@ export async function getDailyAttendanceService(
   // Fetch all operational employees (respecting caller testing visibility)
   let directory = await getEmployeeDirectoryService(department && department !== 'ALL' ? { department } : undefined, caller);
 
+  // STRICT REQUIREMENT: Only active, non-trashed, attendance-eligible staff appear in attendance
+  directory = directory.filter((emp) => {
+    if (emp.isActive === false) return false;
+    if (emp.isTrashed) return false;
+    if (emp.status === 'TRASH' || emp.status === 'INACTIVE' || emp.status === 'NON_STAFF') return false;
+    if (emp.attendanceEligible === false) return false;
+    return true;
+  });
+
   // If Attendance Manager views: ONLY show employees included in the published roster
   if (!isSuperAdmin) {
     if (!isRosterPublished) {
@@ -652,7 +716,7 @@ export async function getDailyAttendanceService(
   });
 
   const markedCount = items.filter((i) => i.isMarked).length;
-  const isFinalized = records.length > 0 && records.some((r: any) => r.isFinalized);
+  const isFinalized = items.length > 0 && items.some((i) => i.isFinalized);
   const presentCount = items.filter((i) => i.status === 'PRESENT' && i.isMarked).length;
   const wfhCount = items.filter((i) => i.status === 'WFH' && i.isMarked).length;
   const absentCount = items.filter((i) => i.status === 'ABSENT' && i.isMarked).length;
@@ -765,8 +829,10 @@ export async function captureDailyAttendanceService(params: {
         });
         if (
           empUser &&
-          empUser.employeeProfile?.attendanceEligible !== false &&
-          empUser.employeeProfile?.status !== 'INACTIVE'
+          empUser.isActive &&
+          !empUser.approvedBy?.startsWith('TRASHED:') &&
+          empUser.employeeProfile?.status === 'ACTIVE' &&
+          empUser.employeeProfile?.attendanceEligible === true
         ) {
           await db.dailyAttendanceRoster.upsert({
             where: {
@@ -1539,6 +1605,8 @@ export async function getDailyRosterService(dateInput: string | Date, caller?: A
           name: true,
           email: true,
           role: true,
+          isActive: true,
+          approvedBy: true,
           employeeProfile: true,
         },
       },
@@ -1560,6 +1628,8 @@ export async function getDailyRosterService(dateInput: string | Date, caller?: A
             name: true,
             email: true,
             role: true,
+            isActive: true,
+            approvedBy: true,
             employeeProfile: true,
           },
         },
@@ -1571,9 +1641,19 @@ export async function getDailyRosterService(dateInput: string | Date, caller?: A
     });
   }
 
-  let filteredEntries = entries;
+  // STRICT REQUIREMENT: Only active, non-trashed, attendance-eligible working staff appear in roster
+  let filteredEntries = entries.filter((e: any) => {
+    const emp = e.employee;
+    if (!emp) return false;
+    if (emp.isActive === false) return false;
+    if (emp.approvedBy?.startsWith('TRASHED:')) return false;
+    if (emp.employeeProfile?.status === 'TRASH' || emp.employeeProfile?.status === 'INACTIVE' || emp.employeeProfile?.status === 'NON_STAFF') return false;
+    if (emp.employeeProfile?.attendanceEligible === false) return false;
+    return true;
+  });
+
   if (!isSuperAdmin && !isTestingMode) {
-    filteredEntries = entries.filter((e: any) => !isAttendanceTestingEmail(e.employee?.email));
+    filteredEntries = filteredEntries.filter((e: any) => !isAttendanceTestingEmail(e.employee?.email));
   }
 
   const isPublished = filteredEntries.length > 0;

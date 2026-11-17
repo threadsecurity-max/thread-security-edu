@@ -127,21 +127,22 @@ export function CaptureEmployeeAttendanceClient({
   // Distinct departments
   const departments = useMemo(() => {
     const set = new Set<string>();
-    employees.forEach((e) => {
-      if (e.department) set.add(e.department);
+    (employees || []).forEach((e) => {
+      if (e?.department) set.add(e.department);
     });
     return Array.from(set);
   }, [employees]);
 
   // Filtered employees list
   const filteredEmployees = useMemo(() => {
-    return employees.filter((emp) => {
+    return (employees || []).filter((emp) => {
+      if (!emp || !emp.id) return false;
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
-        emp.name.toLowerCase().includes(q) ||
-        emp.email.toLowerCase().includes(q) ||
-        emp.employeeId.toLowerCase().includes(q);
+        (emp.name ? emp.name.toLowerCase().includes(q) : false) ||
+        (emp.email ? emp.email.toLowerCase().includes(q) : false) ||
+        (emp.employeeId ? emp.employeeId.toLowerCase().includes(q) : false);
 
       const matchesDept = selectedDept === 'ALL' || emp.department === selectedDept;
 

@@ -71,12 +71,27 @@ export default async function CaptureEmployeeAttendancePage({
       remarks: item.remarks || '',
     }));
 
-  const cleanEmployees = (directory || []).filter((emp: any) => emp && emp.id);
+  const cleanEmployees = (directory || [])
+    .filter((emp: any) => emp && emp.id)
+    .map((emp: any) => ({
+      id: String(emp.id),
+      name: String(emp.name || emp.email?.split('@')[0] || 'Employee'),
+      email: String(emp.email || ''),
+      employeeId: String(emp.employeeId || emp.employeeProfile?.employeeId || `EMP-${emp.id.slice(-4).toUpperCase()}`),
+      department: String(emp.department || emp.employeeProfile?.department || 'General Tech'),
+      designation: String(emp.designation || emp.employeeProfile?.designation || 'Staff Associate'),
+      avatarUrl: emp.avatarUrl || null,
+    }));
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <CaptureEmployeeAttendanceClient
-        currentUser={session}
+        currentUser={{
+          userId: session.userId,
+          name: session.name || 'Admin',
+          email: session.email || '',
+          role: session.role,
+        }}
         employees={JSON.parse(JSON.stringify(cleanEmployees))}
         initialRecords={JSON.parse(JSON.stringify(initialRecords))}
         initialDate={targetDateStr}
