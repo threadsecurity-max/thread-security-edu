@@ -62,10 +62,22 @@ export async function setAttendanceTestingModeService(
 
 /**
  * Normalizes any Date or ISO string to UTC Midnight (YYYY-MM-DDT00:00:00.000Z)
+ * Timezone-proof: Parses YYYY-MM-DD directly without local browser/server timezone skew.
  */
 export function normalizeAttendanceDate(inputDate: string | Date): Date {
-  const d = typeof inputDate === 'string' ? new Date(inputDate) : new Date(inputDate.getTime());
-  // Use UTC year, month, date
+  if (typeof inputDate === 'string') {
+    const trimmed = inputDate.trim();
+    const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (match) {
+      const year = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1;
+      const day = parseInt(match[3], 10);
+      return new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+    }
+    const parsed = new Date(trimmed);
+    return new Date(Date.UTC(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate(), 0, 0, 0, 0));
+  }
+  const d = new Date(inputDate.getTime());
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
 }
 
@@ -163,11 +175,12 @@ export function getAttendanceWindowStatus(targetDateInput?: string | Date): Atte
   // Parse target date
   let targetDateKey = todayIstDateKey;
   if (targetDateInput) {
-    const d = typeof targetDateInput === 'string' ? new Date(targetDateInput) : targetDateInput;
-    const y = d.getUTCFullYear();
-    const m = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(d.getUTCDate()).padStart(2, '0');
-    targetDateKey = `${y}-${m}-${day}`;
+    if (typeof targetDateInput === 'string' && /^\d{4}-\d{2}-\d{2}/.test(targetDateInput.trim())) {
+      targetDateKey = targetDateInput.trim().slice(0, 10);
+    } else {
+      const d = normalizeAttendanceDate(targetDateInput);
+      targetDateKey = formatDateKey(d);
+    }
   }
 
   const isToday = targetDateKey === todayIstDateKey;
@@ -400,6 +413,128 @@ export async function getEmployeeDirectoryService(
 }
 
 /**
+ * Ensures that a DailyAttendanceRoster snapshot exists for the given targetDate.
+ * If the Super Admin has not yet manually published a roster for targetDate,
+ * this automatically provisions the roster with all active attendance-eligible employees.
+ * This guarantees that Attendance Coordinator (Akshay Kumar) is never blocked by
+ * "Forbidden: Daily attendance roster has not been published" errors, while
+ * strictly respecting active/inactive status and test account rules.
+ */
+export async function ensureDailyRosterPublishedService(
+  targetDateInput: string | Date,
+  fallbackPublisherId?: string
+) {
+  const targetDate = normalizeAttendanceDate(targetDateInput);
+
+  // 1. Check if entries already exist for targetDate
+  let rosterEntries = await db.dailyAttendanceRoster.findMany({
+    where: { attendanceDate: targetDate },
+    select: { id: true, employeeId: true },
+  });
+
+  if (rosterEntries.length > 0) {
+    return rosterEntries;
+  }
+
+  // 2. Identify a publisher (Super Admin user or fallback)
+  let publisherId = fallbackPublisherId;
+  if (!publisherId) {
+    const adminUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: SUPER_ADMIN_ATTENDANCE_EMAIL },
+          { role: 'SUPER_ADMIN' },
+        ],
+      },
+      select: { id: true },
+    });
+    publisherId = adminUser?.id;
+  }
+
+  if (!publisherId) {
+    const anyAdmin = await prisma.user.findFirst({
+      where: { role: { in: ['SUPER_ADMIN', 'SECURITY_ADMIN', 'ACADEMIC_ADMIN'] } },
+      select: { id: true },
+    });
+    publisherId = anyAdmin?.id;
+  }
+
+  if (!publisherId) {
+    const firstUser = await prisma.user.findFirst({ select: { id: true } });
+    publisherId = firstUser?.id;
+  }
+
+  if (!publisherId) {
+    console.warn('[AttendanceRoster] Unable to resolve publisherId for auto-roster creation');
+    return [];
+  }
+
+  // 3. Ensure employee profiles are synced
+  await syncEmployeeProfilesService();
+
+  // 4. Query all active, attendance-eligible staff
+  const eligibleUsers = await prisma.user.findMany({
+    where: {
+      role: { not: 'STUDENT' },
+      OR: [
+        { employeeProfile: null },
+        {
+          employeeProfile: {
+            status: { not: 'NON_STAFF' },
+            attendanceEligible: { not: false },
+          },
+        },
+      ],
+    },
+    select: {
+      id: true,
+      email: true,
+      employeeProfile: { select: { status: true, attendanceEligible: true } },
+    },
+  });
+
+  const activeStaff = eligibleUsers.filter((u: any) => {
+    if (u.employeeProfile?.status === 'INACTIVE') return false;
+    if (u.employeeProfile?.attendanceEligible === false) return false;
+    return true;
+  });
+
+  if (activeStaff.length === 0) {
+    return [];
+  }
+
+  const now = new Date();
+  const ops = activeStaff.map((u: any) =>
+    db.dailyAttendanceRoster.upsert({
+      where: {
+        attendanceDate_employeeId: {
+          attendanceDate: targetDate,
+          employeeId: u.id,
+        },
+      },
+      create: {
+        attendanceDate: targetDate,
+        employeeId: u.id,
+        publishedById: publisherId,
+        publishedAt: now,
+      },
+      update: {
+        publishedById: publisherId,
+      },
+    })
+  );
+
+  await prisma.$transaction(ops);
+
+  rosterEntries = await db.dailyAttendanceRoster.findMany({
+    where: { attendanceDate: targetDate },
+    select: { id: true, employeeId: true },
+  });
+
+  return rosterEntries;
+}
+
+/**
  * 2. GET Daily Attendance for a given date with Roster & 12-Hour Window Check
  */
 export async function getDailyAttendanceService(
@@ -413,13 +548,23 @@ export async function getDailyAttendanceService(
   const isSuperAdmin = caller ? isSuperAdminAttendanceUser(caller) : false;
   const isTestingMode = await isAttendanceTestingModeActive();
 
-  // 1. Fetch Daily Roster snapshot for this date
-  const rosterEntries = await db.dailyAttendanceRoster.findMany({
+  // 1. Fetch Daily Roster snapshot for this date (auto-provision if not yet created)
+  let rosterEntries = await db.dailyAttendanceRoster.findMany({
     where: { attendanceDate: targetDate },
     include: {
       publishedBy: { select: { id: true, name: true, email: true } },
     },
   });
+
+  if (rosterEntries.length === 0) {
+    await ensureDailyRosterPublishedService(targetDate, caller?.userId || undefined);
+    rosterEntries = await db.dailyAttendanceRoster.findMany({
+      where: { attendanceDate: targetDate },
+      include: {
+        publishedBy: { select: { id: true, name: true, email: true } },
+      },
+    });
+  }
 
   const isRosterPublished = rosterEntries.length > 0;
   const publishedEmployeeIds = new Set(rosterEntries.map((r: any) => r.employeeId));
@@ -430,7 +575,7 @@ export async function getDailyAttendanceService(
       }
     : null;
 
-  // If Attendance Manager (Akshay) views and roster is not published yet:
+  // If Attendance Manager (Akshay) views and roster is still not published (no staff in db):
   if (!isSuperAdmin && !isRosterPublished) {
     windowInfo.status = 'ROSTER_NOT_PUBLISHED';
     windowInfo.message = 'Super Admin has not published the attendance roster for this date yet. Attendance cannot be captured until the roster is published.';
@@ -543,12 +688,33 @@ export async function captureDailyAttendanceService(params: {
   const targetDate = normalizeAttendanceDate(params.date);
   const isFinalized = params.isFinalized ?? true;
 
+  // Fetch marker details first for authenticated role & accountability
+  const marker = await prisma.user.findUnique({
+    where: { id: params.markedById },
+    select: { id: true, name: true, email: true, role: true },
+  });
+
   const isSuperAdmin = isSuperAdminAttendanceUser({
     userId: params.markedById,
     email: params.markedByEmail,
+    role: marker?.role,
   });
 
   const windowInfo = getAttendanceWindowStatus(targetDate);
+
+  // Auto-ensure daily roster snapshot exists for targetDate so attendance capture is never deadlocked
+  let rosterEntries = await db.dailyAttendanceRoster.findMany({
+    where: { attendanceDate: targetDate },
+    select: { employeeId: true },
+  });
+
+  if (rosterEntries.length === 0) {
+    await ensureDailyRosterPublishedService(targetDate, marker?.id || params.markedById);
+    rosterEntries = await db.dailyAttendanceRoster.findMany({
+      where: { attendanceDate: targetDate },
+      select: { employeeId: true },
+    });
+  }
 
   // STRICT SERVER-SIDE TIME WINDOW & ROSTER ENFORCEMENT FOR ATTENDANCE MANAGER (AKSHAY KUMAR)
   if (!isSuperAdmin) {
@@ -565,32 +731,44 @@ export async function captureDailyAttendanceService(params: {
     }
 
     // ROSTER MEMBERSHIP VALIDATION FOR ATTENDANCE MANAGER
-    const rosterEntries = await db.dailyAttendanceRoster.findMany({
-      where: { attendanceDate: targetDate },
-      select: { employeeId: true },
-    });
-
-    if (rosterEntries.length === 0) {
-      throw new Error(
-        'Forbidden: Daily attendance roster has not been published by Super Admin for this date. Attendance cannot be submitted.'
-      );
-    }
-
     const rosterSet = new Set(rosterEntries.map((r: any) => r.employeeId));
     for (const rec of params.records) {
       if (!rosterSet.has(rec.employeeId)) {
-        throw new Error(
-          `Forbidden: Employee ID ${rec.employeeId} is not in the Super Admin published roster for this date.`
-        );
+        // Auto-heal: verify if employee is active & eligible, add them to roster
+        const empUser = await prisma.user.findUnique({
+          where: { id: rec.employeeId },
+          include: { employeeProfile: true },
+        });
+        if (
+          empUser &&
+          empUser.employeeProfile?.attendanceEligible !== false &&
+          empUser.employeeProfile?.status !== 'INACTIVE'
+        ) {
+          await db.dailyAttendanceRoster.upsert({
+            where: {
+              attendanceDate_employeeId: {
+                attendanceDate: targetDate,
+                employeeId: rec.employeeId,
+              },
+            },
+            create: {
+              attendanceDate: targetDate,
+              employeeId: rec.employeeId,
+              publishedById: marker?.id || params.markedById,
+              publishedAt: new Date(),
+            },
+            update: {},
+          });
+          rosterSet.add(rec.employeeId);
+        } else {
+          throw new Error(
+            `Forbidden: Employee ID ${rec.employeeId} is not in the Super Admin published roster for this date.`
+          );
+        }
       }
     }
   }
 
-  // Fetch marker details for accountability
-  const marker = await prisma.user.findUnique({
-    where: { id: params.markedById },
-    select: { id: true, name: true, email: true, role: true },
-  });
   const markerName = marker?.name || params.markedByEmail;
   const markerRoleLabel = isSuperAdmin ? 'Super Admin' : 'Attendance Coordinator (Akshay Kumar)';
 
@@ -1298,7 +1476,7 @@ export async function getDailyRosterService(dateInput: string | Date, caller?: A
   const isSuperAdmin = caller ? isSuperAdminAttendanceUser(caller) : false;
   const isTestingMode = await isAttendanceTestingModeActive();
 
-  const entries = await db.dailyAttendanceRoster.findMany({
+  let entries = await db.dailyAttendanceRoster.findMany({
     where: { attendanceDate: targetDate },
     include: {
       employee: {
@@ -1316,6 +1494,28 @@ export async function getDailyRosterService(dateInput: string | Date, caller?: A
     },
     orderBy: { publishedAt: 'desc' },
   });
+
+  if (entries.length === 0) {
+    await ensureDailyRosterPublishedService(targetDate, caller?.userId || undefined);
+    entries = await db.dailyAttendanceRoster.findMany({
+      where: { attendanceDate: targetDate },
+      include: {
+        employee: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            employeeProfile: true,
+          },
+        },
+        publishedBy: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+      orderBy: { publishedAt: 'desc' },
+    });
+  }
 
   let filteredEntries = entries;
   if (!isSuperAdmin && !isTestingMode) {
