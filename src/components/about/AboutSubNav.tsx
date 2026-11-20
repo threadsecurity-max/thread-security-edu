@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, CheckSquare, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckSquare } from 'lucide-react';
 
 interface SubNavItem {
   id: string;
   label: string;
-  shortLabel?: string;
   isSpecial?: boolean;
 }
 
@@ -61,7 +60,7 @@ export function AboutSubNav() {
   return (
     <aside
       aria-label="About Page Navigation"
-      className="sticky top-[4.25rem] z-30 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 transition-all"
+      className="sticky top-[4.25rem] z-30 bg-black/90 backdrop-blur-md border-b border-zinc-850 transition-all"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between gap-2 py-2.5 overflow-x-auto no-scrollbar">
@@ -75,15 +74,11 @@ export function AboutSubNav() {
                   onClick={(e) => scrollTo(e, item.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                     isActive
-                      ? item.isSpecial
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
-                        : 'bg-white/10 text-white border border-white/20 shadow-xs'
-                      : item.isSpecial
-                      ? 'text-emerald-400/80 hover:text-emerald-300 hover:bg-emerald-500/10'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                      ? 'bg-white text-black font-bold shadow-xs'
+                      : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
                   }`}
                 >
-                  {item.isSpecial && <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />}
+                  {item.isSpecial && <ShieldCheck className="w-3.5 h-3.5" />}
                   <span>{item.label}</span>
                 </a>
               );
@@ -91,13 +86,13 @@ export function AboutSubNav() {
           </div>
 
           {/* Quick jump to pre-enrolment checklist */}
-          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-slate-800 shrink-0">
+          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-zinc-800 shrink-0">
             <a
               href="#checklist"
               onClick={(e) => scrollTo(e, 'checklist')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-lime-400/10 hover:bg-lime-400/20 text-lime-300 border border-lime-400/30 text-xs font-mono font-bold tracking-tight transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 hover:border-zinc-500 text-xs font-mono font-bold tracking-tight transition-all cursor-pointer"
             >
-              <CheckSquare className="w-3.5 h-3.5 text-lime-400" />
+              <CheckSquare className="w-3.5 h-3.5 text-zinc-300" />
               <span>Pre-Enrollment Checklist</span>
             </a>
           </div>

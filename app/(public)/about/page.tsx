@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="w-full bg-slate-950 text-white min-h-screen font-sans selection:bg-lime-400 selection:text-slate-950">
+    <div className="w-full bg-black text-white min-h-screen font-sans selection:bg-white selection:text-black">
       <AboutHero />
       <AboutSubNav />
       <WhoWeAre />

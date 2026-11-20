@@ -235,7 +235,7 @@ export function CaptureEmployeeAttendanceClient({
     };
   }, [employees, attendanceMap]);
 
-  // Submission handler with resilient REST API fallback for deployment sync
+  // Submission handler with resilient REST API primary + Server Action fallback for seamless deployment sync
   const executeSubmit = (isFinalized: boolean) => {
     if (isLocked) {
       showToast('Attendance for past dates is locked. Only Super Admin has rectification authority.', 'error');
@@ -249,33 +249,45 @@ export function CaptureEmployeeAttendanceClient({
         remarks: attendanceMap[emp.id]?.remarks || undefined,
       }));
 
-      let res: { success: boolean; error?: string; data?: any };
+      let res: { success: boolean; error?: string; data?: any } = { success: false };
+
+      // Method 1: Direct HTTP POST (immune to Server Action hash changes across deployments)
       try {
-        res = await captureEmployeeAttendanceAction({
-          date: attendanceDate,
-          records,
-          isFinalized,
+        const apiRes = await fetch('/api/employee-attendance/daily', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: attendanceDate,
+            records,
+            isFinalized,
+          }),
         });
-      } catch (actionErr: any) {
-        console.warn('[CaptureAttendance] Server Action sync note, attempting direct API fallback:', actionErr);
-        try {
-          const apiRes = await fetch('/api/employee-attendance/daily', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+        const apiData = await apiRes.json();
+        if (apiRes.ok && apiData.success) {
+          res = { success: true, data: apiData.data };
+        } else {
+          // If API returned structured error, try action fallback
+          try {
+            res = await captureEmployeeAttendanceAction({
               date: attendanceDate,
               records,
               isFinalized,
-            }),
-          });
-          const apiData = await apiRes.json();
-          if (apiRes.ok && apiData.success) {
-            res = { success: true, data: apiData.data };
-          } else {
-            res = { success: false, error: apiData.error || 'Failed to save attendance via API' };
+            });
+          } catch {
+            res = { success: false, error: apiData.error || 'Failed to save attendance' };
           }
-        } catch (apiErr: any) {
-          res = { success: false, error: apiErr?.message || 'Network error saving attendance' };
+        }
+      } catch (fetchErr: any) {
+        // Fallback to Server Action if fetch failed
+        try {
+          res = await captureEmployeeAttendanceAction({
+            date: attendanceDate,
+            records,
+            isFinalized,
+          });
+        } catch (actionErr: any) {
+          console.warn('[CaptureAttendance] Submission error:', actionErr);
+          res = { success: false, error: actionErr?.message || fetchErr?.message || 'Network error saving attendance' };
         }
       }
 
