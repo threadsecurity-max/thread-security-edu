@@ -377,7 +377,7 @@ export function PublicFooter() {
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li>
-                <Link href="/#about" className="text-slate-600 hover:text-slate-950 transition-colors">
+                <Link href="/about" className="text-slate-600 hover:text-slate-950 transition-colors">
                   About Thread Security
                 </Link>
               </li>

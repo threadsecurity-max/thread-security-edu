@@ -21,6 +21,7 @@ import {
   Sparkles,
   ChevronDown,
   Shield,
+  ShieldCheck,
   Brain,
   Clock,
   ArrowRight,
@@ -371,8 +372,17 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
 
                   <div className="pt-4 pb-1">
                     <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 mb-2">
-                      Explore & Career
+                      Explore &amp; Career
                     </div>
+
+                    <Link
+                      href="/about"
+                      onClick={() => setIsOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm text-slate-900 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors mb-1"
+                    >
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      <span>About Us &amp; Trust</span>
+                    </Link>
 
                     <Link
                       href="/workshops"
