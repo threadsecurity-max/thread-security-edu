@@ -269,50 +269,60 @@ export function getAttendanceWindowStatus(targetDateInput?: string | Date): Atte
  * Ensures all non-student users have an EmployeeProfile record
  */
 export async function syncEmployeeProfilesService() {
-  const missingProfiles = await prisma.user.findMany({
-    where: { role: { not: 'STUDENT' }, employeeProfile: null },
-    include: { tsIdentity: true, mentorIdentity: true, mentorProfile: true },
-  });
-
-  if (missingProfiles.length === 0) return;
-
-  for (const u of missingProfiles) {
-    const empId =
-      u.tsIdentity?.tsId ||
-      u.mentorIdentity?.mentorId ||
-      `TSE-EMP-${u.id.slice(-4).toUpperCase()}`;
-
-    let dept = 'Academics & Faculty';
-    let desig = u.mentorProfile?.title || 'Faculty Mentor';
-
-    if (u.role === 'SUPER_ADMIN') {
-      dept = 'Executive Management';
-      desig = 'Super Administrator';
-    } else if (u.role === 'SECURITY_ADMIN') {
-      dept = 'Cyber Operations & SOC';
-      desig = 'Security Operations Analyst';
-    } else if (u.role === 'STAFF_EXECUTIVE') {
-      dept = 'Academic Operations';
-      desig = 'Executive Staff Associate';
-    } else if (u.role === 'STAFF_JUNIOR') {
-      dept = 'Lab & Technical Support';
-      desig = 'Junior Technical Associate';
-    }
-
-    const isTrashed = u.approvedBy?.startsWith('TRASHED:');
-    const initialStatus = isTrashed ? 'TRASH' : u.isActive ? 'ACTIVE' : 'INACTIVE';
-    const isEligible = !isTrashed && u.isActive;
-
-    await db.employeeProfile.create({
-      data: {
-        userId: u.id,
-        employeeId: empId,
-        department: dept,
-        designation: desig,
-        status: initialStatus,
-        attendanceEligible: isEligible,
-      },
+  try {
+    const missingProfiles = await prisma.user.findMany({
+      where: { role: { not: 'STUDENT' }, employeeProfile: null },
+      include: { tsIdentity: true, mentorIdentity: true, mentorProfile: true },
     });
+
+    if (!missingProfiles || missingProfiles.length === 0) return;
+
+    for (const u of missingProfiles) {
+      try {
+        const empId =
+          u.tsIdentity?.tsId ||
+          u.mentorIdentity?.mentorId ||
+          `TSE-EMP-${u.id.slice(-4).toUpperCase()}`;
+
+        let dept = 'Academics & Faculty';
+        let desig = u.mentorProfile?.title || 'Faculty Mentor';
+
+        if (u.role === 'SUPER_ADMIN') {
+          dept = 'Executive Management';
+          desig = 'Super Administrator';
+        } else if (u.role === 'SECURITY_ADMIN') {
+          dept = 'Cyber Operations & SOC';
+          desig = 'Security Operations Analyst';
+        } else if (u.role === 'STAFF_EXECUTIVE') {
+          dept = 'Academic Operations';
+          desig = 'Executive Staff Associate';
+        } else if (u.role === 'STAFF_JUNIOR') {
+          dept = 'Lab & Technical Support';
+          desig = 'Junior Technical Associate';
+        }
+
+        const isTrashed = u.approvedBy?.startsWith('TRASHED:');
+        const initialStatus = isTrashed ? 'TRASH' : u.isActive ? 'ACTIVE' : 'INACTIVE';
+        const isEligible = !isTrashed && u.isActive;
+
+        await db.employeeProfile.upsert({
+          where: { userId: u.id },
+          create: {
+            userId: u.id,
+            employeeId: empId,
+            department: dept,
+            designation: desig,
+            status: initialStatus,
+            attendanceEligible: isEligible,
+          },
+          update: {},
+        });
+      } catch (profileErr) {
+        console.warn(`[syncEmployeeProfiles] Notice syncing profile for user ${u.id}:`, profileErr);
+      }
+    }
+  } catch (err) {
+    console.warn('[syncEmployeeProfilesService] Profile sync notice:', err);
   }
 }
 
@@ -636,13 +646,22 @@ export async function getDailyAttendanceService(
   });
 
   if (rosterEntries.length === 0) {
-    await ensureDailyRosterPublishedService(targetDate, caller?.userId || undefined);
-    rosterEntries = await db.dailyAttendanceRoster.findMany({
-      where: { attendanceDate: targetDate },
-      include: {
-        publishedBy: { select: { id: true, name: true, email: true } },
-      },
-    });
+    try {
+      await ensureDailyRosterPublishedService(targetDate, caller?.userId || undefined);
+    } catch (rosterErr) {
+      console.warn('[getDailyAttendanceService] Auto-roster provision notice:', rosterErr);
+    }
+    try {
+      rosterEntries = await db.dailyAttendanceRoster.findMany({
+        where: { attendanceDate: targetDate },
+        include: {
+          publishedBy: { select: { id: true, name: true, email: true } },
+        },
+      });
+    } catch (fetchRosterErr) {
+      console.warn('[getDailyAttendanceService] Fetch roster entries notice:', fetchRosterErr);
+      rosterEntries = [];
+    }
   }
 
   const isRosterPublished = rosterEntries.length > 0;
@@ -1618,27 +1637,31 @@ export async function getDailyRosterService(dateInput: string | Date, caller?: A
   });
 
   if (entries.length === 0) {
-    await ensureDailyRosterPublishedService(targetDate, caller?.userId || undefined);
-    entries = await db.dailyAttendanceRoster.findMany({
-      where: { attendanceDate: targetDate },
-      include: {
-        employee: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            isActive: true,
-            approvedBy: true,
-            employeeProfile: true,
+    try {
+      await ensureDailyRosterPublishedService(targetDate, caller?.userId || undefined);
+      entries = await db.dailyAttendanceRoster.findMany({
+        where: { attendanceDate: targetDate },
+        include: {
+          employee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              isActive: true,
+              approvedBy: true,
+              employeeProfile: true,
+            },
+          },
+          publishedBy: {
+            select: { id: true, name: true, email: true },
           },
         },
-        publishedBy: {
-          select: { id: true, name: true, email: true },
-        },
-      },
-      orderBy: { publishedAt: 'desc' },
-    });
+        orderBy: { publishedAt: 'desc' },
+      });
+    } catch (rosterErr) {
+      console.warn('[getDailyRosterService] Auto-roster provision notice:', rosterErr);
+    }
   }
 
   // STRICT REQUIREMENT: Only active, non-trashed, attendance-eligible working staff appear in roster

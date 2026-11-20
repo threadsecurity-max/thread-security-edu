@@ -19,16 +19,21 @@ export function BroadcastNotificationBanner({ userId }: { userId?: string }) {
   async function loadNotifications() {
     if (!userId) return;
     setLoading(true);
-    const res = await fetchUserNotificationsAction(userId);
-    if (res.success && res.notifications) {
-      setNotifications(res.notifications);
-      // Select first unread broadcast announcement
-      const unread = res.notifications.find((n: any) => !n.isRead);
-      if (unread) {
-        setActiveBroadcast(unread);
+    try {
+      const res = await fetchUserNotificationsAction(userId);
+      if (res?.success && res.notifications) {
+        setNotifications(res.notifications);
+        // Select first unread broadcast announcement
+        const unread = res.notifications.find((n: any) => !n.isRead);
+        if (unread) {
+          setActiveBroadcast(unread);
+        }
       }
+    } catch (err) {
+      console.warn('[BroadcastNotificationBanner] Non-fatal notification check notice:', err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   const handleMarkAsRead = async (id: string) => {
@@ -36,8 +41,12 @@ export function BroadcastNotificationBanner({ userId }: { userId?: string }) {
     if (activeBroadcast?.id === id) {
       setActiveBroadcast(null);
     }
-    await markAsReadAction(id);
-    loadNotifications();
+    try {
+      await markAsReadAction(id);
+      loadNotifications();
+    } catch (err) {
+      console.warn('[BroadcastNotificationBanner] Mark as read notice:', err);
+    }
   };
 
   const unreadBroadcasts = notifications.filter(

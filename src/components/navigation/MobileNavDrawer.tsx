@@ -313,9 +313,18 @@ export function MobileNavDrawer({ session }: MobileNavDrawerProps) {
                         </Link>
 
                         <Link
+                          href="/industrial-training"
+                          onClick={() => setIsOpen(false)}
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-lg transition-colors"
+                        >
+                          <span>North India Industrial Training Hub</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-lime-400" />
+                        </Link>
+
+                        <Link
                           href="/internship-training"
                           onClick={() => setIsOpen(false)}
-                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                          className="flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
                         >
                           <span>View Full Training Overview</span>
                           <ArrowRight className="w-3.5 h-3.5 text-lime-600" />

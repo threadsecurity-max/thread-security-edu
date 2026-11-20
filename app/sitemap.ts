@@ -63,6 +63,43 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.75,
     },
+    // Programmatic Industrial Training Landing Pages (Hub & 5 North India Cities)
+    {
+      url: `${baseUrl}/industrial-training`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/industrial-training/jalandhar`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/industrial-training/phagwara`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/industrial-training/ludhiana`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/industrial-training/chandigarh`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/industrial-training/dharamshala`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
   ];
 
   // 2. Dynamic Course Routes (Master Registry + DB Courses)

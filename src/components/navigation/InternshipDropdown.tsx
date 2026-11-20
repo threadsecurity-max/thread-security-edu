@@ -188,15 +188,27 @@ export function InternshipDropdown() {
             </div>
 
             {/* Bottom Footer Action */}
-            <div className="bg-slate-50 border-t border-slate-100 p-3 text-center">
+            <div className="bg-slate-50 border-t border-slate-100 p-3 space-y-2">
               <Link
-                href="/internship-training"
+                href="/industrial-training"
                 onClick={() => setIsOpen(false)}
                 className="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all"
               >
-                <span>View All Training & Internship Details</span>
+                <span>45-Day &amp; 6-Month Industrial Training Hub</span>
                 <ArrowRight className="w-3.5 h-3.5 text-lime-400" />
               </Link>
+              <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-[11px] font-medium text-slate-500 pt-0.5">
+                <span className="font-semibold text-slate-600">Cities:</span>
+                <Link href="/industrial-training/jalandhar" onClick={() => setIsOpen(false)} className="hover:text-purple-700 hover:underline">Jalandhar</Link>
+                <span>•</span>
+                <Link href="/industrial-training/phagwara" onClick={() => setIsOpen(false)} className="hover:text-purple-700 hover:underline">Phagwara</Link>
+                <span>•</span>
+                <Link href="/industrial-training/ludhiana" onClick={() => setIsOpen(false)} className="hover:text-purple-700 hover:underline">Ludhiana</Link>
+                <span>•</span>
+                <Link href="/industrial-training/chandigarh" onClick={() => setIsOpen(false)} className="hover:text-purple-700 hover:underline">Chandigarh</Link>
+                <span>•</span>
+                <Link href="/industrial-training/dharamshala" onClick={() => setIsOpen(false)} className="hover:text-purple-700 hover:underline">Dharamshala</Link>
+              </div>
             </div>
 
           </div>

@@ -27,11 +27,16 @@ export function BroadcastMessageModal() {
 
   async function loadAnalytics() {
     setLoadingAnalytics(true);
-    const res = await fetchBroadcastAnalyticsAction();
-    if (res.success && res.analytics) {
-      setAnalytics(res.analytics);
+    try {
+      const res = await fetchBroadcastAnalyticsAction();
+      if (res?.success && res.analytics) {
+        setAnalytics(res.analytics);
+      }
+    } catch (err) {
+      console.warn('[BroadcastMessageModal] Analytics load notice:', err);
+    } finally {
+      setLoadingAnalytics(false);
     }
-    setLoadingAnalytics(false);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -39,19 +44,24 @@ export function BroadcastMessageModal() {
     setLoading(true);
     setMsg(null);
 
-    const formData = new FormData(e.currentTarget);
-    const res = await broadcastMessageAction(formData);
-    setLoading(false);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const res = await broadcastMessageAction(formData);
 
-    if (res.success) {
-      setMsg(`Broadcast dispatched successfully to ${res.targetCount || 1} active recipient(s).`);
-      setTimeout(() => {
-        setMsg(null);
-        setActiveTab('READ_RECEIPTS');
-        loadAnalytics();
-      }, 1500);
-    } else {
-      setMsg(res.error || 'Failed to send broadcast message.');
+      if (res?.success) {
+        setMsg(`Broadcast dispatched successfully to ${res.targetCount || 1} active recipient(s).`);
+        setTimeout(() => {
+          setMsg(null);
+          setActiveTab('READ_RECEIPTS');
+          loadAnalytics();
+        }, 1500);
+      } else {
+        setMsg(res?.error || 'Failed to send broadcast message.');
+      }
+    } catch (err: any) {
+      setMsg(err?.message || 'Network exception while dispatching broadcast message.');
+    } finally {
+      setLoading(false);
     }
   }
 

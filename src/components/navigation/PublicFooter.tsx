@@ -333,18 +333,33 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/learning-paths#six-months" className="text-slate-600 hover:text-slate-950 transition-colors">
-                  6 Months Training
+                <Link href="/industrial-training" className="text-slate-600 hover:text-slate-950 transition-colors font-medium">
+                  Industrial Training Hub
                 </Link>
               </li>
               <li>
-                <Link href="/learning-paths#forty-five-days" className="text-slate-600 hover:text-slate-950 transition-colors">
-                  45 Days Training
+                <Link href="/industrial-training/jalandhar" className="text-slate-600 hover:text-slate-950 transition-colors">
+                  Training in Jalandhar
                 </Link>
               </li>
               <li>
-                <Link href="/learning-paths#six-weeks" className="text-slate-600 hover:text-slate-950 transition-colors">
-                  Summer Internship
+                <Link href="/industrial-training/phagwara" className="text-slate-600 hover:text-slate-950 transition-colors">
+                  Training in Phagwara
+                </Link>
+              </li>
+              <li>
+                <Link href="/industrial-training/ludhiana" className="text-slate-600 hover:text-slate-950 transition-colors">
+                  Training in Ludhiana
+                </Link>
+              </li>
+              <li>
+                <Link href="/industrial-training/chandigarh" className="text-slate-600 hover:text-slate-950 transition-colors">
+                  Training in Chandigarh
+                </Link>
+              </li>
+              <li>
+                <Link href="/industrial-training/dharamshala" className="text-slate-600 hover:text-slate-950 transition-colors">
+                  Training in Dharamshala
                 </Link>
               </li>
               <li>
